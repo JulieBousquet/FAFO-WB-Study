@@ -240,11 +240,16 @@ ren q112 q112_kish_table_nb
 
 *Main respondent hh quest
 tab q113, m 
-ren q113 q113_main_resp_hh_quest
+ren q113 q113_main_resp_hh
+tab q113_main_resp_hh, m
+
+egen iid = concat(hhid q113_main_resp_hh)
+isid iid 
+lab var iid "Individual ID: concat hhid and main resp nb"
 
 *Mains respondent RSI quest
 tab q114, m 
-ren q114 q114_main_resp_rsi_quest
+ren q114 q114_main_resp_rsi
 
 *Interview status
 tab q123, m 
@@ -252,20 +257,16 @@ ren q123 q123_interview_compl
 tab r123, m 
 ren r123 r123_interview_status
 
-br q123_interview_compl
-
 *Total hh member
 tab q115_t, m 
 ren q115_t q115_t_hh_members
 
 	*Male
 	tab q115_m, m 
-	ren q115_m q115_m_hh_m_members
+	ren q115_m q115_m_hh_members
 
 	tab q115_f, m 
-	ren q115_f q115_f_hh_f_members
-
-	order q115_tnew q115_mnew q115_fnew, a(q115_f_hh_f_members) 
+	ren q115_f q115_f_hh_members
 
 	*Category
 	tab q115_tnew, m 
@@ -274,6 +275,38 @@ ren q115_t q115_t_hh_members
 	ren q115_mnew q115_m_hh_members_cat
 	tab q115_fnew, m 
 	ren q115_fnew q115_f_hh_members_cat
+
+  order q115_t_hh_members q115_t_hh_members_cat ///
+        q115_m_hh_members q115_m_hh_members_cat ///
+        q115_f_hh_members q115_f_hh_members_cat ///
+        , a(r123_interview_status) 
+
+*** HOUSEHOLD DEMOGRAPHICS
+
+*Highest level of education
+tab HHedumax, m 
+
+*Number of children in hh
+tab HHchildren, m
+*Gender of hh head 
+tab HHsex, m 
+*Age of hh head
+tab HHage, m 
+*Citizenship of hh head
+tab HHcitizen, m 
+*Refugee status od hh head
+tab HHrefugee, m 
+*Pop group of hh head
+tab HHPopGrp, m 
+*Hh educ
+tab HHedu, m 
+*HH income
+tab HHincome, m 
+
+order   HHedumax HHchildren HHsex HHage HHcitizen ///
+        HHrefugee HHPopGrp HHedu HHincome ///
+        , a(q115_f_hh_members_cat) 
+
 
 /********************************************
 SECTION 2 : THE DWELLING AND ITS ENVIRONMENT
@@ -302,63 +335,111 @@ tab q201_3, m
 
 tab q202, m 
 tab q203, m 
+
 tab q204, m 
+tab q204new, m 
+ren q204new q204_nb_rooms_newcat
+
 tab q205, m 
+tab q205new, m 
+ren q205new q205_size_dwell_cat
+
 tab q206, m 
+
 tab q207, m 
+tab q207new, m 
+ren q207new q207_toilet_cleancat
+
 tab q208, m 
 tab q209, m 
 tab q210, m 
+
 tab q211, m 
-tab q212, m 
-tab q213, m 
-tab q213_1, m 
-tab q213_2, m 
-tab q213_3, m 
-tab q213_4, m 
-tab q213_5, m
-
-order q213, a(q212)
-order 	q204new q205new q207new q211new ///
-		q213new q213_1new q213_2new q213_3new ///
-		q213_4new q213_5new , a(q213_5)
-
-tab q204new, m 
-tab q205new, m 
-tab q207new, m 
 tab q211new, m 
-tab q213new, m 
+ren q211new q211_water_exp_cat
+
+tab q212, m 
+
+tab q213, m 
+tab q213new, m
+ren q213new q213_energy_exp_cat
+
+tab q213_1, m 
 tab q213_1new, m 
+ren q213_1new q213_1_gas_exp_cat
+
+tab q213_2, m 
 tab q213_2new, m 
+ren q213_2new q213_2_petrol_exp_cat
+
+tab q213_3, m 
 tab q213_3new, m 
-tab q213_4new, m 
+ren q213_3new q213_3_elec_exp_cat
+
+tab q213_4, m
+tab q213_4new, m
+ren q213_4new q213_4_wood_exp_cat 
+
+tab q213_5, m
 tab q213_5new, m 
+ren q213_5new q213_5_oth_exp_cat
+
+order   q204 q204_nb_rooms_newcat ///
+        q205 q205_size_dwell_cat ///
+        q207 q207_toilet_cleancat ///
+        q211 q211_water_exp_cat ///
+        q213 q213_energy_exp_cat ///
+        q213_1 q213_1_gas_exp_cat ///
+        q213_2 q213_2_petrol_exp_cat /// 
+        q213_3 q213_3_elec_exp_cat ///
+        q213_4 q213_4_wood_exp_cat ///
+        q213_5 q213_5_oth_exp_cat ///
+        , a(q203)
 
 
 /* SUBSECTION: Tenure */
 *  ------------------  *
 
 tab q214, m 
-tab q215, m 
+
+tab q215, m
+tab q215new, m 
+ren q215new q215_rent_cat
+
 tab q216, m 
 tab q217, m 
+
 tab q218, m 
+tab q218new, m
+ren q218new q218_rent_mkt_cat
+
 tab q219, m 
 tab q219_2, m 
 tab q220_1, m 
 tab q220_2, m 
 tab q220_3, m 
+
 tab q221, m 
+tab q221new, m
+ren q221new q221_inc_rent_cat
+
 tab q222, m 
+tab q222new, m 
+
 tab q223_1, m 
 tab q223_2, m 
 
-order q215new q218new q221new q222new, a(q223_2)
+ren q222new q222_q223_free_accom_refug
 
-tab q215new, m 
-tab q218new, m 
-tab q221new, m 
-tab q222new, m 
+
+order q215 q215_rent_cat ///
+      q216 q217 ///
+      q218 q218_rent_mkt_cat ///
+      q219 q219_2 ///
+      q220_1 q220_2 q220_3 ///
+      q221 q221_inc_rent_cat /// 
+      q222 q223_1 q223_2 q222_q223_free_accom_refug ///
+      , a(q214)
 
 /* SUBSECTION: Safety and satisfaction with housing conditions */
 *  -----------------------------------------------------------  *
@@ -374,113 +455,268 @@ SECTION 9 : WEALTH
 *  ------------------  *
 
 tab q900, m 
+tab inc_wage_y, m
+ren inc_wage_y q900_inc_wage_y
 tab q900_qy, m 
+tab q900_qynew, m
+ren q900_qynew q900_qy_inc_wage_cat
 tab q900_qm, m 
-tab q901, m 
+tab inc_wage_m, m
+ren inc_wage_m q900_inc_wage_m
+tab q900_qmnew, m
+ren q900_qmnew q900_qm_inc_wage_cat
+
+tab q901, m
+tab inc_selfemp_y, m 
+ren inc_selfemp_y q901_inc_selfemp_y
 tab q901_qy, m 
+tab q901_qynew, m
+ren q901_qynew q901_qy_inc_se_cat
 tab q901_qm, m 
+tab inc_selfemp_m, m
+ren inc_selfemp_m q901_inc_selfemp_m
+tab q901_qmnew, m
+ren q901_qmnew q901_qm_inc_se_cat
+
 tab q902, m 
+tab inc_transfer_y, m
+ren inc_transfer_y q902_inc_transfer_y
 tab q902_qy, m 
+tab q902_qynew, m
+ren q902_qynew q902_qy_inc_transf_cat
 tab q902_qm, m 
-tab q903, m 
+tab inc_transfer_m, m
+ren inc_transfer_m q902_inc_transfer_m
+tab q902_qmnew, m
+ren q902_qmnew q902_qm_inc_transf_cat
+
+tab q903, m
+tab inc_property_y, m
+ren inc_property_y q903_inc_property_y
 tab q903_qy, m 
+tab q903_qynew, m
+ren q903_qynew q903_qy_inc_prop_cat
 tab q903_qm, m 
+tab inc_property_m, m
+ren inc_property_m q903_inc_property_m
+tab q903_qmnew, m
+ren q903_qmnew q903_qm_inc_prop_cat
+
 tab q904, m 
+tab inc_other_y, m
+ren inc_other_y q904_inc_other_y
 tab q904_qy, m 
+tab q904_qynew, m
+ren q904_qynew q904_qy_inc_oth_cat
 tab q904_qm, m 
+tab inc_other_m, m
+ren inc_other_m q904_inc_other_m
+tab q904_qmnew, m
+ren q904_qmnew q904_qm_inc_oth_cat
+
 tab q905, m 
 tab q905_qy, m
-
-order 	q900_qynew q901_qynew q902_qynew q903_qynew ///
-		q904_qynew q905_qyupd q905_qyupdnew q900_qmnew ///
-		q901_qmnew q902_qmnew q903_qmnew q904_qmnew ///
-		, a(q905_qy)
-
-tab q900_qynew, m 
-tab q901_qynew, m 
-tab q902_qynew, m 
-tab q903_qynew, m 
-tab q904_qynew, m 
 tab q905_qyupd, m 
-tab q905_qyupdnew, m 
-tab q900_qmnew, m 
-tab q901_qmnew, m 
-tab q902_qmnew, m 
-tab q903_qmnew, m 
-tab q904_qmnew, m 
+tab q905_qyupdnew, m
+ren q905_qyupdnew q905_qyupd_inc_totadj_cat
+tab q905_qyupd_inc_totadj_cat, m
+
+*Total income last month
+tab HHallincome, m 
+ren HHallincome income_m_total_hh
+tab HHallincome_new, m 
+ren HHallincome_new income_m_total_hh_cat
+
+*Usual month cash income of ALL hh members
+tab HHwage, m 
+ren HHwage wage_m_hh
+tab HHwage_new, m 
+ren HHwage_new wage_m_hh_cat
+
+*Usual month cash income of all hh members aged 18+
+tab HHadultinc, m 
+ren HHadultinc income_m_adult18
+tab HHadultinc_new, m 
+ren HHadultinc_new income_m_adult18_cat
+
+*Usual month cash income of MALE hh members aged 
+tab HHmaleinc, m 
+ren HHmaleinc income_m_male
+tab HHmaleinc_new, m 
+ren HHmaleinc_new income_m_male_cat
+
+*Usual month cash income of all hh members aged 25+
+tab HHadultinc2, m 
+ren HHadultinc2 income_m_adult25
+tab HHadultinc2_new, m 
+ren HHadultinc2_new income_m_adult25_cat
+
+
+order   q900_qy q900_inc_wage_y q900_qy_inc_wage_cat ///
+        q900_qm q900_inc_wage_m q900_qm_inc_wage_cat ///
+        q901 q901_inc_selfemp_y q901_qy q901_qy_inc_se_cat ///
+        q901_qm q901_inc_selfemp_m q901_qm_inc_se_cat ///
+        q902 q902_inc_transfer_y q902_qy q902_qy_inc_transf_cat ///
+        q902_qm q902_inc_transfer_m q902_qm_inc_transf_cat ///
+        q903 q903_inc_property_y q903_qy q903_qy_inc_prop_cat ///
+        q903_qm q903_inc_property_m q903_qm_inc_prop_cat ///
+        q904 q904_inc_other_y q904_qy q904_qy_inc_oth_cat ///
+        q904_qm q904_inc_other_m q904_qm_inc_oth_cat ///
+        q905 q905_qy ///
+        q905_qyupd q905_qyupd_inc_totadj_cat ///
+        income_m_total_hh income_m_total_hh_cat wage_m_hh ///
+        wage_m_hh_cat income_m_adult18 income_m_adult18_cat ///
+        income_m_male income_m_male_cat income_m_adult25 ///
+        income_m_adult25_cat ///
+        , a(q900)
 
 /* SUBSECTION: Economics Self-Assessment */
 *  -------------------------------------  *
 
 tab q906, m 
 tab q907, m 
+tab q907new, m
+ren q907new q907_eco_status_cat
+
+order q907_eco_status_cat, a(q907)
 
 /* SUBSECTION: Poverty Support */
 *  ---------------------------  *
 
+*National poverty support (NPS)
 tab q908_a1, m 
-tab q908_j1, m 
+tab q908_j1, m
+tab q908_j1new, m
+ren q908_j1new q908_j1_aid_nps_cat 
 tab q908_b1, m 
 tab q908_c1, m 
 tab q908_d1, m 
+
+*Hashemite charity packages
 tab q908_a2, m 
 tab q908_j2, m 
+tab q908_j2new, m
+ren q908_j2new q908_j2_aid_charity_cat
 tab q908_b2, m 
 tab q908_c2, m 
-tab q908_d2, m 
+tab q908_d2, m
+
+*Zakat committee
 tab q908_a3, m 
-tab q908_j3, m 
+tab q908_j3, m
+tab q908_j3new, m
+ren q908_j3new q908_j3_aid_zakat_cat
 tab q908_b3, m 
 tab q908_c3, m 
 tab q908_d3, m 
+
+*Religious organization
 tab q908_a4, m 
 tab q908_j4, m 
+tab q908_j4new, m 
+ren q908_j4new q908_j4_aid_rel_cat
 tab q908_b4, m 
 tab q908_c4, m 
-tab q908_d4, m 
+tab q908_d4, m
+
+*Other Jordanian NGO/Charity
 tab q908_a5, m 
 tab q908_j5, m 
+tab q908_j5new, m
+ren q908_j5new q908_j5_aid_jord_cat
 tab q908_b5, m 
 tab q908_c5, m 
 tab q908_d5, m 
+
+*UNRWA
 tab q908_a6, m 
 tab q908_j6, m 
+tab q908_j6new, m
+ren q908_j6new q908_j6_aid_unrwa_cat
 tab q908_b6, m 
 tab q908_c6, m 
 tab q908_d6, m 
+
+*Other international NGO
 tab q908_a7, m 
-tab q908_j7, m 
+tab q908_j7, m
+tab q908_j7new, m 
+ren q908_j7new q908_j7_aid_ngo_cat
 tab q908_b7, m 
 tab q908_c7, m 
-tab q908_d7, m 
+tab q908_d7, m
+
+*Other country/embassy
 tab q908_a8, m 
 tab q908_j8, m 
+tab q908_j8new, m
+ren q908_j8new q908_j8_aid_country_cat
 tab q908_b8, m 
 tab q908_c8, m 
 tab q908_d8, m 
-tab q908_9t, m 
+
+*Other
 tab q908_a9, m 
 tab q908_j9, m 
+tab q908_j9new, m
+ren q908_j9new q908_j9_aid_oth_cat
 tab q908_b9, m 
 tab q908_c9, m 
 tab q908_d9, m 
+tab q908_9t, m 
+
+order q908_a1 q908_j1 q908_j1_aid_nps_cat q908_b1 q908_c1 q908_d1 ///
+      q908_a2 q908_j2 q908_j2_aid_charity_cat q908_b2 q908_c2 q908_d2 ///
+      q908_a3 q908_j3 q908_j3_aid_zakat_cat q908_b3 q908_c3 q908_d3 ///
+      q908_a4 q908_j4 q908_j4_aid_rel_cat q908_b4 q908_c4 q908_d4 ///
+      q908_a5 q908_j5 q908_j5_aid_jord_cat q908_b5 q908_c5 q908_d5 ///
+      q908_a6 q908_j6 q908_j6_aid_unrwa_cat q908_b6 q908_c6 q908_d6 ///
+      q908_a7 q908_j7 q908_j7_aid_ngo_cat q908_b7 q908_c7 q908_d7 ///
+      q908_a8 q908_j8 q908_j8_aid_country_cat q908_b8 q908_c8 q908_d8 ///
+      q908_a9 q908_j9 q908_j9_aid_oth_cat q908_b9 q908_c9 q908_d9 ///
+      q908_9t, a(q907_eco_status_cat)
+
+
+*Poverty Support
+
+*Did the hh receive any kind of assistance in last 6 months
+tab money, m 
+*Created  from variables: q908_a*
+
+*Total amount in assistance
+tab amount, m
+*Created from variables: q908_j* 
+
+*Did the hh receive food assistance in last 6 months
+tab food, m 
+*Created from variables: q908_b*
+
+*Did the hh receive shelter assitance in last 6 months
+tab shelter, m 
+*Created from variables: q908_c*
+
+*Did the hh receive other assitance in last 6 months
+tab other, m 
+*Created from variables: q908_d*
+
+*From international providers 
+*Q: WHO IS INCLUDED AS "INTERNATIONAL PROVIDERS"
+tab int_money, m 
+tab int_amount, m 
+tab int_food, m 
+tab int_shelter, m 
+tab int_other, m 
+
+order   money amount food shelter other ///
+        int_money int_amount int_food int_shelter int_other ///
+        , a(q908_9t)
+
 tab q909, m 
+tab q909new, m
+ren q909new q909_min_inc
 
-order 	q907new q908_j1new q908_j2new q908_j3new q908_j4new ///
-		q908_j5new q908_j6new q908_j7new q908_j8new q908_j9new ///
-		q909new, a(q909)
-
-tab q907new, m 
-tab q908_j1new, m 
-tab q908_j2new, m 
-tab q908_j3new, m 
-tab q908_j4new, m 
-tab q908_j5new, m 
-tab q908_j6new, m 
-tab q908_j7new, m 
-tab q908_j8new, m 
-tab q908_j9new, m 
-tab q909new, m 
+order   q909 q909_min_inc ///
+        , a(int_other)
 
 /* SUBSECTION: Consumer Durables */
 *  -----------------------------  *
@@ -571,62 +807,35 @@ tab q912_30, m
 tab q912_30n, m 
 tab q912_31, m 
 
-
-
-tab inc_wage_y, m 
-tab inc_selfemp_y, m 
-tab inc_transfer_y, m 
-tab inc_property_y, m 
-tab inc_other_y, m 
-tab inc_wage_m, m 
-tab inc_selfemp_m, m 
-tab inc_transfer_m, m 
-tab inc_property_m, m 
-tab inc_other_m, m 
-tab HHallincome, m 
-tab HHallincome_new, m 
-tab HHwage, m 
-tab HHwage_new, m 
-tab HHadultinc, m 
-tab HHadultinc_new, m 
-tab HHmaleinc, m 
-tab HHmaleinc_new, m 
-tab HHadultinc2, m 
-tab HHadultinc2_new, m 
-tab money, m 
-tab amount, m 
-tab food, m 
-tab shelter, m 
-tab other, m 
-tab int_money, m 
-tab int_amount, m 
-tab int_food, m 
-tab int_shelter, m 
-tab int_other, m 
-tab Depratio_1, m 
+*Share of hh members in employment
+tab Depratio_1, m
+*Demographic dependents per hh member 
 tab Depratio2_1, m 
+*Economic dependents per hh member
 tab Depratio3_1, m 
+
+*Share of hh members in employment
 tab DepRatio, m 
+*Demographic dependents per hh member
 tab DepRatio2, m 
+*Economic dependents per hh member
 tab DepRatio3, m 
+
+*Employed community members per economic dependent
 tab GroupDepRatio, m 
+*Demographic dependents per working age comunity member
 tab GroupDepRatio2, m 
+*Economic dependents per employed community member 
 tab GroupDepRatio3, m 
-tab HHedumax, m 
+
+
+*Wealth index
 tab wealthidx, m 
+*Wealth index quintiles
 tab wealthidx5, m 
+*Wealth index tertile
 tab wealthidx3, m 
-tab HHchildren, m 
-tab HHsex, m 
-tab HHage, m 
-tab HHcitizen, m 
-tab HHrefugee, m 
 
-br HHcitizen HHrefugee
-
-tab HHPopGrp, m 
-tab HHedu, m 
-tab HHincome, m 
 tab dtot___, m
 
 ******************
@@ -638,6 +847,137 @@ isid ques_no
 sort ques_no
 *Serial Number of household member
 tab q300 , m
+
+
+*Questionnaire Number
+tab ques_no, m 
+ren ques_no hhid
+
+*Household relative weight 
+tab HHrel_wt, m
+
+*RSI relative weight
+tab RSIrel_wt, m 
+
+*Name gornorates
+tab governorate, m 
+
+*Governorate
+tab q101, m 
+ren q101 q101_governorate
+drop governorate
+
+*Stratum
+tab Stratum, m 
+
+*Cluster ID
+tab ClusterID, m 
+
+*Urban / Rural
+tab ur_rl, m 
+ren ur_rl urban_rural
+
+*Nationality: at least one syrian member
+tab nat_hh, m 
+ren nat_hh nationality_hh
+
+*Nationality: as listed
+tab nat_samp, m 
+ren nat_samp nationality_listed
+
+tab HHgroup, m 
+
+tab HHgr1, m
+ 
+tab HHgr2, m 
+
+tab HHgr3, m 
+
+tab HHgr4, m 
+
+tab year, m 
+*2014
+
+*District
+tab q102, m 
+ren q102 q102_district
+tab q102_district, m
+
+*Sub district
+tab q103, m 
+ren q103 q103_sub_district
+tab q103_sub_district, m
+
+*Locality
+tab q104, m 
+ren q104 q104_locality
+
+*Area
+tab q105, m 
+ren q105 q105_area 
+
+*Neighborhood
+tab q106, m
+ren q106 q106_neighborhood
+
+*Block
+tab q107, m
+ren q107 q107_block
+tab q107_1, m  
+
+*Building
+tab q108, m 
+ren q108 q108_building 
+
+*Household in Building
+tab q109, m 
+ren q109 q109_hh_building
+
+*Dwellings
+tab q110, m 
+ren q110 q110_dwellings_building
+
+*Household in Block
+tab q111, m 
+ren q111 q111_hh_block
+
+*Kish table number
+tab q112, m 
+ren q112 q112_kish_table_nb
+
+*Main respondent hh quest
+tab q113, m 
+ren q113 q113_main_resp_hh
+tab q113_main_resp_hh, m
+
+egen iid = concat(hhid q300)
+isid iid 
+lab var iid "Individual ID: concat hhid and main resp nb"
+
+*Mains respondent RSI quest
+tab q114, m 
+ren q114 q114_main_resp_rsi
+
+*Interview status
+tab q123, m 
+ren q123 q123_interview_compl
+
+*Total hh member
+tab q115_t, m 
+ren q115_t q115_t_hh_members
+
+  *Male
+  tab q115_m, m 
+  ren q115_m q115_m_hh_members
+
+  tab q115_f, m 
+  ren q115_f q115_f_hh_members
+
+  order q115_t_hh_members  ///
+        q115_m_hh_members  ///
+        q115_f_hh_members  ///
+        , a(q123_interview_compl) 
+
 
 ***************
 * RSI DATASET *
