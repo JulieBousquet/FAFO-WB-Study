@@ -16,3 +16,4 @@ set mem 100m
 
 
 use "$data_base/Jordan2014_ROS_HH_RSI.dta", clear
+
