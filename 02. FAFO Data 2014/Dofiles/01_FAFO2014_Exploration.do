@@ -243,10 +243,6 @@ tab q113, m
 ren q113 q113_main_resp_hh
 tab q113_main_resp_hh, m
 
-egen iid = concat(hhid q113_main_resp_hh)
-isid iid 
-lab var iid "Individual ID: concat hhid and main resp nb"
-
 *Mains respondent RSI quest
 tab q114, m 
 ren q114 q114_main_resp_rsi
@@ -838,6 +834,13 @@ tab wealthidx3, m
 
 tab dtot___, m
 
+
+*CREATION OF THE UNIQUE ID for matching 
+
+egen iid = concat(hhid q113_main_resp_hh)
+isid iid 
+lab var iid "Individual ID: concat hhid and main resp nb"
+
 ******************
 * ROSter DATASET *
 ******************
@@ -845,9 +848,9 @@ tab dtot___, m
 use "$data_base/Jordan2014 ILO ROS_UserFile_Jul 2014.dta", clear
 isid ques_no
 sort ques_no
+
 *Serial Number of household member
 tab q300 , m
-
 
 *Questionnaire Number
 tab ques_no, m 
@@ -984,7 +987,135 @@ ren q115_t q115_t_hh_members
 ***************
 
 use "$data_base/Jordan2014 ILO RSI_UserFile_Jul 2014.dta", clear
+
 isid ques_no
+
+*Questionnaire Number
+tab ques_no, m 
+ren ques_no hhid
+
+*Household relative weight 
+tab HHrel_wt, m
+
+*RSI relative weight
+tab RSIrel_wt, m 
+
+*Name gornorates
+tab governorate, m 
+
+*Governorate
+tab q101, m 
+ren q101 q101_governorate
+drop governorate
+
+*Stratum
+tab Stratum, m 
+
+*Cluster ID
+tab ClusterID, m 
+
+*Urban / Rural
+tab ur_rl, m 
+ren ur_rl urban_rural
+
+*Nationality: at least one syrian member
+tab nat_hh, m 
+ren nat_hh nationality_hh
+
+*Nationality: as listed
+tab nat_samp, m 
+ren nat_samp nationality_listed
+
+tab HHgroup, m 
+
+tab HHgr1, m
+ 
+tab HHgr2, m 
+
+tab HHgr3, m 
+
+tab HHgr4, m 
+
+tab year, m 
+*2014
+
+*District
+tab q102, m 
+ren q102 q102_district
+tab q102_district, m
+
+*Sub district
+tab q103, m 
+ren q103 q103_sub_district
+tab q103_sub_district, m
+
+*Locality
+tab q104, m 
+ren q104 q104_locality
+
+*Area
+tab q105, m 
+ren q105 q105_area 
+
+*Neighborhood
+tab q106, m
+ren q106 q106_neighborhood
+
+*Block
+tab q107, m
+ren q107 q107_block
+tab q107_1, m  
+
+*Building
+tab q108, m 
+ren q108 q108_building 
+
+*Household in Building
+tab q109, m 
+ren q109 q109_hh_building
+
+*Dwellings
+tab q110, m 
+ren q110 q110_dwellings_building
+
+*Household in Block
+tab q111, m 
+ren q111 q111_hh_block
+
+*Kish table number
+tab q112, m 
+ren q112 q112_kish_table_nb
+
+*Main respondent hh quest
+tab q113, m 
+ren q113 q113_main_resp_hh
+tab q113_main_resp_hh, m
+
+*Mains respondent RSI quest
+tab q114, m 
+ren q114 q114_main_resp_rsi
+
+*Interview status
+tab q123, m 
+ren q123 q123_interview_compl
+
+*Total hh member
+tab q115_t, m 
+ren q115_t q115_t_hh_members
+
+  *Male
+  tab q115_m, m 
+  ren q115_m q115_m_hh_members
+
+  tab q115_f, m 
+  ren q115_f q115_f_hh_members
+
+  order q115_t_hh_members  ///
+        q115_m_hh_members  ///
+        q115_f_hh_members  ///
+        , a(q123_interview_compl) 
+
+
 
 tab r301, m
 /*
@@ -1095,32 +1226,72 @@ work permit |
 * MERGE DATASET *
 *****************
 
+use "$data_base/Jordan2014 ILO ROS_UserFile_Jul 2014.dta", clear
+
+*Household ID
+ren   ques_no hhid 
+
+*The unique identifier is: the HHID + the serial number of household
+*The head, who was initally surveyed, is the number 1
+egen      iid = concat(hhid q300)
+destring  iid, replace
+isid      iid 
+lab var   iid "Individual ID: concat hhid and serial number"
+
+tempfile filetemp
+save `filetemp' 
+
+
 use "$data_base/Jordan2014 ILO HH_UserFile_Jul 2014.dta", clear 
 
-*RSI
-merge 1:1 ques_no using "$data_base/Jordan2014 ILO RSI_UserFile_Jul 2014.dta"
-ren _merge merge_rsi
-/*
-   Result                           # of obs.
-    -----------------------------------------
-    not matched                         2,148
-        from master                     2,148  (_merge==1)
-        from using                          0  (_merge==2)
+*Household ID
+ren   ques_no hhid 
 
-    matched                             1,712  (_merge==3)
-    -----------------------------------------
-*/
+*Since the head always has number 1 as a serial number,
+*I create the unique id of the head, in order to match
+*with the ROS dataset. In that case, we are able to have 
+*all the info of the head, ROS + HH, and the info
+*of the rest of the household
+gen   hid = 1
 
-*1,712 individuals selected in RSI (1 by household)
+egen  iid = concat(hhid hid)
+destring  iid, replace
+isid      iid 
+lab var   iid "Individual ID: concat hhid and head serial number = 1"
 
-merge 1:m ques_no using "$data_base/Jordan2014 ILO ROS_UserFile_Jul 2014.dta"
+
+egen rsi_id = concat(hhid q114)
+destring  rsi_id, replace
+isid rsi_id
+
+*Then, supposely, we can merge on iid. There should be 3,860 match
+merge 1:1 iid using `filetemp'
 ren _merge merge_ros
 
-*Gen Individual ID 
-egen iid = concat(ques_no q300)
+sort hhid iid
+
+tempfile filetemp2
+save `filetemp2' 
+
+use "$data_base/Jordan2014 ILO RSI_UserFile_Jul 2014.dta", clear 
+
+*Household ID
+ren   ques_no hhid 
+
+egen rsi_id = concat(hhid q114)
+destring  rsi_id, replace
+isid rsi_id
+
+*Then, supposely, we can merge on iid. There should be 1,712 match
+merge 1:m rsi_id using `filetemp2'
+ren _merge merge_rsi
+
+order hhid iid rsi_id
 
 isid iid 
-ren ques_no hhid
 
+sort hhid iid
+
+save "$data_base/Jordan2014_ROS_HH_RSI.dta", replace
 
 
