@@ -1259,7 +1259,6 @@ destring  iid, replace
 isid      iid 
 lab var   iid "Individual ID: concat hhid and head serial number = 1"
 
-
 egen rsi_id = concat(hhid q114)
 destring  rsi_id, replace
 isid rsi_id
@@ -1291,6 +1290,10 @@ order hhid iid rsi_id
 isid iid 
 
 sort hhid iid
+
+tab merge_rsi 
+replace rsi_id = . if merge_rsi == 2 
+distinct rsi_id
 
 save "$data_base/Jordan2014_ROS_HH_RSI.dta", replace
 
