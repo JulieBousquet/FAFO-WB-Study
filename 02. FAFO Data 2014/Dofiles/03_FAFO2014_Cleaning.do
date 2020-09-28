@@ -130,3 +130,24 @@ ren q115_t q115_t_hh_members
 su q115_t_hh_members
 su q115_m_hh_members
 su q115_f_hh_members
+
+tab q303, m
+tab q303 nat_hh 
+*Industries - RSI
+
+tab r222 if merge_rsi == 3, m
+
+codebook nat_hh
+tab q514 if nat_hh == 1
+
+
+*Work permits
+
+ 
+tab r301, m
+tab r301 if nat_hh == 1
+tab r304 if nat_hh == 1
+
+tab q531  if nat_hh == 1
+
+
