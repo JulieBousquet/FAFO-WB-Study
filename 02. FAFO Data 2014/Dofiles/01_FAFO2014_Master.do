@@ -18,7 +18,7 @@ Creation Date:    18 September 2020
 if inlist(c(username), "u0131185", "julie") == 1 {
    
 	global github 	`"/users/`c(username)'/Documents/GitHub/FAFO-WB-Study-Jordan/"'
-	global dropbox	`"/users/`c(username)'/Dropbox/Fafo-WB Study/Jordan/Jordan 2014/"'
+	global dropbox	`"/users/`c(username)'/Dropbox/Fafo-WB Study/Jordan/06. Data Jordan 2014/"'
    
    }
    
