@@ -216,8 +216,13 @@ tab q505, m
 codebook q502
 
 *Those who work 
+preserve
 keep if q502 == 1 | q503 == 1 | q504 == 1 | q505 == 1 
 tab q520, m
+tab q519, m
+tab q521, m 
+tab q524new, m
+restore
 
 /*
                       Main job location |      Freq.     Percent        Cum.
@@ -233,7 +238,6 @@ In this living area (camp/ town/ villag |        677       27.94       40.20
 
 */
 
-tab q519, m
 
 /*
 Work inside |
@@ -248,7 +252,7 @@ Work inside |
       Total |      2,423      100.00
 */
 
-tab q521, m 
+
 
 /*
    Place where most of the work is |
@@ -270,7 +274,7 @@ Shop/Kiosk/Coffee house/Restaurant |        339       13.99       89.10
                              Total |      2,423      100.00
 */
 
-tab q524new, m
+
 
 /*
  Time on average |
@@ -290,6 +294,9 @@ Less than 1 hour |         97        4.00       67.19
 */
 
 *Disgregated by nationality
+
+preserve
+keep if q502 == 1 | q503 == 1 | q504 == 1 | q505 == 1 
 
 tab nat_hh, m 
 tab HHgroup, m
@@ -354,7 +361,7 @@ Outside this living a |       263      1,153 |     1,416
                 Total |       622      1,793 |     2,415 
 
 */
-
+restore
 
 preserve
 keep if merge_ros == 3 //Not in roster, just HHhead
@@ -395,6 +402,8 @@ preserve
 drop if HHgroup == 1 //Not in camp
 bys governorate q102_district HHrefugee: distinct hhid  
 restore 
+
+
 
 tab HHrefugee
 
