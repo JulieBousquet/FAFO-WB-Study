@@ -15,9 +15,9 @@ set mem 100m
 	****************************************************************************
 
 
-use "$data_base/Jordan2014_ROS_HH_RSI.dta", clear
+use "$data_2014_base/Jordan2014_ROS_HH_RSI.dta", clear
 
-
+*
 distinct hhid 
 distinct iid
 distinct rsi_id 
