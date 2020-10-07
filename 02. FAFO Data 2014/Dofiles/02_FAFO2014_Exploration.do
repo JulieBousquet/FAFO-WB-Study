@@ -18,7 +18,7 @@ set mem 100m
 * HOUSEHOLD DATASET *
 *********************
 
-use "$data_base/Jordan2014 ILO HH_UserFile_Jul 2014.dta", clear
+use "$data_2014_base/Jordan2014 ILO HH_UserFile_Jul 2014.dta", clear
 
 *Questionnaire Number
 tab ques_no, m 
@@ -845,7 +845,7 @@ lab var iid "Individual ID: concat hhid and main resp nb"
 * ROSter DATASET *
 ******************
 
-use "$data_base/Jordan2014 ILO ROS_UserFile_Jul 2014.dta", clear
+use "$data_2014_base/Jordan2014 ILO ROS_UserFile_Jul 2014.dta", clear
 isid ques_no
 sort ques_no
 
@@ -986,7 +986,7 @@ ren q115_t q115_t_hh_members
 * RSI DATASET *
 ***************
 
-use "$data_base/Jordan2014 ILO RSI_UserFile_Jul 2014.dta", clear
+use "$data_2014_base/Jordan2014 ILO RSI_UserFile_Jul 2014.dta", clear
 
 isid ques_no
 
@@ -1226,7 +1226,7 @@ work permit |
 * MERGE DATASET *
 *****************
 
-use "$data_base/Jordan2014 ILO ROS_UserFile_Jul 2014.dta", clear
+use "$data_2014_base/Jordan2014 ILO ROS_UserFile_Jul 2014.dta", clear
 
 *Household ID
 ren   ques_no hhid 
@@ -1242,7 +1242,7 @@ tempfile filetemp
 save `filetemp' 
 
 
-use "$data_base/Jordan2014 ILO HH_UserFile_Jul 2014.dta", clear 
+use "$data_2014_base/Jordan2014 ILO HH_UserFile_Jul 2014.dta", clear 
 
 *Household ID
 ren   ques_no hhid 
@@ -1272,7 +1272,7 @@ sort hhid iid
 tempfile filetemp2
 save `filetemp2' 
 
-use "$data_base/Jordan2014 ILO RSI_UserFile_Jul 2014.dta", clear 
+use "$data_2014_base/Jordan2014 ILO RSI_UserFile_Jul 2014.dta", clear 
 
 *Household ID
 ren   ques_no hhid 
@@ -1295,6 +1295,6 @@ tab merge_rsi
 replace rsi_id = . if merge_rsi == 2 
 distinct rsi_id
 
-save "$data_base/Jordan2014_ROS_HH_RSI.dta", replace
+save "$data_2014_base/Jordan2014_ROS_HH_RSI.dta", replace
 
 
