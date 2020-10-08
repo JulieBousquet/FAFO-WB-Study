@@ -169,6 +169,8 @@ su q115_t_hh_members
 su q115_m_hh_members
 su q115_f_hh_members
 
+bys nat_hh: su q115_t_hh_members 
+
 tab q303, m
 tab q303 nat_hh 
 *Industries - RSI
