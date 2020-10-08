@@ -329,7 +329,9 @@ Less than 1 hour |        27         70 |        97
            Total |       609      1,757 |     2,366 
 
 */
+drop if HHgroup == 1 //Not in camp
 
+bys HHrefugee: tab q524new
 
 tab q519 HHrefugee
 
@@ -440,4 +442,6 @@ tab q801
 tab q802
 restore
 
+tab q303, m
+bys HHrefugee: tab q303, m
 
