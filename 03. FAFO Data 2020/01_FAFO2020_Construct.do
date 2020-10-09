@@ -179,8 +179,8 @@ isid iid
 merge 1:1 iid using `filetemp'
 ren _merge merge_rsi
 
-br qrclust qrhhid qrrsi qhclust qhhhid qhrsi merge_rsi
-keep if qrclust == 1110974 | qhclust == 1110974
+*br qrclust qrhhid qrrsi qhclust qhhhid qhrsi merge_rsi
+*keep if qrclust == 1110974 | qhclust == 1110974
 sort merge_rsi
 
 /*
@@ -202,6 +202,14 @@ From Master: are the ones in RSI only. They were not surveyed as part of the
 HH but as part of the RSI only [WHICH IS WIERD]
   733 observations
 */
+
+
+*RSI
+tab merge_rsi, m
+lab def merge_rsi 1 "RSI" 2 "HH" 3 "RSI and HH", modify
+lab val merge_rsi merge_rsi
+tab merge_rsi, m
+
 
 save "$data_2020_base/Jordan2020_HH_RSI.dta", replace
 
@@ -312,11 +320,6 @@ replace clusterid = qhclust if mi(clusterid)
 egen hhid = concat(clusterid hhid_clust)
 distinct hhid
 
-
-*RSI
-tab merge_rsi, m
-lab def merge_rsi 1 "RSI" 2 "HH" 3 "RSI and HH", modify
-lab val merge_rsi merge_rsi
 
 *Geography
 
