@@ -169,6 +169,8 @@ su q115_t_hh_members
 su q115_m_hh_members
 su q115_f_hh_members
 
+bys nat_hh: su q115_t_hh_members 
+
 tab q303, m
 tab q303 nat_hh 
 *Industries - RSI
@@ -327,7 +329,9 @@ Less than 1 hour |        27         70 |        97
            Total |       609      1,757 |     2,366 
 
 */
+drop if HHgroup == 1 //Not in camp
 
+bys HHrefugee: tab q524new
 
 tab q519 HHrefugee
 
@@ -438,4 +442,6 @@ tab q801
 tab q802
 restore
 
+tab q303, m
+bys HHrefugee: tab q303, m
 
