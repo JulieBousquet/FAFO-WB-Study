@@ -445,3 +445,71 @@ restore
 tab q303, m
 bys HHrefugee: tab q303, m
 
+
+
+
+
+
+use "$data_2014_base/Jordan2014_ROS_HH_RSI.dta", clear
+
+******* ARD *******
+  
+tab q115_t_hh_members, m 
+tab q115_m_hh_members, m 
+tab q115_f_hh_members, m 
+
+
+tab q203, m 
+tab q204, m 
+tab q207, m 
+tab q209, m 
+tab q210, m 
+tab q212, m 
+tab q214, m 
+tab q220_1, m 
+tab q220_2, m 
+tab q225, m
+tab r222, m 
+tab q405_2, m 
+tab q405_1, m 
+tab q406, m 
+tab q410, m 
+tab q409, m 
+tab q702, m 
+tab q700, m
+tab q306
+duplicates drop hhid, force
+tab HHchildren, m
+
+codebook HHrefugee
+tab ClusterID HHrefugee
+
+use "$data_2014_base/Jordan2014_ROS_HH_RSI.dta", clear
+
+*drop in camp
+tab HHgr1
+drop if HHgr1 == 1
+
+tab ClusterID HHrefugee
+sort ClusterID
+br HHrefugee ClusterID
+*refugee = 1
+gen refug = 1 if HHrefugee == 1 
+gen host = 1 if HHrefugee == 2 
+
+egen count_ref = count(refug), by(ClusterID)
+egen count_ref = count(host), by(ClusterID)
+
+collapse (sum) refug host , by(ClusterID)
+
+tab refug, m
+tab host , 
+distinct ClusterID if refug == 0
+*39
+*(11%)
+distinct ClusterID if host == 0
+*89
+*(25%)
+
+distinct ClusterID
+*348
