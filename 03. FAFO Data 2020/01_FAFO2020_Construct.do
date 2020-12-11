@@ -172,6 +172,7 @@ format hhid %12.0g
 
 egen iid = concat(qrclust qrhhid qrrsi) , f(%18.0g)
 isid iid
+drop if hhid == 11306617 & qrrsi == 3
 
 merge 1:1 iid using `filetemp'
 ren _merge merge_rsi
@@ -211,6 +212,7 @@ format iid %12.0g
 isid iid
 
 keep iid hhid 
+replace iid = 113066171  if hhid == 11306617
 
 save "$data_2020_temp/list_household_heads.dta", replace
 
@@ -243,6 +245,8 @@ drop if (qhresult == 12 | qhresult == 5 | qhresult == . ) & dup == 1
 drop dup 
 isid hhid 
 
+
+
 tempfile merge_hh
 save `merge_hh' 
 
@@ -253,6 +257,16 @@ label variable hhid "Household ID"
 destring hhid, replace
 distinct hhid 
 format hhid %12.0g
+
+
+drop if hhid == 11306617 & qrrsi == 3
+
+tab qrresult , m
+codebook qrresult
+*br if qrresult != 1 & qrresult != 2 & qrresult != 6
+*drop if (qrresult == 12 | qrresult == 5 | qrresult == . ) & dup == 1
+*drop dup 
+*isid hhid 
 
 gen survey_rsi = 1 
 lab var survey_rsi "Individual did the RSI survey"
@@ -282,12 +296,17 @@ did not do RSI
 
 *RSI
 tab merge_rsi, m
-lab def merge_rsi 1 "RSI" 2 "HH" 3 "RSI and HH", modify
+lab def merge_rsi 1 "RSI" 2 "HH" 3 "RSI and HH" 4 "ROS and HH", modify
 lab val merge_rsi merge_rsi
 tab merge_rsi, m
 lab var merge_rsi "Merge variable between HH survey and RSI survey"
 
 drop if merge_rsi == 2 & qhresult != 1
+
+*Some did only the ROS surve and not the RSI (even tho they are in the RSI
+*dataset: this is because FAFO merged without indicatng this)
+replace merge_rsi = 4 if qrresult != 1 & qrresult != 2 & qrresult != 6
+
 *183 househods did neither the HH survey neither the RSI survey neither the roster
 *i drop them for now
 
@@ -320,4 +339,5 @@ drop id_count
 order iid hhid rsiid  
 order survey_rsi survey_hh, b(ID101)
      
+
 save "$data_2020_final/Jordan2020_HH_RSI.dta", replace

@@ -111,6 +111,6 @@ tab merge_rsi
 replace rsi_id = . if merge_rsi == 2 
 distinct rsi_id
 
-save "$data_2014_base/Jordan2014_ROS_HH_RSI.dta", replace
+save "$data_2014_final/Jordan2014_ROS_HH_RSI.dta", replace
 
 
