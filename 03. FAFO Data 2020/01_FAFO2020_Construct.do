@@ -15,71 +15,6 @@ set mem 100m
 	****************************************************************************
 
 
-*********************
-* HOUSEHOLD DATASET *
-*********************
-
-use "$data_2020_base/Household-Final.dta", clear
-
-tab ID101 
-
-*ID101 ID102 ID103 ID104 ID105 ID106 ID107 qhclust
-
-tab headnation, m
-list qhclust qhintvcode qhhhid qhresult if headnation == 10
-
-/*
-     +-----------------------------+
-     | qhclust   qhintv~e   qhhhid |
-     |-----------------------------|
-129. | 1150084         18        2 |
-     +-----------------------------+
-*/
-
-/*
-Nationality |      Freq.     Percent        Cum.
-------------+-----------------------------------
-     Jordan |        259       31.94       31.94
-      Syria |        343       42.29       74.23
-      Egypt |         20        2.47       76.70
-         10 |          1        0.12       76.82
-          . |        188       23.18      100.00
-------------+-----------------------------------
-      Total |        811      100.00
-*/
-
-tab qhresult if mi(headnation)
-
-/*
-          Result of household interview |      Freq.     Percent        Cum.
-----------------------------------------+-----------------------------------
-No (competent) household member at home |         22       11.83       11.83
-                                Refused |         72       38.71       50.54
-                     No eligible person |          8        4.30       54.84
-                  No usable information |          3        1.61       56.45
-                  Status not determined |         15        8.06       64.52
-Dwelling vacant or address not a dwelli |         17        9.14       73.66
-                     Dwelling not found |          5        2.69       76.34
-                                  Other |         44       23.66      100.00
-----------------------------------------+-----------------------------------
-                                  Total |        186      100.00
-
-*/
-
-*I DROP THESE INDIVIDUALS 
-drop if mi(headnation) | headnation == 10
-
-
-tab headnation, m
-
-codebook headnation
-gen refugee = 1 if headnation == 2
-replace refugee = 2 if headnation == 1 | headnation == 3
-lab def refugee 1 "Refugee" 2 "Non refugee", modify
-lab val refugee refugee 
-lab var refugee "Refugee is 1 if Syrian is 2 if other (Jordan, Egyptian)"
-tab refugee, m
-
 use "$data_2020_base/RSI-Final.dta",clear 
 
 *qhclust == 1150084 & qrhhid == 2
@@ -140,6 +75,8 @@ lab def refugee 1 "Refugee" 2 "Non refugee", modify
 lab val refugee refugee 
 lab var refugee "Refugee is 1 if Syrian is 2 if other (Jordan, Egyptian)"
 tab refugee, m 
+
+
 
 *****************
 * CREATE HH HEAD LIST *
@@ -245,8 +182,6 @@ drop if (qhresult == 12 | qhresult == 5 | qhresult == . ) & dup == 1
 drop dup 
 isid hhid 
 
-
-
 tempfile merge_hh
 save `merge_hh' 
 
@@ -305,10 +240,10 @@ drop if merge_rsi == 2 & qhresult != 1
 
 *Some did only the ROS surve and not the RSI (even tho they are in the RSI
 *dataset: this is because FAFO merged without indicatng this)
-replace merge_rsi = 4 if qrresult != 1 & qrresult != 2 & qrresult != 6
+replace merge_rsi = 4 if qrresult != 1 & qrresult != 2 
+*& qrresult != 6
 
 *183 househods did neither the HH survey neither the RSI survey neither the roster
-*i drop them for now
 
 egen rsiid = concat(hhid qrrsi) , f(%18.0g)
 replace rsiid = "" if mi(qrrsi)
@@ -341,3 +276,5 @@ order survey_rsi survey_hh, b(ID101)
      
 
 save "$data_2020_final/Jordan2020_HH_RSI.dta", replace
+
+
