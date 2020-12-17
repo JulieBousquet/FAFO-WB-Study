@@ -274,14 +274,101 @@ tab q515new
 
 
 ***** HOURS WORKED ****
+tab r203
+ren r203 rsi_work_hours_7d
 
+tab r227
+tab r228
 *r203 r203new
 *r227 
 *r228 
+
+
+**** WORKING HOURS  ****
+
+tab QR506, m //Number of hours work during the past 7 das
+tab QR507, m //Number of hours work during the past month
+ren QR506 rsi_work_hours_7d
+ren QR507 rsi_work_hours_m
+
+
+
 *drop if q305 < 15 
 *drop if q501 == 97 
 *drop if refugee != 1
 logit ros_work_permit ros_employed refugee
+
+
+
+***** DETERMINANT OF GETTING A WORK PERMIT 
+preserve
+
+keep if refugee == 1
+logit rsi_work_permit ///
+        ros_employed  ///
+        rsi_wage_income_lm_cont ///
+        rsi_work_hours_m ///
+        
+restore
+
+***** CHARACTERISTICS OF INDIVIDUAALS/HOUSEHOLDS GETTING A WP
+preserve
+
+keep if refugee == 1
+ttest hhsize, by(rsi_work_permit)
+ttest qrgender, by(rsi_work_permit)
+ttest economy, by(rsi_work_permit)
+ttest refugee, by(rsi_work_permit)
+ttest qrage, by(rsi_work_permit)
+
+logit rsi_work_permit hhsize qrgender qrage economy refugee
+ 
+  *i.industry i.occupation 
+restore
+
+***** HOW DOES HAVING A WP AFFECTS OUTCOME VAR 
+preserve
+
+keep if refugee == 1
+reg rsi_wage_income_lm_cont_ln rsi_work_permit, robust
+reg rsi_work_hours_m rsi_work_permit, robust
+reg ros_employed rsi_work_permit, robust
+restore
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -477,6 +564,8 @@ tab QR609, m //wage income typical (cont)
 
 mdesc QH502_2 QH502_4 QR608 QR609
 
+gen rsi_wage_income_lm_cont_ln = ln(rsi_wage_income_lm_cont)
+
 ren QH502_2 hh_wage_income_lm_cat
 ren QH502_4 hh_wage_income_l12m_cat
 ren QR608 	rsi_wage_income_lm_cont
@@ -514,28 +603,79 @@ ren QH503_4 hh_se_income_l12m_cat
 ren QR705 	rsi_se_income_lm_cont
 ren QR706 	rsi_se_income_typ_cont
 
+**** ADDITIONAL INCOME ****
+
 *RSI : Additional Income 
 
 tab QR805, m
 tab QR806, m
 
+**** WORKING HOURS  ****
+
+tab QR506, m //Number of hours work during the past 7 das
+tab QR507, m //Number of hours work during the past month
+ren QR506 rsi_work_hours_7d
+ren QR507 rsi_work_hours_m
+
+**** INDUSTRIES AND OCCUPATION ****
 
 * Industry 
 tab QR501 
-ren QR501 industry
+*ren QR501 industry
+encode QR501, gen(industry)
 *Occupation 
 tab QR502
-ren QR502 occupation
+*ren QR502 occupation
+encode QR502, gen(occupation)
 
 
 
 
+bys refugee : tab rsi_work_permit ros_employed , m
+/*
+-> refugee = Refugee
 
+    Have a |
+valid work |     ros_employed
+    permit |        No        Yes |     Total
+-----------+----------------------+----------
+        No |       434        112 |       546 
+       Yes |        23         78 |       101 
+-----------+----------------------+----------
+     Total |       457        190 |       647 
+*/
 
+***** DETERMINANT OF GETTING A WORK PERMIT 
+preserve
 
+keep if refugee == 1
+logit rsi_work_permit ///
+        ros_employed  ///
+        rsi_wage_income_lm_cont ///
+        rsi_work_hours_m ///
+        
+restore
 
+***** CHARACTERISTICS OF INDIVIDUAALS/HOUSEHOLDS GETTING A WP
+preserve
 
-probit 	rsi_work_permit ros_employed refugee ///
-		hhsize headgender economy ///
-		hh_wage_income_l12m_cat hh_wage_income_lm_cat ///
-		rsi_wage_income_lm_cont rsi_wage_income_typ_cont  
+keep if refugee == 1
+ttest hhsize, by(rsi_work_permit)
+ttest qrgender, by(rsi_work_permit)
+ttest economy, by(rsi_work_permit)
+ttest refugee, by(rsi_work_permit)
+ttest qrage, by(rsi_work_permit)
+
+logit rsi_work_permit hhsize qrgender qrage economy refugee
+
+  *i.industry i.occupation 
+restore
+
+***** HOW DOES HAVING A WP AFFECTS OUTCOME VAR 
+preserve
+
+keep if refugee == 1
+reg rsi_wage_income_lm_cont_ln rsi_work_permit, robust
+reg rsi_work_hours_m rsi_work_permit, robust
+reg ros_employed rsi_work_permit, robust
+restore
