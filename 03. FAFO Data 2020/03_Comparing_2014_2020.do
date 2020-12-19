@@ -216,6 +216,9 @@ tab q900_qm // Wage income last month
 tab q532 //Cash Income Main Job Last month (cont)
 tab q532new //Cash Income Main Job Last month (cat)
 
+ren q532 ros_wage_income_lm_cont
+gen ros_wage_income_lm_cont_ln = ln(ros_wage_income_lm_cont)
+
 tab q533 //Usual Monthly cash income (cont)
 tab q533new //Usual Monthly cash income (cat)
 
@@ -227,6 +230,9 @@ tab q532and536new //Total cash Income last month (cat)
 *RSI 
 tab r204 //Cash Income Main Job Last month (cont)
 tab r204new //Cash Income Main Job Last month (cat)
+
+ren r204 rsi_wage_income_lm_cont
+
 
 tab r205 //Usual Monthly cash income (cont)
 tab r205new //Usual Monthly cash income (cat)
@@ -279,50 +285,56 @@ ren r203 rsi_work_hours_7d
 
 tab r227
 tab r228
-*r203 r203new
-*r227 
-*r228 
 
 
-**** WORKING HOURS  ****
+****** DEMOGRAPHICS ******
 
-tab QR506, m //Number of hours work during the past 7 das
-tab QR507, m //Number of hours work during the past month
-ren QR506 rsi_work_hours_7d
-ren QR507 rsi_work_hours_m
+tab HHsex , m //Sex of HH
+tab RSIsex, m //Sex of RSI resp 
+tab q303, m //Sex
+ren q303 ros_gender
+ren HHsex hh_gender 
 
+tab q115_tnew, m
+tab q115_t, m
+ren q115_t hh_hhsize
+
+tab q305, m
+ren q305 ros_age
 
 
 *drop if q305 < 15 
 *drop if q501 == 97 
 *drop if refugee != 1
-logit ros_work_permit ros_employed refugee
-
-
 
 ***** DETERMINANT OF GETTING A WORK PERMIT 
 preserve
-
 keep if refugee == 1
 logit rsi_work_permit ///
         ros_employed  ///
-        rsi_wage_income_lm_cont ///
-        rsi_work_hours_m ///
-        
+        ros_wage_income_lm_cont ///
+        rsi_work_hours_7d  
 restore
 
 ***** CHARACTERISTICS OF INDIVIDUAALS/HOUSEHOLDS GETTING A WP
+
 preserve
 
 keep if refugee == 1
-ttest hhsize, by(rsi_work_permit)
-ttest qrgender, by(rsi_work_permit)
-ttest economy, by(rsi_work_permit)
+ttest hh_hhsize, by(rsi_work_permit)
+ttest ros_gender, by(rsi_work_permit)
+ttest hh_gender, by(rsi_work_permit)
+ttest ros_age, by(rsi_work_permit)
+*ttest economy, by(rsi_work_permit)
 ttest refugee, by(rsi_work_permit)
-ttest qrage, by(rsi_work_permit)
 
-logit rsi_work_permit hhsize qrgender qrage economy refugee
- 
+logit rsi_work_permit hh_hhsize 
+logit rsi_work_permit ros_gender 
+logit rsi_work_permit hh_gender 
+logit rsi_work_permit ros_age
+
+logit rsi_work_permit ros_age hh_hhsize ros_gender ros_age
+
   *i.industry i.occupation 
 restore
 
@@ -330,8 +342,8 @@ restore
 preserve
 
 keep if refugee == 1
-reg rsi_wage_income_lm_cont_ln rsi_work_permit, robust
-reg rsi_work_hours_m rsi_work_permit, robust
+reg ros_wage_income_lm_cont_ln rsi_work_permit, robust
+reg rsi_work_hours_7d rsi_work_permit, robust
 reg ros_employed rsi_work_permit, robust
 restore
 
@@ -352,6 +364,8 @@ restore
 
 
 
+
+tab QR502 if rsi_work_permit == 1
 
 
 
@@ -564,12 +578,13 @@ tab QR609, m //wage income typical (cont)
 
 mdesc QH502_2 QH502_4 QR608 QR609
 
-gen rsi_wage_income_lm_cont_ln = ln(rsi_wage_income_lm_cont)
 
 ren QH502_2 hh_wage_income_lm_cat
 ren QH502_4 hh_wage_income_l12m_cat
 ren QR608 	rsi_wage_income_lm_cont
 ren QR609 	rsi_wage_income_typ_cont
+
+gen rsi_wage_income_lm_cont_ln = ln(rsi_wage_income_lm_cont)
 
 **** SELF-EMPLOYED INCOME ****
 
@@ -645,6 +660,23 @@ valid work |     ros_employed
      Total |       457        190 |       647 
 */
 
+****** DEMOGRAPHICS ******
+
+tab qrgender, m
+tab headgender, m
+ren qrgender ros_gender
+ren headgender hh_gender 
+
+tab hhsize, m 
+ren hhsize hh_hhsize
+
+tab qrage, m
+ren qrage ros_age
+
+tab economy, m 
+ren economy hh_poor
+
+
 ***** DETERMINANT OF GETTING A WORK PERMIT 
 preserve
 
@@ -660,13 +692,14 @@ restore
 preserve
 
 keep if refugee == 1
-ttest hhsize, by(rsi_work_permit)
-ttest qrgender, by(rsi_work_permit)
-ttest economy, by(rsi_work_permit)
+ttest hh_hhsize, by(rsi_work_permit)
+ttest ros_gender, by(rsi_work_permit)
+ttest hh_gender, by(rsi_work_permit)
+ttest ros_age, by(rsi_work_permit)
+ttest hh_poor, by(rsi_work_permit)
 ttest refugee, by(rsi_work_permit)
-ttest qrage, by(rsi_work_permit)
 
-logit rsi_work_permit hhsize qrgender qrage economy refugee
+logit rsi_work_permit hh_hhsize ros_gender hh_gender ros_age hh_poor 
 
   *i.industry i.occupation 
 restore
