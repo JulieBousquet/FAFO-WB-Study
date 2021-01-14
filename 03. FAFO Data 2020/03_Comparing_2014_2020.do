@@ -770,3 +770,5 @@ tab industry rsi_work_permit
 mdesc industry
 tab employ, m
 tab employ rsi_work_permit 
+
+tab QR117, m
