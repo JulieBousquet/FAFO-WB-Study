@@ -712,3 +712,61 @@ reg rsi_wage_income_lm_cont_ln rsi_work_permit, robust
 reg rsi_work_hours_m rsi_work_permit, robust
 reg ros_employed rsi_work_permit, robust
 restore
+
+
+keep if refugee == 1
+tab rsi_work_permit QR112
+tab rsi_work_permit QR113 
+tab rsi_work_permit QR114 
+tab rsi_work_permit QR115
+
+tab rsi_work_permit QR301 
+
+tab QR501 rsi_work_permit
+tab QR502 rsi_work_permit
+
+tab rsi_work_permit QR512
+tab QR514 rsi_work_permit 
+tab rsi_work_permit QR601
+
+tab QR605S rsi_work_permit 
+corr  QR605S rsi_work_permit
+
+corr rsi_work_permit QR1312
+corr rsi_work_permit QR1313_1 QR1313_2 QR1313_3 QR1313_4 QR1313_5 QR1314 QR1315
+corr rsi_work_permit *
+
+foreach var of varlist * {
+    capture assert missing(`var')
+    if !_rc drop `var'
+}
+
+
+ tab QR213
+ tab rsi_work_permit QR213 
+ corr rsi_work_permit QR213
+
+ gen indsutry_wp = 0 
+ replace indsutry_wp = QR204 if rsi_work_permit == 1 
+ replace indsutry_wp = QR213 if rsi_work_permit == 1 & mi(indsutry_wp)
+
+ tab indsutry_wp rsi_work_permit 
+ corr industry indsutry_wp 
+
+ *Documented migrants
+
+drop if refugee == 2
+tab QR112, m
+tab QR113, m
+tab QR114, m
+tab QR115, m
+tab QR215, m
+* B = No need/No Necessary
+
+tab QR112 rsi_work_permit 
+tab QR114 rsi_work_permit 
+tab QR215 rsi_work_permit 
+tab industry rsi_work_permit 
+mdesc industry
+tab employ, m
+tab employ rsi_work_permit 
