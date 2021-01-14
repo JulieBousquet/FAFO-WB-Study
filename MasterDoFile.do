@@ -65,8 +65,22 @@ if inlist(c(username), "u0131185", "julie") == 1 {
 		global do_2020			"$github/03. FAFO Data 2020/Dofiles/"
 
 
+	****************************
+	**     SECONDARY DATA     **
+	****************************
+	*Master to locate the folder
+	global data_sec_LFS "$dropbox/04. Secondary Data/01. Labor Force Survey Syria 2010/"
+		global data_LFS 		"$data_sec_LFS/01. Datasets/"
+			global data_LFS_base 		"$data_LFS/02. Base"
+			global data_LFS_temp 		"$data_LFS/03. Temp"
+			global data_LFS_final 		"$data_LFS/04. Final"
+			global data_LFS_shp			"$data_LFS/05. Shapefile"
+		global out_LFS  		"$data_sec_LFS/02. Output/"
+		global do_LFS			"$github/04. Secondary Data/Dofiles/"
+
 
 exit
 /* End of do-file */
 
 ><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><
+

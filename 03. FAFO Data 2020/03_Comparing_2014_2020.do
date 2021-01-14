@@ -772,3 +772,11 @@ tab employ, m
 tab employ rsi_work_permit 
 
 tab QR117, m
+
+ graph bar, ///
+  over(QR117, sort(1) descending label(angle(ninety))) ///
+  blabel(bar, format(%3.2g)) ///
+  title("In which Syrian governorate did you live before" "ariving to Jordan?") ///
+  subtitle(In Percentage) ///
+  note("n=677, missing=30" "FAFO, 2020, RSI")
+graph export "$out_LFS/bar_gov_origin.pdf", as(pdf) replace
