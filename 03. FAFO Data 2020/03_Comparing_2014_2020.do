@@ -388,7 +388,345 @@ tab QR502 if rsi_work_permit == 1
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 use "$data_2020_final/Jordan2020_HH_RSI.dta", clear
+
+**** INDUSTRIES AND OCCUPATION ****
+
+* Industry 
+tab QR501 
+*ren QR501 industry
+encode QR501, gen(industry)
+*Occupation 
+tab QR502
+*ren QR502 occupation
+encode QR502, gen(occupation)
+
+
+sort industry
+*br industry
+egen id = group(industry) 
+duplicates tag id, gen(dup)
+bys id: gen idn = _n
+*drop if idn != 1
+*drop if dup > 0
+list industry
+br industry
+*gen id = _n 
+
+tempfile tempfile_indus
+save `tempfile_indus'
+
+
+import excel "$data_2020_base\Industry_2020.xlsx", sheet("MAIN") firstrow clear
+*gen id = _n 
+egen id = group(industry_ar) 
+
+merge m:m id  using `tempfile_indus'
+
+drop _merge dup 
+
+*https://ilostat.ilo.org/resources/concepts-and-definitions/classification-economic-activities/
+
+ren industry industry_orig
+br industry_orig industry_ar
+
+gen industry = industry_en
+replace industry = "Manufacturing" if industry_en == "Wood Carving"
+replace industry = "Manufacturing" if industry_en == "Carpenter"
+replace industry = "Manufacturing" if industry_en == "Wood carpenter"
+replace industry = "Manufacturing" if industry_en == "Wood Carving"
+replace industry = "Manufacturing" if industry_en == "Dairy factory"
+replace industry = "Manufacturing" if industry_en == "Factory"
+replace industry = "Manufacturing" if industry_en == "Factory worker"
+replace industry = "Manufacturing" if industry_en == "Plastic parts for pipe fittings"
+replace industry = "Manufacturing" if industry_en == "Tobacco company"
+replace industry = "Manufacturing" if industry_en == "Oily"
+replace industry = "Manufacturing" if industry_en == "In the assembly of scrap"
+replace industry = "Manufacturing" if industry_en == "Epic"
+replace industry = "Manufacturing" if industry_en == "manufacturing"
+replace industry = "Manufacturing" if industry_en == "Factor" & iid == 133015931
+
+replace industry = "Administrative and support service activities" if industry_en == "Security and Protection" 
+replace industry = "Administrative and support service activities" if industry_en == "security"
+replace industry = "Administrative and support service activities" if industry_en == "Business Administration"
+replace industry = "Administrative and support service activities" if industry_en == "guard"
+replace industry = "Administrative and support service activities" if industry_en == "Smith"
+replace industry = "Administrative and support service activities" if industry_en == "Municipal guarding"
+replace industry = "Administrative and support service activities" if industry_en == "secretary"
+replace industry = "Administrative and support service activities" if industry_en == "clerk"
+
+replace industry = "Construction" if industry_en == "Construction work / plumbing"
+replace industry = "Construction" if industry_en == "Tile tiling houses"
+replace industry = "Construction" if industry_en == "Tiling houses"
+replace industry = "Construction" if industry_en == "Repairing"
+replace industry = "Construction" if industry_en == "Construction services"
+replace industry = "Construction" if industry_en == "Painting and decoration"
+replace industry = "Construction" if industry_en == "Painter"
+replace industry = "Construction" if industry_en == "Maintenance of homes"
+replace industry = "Construction" if industry_en == "Tile worker"
+replace industry = "Construction" if industry_en == "A builder"
+replace industry = "Construction" if industry_en == "Stone worker"
+replace industry = "Construction" if industry_en == "Carpentry worker"
+replace industry = "Construction" if industry_en == "Tile art"
+replace industry = "Construction" if industry_en == "Maintenance services"
+replace industry = "Construction" if industry_en == "A stone"
+replace industry = "Construction" if industry_en == "Dressing Shahf"
+replace industry = "Construction" if industry_en == "Brady Industry"
+replace industry = "Construction" if industry_en == "Clay"
+replace industry = "Construction" if industry_en == "A worker on a tank"
+replace industry = "Construction" if industry_en == "Cache operator"
+replace industry = "Construction" if industry_en == "Daily worker"
+replace industry = "Construction" if industry_en == "Thrash"
+replace industry = "Construction" if industry_en == "Kahla buildings"
+replace industry = "Construction" if industry_en == "As a sash"
+replace industry = "Construction" if industry_en == "Mossorgi" 
+replace industry = "Construction" if industry_en == "Mawalat"
+replace industry = "Construction" if industry_en == "Construction work"
+replace industry = "Construction" if industry_en == "Building"
+replace industry = "Construction" if industry_en == "Carpentry"
+replace industry = "Construction" if industry_en == "Maintenance"
+replace industry = "Construction" if industry_en == "Tiles"
+replace industry = "Construction" if industry_en == "sewing"
+replace industry = "Construction" if industry_en == "Factor" & iid == 134058181 
+replace industry = "Construction" if industry_en == "Factor" & iid == 1330162101
+replace industry = "Construction" if industry_en == "Factor" & iid == 2210159122
+replace industry = "Construction" if industry_en == "Factor" & iid == 1340340112
+replace industry = "Construction" if industry_en == "Factor" & iid == 1330396131
+replace industry = "Construction" if industry_en == "Factor" & iid == 133011392
+replace industry = "Construction" if industry_en == "Factor" & iid == 133123391
+replace industry = "Construction" if industry_en == "Factor" & iid == 1110974142
+replace industry = "Construction" if industry_en == "Factor" & iid == 2210294161
+
+replace industry = "Wholesale and retail trade" if industry_en == "Aluminum seller"
+replace industry = "Wholesale and retail trade" if industry_en == "Aluminum"
+replace industry = "Wholesale and retail trade" if industry_en == "salesassistant"
+replace industry = "Wholesale and retail trade" if industry_en == "fixing cars"
+replace industry = "Wholesale and retail trade" if industry_en == "Repair and install car wheels"
+replace industry = "Wholesale and retail trade" if industry_en == "Car wash and grease"
+replace industry = "Wholesale and retail trade" if industry_en == "Working aluminum"
+replace industry = "Wholesale and retail trade" if industry_en == "Aluminum industry"
+replace industry = "Wholesale and retail trade" if industry_en == "Plastic industry"
+replace industry = "Wholesale and retail trade" if industry_en == "Wholesale stores upload and download"
+replace industry = "Wholesale and retail trade" if industry_en == "upload and download"
+replace industry = "Wholesale and retail trade" if industry_en == "Download khedler"
+replace industry = "Wholesale and retail trade" if industry_en == "Packaging and packing"
+replace industry = "Wholesale and retail trade" if industry_en == "Download agent download"
+replace industry = "Wholesale and retail trade" if industry_en == "Download merchandise" 
+replace industry = "Wholesale and retail trade" if industry_en == "distribution"
+replace industry = "Wholesale and retail trade" if industry_en == "glass"
+replace industry = "Wholesale and retail trade" if industry_en == "Upload and download agent"
+replace industry = "Wholesale and retail trade" if industry_en == "Baleet assistant"
+replace industry = "Wholesale and retail trade" if industry_en == "Load factor"
+replace industry = "Wholesale and retail trade" if industry_en == "trade"
+replace industry = "Wholesale and retail trade" if industry_en == "Factor" & iid == 1330396122
+replace industry = "Wholesale and retail trade" if industry_en == "Factor" & iid == 1130731151
+
+replace industry = "Services" if industry_en == "Vendor"
+replace industry = "Services" if industry_en == "Mall services"
+replace industry = "Services" if industry_en == "Shopping mall"
+replace industry = "Services" if industry_en == "Supermarket employee"
+replace industry = "Services" if industry_en == "B store cleaning supplies"
+replace industry = "Services" if industry_en == "I want cars"
+replace industry = "Services" if industry_en == "Sale"
+replace industry = "Services" if industry_en == "Selling clothes"
+replace industry = "Services" if industry_en == "Carpet cleaning"
+replace industry = "Services" if industry_en == "shaving"
+replace industry = "Services" if industry_en == "tailor"
+replace industry = "Services" if industry_en == "Tailor"
+replace industry = "Services" if industry_en == "bus driver"
+replace industry = "Services" if industry_en == "Beckham driver"
+replace industry = "Services" if industry_en == "Making bags"
+replace industry = "Services" if industry_en == "Tailor worker"
+replace industry = "Services" if industry_en == "Sales agent"
+replace industry = "Services" if industry_en == "car wash"
+replace industry = "Services" if industry_en == "Tailoring"
+replace industry = "Services" if industry_en == "Sales Officer"
+replace industry = "Services" if industry_en == "Cellular devices"
+replace industry = "Services" if industry_en == "cooperative"
+replace industry = "Services" if industry_en == "Aammal home services"
+replace industry = "Services" if industry_en == "Agent services"
+replace industry = "Services" if industry_en == "Exhaust oils"
+replace industry = "Services" if industry_en == "Coavira"
+replace industry = "Services" if industry_en == "Transfer"
+replace industry = "Services" if industry_en == "In front of a mosque"
+replace industry = "Services" if industry_en == "Carpet washing"
+replace industry = "Services" if industry_en == "Driver"
+replace industry = "Services" if industry_en == "Super Market"
+replace industry = "Services" if industry_en == "clothes designing"
+replace industry = "Services" if industry_en == "Factor" & iid == 1110974111
+replace industry = "Services" if industry_en == "Officer" & iid == 221005082
+replace industry = "Services" if industry_en == "free businees" & iid == 213006991
+
+replace industry = "Other service activities" if industry_en == "Houseware"
+replace industry = "Other service activities" if industry_en == "Aid"
+replace industry = "Other service activities" if industry_en == "Raising a child"
+replace industry = "Other service activities" if industry_en == "Child rearing"
+replace industry = "Other service activities" if industry_en == "Arrange cleaning houses"
+replace industry = "Other service activities" if industry_en == "Beautifying"
+replace industry = "Other service activities" if industry_en == "Beauty and stylist"
+replace industry = "Other service activities" if industry_en == "grocery"
+replace industry = "Other service activities" if industry_en == "Marketing of baby pads"
+replace industry = "Other service activities" if industry_en == "Baby towel packing"
+replace industry = "Other service activities" if industry_en == "Clean up"
+replace industry = "Other service activities" if industry_en == "Clean Worker"
+replace industry = "Other service activities" if industry_en == "laundry"
+replace industry = "Other service activities" if industry_en == "Bleacher"
+replace industry = "Other service activities" if industry_en == "various works"
+replace industry = "Other service activities" if industry_en == "Home project" 
+replace industry = "Other service activities" if industry_en == "House work" 
+replace industry = "Other service activities" if industry_en == "free businees" & iid == 213006191
+
+replace industry = "Agriculture" if industry_en == "Corn seller"
+replace industry = "Agriculture" if industry_en == "Stall seller"
+replace industry = "Agriculture" if industry_en == "Cultivation tillage"
+replace industry = "Agriculture" if industry_en == "Farmer"
+replace industry = "Agriculture" if industry_en == "Vegetable trade"
+replace industry = "Agriculture" if industry_en == "Food trade"
+replace industry = "Agriculture" if industry_en == "Buying and selling vegetables and fruits"
+replace industry = "Agriculture" if industry_en == "Vegetables"
+replace industry = "Agriculture" if industry_en == "Agriculture worker"
+replace industry = "Agriculture" if industry_en == "Peach trees"
+replace industry = "Agriculture" if industry_en == "Azraq reserve" 
+replace industry = "Agriculture" if industry_en == "Selling vegetables"
+replace industry = "Agriculture" if industry_en == "Selling greenery"
+
+replace industry = "Professional, scientific and technical activities" if industry_en == "engineering"
+replace industry = "Professional, scientific and technical activities" if industry_en == "Engineer"
+replace industry = "Professional, scientific and technical activities" if industry_en == "Accounting"
+replace industry = "Professional, scientific and technical activities" if industry_en == "Station technician worker"
+replace industry = "Professional, scientific and technical activities" if industry_en == "Maintenance technician"
+replace industry = "Professional, scientific and technical activities" if industry_en == "Electrostatic technician"
+replace industry = "Professional, scientific and technical activities" if industry_en == "Dental technician"
+replace industry = "Professional, scientific and technical activities" if industry_en == "Electronics technician"
+replace industry = "Professional, scientific and technical activities" if industry_en == "Welding technician"
+replace industry = "Professional, scientific and technical activities" if industry_en == "Lawyer / law firm"
+replace industry = "Professional, scientific and technical activities" if industry_en == "lawyer"
+replace industry = "Professional, scientific and technical activities" if industry_en == "Biology Labs"
+replace industry = "Professional, scientific and technical activities" if industry_en == "rights"
+replace industry = "Professional, scientific and technical activities" if industry_en == "Shipping services"
+replace industry = "Professional, scientific and technical activities" if industry_en == "A question about his building"
+replace industry = "Professional, scientific and technical activities" if industry_en == "Accountant"
+
+replace industry = "Military" if industry_en == "He works in the army"
+replace industry = "Military" if industry_en == "Paratroopers"
+replace industry = "Military" if industry_en == "Army"
+replace industry = "Military" if industry_en == "army"
+replace industry = "Military" if industry_en == "Civil defense"
+replace industry = "Military" if industry_en == "Armed forces protect"
+replace industry = "Military" if industry_en == "Soldier"
+replace industry = "Military" if industry_en == "Officer" & iid == 221015912
+
+replace industry = "Human health and social work activities" if industry_en == "a nurse"
+replace industry = "Human health and social work activities" if industry_en == "My hospital"
+replace industry = "Human health and social work activities" if industry_en == "Take a nurse"
+replace industry = "Human health and social work activities" if industry_en == "nursing"
+replace industry = "Human health and social work activities" if industry_en == "medical services"
+replace industry = "Human health and social work activities" if industry_en == "Humanitarian work"
+replace industry = "Human health and social work activities" if industry_en == "Non-profit organizations volunteer"
+
+replace industry = "Accommodation and food service activities" if industry_en == "Pastries"
+replace industry = "Accommodation and food service activities" if industry_en == "Wrap sandwich restaurant"
+replace industry = "Accommodation and food service activities" if industry_en == "Falafel restaurant"
+replace industry = "Accommodation and food service activities" if industry_en == "Restaurant serving meals"
+replace industry = "Accommodation and food service activities" if industry_en == "A productive kitchen"
+replace industry = "Accommodation and food service activities" if industry_en == "Restaurants"
+replace industry = "Accommodation and food service activities" if industry_en == "Boucherji"
+replace industry = "Accommodation and food service activities" if industry_en == "Shawarma processing"
+replace industry = "Accommodation and food service activities" if industry_en == "Confectionery processing"
+replace industry = "Accommodation and food service activities" if industry_en == "Food processing for the army"
+replace industry = "Accommodation and food service activities" if industry_en == "Vegetable cleaning"
+replace industry = "Accommodation and food service activities" if industry_en == "Baker equipment baker"
+replace industry = "Accommodation and food service activities" if industry_en == "Confectionery industry"
+replace industry = "Accommodation and food service activities" if industry_en == "Making pastries"
+replace industry = "Accommodation and food service activities" if industry_en == "Cook desserts"
+replace industry = "Accommodation and food service activities" if industry_en == "Worker in a shawarma restaurant"
+replace industry = "Accommodation and food service activities" if industry_en == "A worker in a cake factory"
+replace industry = "Accommodation and food service activities" if industry_en == "Fran bakery"
+replace industry = "Accommodation and food service activities" if industry_en == "Coffee works"
+replace industry = "Accommodation and food service activities" if industry_en == "Cafeteria"
+replace industry = "Accommodation and food service activities" if industry_en == "Bakeries"
+replace industry = "Accommodation and food service activities" if industry_en == "bakery"
+replace industry = "Accommodation and food service activities" if industry_en == "Bread industry"
+replace industry = "Accommodation and food service activities" if industry_en == "Attar"
+replace industry = "Accommodation and food service activities" if industry_en == "Baker"
+replace industry = "Accommodation and food service activities" if industry_en == "As a grinder"
+replace industry = "Accommodation and food service activities" if industry_en == "Candy"
+replace industry = "Accommodation and food service activities" if industry_en == "Coffee worker"
+replace industry = "Accommodation and food service activities" if industry_en == "Restaurant worker"
+replace industry = "Accommodation and food service activities" if industry_en == "Resturant"
+replace industry = "Accommodation and food service activities" if industry_en == "Factor" & iid == 2210294151
+
+replace industry = "Education" if industry_en == "School. Teaching"
+replace industry = "Education" if industry_en == "School"
+replace industry = "Education" if industry_en == "Short teacher"
+replace industry = "Education" if industry_en == "Tile teacher"
+replace industry = "Education" if industry_en == "Computer teacher education sector"
+replace industry = "Education" if industry_en == "Sweets teacher"
+replace industry = "Education" if industry_en == "Shawarma teacher"
+replace industry = "Education" if industry_en == "Coffee teacher"
+replace industry = "Education" if industry_en == "Mentor.Teaching"
+replace industry = "Education" if industry_en == "Attention to educational outcomes"
+replace industry = "Education" if industry_en == "Education and teaching"
+replace industry = "Education" if industry_en == "Teaching in camps"
+replace industry = "Education" if industry_en == "Teaching Teaching"
+replace industry = "Education" if industry_en == "educational"
+replace industry = "Education" if industry_en == "Teacher"
+replace industry = "Education" if industry_en == "Assistant Director / Education Sector"
+replace industry = "Education" if industry_en == "Private tutoring"
+replace industry = "Education" if industry_en == "Public security"
+replace industry = "Education" if industry_en == "education"
+replace industry = "Education" if industry_en == "teaching"
+
+replace industry = "Financial and insurance activities" if industry_en == "Trading"
+replace industry = "Financial and insurance activities" if industry_en == "Financial collection"
+
+replace industry = "Hotels and restaurants" if industry_en == "A hotel worker"
+
+replace industry = "Electricity, gas and water supply" if industry_en == "Homes electrician"
+replace industry = "Electricity, gas and water supply" if industry_en == "Its services"
+replace industry = "Electricity, gas and water supply" if industry_en == "Electrician"
+replace industry = "Electricity, gas and water supply" if industry_en == "electricity company"
+replace industry = "Electricity, gas and water supply" if industry_en == "Factor" & iid == 115012533
+
+replace industry = "Water supply; sewerage, waste management and remediation activities" if industry_en == "Waste recycling"
+replace industry = "Water supply; sewerage, waste management and remediation activities" if industry_en == "Sanitary extensions"
+replace industry = "Water supply; sewerage, waste management and remediation activities" if industry_en == "A strategic plan for Yarmouk water"
+
+replace industry = "Information and communication" if industry_en == "Technology solutions company"
+replace industry = "Information and communication" if industry_en == "Its writer"
+
+sort industry
+list industry
+br industry
+
+tab industry, m
+tab industry qremp, m
+
+codebook qremp
+list qremp industry occupation if mi(qremp)
+list qremp industry occupation if qremp == 3 & !mi(industry)
+
+
+order industry industry_ar industry_en industry_orig, b(QR501)
+
+
 
 desc 
 
@@ -632,19 +970,6 @@ tab QR507, m //Number of hours work during the past month
 ren QR506 rsi_work_hours_7d
 ren QR507 rsi_work_hours_m
 
-**** INDUSTRIES AND OCCUPATION ****
-
-* Industry 
-tab QR501 
-*ren QR501 industry
-encode QR501, gen(industry)
-*Occupation 
-tab QR502
-*ren QR502 occupation
-encode QR502, gen(occupation)
-
-
-
 
 bys refugee : tab rsi_work_permit ros_employed , m
 /*
@@ -713,7 +1038,7 @@ reg rsi_work_hours_m rsi_work_permit, robust
 reg ros_employed rsi_work_permit, robust
 restore
 
-
+preserve
 keep if refugee == 1
 tab rsi_work_permit QR112
 tab rsi_work_permit QR113 
@@ -734,7 +1059,6 @@ corr  QR605S rsi_work_permit
 
 corr rsi_work_permit QR1312
 corr rsi_work_permit QR1313_1 QR1313_2 QR1313_3 QR1313_4 QR1313_5 QR1314 QR1315
-corr rsi_work_permit *
 
 foreach var of varlist * {
     capture assert missing(`var')
@@ -780,3 +1104,15 @@ tab QR117, m
   subtitle(In Percentage) ///
   note("n=677, missing=30" "FAFO, 2020, RSI")
 graph export "$out_LFS/bar_gov_origin.pdf", as(pdf) replace
+
+restore
+
+lab list nationality
+/*
+           1 Jordanian
+           2 Syrian
+           3 Egyptian
+           4 Palestinian
+*/
+tab industry rsi_work_permit  if nationality == 2
+tab industry rsi_work_permit  if nationality == 1
