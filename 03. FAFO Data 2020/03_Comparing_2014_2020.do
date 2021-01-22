@@ -347,6 +347,7 @@ reg rsi_work_hours_7d rsi_work_permit, robust
 reg ros_employed rsi_work_permit, robust
 restore
 
+save "$data_2014_final/Jordan2014_02_Clean.dta", replace
 
 
 
@@ -365,7 +366,6 @@ restore
 
 
 
-tab QR502 if rsi_work_permit == 1
 
 
 
@@ -798,14 +798,16 @@ list headnation if QH207 == .
 codebook QH207
 codebook headnation
 gen refugee = 1 if QH207 == 2
-replace refugee = 2 if QH207 == 1 | QH207 == 3 | QH207 == 10
-lab def refugee 1 "Refugee" 2 "Non refugee", modify
+replace refugee = 2 if QH207 == 1 
+replace refugee = 3 if QH207 == 3 | QH207 == 10
+lab def refugee 1 "Refugee" 2 "Syrian" 3 "Others", modify
 lab val refugee refugee 
 lab var refugee "Refugee is 1 if Syrian is 2 if other (Jordan, Egyptian)"
 tab refugee, m
 
 replace refugee = 1 if mi(refugee) & headnation == 2
-replace refugee = 2 if mi(refugee) & (headnation == 1 | headnation == 3)
+replace refugee = 2 if mi(refugee) & headnation == 1
+replace refugee = 3 if mi(refugee) & headnation == 3
 tab refugee, m
 
 *Refugees are only SYRIANS 
@@ -922,7 +924,8 @@ ren QH502_4 hh_wage_income_l12m_cat
 ren QR608 	rsi_wage_income_lm_cont
 ren QR609 	rsi_wage_income_typ_cont
 
-gen rsi_wage_income_lm_cont_ln = ln(rsi_wage_income_lm_cont)
+gen rsi_wage_income_lm_cont_ln = ln(1+ rsi_wage_income_lm_cont)
+tab rsi_wage_income_lm_cont_ln, m
 
 **** SELF-EMPLOYED INCOME ****
 
@@ -1116,3 +1119,1259 @@ lab list nationality
 */
 tab industry rsi_work_permit  if nationality == 2
 tab industry rsi_work_permit  if nationality == 1
+
+save "$data_2020_final/Jordan2020_02_Clean.dta", replace
+
+*********** INSTRUMENT *************
+
+/*
+Share
+Number of refguees coming from gov X in syra and residing in Jordan
+*/
+use "$data_2020_final/Jordan2020_02_Clean.dta", clear
+tab QR117, m
+
+/*
+*Number of syrians employed in Y industry in Syria pre crisis in each gov
+*/
+import excel "$data_LFS_base/Workers distribution by governorate.xlsx", clear firstrow sheet("Workers by gov, industries, tot")
+
+tab Governorates
+ren Governorates governorate
+gen id_region = 1 if governorate == "AL-Hasakeh"
+replace id_region = 2 if governorate == "Aleppo"
+replace id_region = 3 if governorate == "AL-Rakka"
+replace id_region = 4 if governorate == "AL-Sweida"
+replace id_region = 5 if governorate == "Damascus"
+replace id_region = 6 if governorate == "Dar'a"
+replace id_region = 7 if governorate == "Deir-ez-Zor"
+replace id_region = 8 if governorate == "Hama"
+replace id_region = 9 if governorate == "Homs"
+replace id_region = 10 if governorate == "Idleb"
+replace id_region = 11 if governorate == "Lattakia"
+replace id_region = 12 if governorate == "Quneitra"
+replace id_region = 13 if governorate == "Damascus Rural"
+replace id_region = 14 if governorate == "Tartous"
+
+drop if governorate == "Total"
+
+ren Agricultureandforestry agriculture 
+ren Industry factory 
+ren Buildingandconstruction construction 
+ren Hotelsandrestaurantstrade trade 
+ren Transportationstoragecommun transportation 
+ren Moneyinsuranceandrealestat banking 
+ren Services services 
+
+/*
+Distance between Syrian governoarate (fronteer or centroid or largest city?) AND
+Jordan district of residence
+*/
+
+
+use "$data_2020_final/Jordan2020_02_Clean.dta", clear
+tab ID102, m 
+tab ID102N, m 
+tab ID103N, m
+
+*br ID101 ID101N ID102 ID102N ID103 ID103N ID104 ID104N ID105 ID105N ID106 ID106N ID107 ID107N ID108 ID109
+sort ID101 ID102 ID103 ID104 ID105 ID106 ID107 ID108 ID109
+gen governorate = ID101
+gen governorate_ar = ID101N
+codebook ID101 
+gen governorate_en = ""
+replace governorate_en = "Amman" if governorate == 11
+replace governorate_en = "Zarqa" if governorate == 13
+replace governorate_en = "Irbid" if governorate == 21
+replace governorate_en = "Mafraq" if governorate == 22
+tab governorate_en, m
+
+gen district = ID102
+gen district_ar = ID102N
+gen district_en = ""
+gen district_lat = .
+gen district_long = .
+
+*AMMAN
+preserve
+keep if governorate_en == "Amman"
+list governorate_en district district_ar
+restore
+replace district_en = "Oman Kasbah" if district == 1 & governorate_en == "Amman"
+replace district_lat = 31.974414651075975 if district_en == "Oman Kasbah"
+replace district_long = 35.911453436115245 if district_en == "Oman Kasbah"
+*31.974414651075975, 35.911453436115245
+replace district_en = "Marka" if district == 2 & governorate_en == "Amman"
+replace district_lat = 31.986640871431415 if district_en == "Marka"
+replace district_long = 35.99537170646262 if district_en == "Marka"
+*31.986640871431415, 35.99537170646262
+replace district_en = "Al Quwaysimah" if district == 3 & governorate_en == "Amman"
+replace district_lat = 31.90971482167334 if district_en == "Al Quwaysimah"
+replace district_long = 35.94899163438272 if district_en == "Al Quwaysimah"
+*31.90971482167334, 35.94899163438272
+replace district_en = "Wadi As-Seir" if district == 5 & governorate_en == "Amman"
+replace district_lat = 31.94278232023675 if district_en == "Wadi As-Seir"
+replace district_long = 35.797766588883 if district_en == "Wadi As-Seir"
+*31.94278232023675, 35.797766588883
+
+*ZARQA
+preserve
+keep if governorate_en == "Zarqa"
+list governorate_en district district_ar
+restore
+replace district_en = "Zarqa Qasabah" if district == 1 & governorate_en == "Zarqa"
+replace district_lat = 32.065097117788476 if district_en == "Zarqa Qasabah"
+replace district_long = 36.086981756472305 if district_en == "Zarqa Qasabah"
+*32.065097117788476, 36.086981756472305
+replace district_en = "Russeifa" if district == 2 & governorate_en == "Zarqa"
+replace district_lat = 32.021339014239544 if district_en == "Russeifa"
+replace district_long = 36.02891119926634 if district_en == "Russeifa"
+*32.021339014239544, 36.02891119926634
+
+*IRBID
+preserve
+keep if governorate_en == "Irbid"
+list governorate_en district district_ar
+restore
+replace district_en = "Irbid Qasabah" if district == 1 & governorate_en == "Irbid"
+replace district_lat = 32.55617401628591 if district_en == "Irbid Qasabah"
+replace district_long = 35.84594272084967 if district_en == "Irbid Qasabah"
+*32.55617401628591, 35.84594272084967
+
+*MAFRAQ
+preserve
+keep if governorate_en == "Mafraq"
+list governorate_en district district_ar
+restore
+replace district_en = "Mafraq Qasabah" if district == 1 & governorate_en == "Mafraq"
+replace district_lat = 32.33796238830525 if district_en == "Mafraq Qasabah"
+replace district_long = 36.18950089558544 if district_en == "Mafraq Qasabah"
+*32.33796238830525, 36.18950089558544
+replace district_en = "North West Badiah" if district == 2 & governorate_en == "Mafraq"
+replace district_lat = 32.37274293678503 if district_en == "North West Badiah"
+replace district_long = 36.30590013495499 if district_en == "North West Badiah"
+*32.37274293678503, 36.30590013495499
+replace district_en = "Northern Badia" if district == 3 & governorate_en == "Mafraq"
+replace district_lat = 32.34273721001913 if district_en == "Northern Badia"
+replace district_long = 36.21647768671195 if district_en == "Northern Badia"
+*32.34273721001913, 36.21647768671195
+
+/*
+                   |               governorate_en
+       district_en |     Amman      Irbid     Mafraq      Zarqa |     Total
+-------------------+--------------------------------------------+----------
+     Al Quwaysimah |        21          0          0          0 |        21 
+    Mafraq Qasabah |         0          0        101          0 |       101 
+             Marka |        22          0          0          0 |        22 
+ North West Badiah |         0          0         35          0 |        35 
+    Northern Badia |         0          0        163          0 |       163 
+       Oman Kasbah |       104          0          0          0 |       104 
+          Russeifa |         0          0          0        107 |       107 
+      Wadi As-Seir |       146          0          0          0 |       146 
+     Irbid Qasabah |         0        285          0          0 |       285 
+     Zarqa Qasabah |         0          0          0        258 |       258 
+-------------------+--------------------------------------------+----------
+             Total |       293        285        299        365 |     1,242 
+*/
+
+gen sub_district = ID103
+gen sub_district_ar = ID103N
+gen sub_district_en = ""
+gen sub_district_lat = .
+gen sub_district_long = .
+
+*AMMAN
+preserve
+keep if governorate_en == "Amman"
+list governorate_en district_en sub_district sub_district_ar
+restore
+
+*District: Oman Kasbah
+preserve
+keep if governorate_en == "Amman"
+keep if district_en == "Oman Kasbah"
+list governorate_en district_en sub_district sub_district_ar
+restore
+replace sub_district_en = "Oman Kasbah"  if sub_district == 1 ///
+                                & district_en == "Oman Kasbah" ///
+                                & governorate_en == "Amman"
+replace sub_district_lat = 31.974414651075975    if sub_district_en == "Oman Kasbah"
+replace sub_district_long = 35.911453436115245  if sub_district_en == "Oman Kasbah"
+*31.974414651075975, 35.911453436115245
+*District: Marka
+preserve
+keep if governorate_en == "Amman"
+keep if district_en == "Marka"
+list governorate_en district_en sub_district sub_district_ar
+restore
+replace sub_district_en = "Marka"  if sub_district == 1 ///
+                                & district_en == "Marka" ///
+                                & governorate_en == "Amman"
+replace sub_district_lat = 31.986640871431415   if sub_district_en == "Marka"
+replace sub_district_long =  35.99537170646262 if sub_district_en == "Marka"
+*31.986640871431415, 35.99537170646262
+*District: Al Quwaysimah
+preserve
+keep if governorate_en == "Amman"
+keep if district_en == "Al Quwaysimah"
+list governorate_en district_en sub_district sub_district_ar
+restore
+replace sub_district_en = "Al Quwaysimah"  if sub_district == 1 ///
+                                & district_en == "Al Quwaysimah" ///
+                                & governorate_en == "Amman"
+replace sub_district_lat = 31.90971482167334   if sub_district_en == "Al Quwaysimah"
+replace sub_district_long = 35.94899163438272  if sub_district_en == "Al Quwaysimah"
+*31.90971482167334, 35.94899163438272
+*District: Wadi As-Seir
+preserve
+keep if governorate_en == "Amman"
+keep if district_en == "Wadi As-Seir"
+list governorate_en district_en sub_district sub_district_ar
+restore
+replace sub_district_en = "Wadi As-Seir"  if sub_district == 1 ///
+                                & district_en == "Wadi As-Seir" ///
+                                & governorate_en == "Amman"
+replace sub_district_lat =  31.94278232023675  if sub_district_en == "Wadi As-Seir"
+replace sub_district_long = 35.797766588883  if sub_district_en == "Wadi As-Seir"
+*31.94278232023675, 35.797766588883
+
+*ZARQA
+preserve
+keep if governorate_en == "Zarqa"
+list governorate_en district_en sub_district sub_district_ar
+restore
+
+*District: Zarqa Qasabah
+preserve
+keep if governorate_en == "Zarqa"
+keep if district_en == "Russeifa"
+list governorate_en district_en sub_district sub_district_ar
+restore
+replace sub_district_en = "Russeifa"  if sub_district == 1 ///
+                                & district_en == "Russeifa" ///
+                                & governorate_en == "Zarqa"
+replace sub_district_lat = 32.021339014239544  if sub_district_en == "Russeifa"
+replace sub_district_long = 36.02891119926634  if sub_district_en == "Russeifa"
+*32.021339014239544, 36.02891119926634
+
+*District: Zarqa Qasabah
+preserve
+keep if governorate_en == "Zarqa"
+keep if district_en == "Zarqa Qasabah"
+list governorate_en district_en sub_district sub_district_ar
+restore
+replace sub_district_en = "Zarqa"  if sub_district == 1 ///
+                                & district_en == "Zarqa Qasabah" ///
+                                & governorate_en == "Zarqa"
+replace sub_district_lat =  32.06451522131926  if sub_district_en == "Zarqa"
+replace sub_district_long = 36.09110162965672  if sub_district_en == "Zarqa"
+*32.06451522131926, 36.09110162965672
+replace sub_district_en = "Dhlail"  if sub_district == 3 ///
+                                & district_en == "Zarqa Qasabah" ///
+                                & governorate_en == "Zarqa"
+replace sub_district_lat = 32.11870356364973   if sub_district_en == "Dhlail"
+replace sub_district_long = 36.263809282334016  if sub_district_en == "Dhlail"
+*32.11870356364973, 36.263809282334016
+replace sub_district_en = "Azraq"  if sub_district == 4 ///
+                                & district_en == "Zarqa Qasabah" ///
+                                & governorate_en == "Zarqa"
+replace sub_district_lat =  31.834884097349914  if sub_district_en == "Azraq"
+replace sub_district_long = 36.81421742645394  if sub_district_en == "Azraq"
+*31.834884097349914, 36.81421742645394
+
+*IRBID
+preserve
+keep if governorate_en == "Irbid"
+list governorate_en district_en sub_district sub_district_ar
+restore
+replace sub_district_en = "Irbid Qasabah"  if sub_district == 1 ///
+                                & district_en == "Irbid Qasabah" ///
+                                & governorate_en == "Irbid"
+replace sub_district_lat =  32.55617401628591  if sub_district_en == "Irbid Qasabah"
+replace sub_district_long = 35.84594272084967  if sub_district_en == "Irbid Qasabah"
+*32.55617401628591, 35.84594272084967
+
+*MAFRAQ
+preserve
+keep if governorate_en == "Mafraq"
+list governorate_en district_en sub_district sub_district_ar
+restore
+
+*District: Mafraq Qasabah
+replace sub_district_en = "Al-Mafraq"  if sub_district == 1 ///
+                                & district_en == "Mafraq Qasabah" ///
+                                & governorate_en == "Mafraq"
+replace sub_district_lat = 32.34490724290661   if sub_district_en == "Al-Mafraq"
+replace sub_district_long = 36.22277226912603  if sub_district_en == "Al-Mafraq"
+*32.34490724290661, 36.22277226912603
+replace sub_district_en = "Balama"  if sub_district == 2 ///
+                                & district_en == "Mafraq Qasabah" ///
+                                & governorate_en == "Mafraq"
+replace sub_district_lat =  32.23617954772689  if sub_district_en == "Balama"
+replace sub_district_long =  36.087438858069085 if sub_district_en == "Balama"
+*32.23617954772689, 36.087438858069085
+
+*District: North West Badiah
+replace sub_district_en = "Sabha"  if sub_district == 2 ///
+                                & district_en == "North West Badiah" ///
+                                & governorate_en == "Mafraq"
+replace sub_district_lat = 32.332223817632226   if sub_district_en == "Sabha"
+replace sub_district_long = 36.501713399134026  if sub_district_en == "Sabha"
+*32.332223817632226, 36.501713399134026
+
+*District: Northern Badia
+replace sub_district_en = "Northern Badia Hospital"  if sub_district == 1 ///
+                                & district_en == "Northern Badia" ///
+                                & governorate_en == "Mafraq"
+replace sub_district_lat =  32.26596392290488  if sub_district_en == "Northern Badia Hospital"
+replace sub_district_long = 36.45663725566756  if sub_district_en == "Northern Badia Hospital"
+*32.26596392290488, 36.45663725566756
+replace sub_district_en = "Sama as-Sirhan"  if sub_district == 2 ///
+                                & district_en == "Northern Badia" ///
+                                & governorate_en == "Mafraq"
+replace sub_district_lat =  32.4696026471201  if sub_district_en == "Sama as-Sirhan"
+replace sub_district_long =  36.24237254635352 if sub_district_en == "Sama as-Sirhan"
+*32.4696026471201, 36.24237254635352
+replace sub_district_en = "Hawshah"  if sub_district == 3 ///
+                                & district_en == "Northern Badia" ///
+                                & governorate_en == "Mafraq"
+replace sub_district_lat = 32.45110202348651   if sub_district_en == "Hawshah"
+replace sub_district_long = 36.098860874001765  if sub_district_en == "Hawshah"
+*32.45110202348651, 36.098860874001765
+replace sub_district_en = "Al-Khalidya"  if sub_district == 4 ///
+                                & district_en == "Northern Badia" ///
+                                & governorate_en == "Mafraq"
+replace sub_district_lat =  32.17791959252225  if sub_district_en == "Al-Khalidya"
+replace sub_district_long =  36.30187946372356 if sub_district_en == "Al-Khalidya"
+*32.17791959252225, 36.30187946372356
+
+bys governorate_en district_en: tab sub_district , m
+bys governorate_en district_en: tab sub_district_en , m
+
+tab sub_district_ar , m
+tab sub_district_en, m
+distinct sub_district_ar
+distinct sub_district_en
+
+
+
+
+
+sort governorate district sub_district ID104
+
+gen locality = ID104
+gen locality_ar = ID104N
+gen locality_en = ""
+gen locality_lat = .
+gen locality_long = .
+
+*AMMAN
+preserve
+keep if governorate_en == "Amman"
+list governorate_en district_en sub_district_en locality locality_ar
+restore
+
+*District: Al Quwaysimah
+*Sub-District: Al Quwaysimah
+preserve
+keep if governorate_en == "Amman"
+keep if district_en == "Al Quwaysimah"
+keep if sub_district_en == "Al Quwaysimah"
+list governorate_en district_en sub_district_en locality locality_ar
+restore
+replace locality_en = "Umm Kassir"  if    locality        == 13 ///
+                                        & sub_district_en == "Al Quwaysimah" ///
+                                        & district_en     == "Al Quwaysimah" ///
+                                        & governorate_en  == "Amman"
+replace locality_lat  = 31.89241931317512 if locality_en == "Umm Kassir"
+replace locality_long = 35.91326271522353 if locality_en == "Umm Kassir"
+*31.89241931317512, 35.91326271522353
+
+*District: Marka
+*Sub-District: Marka
+preserve
+keep if governorate_en == "Amman"
+keep if district_en == "Marka"
+keep if sub_district_en == "Marka"
+list governorate_en district_en sub_district_en locality locality_ar
+restore
+replace locality_en = "Marka"  if   locality        ==  111 ///
+                                & sub_district_en == "Marka" ///
+                                & district_en     == "Marka" ///
+                                & governorate_en  == "Amman"
+replace locality_lat  = 31.986640871431415 if locality_en == "Marka"
+replace locality_long = 35.99537170646262 if locality_en == "Marka"
+*31.986640871431415, 35.99537170646262
+
+*District: Oman Kasbah
+*Sub-District: Oman Kasbah
+preserve
+keep if governorate_en == "Amman"
+keep if district_en == "Oman Kasbah"
+keep if sub_district_en == "Oman Kasbah"
+list governorate_en district_en sub_district_en locality locality_ar
+restore
+replace locality_en = "Badr"  if      locality        == 116 ///
+                                & sub_district_en == "Oman Kasbah" ///
+                                & district_en     == "Oman Kasbah" ///
+                                & governorate_en  == "Amman"
+replace locality_lat  = 31.926361240204557 if locality_en == "Badr"
+replace locality_long = 35.90123998988293 if locality_en == "Badr"
+*31.926361240204557, 35.90123998988293
+
+*District: Wadi As-Seir
+*Sub-District: Wadi As-Seir
+preserve
+keep if governorate_en == "Amman"
+keep if district_en == "Wadi As-Seir"
+keep if sub_district_en == "Wadi As-Seir"
+list governorate_en district_en sub_district_en locality locality_ar
+restore
+replace locality_en = "Wadi As-Seir"  if      locality        == 11 ///
+                                & sub_district_en == "Wadi As-Seir" ///
+                                & district_en     == "Wadi As-Seir" ///
+                                & governorate_en  == "Amman"
+replace locality_lat  = 31.94278232023675 if locality_en == "Wadi As-Seir"
+replace locality_long = 35.797766588883  if locality_en == "Wadi As-Seir"
+*31.94278232023675, 35.797766588883
+
+replace locality_en = "Marj Al Hamam"  if      locality        == 13 ///
+                                & sub_district_en == "Wadi As-Seir" ///
+                                & district_en     == "Wadi As-Seir" ///
+                                & governorate_en  == "Amman"
+replace locality_lat  = 31.89721276228926 if locality_en == "Marj Al Hamam"
+replace locality_long = 35.796257729550085 if locality_en == "Marj Al Hamam"
+*31.89721276228926, 35.796257729550085
+
+*ZARQA
+preserve
+keep if governorate_en == "Zarqa"
+list governorate_en district_en sub_district_en locality locality_ar
+restore
+
+*District: Zarqa Qasabah
+*Sub-District: Zarqa
+preserve
+keep if governorate_en == "Zarqa"
+keep if district_en == "Zarqa Qasabah"
+keep if sub_district_en == "Zarqa"
+list governorate_en district_en sub_district_en locality locality_ar
+restore
+replace locality_en = "Zarqa"  if      locality        == 111 ///
+                                & sub_district_en == "Zarqa" ///
+                                & district_en     == "Zarqa Qasabah" ///
+                                & governorate_en  == "Zarqa"
+replace locality_lat  = 32.06451522131926 if locality_en == "Zarqa"
+replace locality_long = 36.09110162965672 if locality_en == "Zarqa"
+*32.06451522131926, 36.09110162965672
+*Sub-District: Dhlail
+preserve
+keep if governorate_en == "Zarqa"
+keep if district_en == "Zarqa Qasabah"
+keep if sub_district_en == "Dhlail"
+list governorate_en district_en sub_district_en locality locality_ar
+restore
+replace locality_en = "Dhlail"  if      locality        ==  11 ///
+                                & sub_district_en == "Dhlail" ///
+                                & district_en     == "Zarqa Qasabah" ///
+                                & governorate_en  == "Zarqa"
+replace locality_lat  = 32.11870356364973 if locality_en == "Dhlail"
+replace locality_long = 36.263809282334016 if locality_en == "Dhlail"
+*32.11870356364973, 36.263809282334016
+*Sub-District: Azraq
+preserve
+keep if governorate_en == "Zarqa"
+keep if district_en == "Zarqa Qasabah"
+keep if sub_district_en == "Azraq"
+list governorate_en district_en sub_district_en locality locality_ar
+restore
+replace locality_en = "Southern Blue"  if      locality        == 12 ///
+                                & sub_district_en == "Azraq" ///
+                                & district_en     == "Zarqa Qasabah" ///
+                                & governorate_en  == "Zarqa"
+replace locality_lat  = 31.834217835939295 if locality_en == "Southern Blue"
+replace locality_long = 36.810942010642805 if locality_en == "Southern Blue"
+*31.834217835939295, 36.810942010642805
+*District: Russeifa
+*Sub-District: Russeifa
+preserve
+keep if governorate_en == "Zarqa"
+keep if district_en == "Russeifa"
+keep if sub_district_en == "Russeifa"
+list governorate_en district_en sub_district_en locality locality_ar
+restore
+replace locality_en = "Russeifa"  if      locality        == 11 ///
+                                & sub_district_en == "Russeifa" ///
+                                & district_en     == "Russeifa" ///
+                                & governorate_en  == "Zarqa"
+replace locality_lat  = 32.021339014239544 if locality_en == "Russeifa"
+replace locality_long = 36.02891119926634 if locality_en == "Russeifa"
+*32.021339014239544, 36.02891119926634
+
+*IRBID
+preserve
+keep if governorate_en == "Irbid"
+list governorate_en district_en sub_district_en locality locality_ar
+restore
+
+*District: Irbid Qasabah
+*Sub-District: Irbid Qasabah
+preserve
+keep if governorate_en == "Irbid"
+keep if district_en == "Irbid Qasabah"
+keep if sub_district_en == "Irbid Qasabah"
+list governorate_en district_en sub_district_en locality locality_ar
+restore
+replace locality_en = "Irbid Qasabah"  if      locality        == 111 ///
+                                & sub_district_en == "Irbid Qasabah" ///
+                                & district_en     == "Irbid Qasabah" ///
+                                & governorate_en  == "Irbid"
+replace locality_lat  = 32.55617401628591 if locality_en == "Irbid Qasabah"
+replace locality_long = 35.84594272084967 if locality_en == "Irbid Qasabah"
+*32.55617401628591, 35.84594272084967
+
+*MAFRAQ
+preserve
+keep if governorate_en == "Mafraq"
+list governorate_en district_en sub_district_en locality locality_ar
+restore
+
+*District: Mafraq Qasabah
+*Sub-District: Al-Mafraq
+preserve
+keep if governorate_en == "Mafraq"
+keep if district_en == "Mafraq Qasabah"
+keep if sub_district_en == "Al-Mafraq"
+list governorate_en district_en sub_district_en locality locality_ar
+restore
+replace locality_en = "Al-Mafraq"  if      locality        == 111 ///
+                                & sub_district_en == "Al-Mafraq" ///
+                                & district_en     == "Mafraq Qasabah" ///
+                                & governorate_en  == "Mafraq"
+replace locality_lat  = 32.34490724290661 if locality_en == "Al-Mafraq"
+replace locality_long = 36.22277226912603 if locality_en == "Al-Mafraq"
+*32.34490724290661, 36.22277226912603
+*District: Mafraq Qasabah
+*Sub-District: Balama
+preserve
+keep if governorate_en == "Mafraq"
+keep if district_en == "Mafraq Qasabah"
+keep if sub_district_en == "Balama"
+list governorate_en district_en sub_district_en locality locality_ar
+restore
+replace locality_en = "Balama"  if      locality        == 11 ///
+                                & sub_district_en == "Balama" ///
+                                & district_en     == "Mafraq Qasabah" ///
+                                & governorate_en  == "Mafraq"
+replace locality_lat  = 32.23617954772689 if locality_en == "Balama"
+replace locality_long = 36.087438858069085 if locality_en == "Balama"
+*32.23617954772689, 36.087438858069085
+
+*District: North West Badiah
+*Sub-District: Sabha
+preserve
+keep if governorate_en == "Mafraq"
+keep if district_en == "North West Badiah"
+keep if sub_district_en == "Sabha"
+list governorate_en district_en sub_district_en locality locality_ar
+restore
+replace locality_en = "Sabha"  if      locality        == 11 ///
+                                & sub_district_en == "Sabha" ///
+                                & district_en     == "North West Badiah" ///
+                                & governorate_en  == "Mafraq"
+replace locality_lat  = 32.332223817632226 if locality_en == "Sabha"
+replace locality_long = 36.501713399134026 if locality_en == "Sabha"
+*32.332223817632226, 36.501713399134026
+
+*District: Northern Badia 
+*Sub-District: Northern Badia Hospital
+preserve
+keep if governorate_en == "Mafraq"
+keep if district_en == "Northern Badia"
+keep if sub_district_en == "Northern Badia Hospital"
+list governorate_en district_en sub_district_en locality locality_ar
+restore
+replace locality_en = "Zaatari Village"  if      locality        == 11 ///
+                                & sub_district_en == "Northern Badia Hospital" ///
+                                & district_en     == "Northern Badia" ///
+                                & governorate_en  == "Mafraq"
+replace locality_lat  = 32.311040581204125 if locality_en == "Zaatari Village"
+replace locality_long = 36.302097600102336 if locality_en == "Zaatari Village"
+*32.311040581204125, 36.302097600102336
+
+*District: Northern Badia 
+*Sub-District: Northern Badia Hospital
+preserve
+keep if governorate_en == "Mafraq"
+keep if district_en == "Northern Badia"
+keep if sub_district_en == "Northern Badia Hospital"
+list governorate_en district_en sub_district_en locality locality_ar
+restore
+replace locality_en = "Mansoura"  if      locality        == 14 ///
+                                & sub_district_en == "Northern Badia Hospital" ///
+                                & district_en     == "Northern Badia" ///
+                                & governorate_en  == "Mafraq"
+replace locality_lat  = 32.414497624348755 if locality_en == "Mansoura"
+replace locality_long = 36.17090089184302 if locality_en == "Mansoura"
+*32.414497624348755, 36.17090089184302
+
+*District: Northern Badia 
+*Sub-District: Sama as-Sirhan
+preserve
+keep if governorate_en == "Mafraq"
+keep if district_en == "Northern Badia"
+keep if sub_district_en == "Sama as-Sirhan"
+list governorate_en district_en sub_district_en locality locality_ar
+restore
+replace locality_en = "Mugayyir as-Sirhan"  if      locality        == 12 ///
+                                & sub_district_en == "Sama as-Sirhan" ///
+                                & district_en     == "Northern Badia" ///
+                                & governorate_en  == "Mafraq"
+replace locality_lat  = 32.46168958388526 if locality_en == "Mugayyir as-Sirhan"
+replace locality_long = 36.19496674381929 if locality_en == "Mugayyir as-Sirhan"
+*32.46168958388526, 36.19496674381929
+
+*District: Northern Badia 
+*Sub-District: Sama as-Sirhan
+preserve
+keep if governorate_en == "Mafraq"
+keep if district_en == "Northern Badia"
+keep if sub_district_en == "Sama as-Sirhan"
+list governorate_en district_en sub_district_en locality locality_ar
+restore
+replace locality_en = "Al-mutila"  if      locality        == 18 ///
+                                & sub_district_en == "Sama as-Sirhan" ///
+                                & district_en     == "Northern Badia" ///
+                                & governorate_en  == "Mafraq"
+replace locality_lat  = 32.4696026471201 if locality_en == "Al-mutila"
+replace locality_long = 36.24237254635352 if locality_en == "Al-mutila"
+*32.4696026471201, 36.24237254635352
+*District: Northern Badia
+*Sub-District: Hawshah
+preserve
+keep if governorate_en == "Mafraq"
+keep if district_en == "Northern Badia"
+keep if sub_district_en == "Hawshah"
+list governorate_en district_en sub_district_en locality locality_ar
+restore
+replace locality_en = "Al-Hamra"  if      locality        == 12 ///
+                                & sub_district_en == "Hawshah" ///
+                                & district_en     == "Northern Badia" ///
+                                & governorate_en  == "Mafraq"
+replace locality_lat  = 32.44249328026196 if locality_en == "Al-Hamra"
+replace locality_long = 36.14888702081348 if locality_en == "Al-Hamra"
+*32.44249328026196, 36.14888702081348
+*District: Northern Badia
+*Sub-District: Al-Khalidya
+preserve
+keep if governorate_en == "Mafraq"
+keep if district_en == "Northern Badia"
+keep if sub_district_en == "Al-Khalidya"
+list governorate_en district_en sub_district_en locality locality_ar
+restore
+replace locality_en = "New Khalidiya"  if      locality        == 11 ///
+                                & sub_district_en == "Al-Khalidya" ///
+                                & district_en     == "Northern Badia" ///
+                                & governorate_en  == "Mafraq"
+replace locality_lat  = 32.150380261153956 if locality_en == "New Khalidiya"
+replace locality_long = 36.28513832703932 if locality_en == "New Khalidiya"
+*32.150380261153956, 36.28513832703932
+
+tab locality_en, m
+tab locality_ar, m
+
+bys governorate_en: tab locality_en, m
+
+
+gen area = ID105
+gen area_ar = ID105N
+gen area_en = ""
+gen area_lat = .
+gen area_long = .
+
+sort governorate district sub_district locality area
+
+list governorate_en district_en sub_district_en locality_en area area_ar if governorate_en == "Amman"
+list governorate_en district_en sub_district_en locality_en area area_ar if governorate_en == "Zarqa"
+list governorate_en district_en sub_district_en locality_en area area_ar if governorate_en == "Irbid"
+list governorate_en district_en sub_district_en locality_en area area_ar if governorate_en == "Mafraq"
+
+
+*AMMAN
+preserve
+keep if governorate_en == "Amman"
+list governorate_en district_en sub_district_en locality_en area area_ar
+restore
+
+*District: 
+*Sub-District: 
+*Locality: 
+preserve
+keep if governorate_en == "Amman"
+keep if district_en == "Oman Kasbah"
+keep if sub_district_en == "Oman Kasbah"
+keep if locality_en == "Badr"
+list governorate_en district_en sub_district_en locality_en area area_ar
+restore
+replace area_en = "Badr"  if            area == 7 ///
+                                        & locality_en == "Badr" /// 
+                                        & sub_district_en == "Oman Kasbah" ///
+                                        & district_en     == "Oman Kasbah" ///
+                                        & governorate_en  == "Amman"
+replace area_lat  = 31.926361240204557 if area_en == "Badr"
+replace area_long = 35.90123998988293 if area_en == "Badr"
+*31.926361240204557, 35.90123998988293
+
+*District: Marka
+*Sub-District: Marka
+*Locality: Marka
+preserve
+keep if governorate_en == "Amman"
+keep if district_en == "Marka"
+keep if sub_district_en == "Marka"
+keep if locality_en == "Marka"
+list governorate_en district_en sub_district_en locality_en area area_ar
+restore
+replace area_en = "Marka"  if            area == 3 ///
+                                        & locality_en == "Marka" /// 
+                                        & sub_district_en == "Marka" ///
+                                        & district_en     == "Marka" ///
+                                        & governorate_en  == "Amman"
+replace area_lat  = 31.986640871431415 if area_en == "Marka"
+replace area_long = 35.99537170646262 if area_en == "Marka"
+*31.986640871431415, 35.99537170646262
+
+*District: Al Quwaysimah 
+*Sub-District: Al Quwaysimah
+*Locality: Umm Kassir
+preserve
+keep if governorate_en == "Amman"
+keep if district_en == "Al Quwaysimah"
+keep if sub_district_en == "Al Quwaysimah"
+keep if locality_en == "Umm Kassir"
+list governorate_en district_en sub_district_en locality_en area area_ar
+restore
+replace area_en = "Al-Muqabalayn"  if            area == 13 ///
+                                        & locality_en == "Umm Kassir" /// 
+                                        & sub_district_en == "Al Quwaysimah" ///
+                                        & district_en     == "Al Quwaysimah" ///
+                                        & governorate_en  == "Amman"
+replace area_lat  = 31.903458101435962 if area_en == "Al-Muqabalayn"
+replace area_long = 35.917039265647816 if area_en == "Al-Muqabalayn"
+*31.903458101435962, 35.917039265647816
+
+*District: Wadi As-Seir
+*Sub-District: Wadi As-Seir
+*Locality: Wadi As-Seir
+preserve
+keep if governorate_en == "Amman"
+keep if district_en == "Wadi As-Seir"
+keep if sub_district_en == "Wadi As-Seir"
+keep if locality_en == "Wadi As-Seir"
+list governorate_en district_en sub_district_en locality_en area area_ar
+restore
+replace area_en = "Wadi As-Seir"  if            area == 14 ///
+                                        & locality_en == "Wadi As-Seir" /// 
+                                        & sub_district_en == "Wadi As-Seir" ///
+                                        & district_en     == "Wadi As-Seir" ///
+                                        & governorate_en  == "Amman"
+replace area_lat  = 31.94278232023675 if area_en == "Wadi As-Seir"
+replace area_long = 35.797766588883 if area_en == "Wadi As-Seir"
+*31.94278232023675, 35.797766588883 
+
+*District: Wadi As-Seir
+*Sub-District: Wadi As-Seir
+*Locality: Marj Al Hamam
+preserve
+keep if governorate_en == "Amman"
+keep if district_en == "Wadi As-Seir"
+keep if sub_district_en == "Wadi As-Seir"
+keep if locality_en == "Marj Al Hamam"
+list governorate_en district_en sub_district_en locality_en area area_ar
+restore
+replace area_en = "Marj Al Hamam"  if            area == 1 ///
+                                        & locality_en == "Marj Al Hamam" /// 
+                                        & sub_district_en == "Wadi As-Seir" ///
+                                        & district_en     == "Wadi As-Seir" ///
+                                        & governorate_en  == "Amman"
+replace area_lat  = 31.89721276228926 if area_en == "Marj Al Hamam"
+replace area_long = 35.796257729550085 if area_en == "Marj Al Hamam"
+*31.89721276228926, 35.796257729550085
+
+
+
+
+*AMMAN
+preserve
+keep if governorate_en == "Zarqa"
+list governorate_en district_en sub_district_en locality_en area area_ar
+restore
+
+*District: Zarqa Qasabah
+*Sub-District: Zarqa
+*Locality: Zarqa
+preserve
+keep if governorate_en == "Zarqa"
+keep if district_en == "Zarqa Qasabah"
+keep if sub_district_en == "Zarqa"
+keep if locality_en == "Zarqa"
+list governorate_en district_en sub_district_en locality_en area area_ar
+restore
+replace area_en = "First Area"  if            area == 1 ///
+                                        & locality_en == "Zarqa" /// 
+                                        & sub_district_en == "Zarqa" ///
+                                        & district_en     == "Zarqa Qasabah" ///
+                                        & governorate_en  == "Zarqa"
+list area_en ID106N if area_en == "First Area"
+replace area_lat  = 32.0691308838672 if area_en == "First Area"
+replace area_long = 36.082654486715775 if area_en == "First Area"
+*32.0691308838672, 36.082654486715775
+
+*District: Zarqa Qasabah
+*Sub-District: Zarqa
+*Locality: Zarqa
+preserve
+keep if governorate_en == "Zarqa"
+keep if district_en == "Zarqa Qasabah"
+keep if sub_district_en == "Zarqa"
+keep if locality_en == "Zarqa"
+list governorate_en district_en sub_district_en locality_en area area_ar
+restore
+replace area_en = "Second Area"  if            area == 2 ///
+                                        & locality_en == "Zarqa" /// 
+                                        & sub_district_en == "Zarqa" ///
+                                        & district_en     == "Zarqa Qasabah" ///
+                                        & governorate_en  == "Zarqa"
+list area_en ID106N if area_en == "Second Area"
+replace area_lat  = 32.03985570620314 if area_en == "Second Area"
+replace area_long = 36.09459668475456 if area_en == "Second Area"
+*32.03985570620314, 36.09459668475456
+
+*District: Zarqa Qasabah
+*Sub-District: Zarqa
+*Locality: Zarqa
+preserve
+keep if governorate_en == "Zarqa"
+keep if district_en == "Zarqa Qasabah"
+keep if sub_district_en == "Zarqa"
+keep if locality_en == "Zarqa"
+list governorate_en district_en sub_district_en locality_en area area_ar
+restore
+replace area_en = "Sixth Area"  if            area == 6 ///
+                                        & locality_en == "Zarqa" /// 
+                                        & sub_district_en == "Zarqa" ///
+                                        & district_en     == "Zarqa Qasabah" ///
+                                        & governorate_en  == "Zarqa"
+list area_en ID106N if area_en == "Sixth Area"
+replace area_lat  = 32.07380581797431 if area_en == "Sixth Area"
+replace area_long = 36.08956394598998 if area_en == "Sixth Area"
+*32.07380581797431, 36.08956394598998
+
+*District: Zarqa Qasabah
+*Sub-District: Dhlail
+*Locality: Dhlail
+preserve
+keep if governorate_en == "Zarqa"
+keep if district_en == "Zarqa Qasabah"
+keep if sub_district_en == "Dhlail"
+keep if locality_en == "Dhlail"
+list governorate_en district_en sub_district_en locality_en area area_ar
+restore
+replace area_en = "Dhlail"  if            area == 1 ///
+                                        & locality_en == "Dhlail" /// 
+                                        & sub_district_en == "Dhlail" ///
+                                        & district_en     == "Zarqa Qasabah" ///
+                                        & governorate_en  == "Zarqa"
+replace area_lat  = 32.11870356364973 if area_en == "Dhlail"
+replace area_long = 36.263809282334016 if area_en == "Dhlail"
+*2.11870356364973, 36.263809282334016
+
+*District: Zarqa Qasabah
+*Sub-District: Azraq
+*Locality: Southern Blue
+preserve
+keep if governorate_en == "Zarqa"
+keep if district_en == "Zarqa Qasabah"
+keep if sub_district_en == "Azraq"
+keep if locality_en == "Southern Blue"
+list governorate_en district_en sub_district_en locality_en area area_ar
+restore
+replace area_en = "Southern Blue"  if            area == 1 ///
+                                        & locality_en == "Southern Blue" /// 
+                                        & sub_district_en == "Azraq" ///
+                                        & district_en     == "Zarqa Qasabah" ///
+                                        & governorate_en  == "Zarqa"
+replace area_lat  = 31.834217835939295 if area_en == "Southern Blue"
+replace area_long = 36.810942010642805 if area_en == "Southern Blue"
+*31.834217835939295, 36.810942010642805
+
+*District: Russeifa
+*Sub-District: Russeifa
+*Locality: Russeifa
+preserve
+keep if governorate_en == "Zarqa"
+keep if district_en == "Russeifa"
+keep if sub_district_en == "Russeifa"
+keep if locality_en == "Russeifa"
+list governorate_en district_en sub_district_en locality_en area area_ar
+restore
+replace area_en = "Al-meriat"  if            area == 1 ///
+                                        & locality_en == "Russeifa" /// 
+                                        & sub_district_en == "Russeifa" ///
+                                        & district_en     == "Russeifa" ///
+                                        & governorate_en  == "Zarqa"
+replace area_lat  = 31.60882713502509 if area_en == "Al-meriat"
+replace area_long = 36.00189692062163 if area_en == "Al-meriat"
+*31.60882713502509, 36.00189692062163
+
+*District: Russeifa
+*Sub-District: Russeifa
+*Locality: Russeifa
+preserve
+keep if governorate_en == "Zarqa"
+keep if district_en == "Russeifa"
+keep if sub_district_en == "Russeifa"
+keep if locality_en == "Russeifa"
+list governorate_en district_en sub_district_en locality_en area area_ar
+restore
+replace area_en = "Al-Qadisiyah"  if            area == 2 ///
+                                        & locality_en == "Russeifa" /// 
+                                        & sub_district_en == "Russeifa" ///
+                                        & district_en     == "Russeifa" ///
+                                        & governorate_en  == "Zarqa"
+replace area_lat  = 32.037955146121476 if area_en == "Al-Qadisiyah"
+replace area_long = 36.03420914994394 if area_en == "Al-Qadisiyah"
+*32.037955146121476, 36.03420914994394
+
+*District: Russeifa
+*Sub-District: Russeifa
+*Locality: Russeifa
+preserve
+keep if governorate_en == "Zarqa"
+keep if district_en == "Russeifa"
+keep if sub_district_en == "Russeifa"
+keep if locality_en == "Russeifa"
+list governorate_en district_en sub_district_en locality_en area area_ar
+restore
+replace area_en = "Al-Rashid"  if         area == 4 ///
+                                        & locality_en == "Russeifa" /// 
+                                        & sub_district_en == "Russeifa" ///
+                                        & district_en     == "Russeifa" ///
+                                        & governorate_en  == "Zarqa"
+list area_en ID106N if area_en == "Al-Rashid"
+replace area_lat  = 32.02839782374531 if area_en == "Al-Rashid"
+replace area_long = 36.02495112130838 if area_en == "Al-Rashid"
+*32.02839782374531, 36.02495112130838
+
+
+*IRBID 
+preserve
+keep if governorate_en == "Irbid"
+list governorate_en district_en sub_district_en locality_en area area_ar
+restore
+
+*District: Irbid Qasabah
+*Sub-District: Irbid Qasabah
+*Locality: Irbid Qasabah
+preserve
+keep if governorate_en == "Irbid"
+keep if district_en == "Irbid Qasabah"
+keep if sub_district_en == "Irbid Qasabah"
+keep if locality_en == "Irbid Qasabah"
+list governorate_en district_en sub_district_en locality_en area area_ar
+restore
+replace area_en = "Al-Nozha"  if            area == 4 ///
+                                        & locality_en == "Irbid Qasabah" /// 
+                                        & sub_district_en == "Irbid Qasabah" ///
+                                        & district_en     == "Irbid Qasabah" ///
+                                        & governorate_en  == "Irbid"
+list area_en ID106N if area_en == "Al-Nozha"
+replace area_lat  = 32.55124499173366 if area_en == "Al-Nozha"
+replace area_long = 35.855454869030616 if area_en == "Al-Nozha"
+*32.55124499173366, 35.855454869030616
+
+*District: Irbid Qasabah
+*Sub-District: Irbid Qasabah
+*Locality: Irbid Qasabah
+preserve
+keep if governorate_en == "Irbid"
+keep if district_en == "Irbid Qasabah"
+keep if sub_district_en == "Irbid Qasabah"
+keep if locality_en == "Irbid Qasabah"
+list governorate_en district_en sub_district_en locality_en area area_ar
+restore
+replace area_en = "Al-Rabiyeh"  if            area == 5 ///
+                                        & locality_en == "Irbid Qasabah" /// 
+                                        & sub_district_en == "Irbid Qasabah" ///
+                                        & district_en     == "Irbid Qasabah" ///
+                                        & governorate_en  == "Irbid"
+list area_en ID106N if area_en == "Al-Rabiyeh"
+replace area_lat  = 32.52607293775749 if area_en == "Al-Rabiyeh"
+replace area_long = 35.84590842717352 if area_en == "Al-Rabiyeh"
+*32.52607293775749, 35.84590842717352
+
+*MAFRAQ
+
+preserve
+keep if governorate_en == "Mafraq"
+list governorate_en district_en sub_district_en locality_en area area_ar
+restore
+
+*District: Mafraq Qasabah
+*Sub-District: Al-Mafraq
+*Locality: Al-Mafraq
+preserve
+keep if governorate_en == "Mafraq"
+keep if district_en == "Mafraq Qasabah"
+keep if sub_district_en == "Al-Mafraq"
+keep if locality_en == "Al-Mafraq"
+list governorate_en district_en sub_district_en locality_en area area_ar
+restore
+replace area_en = "Al-Mafraq"  if            area == 1 ///
+                                        & locality_en == "Al-Mafraq" /// 
+                                        & sub_district_en == "Al-Mafraq" ///
+                                        & district_en     == "Mafraq Qasabah" ///
+                                        & governorate_en  == "Mafraq"
+replace area_lat  = 32.34490724290661 if area_en == "Al-Mafraq"
+replace area_long = 36.22277226912603 if area_en == "Al-Mafraq"
+*32.34490724290661, 36.22277226912603
+
+*District: Mafraq Qasabah
+*Sub-District: Balama
+*Locality: Balama
+preserve
+keep if governorate_en == "Mafraq"
+keep if district_en == "Mafraq Qasabah"
+keep if sub_district_en == "Balama"
+keep if locality_en == "Balama"
+list governorate_en district_en sub_district_en locality_en area area_ar
+restore
+replace area_en = "Balama"  if            area == 1 ///
+                                        & locality_en == "Balama" /// 
+                                        & sub_district_en == "Balama" ///
+                                        & district_en     == "Mafraq Qasabah" ///
+                                        & governorate_en  == "Mafraq"
+replace area_lat  = 32.23617954772689 if area_en == "Al-Mafraq"
+replace area_long = 36.087438858069085 if area_en == "Al-Mafraq"
+*32.23617954772689, 36.087438858069085
+
+
+*District: North West Badiah
+*Sub-District: Sabha
+*Locality: Sabha
+preserve
+keep if governorate_en == "Mafraq"
+keep if district_en == "North West Badiah"
+keep if sub_district_en == "Sabha"
+keep if locality_en == "Sabha"
+list governorate_en district_en sub_district_en locality_en area area_ar
+restore
+replace area_en = "Sabha"  if            area == 1 ///
+                                        & locality_en == "Sabha" /// 
+                                        & sub_district_en == "Sabha" ///
+                                        & district_en     == "North West Badiah" ///
+                                        & governorate_en  == "Mafraq"
+replace area_lat  = 32.332223817632226 if area_en == "Sabha"
+replace area_long = 36.501713399134026 if area_en == "Sabha"
+*32.332223817632226, 36.501713399134026
+
+*District: Northern Badia
+*Sub-District: Northern Badia Hospital
+*Locality: Zaatari Village
+preserve
+keep if governorate_en == "Mafraq"
+keep if district_en == "Northern Badia"
+keep if sub_district_en == "Northern Badia Hospital"
+keep if locality_en == "Zaatari Village"
+list governorate_en district_en sub_district_en locality_en area area_ar
+restore
+replace area_en = "Zaatari Village"  if            area == 1 ///
+                                        & locality_en == "Zaatari Village" /// 
+                                        & sub_district_en == "Northern Badia Hospital" ///
+                                        & district_en     == "Northern Badia" ///
+                                        & governorate_en  == "Mafraq"
+replace area_lat  = 32.311040581204125 if area_en == "Zaatari Village"
+replace area_long = 36.302097600102336 if area_en == "Zaatari Village"
+*32.311040581204125, 36.302097600102336
+
+
+*District: Northern Badia
+*Sub-District: Northern Badia Hospital
+*Locality: Mansoura
+preserve
+keep if governorate_en == "Mafraq"
+keep if district_en == "Northern Badia"
+keep if sub_district_en == "Northern Badia Hospital"
+keep if locality_en == "Mansoura"
+list governorate_en district_en sub_district_en locality_en area area_ar
+restore
+replace area_en = "Mansoura"  if            area == 1 ///
+                                        & locality_en == "Mansoura" /// 
+                                        & sub_district_en == "Northern Badia Hospital" ///
+                                        & district_en     == "Northern Badia" ///
+                                        & governorate_en  == "Mafraq"
+replace area_lat  = 32.414497624348755 if area_en == "Mansoura"
+replace area_long = 36.17090089184302 if area_en == "Mansoura"
+*32.414497624348755, 36.17090089184302
+
+
+
+*District: Northern Badia
+*Sub-District: Sama as-Sirhan
+*Locality: Mugayyir as-Sirhan
+preserve
+keep if governorate_en == "Mafraq"
+keep if district_en == "Northern Badia"
+keep if sub_district_en == "Sama as-Sirhan"
+keep if locality_en == "Mugayyir as-Sirhan"
+list governorate_en district_en sub_district_en locality_en area area_ar
+restore
+replace area_en = "Mugayyir as-Sirhan"  if            area == 1 ///
+                                        & locality_en == "Mugayyir as-Sirhan" /// 
+                                        & sub_district_en == "Sama as-Sirhan" ///
+                                        & district_en     == "Northern Badia" ///
+                                        & governorate_en  == "Mafraq"
+replace area_lat  = 32.46168958388526  if area_en == "Mugayyir as-Sirhan"
+replace area_long = 36.19496674381929  if area_en == "Mugayyir as-Sirhan"
+*32.46168958388526, 36.19496674381929
+
+
+*District: Northern Badia
+*Sub-District: 
+*Locality:Al-mutila
+preserve
+keep if governorate_en == "Mafraq"
+keep if district_en == "Northern Badia"
+keep if sub_district_en == "Sama as-Sirhan"
+keep if locality_en == "Al-mutila"
+list governorate_en district_en sub_district_en locality_en area area_ar
+restore
+replace area_en = "Al-mutila"  if            area == 1 ///
+                                        & locality_en == "Al-mutila" /// 
+                                        & sub_district_en == "Sama as-Sirhan" ///
+                                        & district_en     == "Northern Badia" ///
+                                        & governorate_en  == "Mafraq"
+replace area_lat  = 32.4696026471201 if area_en == "Al-mutila"
+replace area_long = 36.24237254635352 if area_en == "Al-mutila"
+*32.4696026471201, 36.24237254635352
+
+*District: Northern Badia
+*Sub-District: Hawshah
+*Locality: Al-Hamra
+preserve
+keep if governorate_en == "Mafraq"
+keep if district_en == "Northern Badia"
+keep if sub_district_en == "Hawshah"
+keep if locality_en == "Al-Hamra"
+list governorate_en district_en sub_district_en locality_en area area_ar
+restore
+replace area_en = "Al-Hamra"  if            area == 1 ///
+                                        & locality_en == "Al-Hamra" /// 
+                                        & sub_district_en == "Hawshah" ///
+                                        & district_en     == "Northern Badia" ///
+                                        & governorate_en  == "Mafraq"
+replace area_lat  = 32.44249328026196 if area_en == "Al-Hamra"
+replace area_long = 36.14888702081348 if area_en == "Al-Hamra"
+*32.44249328026196, 36.14888702081348
+
+
+
+*District: Northern Badia
+*Sub-District: Al-Khalidya
+*Locality: New Khalidiya
+preserve
+keep if governorate_en == "Mafraq"
+keep if district_en == "Northern Badia"
+keep if sub_district_en == "Al-Khalidya"
+keep if locality_en == "New Khalidiya"
+list governorate_en district_en sub_district_en locality_en area area_ar
+restore
+replace area_en = "New Khalidiya"  if            area == 1 ///
+                                        & locality_en == "New Khalidiya" /// 
+                                        & sub_district_en == "Al-Khalidya" ///
+                                        & district_en     == "Northern Badia" ///
+                                        & governorate_en  == "Mafraq"
+replace area_lat  = 32.150380261153956 if area_en == "New Khalidiya"
+replace area_long = 36.28513832703932 if area_en == "New Khalidiya"
+*32.150380261153956, 36.28513832703932
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+*
+
+gen neighborhood = ID106
+gen neighborhood_ar = ID106N
+*gen neighborhood_en = ""
+
+gen block_nb = ID107
+gen building_nb = ID108 
+gen apt_nb = ID109
+
+
+duplicates tab ID103N, gen(dup)
+egen id_subdis = group(ID103N) 
+bys id_subdis: gen id_subdisdrop = _n
+drop if id_subdisdrop != 1
+list ID103N
+tab ID103, m 
+
+
+gen distric  = ""
+gen dis_long = .
+gen dis_lat  = .
+
+replace distric  = "Irbid Qasabah District" if ID103 == 1 & ID101 == 21 //Irbid
+replace dis_long = 32.55848897774644 if district == "Irbid Qasabah District"
+replace dis_lat  = 35.84628568365481 if district == "Irbid Qasabah District"
+
+replace distric = "Zarqa Qasabah District" if ID103 == 4 & ID101 == 13 //Zarqa
+replace dis_long = 32.06253630201071 if district == "Zarqa Qasabah District" 
+replace dis_lat  = 36.10346730196567 if district == "Zarqa Qasabah District" 
+
+replace distric = "Northern Badia Hospital" if ID103 == 1 & ID101 == 22 //
+replace dis_long =  if district == "" 
+replace dis_lat  =  if district == "" 
+
+replace distric = "" if ID103 == 1 & ID101 ==  //
+replace dis_long =  if district == "" 
+replace dis_lat  =  if district == "" 
+
+replace distric = "" if ID103 == 1 & ID101 ==  //
+replace dis_long =  if district == "" 
+replace dis_lat  =  if district == "" 
+
+replace distric = "" if ID103 == 1 & ID101 ==  //
+replace dis_long =  if district == "" 
+replace dis_lat  =  if district == "" 
+
+replace distric = "" if ID103 == 1 & ID101 ==  //
+replace dis_long =  if district == "" 
+replace dis_lat  =  if district == "" 
+
+replace distric = "" if ID103 == 1 & ID101 ==  //
+replace dis_long =  if district == "" 
+replace dis_lat  =  if district == "" 
+
+/*
+SHIFT 
+*/
+
+*Number of refugee with work permits 
+*In 2020
+use "$data_2020_final/Jordan2020_02_Clean.dta", clear
+tab rsi_work_permit, m
+*In 2014
+use "$data_2014_final/Jordan2014_02_Clean.dta", clear
+tab rsi_work_permit, m
+
