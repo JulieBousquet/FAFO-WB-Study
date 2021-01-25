@@ -427,7 +427,7 @@ bys id: gen idn = _n
 *drop if idn != 1
 *drop if dup > 0
 list industry
-br industry
+*br industry
 *gen id = _n 
 
 tempfile tempfile_indus
@@ -445,7 +445,7 @@ drop _merge dup
 *https://ilostat.ilo.org/resources/concepts-and-definitions/classification-economic-activities/
 
 ren industry industry_orig
-br industry_orig industry_ar
+*br industry_orig industry_ar
 
 gen industry = industry_en
 replace industry = "Manufacturing" if industry_en == "Wood Carving"
@@ -714,7 +714,7 @@ replace industry = "Information and communication" if industry_en == "Its writer
 
 sort industry
 list industry
-br industry
+*br industry
 
 tab industry, m
 tab industry qremp, m
@@ -800,9 +800,9 @@ codebook headnation
 gen refugee = 1 if QH207 == 2
 replace refugee = 2 if QH207 == 1 
 replace refugee = 3 if QH207 == 3 | QH207 == 10
-lab def refugee 1 "Refugee" 2 "Syrian" 3 "Others", modify
+lab def refugee 1 "Refugee" 2 "Native" 3 "Others", modify
 lab val refugee refugee 
-lab var refugee "Refugee is 1 if Syrian is 2 if other (Jordan, Egyptian)"
+lab var refugee "Refugee is 1 if Syrian, is 2 if Native, is 3 if others (Palestinian, Egyptian)"
 tab refugee, m
 
 replace refugee = 1 if mi(refugee) & headnation == 2
@@ -1120,56 +1120,14 @@ lab list nationality
 tab industry rsi_work_permit  if nationality == 2
 tab industry rsi_work_permit  if nationality == 1
 
-save "$data_2020_final/Jordan2020_02_Clean.dta", replace
+*save "$data_2020_final/Jordan2020_02_Clean.dta", replace
 
 *********** INSTRUMENT *************
 
-/*
-Share
-Number of refguees coming from gov X in syra and residing in Jordan
-*/
-use "$data_2020_final/Jordan2020_02_Clean.dta", clear
-tab QR117, m
-
-/*
-*Number of syrians employed in Y industry in Syria pre crisis in each gov
-*/
-import excel "$data_LFS_base/Workers distribution by governorate.xlsx", clear firstrow sheet("Workers by gov, industries, tot")
-
-tab Governorates
-ren Governorates governorate
-gen id_region = 1 if governorate == "AL-Hasakeh"
-replace id_region = 2 if governorate == "Aleppo"
-replace id_region = 3 if governorate == "AL-Rakka"
-replace id_region = 4 if governorate == "AL-Sweida"
-replace id_region = 5 if governorate == "Damascus"
-replace id_region = 6 if governorate == "Dar'a"
-replace id_region = 7 if governorate == "Deir-ez-Zor"
-replace id_region = 8 if governorate == "Hama"
-replace id_region = 9 if governorate == "Homs"
-replace id_region = 10 if governorate == "Idleb"
-replace id_region = 11 if governorate == "Lattakia"
-replace id_region = 12 if governorate == "Quneitra"
-replace id_region = 13 if governorate == "Damascus Rural"
-replace id_region = 14 if governorate == "Tartous"
-
-drop if governorate == "Total"
-
-ren Agricultureandforestry agriculture 
-ren Industry factory 
-ren Buildingandconstruction construction 
-ren Hotelsandrestaurantstrade trade 
-ren Transportationstoragecommun transportation 
-ren Moneyinsuranceandrealestat banking 
-ren Services services 
-
-/*
-Distance between Syrian governoarate (fronteer or centroid or largest city?) AND
-Jordan district of residence
-*/
 
 
-use "$data_2020_final/Jordan2020_02_Clean.dta", clear
+*use "$data_2020_final/Jordan2020_02_Clean.dta", clear
+
 tab ID102, m 
 tab ID102N, m 
 tab ID103N, m
@@ -2295,21 +2253,6 @@ replace area_lat  = 32.150380261153956 if area_en == "New Khalidiya"
 replace area_long = 36.28513832703932 if area_en == "New Khalidiya"
 *32.150380261153956, 36.28513832703932
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-*
-
 gen neighborhood = ID106
 gen neighborhood_ar = ID106N
 *gen neighborhood_en = ""
@@ -2317,6 +2260,9 @@ gen neighborhood_ar = ID106N
 gen block_nb = ID107
 gen building_nb = ID108 
 gen apt_nb = ID109
+
+
+save "$data_2020_final/Jordan2020_02_Clean.dta", replace
 
 
 duplicates tab ID103N, gen(dup)
@@ -2327,41 +2273,260 @@ list ID103N
 tab ID103, m 
 
 
-gen distric  = ""
-gen dis_long = .
-gen dis_lat  = .
+/*
+Share
+Number of refguees coming from gov X in syra and residing in Jordan
+*/
+use "$data_2020_final/Jordan2020_02_Clean.dta", clear
+tab QR117, m
+bys refugee: tab QR117, m
 
-replace distric  = "Irbid Qasabah District" if ID103 == 1 & ID101 == 21 //Irbid
-replace dis_long = 32.55848897774644 if district == "Irbid Qasabah District"
-replace dis_lat  = 35.84628568365481 if district == "Irbid Qasabah District"
+/*
+  Syrian governorate live before |      Freq.     Percent        Cum.
+---------------------------------+-----------------------------------
+                      Al Hasakah |          5        0.74        0.74
+                          Aleppo |         74       10.93       11.67
+                       Al Raqqah |          6        0.89       12.56
+                      Al Suwayda |          1        0.15       12.70
+                           Daraa |        224       33.09       45.79
+                    Deir El Zour |          2        0.30       46.09
+                            Hama |         27        3.99       50.07
+                            Homs |        197       29.10       79.17
+                           Idlib |          6        0.89       80.06
+                        Quneitra |          3        0.44       80.50
+                  Rural Damascus |         37        5.47       85.97
+                        Damascus |         65        9.60       95.57
+                               . |         30        4.43      100.00
+---------------------------------+-----------------------------------
+                           Total |        677      100.00
+*/
 
-replace distric = "Zarqa Qasabah District" if ID103 == 4 & ID101 == 13 //Zarqa
-replace dis_long = 32.06253630201071 if district == "Zarqa Qasabah District" 
-replace dis_lat  = 36.10346730196567 if district == "Zarqa Qasabah District" 
+/*
+*Number of syrians employed in Y industry in Syria pre crisis in each gov
+*/
+import excel "$data_LFS_base/Workers distribution by governorate.xlsx", clear firstrow sheet("Workers by gov, industries, tot")
 
-replace distric = "Northern Badia Hospital" if ID103 == 1 & ID101 == 22 //
-replace dis_long =  if district == "" 
-replace dis_lat  =  if district == "" 
+tab Governorates
+ren Governorates governorate
+gen id_region = 1 if governorate == "AL-Hasakeh"
+replace id_region = 2 if governorate == "Aleppo"
+replace id_region = 3 if governorate == "AL-Rakka"
+replace id_region = 4 if governorate == "AL-Sweida"
+replace id_region = 5 if governorate == "Damascus"
+replace id_region = 6 if governorate == "Dar'a"
+replace id_region = 7 if governorate == "Deir-ez-Zor"
+replace id_region = 8 if governorate == "Hama"
+replace id_region = 9 if governorate == "Homs"
+replace id_region = 10 if governorate == "Idleb"
+replace id_region = 11 if governorate == "Lattakia"
+replace id_region = 12 if governorate == "Quneitra"
+replace id_region = 13 if governorate == "Damascus Rural"
+replace id_region = 14 if governorate == "Tartous"
 
-replace distric = "" if ID103 == 1 & ID101 ==  //
-replace dis_long =  if district == "" 
-replace dis_lat  =  if district == "" 
+drop if governorate == "Total"
 
-replace distric = "" if ID103 == 1 & ID101 ==  //
-replace dis_long =  if district == "" 
-replace dis_lat  =  if district == "" 
+ren Agricultureandforestry agriculture 
+ren Industry factory 
+ren Buildingandconstruction construction 
+ren Hotelsandrestaurantstrade trade 
+ren Transportationstoragecommun transportation 
+ren Moneyinsuranceandrealestat banking 
+ren Services services 
 
-replace distric = "" if ID103 == 1 & ID101 ==  //
-replace dis_long =  if district == "" 
-replace dis_lat  =  if district == "" 
+/*
+Distance between Syrian governoarate (fronteer or centroid or largest city?) AND
+Jordan district of residence
+*/
 
-replace distric = "" if ID103 == 1 & ID101 ==  //
-replace dis_long =  if district == "" 
-replace dis_lat  =  if district == "" 
+/*
+shp2dta using "$data_LFS_shp/gadm36_SYR_1.shp", ///
+  database("$data_LFS_temp/syr_adm1") ///
+  coordinates("$data_LFS_temp/syr_coord1") ///
+  genid(id_region) replace
+*/
 
-replace distric = "" if ID103 == 1 & ID101 ==  //
-replace dis_long =  if district == "" 
-replace dis_lat  =  if district == "" 
+use "$data_LFS_temp/syr_adm1.dta", clear
+  rename id_region _ID 
+  merge 1:m _ID using "$data_LFS_temp/syr_coord1.dta"
+  egen gov_syria_long = mean(_X), by(_ID)
+  egen gov_syria_lat = mean(_Y), by(_ID)
+  duplicates drop _ID, force
+  ren NAME_1 governorate_syria
+  keep gov_syria_long gov_syria_lat governorate
+
+tab governorate_syria
+replace governorate_syria = "Al Raqqah" if governorate_syria == "Ar Raqqah"
+replace governorate_syria = "Al Suwayda" if governorate_syria == "As Suwayda'"
+replace governorate_syria = "Daraa" if governorate_syria == "Dar`a"
+replace governorate_syria = "Deir El Zour" if governorate_syria == "Dayr Az Zawr"
+replace governorate_syria = "Hama" if governorate_syria == "Hamah"
+replace governorate_syria = "Homs" if governorate_syria == "Hims"
+replace governorate_syria = "Rural Damascus" if governorate_syria == "Rif Dimashq"
+replace governorate_syria = "Al Hasakah" if governorate_syria == "Al Ḥasakah"
+
+list governorate_syria 
+
+keep if governorate_syria ==  "Al Hasakah" | ///
+        governorate_syria ==  "Aleppo" | ///
+        governorate_syria ==  "Al Raqqah" | ///
+        governorate_syria ==  "Al Suwayda" | ///
+        governorate_syria ==  "Daraa" | ///
+        governorate_syria ==  "Deir El Zour" | ///
+        governorate_syria ==  "Hama" | ///
+        governorate_syria ==  "Homs" | ///
+        governorate_syria ==  "Idlib" | ///
+        governorate_syria ==  "Quneitra" | ///
+        governorate_syria ==  "Damascus" | ///
+        governorate_syria ==  "Rural Damascus" 
+sort governorate_syria 
+gen id_gov_syria = _n
+list id_gov_syria governorate_syria
+
+save "$data_2020_final/governorate_loc_syr.dta", replace
+
+
+use "$data_2020_final/Jordan2020_02_Clean.dta", clear
+
+tab district_en, m 
+tab district_lat, m
+tab district_long, m
+tab sub_district_en, m  
+tab locality_en, m 
+tab area_en, m 
+
+bys refugee: tab QR117, m
+decode QR117, gen(governorate_syria)
+tab governorate_syria, m 
+
+sort governorate_syria
+egen id_gov_syria = group(governorate_syria)
+tab id_gov_syria 
+list id_gov_syria governorate_syria
+
+replace governorate_syria = "-99 Missing" if mi(governorate_syria) & refugee == 1
+replace governorate_syria = "-98 Non Applicable" if mi(governorate_syria) & (refugee == 2 | refugee == 3)
+
+merge m:1 id_gov_syria using "$data_2020_final/governorate_loc_syr.dta"
+drop _merge
+
+tab governorate_syria, m
+tab gov_syria_long, m
+tab gov_syria_lat, m
+
+save "$data_2020_final/Jordan2020_geo_Syria.dta", replace 
+
+
+keep  gov_syria_lat gov_syria_long district_lat district_long sub_district_long ///
+      sub_district_lat area_long area_lat governorate_en locality_long locality_lat ///
+      locality_en district_en sub_district_en governorate_syria
+
+preserve
+keep district_en district_lat district_long
+duplicates drop district_en, force 
+ren district_en geo_unit 
+ren district_long geo_long 
+ren district_lat geo_lat
+tempfile district_geo 
+save `district_geo'
+restore 
+preserve 
+keep governorate_syria gov_syria_long gov_syria_lat
+duplicates drop governorate_syria, force 
+ren governorate_syria geo_unit 
+ren gov_syria_long geo_long 
+ren gov_syria_lat geo_lat
+tempfile gov_syria_geo
+save `gov_syria_geo'
+restore 
+
+use  `district_geo', clear 
+gen gunit = "Districts"
+append using `gov_syria_geo'
+replace gunit = "Governorates" if mi(gunit) & (geo_unit != "-99 Missing" & ///
+                                             geo_unit != "-98 Non Applicable")
+drop if geo_unit == "-99 Missing" 
+drop if geo_unit == "-98 Non Applicable" 
+
+encode gunit, gen(unit)
+
+save "$data_2020_temp/Jordan2020_geo.dta", replace 
+
+
+
+*ssc install geodist
+h geodist
+
+**** MAP OF JORDAN + POINT DISTRICT
+use "$data_LFS_temp/governorate_names.dta", clear
+spmap using "$data_LFS_temp/coord1.dta",    ///
+  id(_ID) fcolor(eggshell) ocolor(sienna) osize( vthin)   ///
+  label(data("$data_LFS_temp/governorate_names.dta") xcoord(mlong_x)      ///
+        ycoord(mlat_y) label(governorate) color(black) size(*0.7) position(0 6)) ///  
+  legend(title("Number of project", size(*0.5)                      ///
+        justification(left)) region(lcolor(white) fcolor(white))        ///
+        position(4))                          ///
+   plotregion(margin(small) icolor(white) color(white))         ///
+   graphregion(icolor(white) color(white))    ///
+   point(data("$data_2020_final/Jordan2020_02_Clean.dta") xcoord(district_long)      ///
+        ycoord(district_lat) size(*0.7) fcolor(blue)) 
+
+*MAP OF SYRIA + POINT GOVERNROATE
+use "$data_LFS_temp/governorate_names.dta", clear
+spmap using "$data_LFS_temp/coord1.dta",    ///
+  id(_ID) fcolor(eggshell) ocolor(sienna) osize( vthin)   ///
+  label(data("$data_LFS_temp/governorate_names.dta") xcoord(mlong_x)      ///
+        ycoord(mlat_y) label(governorate) color(black) size(*0.7) position(0 6)) ///  
+  legend(title("Number of project", size(*0.5)                      ///
+        justification(left)) region(lcolor(white) fcolor(white))        ///
+        position(4))                          ///
+   plotregion(margin(small) icolor(white) color(white))         ///
+   graphregion(icolor(white) color(white))    ///
+   point(data("$data_2020_final/governorate_loc_syr.dta") xcoord(gov_syria_long)      ///
+        ycoord(gov_syria_lat) size(*0.7) fcolor(blue)) 
+
+use "$data_2020_final/Jordan2020_02_Clean.dta", clear
+
+
+**** MAP OF JORDAN AND SYRIA (VIZUALIZING DISTANCE)
+use "$data_LFS_temp/governorate_names.dta", clear
+spmap using "$data_LFS_temp/coord1.dta",    ///
+  id(_ID) fcolor(eggshell) ocolor(sienna) osize( vthin)   ///
+  label(data("$data_LFS_temp/governorate_names.dta") xcoord(mlong_x)      ///
+        ycoord(mlat_y) label(governorate) color(black) size(*0.7) position(0 6)) ///  
+  legend(title("Number of project", size(*0.5)                      ///
+        justification(left)) region(lcolor(white) fcolor(white))        ///
+        position(4))                          ///
+   plotregion(margin(small) icolor(white) color(white))         ///
+   graphregion(icolor(white) color(white))    ///
+   point(data("$data_2020_temp/Jordan2020_geo.dta") xcoord(geo_long)      ///
+        ycoord(geo_lat) by(unit) size(*0.7) fcolor(red blue))
+
+graph export "$out_2020/map_districtJOR_govSYR.pdf", as(pdf) replace
+
+use "$data_2020_final/Jordan2020_geo_Syria.dta", clear 
+
+h geodist
+
+geodist district_lat district_long gov_syria_lat gov_syria_long, gen(distance_dis_gov)
+tab distance_dis_gov, m
+lab var distance_dis_gov "Distance (km) between JORD districts and SYR centroid governorates"
+
+geodist sub_district_lat sub_district_long gov_syria_lat gov_syria_long, gen(distance_subdis_gov)
+tab distance_subdis_gov, m
+lab var distance_subdis_gov "Distance (km) between JORD sub-districts and SYR centroid governorates"
+
+geodist locality_lat locality_long gov_syria_lat gov_syria_long, gen(distance_loc_gov)
+tab distance_loc_gov, m 
+lab var distance_loc_gov "Distance (km) between JORD localities and SYR centroid governorates"
+
+geodist area_lat area_long gov_syria_lat gov_syria_long, gen(distance_area_gov)
+tab distance_area_gov, m
+lab var distance_area_gov "Distance (km) between JORD areas and SYR centroid governorates"
+
+unique distance_dis_gov //53
+unique distance_subdis_gov //63
+unique distance_loc_gov //69
+unique distance_area_gov //82
 
 /*
 SHIFT 
