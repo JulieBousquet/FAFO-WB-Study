@@ -391,283 +391,320 @@ save "$data_2014_final/Jordan2014_02_Clean.dta", replace
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-/*
-Share
-Number of refguees coming from gov X in syra and residing in Jordan
-*/
-use "$data_2020_final/Jordan2020_02_Clean.dta", clear
-tab QR117, m
-bys refugee: tab QR117, m
-
-/*
-  Syrian governorate live before |      Freq.     Percent        Cum.
----------------------------------+-----------------------------------
-                      Al Hasakah |          5        0.74        0.74
-                          Aleppo |         74       10.93       11.67
-                       Al Raqqah |          6        0.89       12.56
-                      Al Suwayda |          1        0.15       12.70
-                           Daraa |        224       33.09       45.79
-                    Deir El Zour |          2        0.30       46.09
-                            Hama |         27        3.99       50.07
-                            Homs |        197       29.10       79.17
-                           Idlib |          6        0.89       80.06
-                        Quneitra |          3        0.44       80.50
-                  Rural Damascus |         37        5.47       85.97
-                        Damascus |         65        9.60       95.57
-                               . |         30        4.43      100.00
----------------------------------+-----------------------------------
-                           Total |        677      100.00
-*/
-
-
-/*
-*Number of syrians employed in Y industry in Syria pre crisis in each gov
-*/
-import excel "$data_LFS_base/Workers distribution by governorate.xlsx", clear firstrow sheet("Workers by gov, industries, tot")
-
-tab Governorates
-ren Governorates governorate
-gen id_region = 1 if governorate == "AL-Hasakeh"
-replace id_region = 2 if governorate == "Aleppo"
-replace id_region = 3 if governorate == "AL-Rakka"
-replace id_region = 4 if governorate == "AL-Sweida"
-replace id_region = 5 if governorate == "Damascus"
-replace id_region = 6 if governorate == "Dar'a"
-replace id_region = 7 if governorate == "Deir-ez-Zor"
-replace id_region = 8 if governorate == "Hama"
-replace id_region = 9 if governorate == "Homs"
-replace id_region = 10 if governorate == "Idleb"
-replace id_region = 11 if governorate == "Lattakia"
-replace id_region = 12 if governorate == "Quneitra"
-replace id_region = 13 if governorate == "Damascus Rural"
-replace id_region = 14 if governorate == "Tartous"
-
-drop if governorate == "Total"
-
-ren Agricultureandforestry agriculture 
-ren Industry factory 
-ren Buildingandconstruction construction 
-ren Hotelsandrestaurantstrade trade 
-ren Transportationstoragecommun transportation 
-ren Moneyinsuranceandrealestat banking 
-ren Services services 
-
-/*
-Distance between Syrian governoarate (fronteer or centroid or largest city?) AND
-Jordan district of residence
-*/
-
-/*
-shp2dta using "$data_LFS_shp/gadm36_SYR_1.shp", ///
-  database("$data_LFS_temp/syr_adm1") ///
-  coordinates("$data_LFS_temp/syr_coord1") ///
-  genid(id_region) replace
-*/
-
-use "$data_LFS_temp/syr_adm1.dta", clear
-  rename id_region _ID 
-  merge 1:m _ID using "$data_LFS_temp/syr_coord1.dta"
-  egen gov_syria_long = mean(_X), by(_ID)
-  egen gov_syria_lat = mean(_Y), by(_ID)
-  duplicates drop _ID, force
-  ren NAME_1 governorate_syria
-  keep gov_syria_long gov_syria_lat governorate
-
-tab governorate_syria
-replace governorate_syria = "Al Raqqah" if governorate_syria == "Ar Raqqah"
-replace governorate_syria = "Al Suwayda" if governorate_syria == "As Suwayda'"
-replace governorate_syria = "Daraa" if governorate_syria == "Dar`a"
-replace governorate_syria = "Deir El Zour" if governorate_syria == "Dayr Az Zawr"
-replace governorate_syria = "Hama" if governorate_syria == "Hamah"
-replace governorate_syria = "Homs" if governorate_syria == "Hims"
-replace governorate_syria = "Rural Damascus" if governorate_syria == "Rif Dimashq"
-replace governorate_syria = "Al Hasakah" if governorate_syria == "Al Ḥasakah"
-
-list governorate_syria 
-
-keep if governorate_syria ==  "Al Hasakah" | ///
-        governorate_syria ==  "Aleppo" | ///
-        governorate_syria ==  "Al Raqqah" | ///
-        governorate_syria ==  "Al Suwayda" | ///
-        governorate_syria ==  "Daraa" | ///
-        governorate_syria ==  "Deir El Zour" | ///
-        governorate_syria ==  "Hama" | ///
-        governorate_syria ==  "Homs" | ///
-        governorate_syria ==  "Idlib" | ///
-        governorate_syria ==  "Quneitra" | ///
-        governorate_syria ==  "Damascus" | ///
-        governorate_syria ==  "Rural Damascus" 
-sort governorate_syria 
-gen id_gov_syria = _n
-list id_gov_syria governorate_syria
-
-save "$data_2020_final/governorate_loc_syr.dta", replace
-
-
 use "$data_2020_final/Jordan2020_02_Clean.dta", clear
 
-tab district_en, m 
-tab district_lat, m
-tab district_long, m
-tab sub_district_en, m  
-tab locality_en, m 
-tab area_en, m 
-
-bys refugee: tab QR117, m
-decode QR117, gen(governorate_syria)
-tab governorate_syria, m 
-
-sort governorate_syria
-egen id_gov_syria = group(governorate_syria)
-tab id_gov_syria 
-list id_gov_syria governorate_syria
-
-replace governorate_syria = "-99 Missing" if mi(governorate_syria) & refugee == 1
-replace governorate_syria = "-98 Non Applicable" if mi(governorate_syria) & (refugee == 2 | refugee == 3)
-
-merge m:1 id_gov_syria using "$data_2020_final/governorate_loc_syr.dta"
-drop _merge
-
-tab governorate_syria, m
-tab gov_syria_long, m
-tab gov_syria_lat, m
-
-save "$data_2020_final/Jordan2020_geo_Syria.dta", replace 
 
 
-keep  gov_syria_lat gov_syria_long district_lat district_long sub_district_long ///
-      sub_district_lat area_long area_lat governorate_en locality_long locality_lat ///
-      locality_en district_en sub_district_en governorate_syria
+desc 
+
+/*
+ obs:         1,243                          
+ vars:        572                         
+*/
+
+distinct hhid 
+* 622 
+
+distinct iid 
+* 1242
+
+************ DEMOGRAPHICS ************
+
+*Governorate
+tab ID101, m 
+/*
+Governorate |      Freq.     Percent        Cum.
+------------+-----------------------------------
+      Amman |        293       23.59       23.59
+      Zarqa |        365       29.39       52.98
+      Irbid |        285       22.95       75.93
+     Mafraq |        299       24.07      100.00
+------------+-----------------------------------
+      Total |      1,242      100.00
+*/
+
+*District
+bys ID101: tab ID102, m 
+bys ID101: distinct ID102
+/*
+Amman: 4
+Zarqa: 2
+Irbid: 1
+Mafraq: 3
+*/
+
+*Sub-District
+bys ID101: distinct ID103
+desc ID103 
+
+*Locality
+desc ID104
+bys ID101: distinct ID104
+/*
+Amman: 4
+Zarqa: 3
+Irbid: 1
+Mafraq: 5
+*/
+*Area
+desc ID105 
+*Neighborhood
+desc ID106
+*Block Number
+desc ID107
+*Building Number
+desc ID108
+
+
+
+******************
+**** OUTCOMES ****
+******************
+
+**** EMPLOYEMENT ****
+
+*If yes to 1, 2, 3, 4: Employed 
+tab QH301, m 
+tab QH302, m
+tab QH303, m 
+tab QH304, m 
+*If yes to 5, 6, 7: Unemployed 
+tab QH305, m 
+tab QH306, m 
+tab QH307, m
+*Otherwise, out of the labor force
+
+*Variable created by FAFO 
+tab qhemp, m 
+codebook qhemp
+gen ros_employed = 0
+replace ros_employed = 1 if QH301 == 1 | QH302 == 1 | QH303== 1 | QH304 == 1
+tab ros_employed, m
+lab val ros_employed yesno
+
+tab QH205, m //only have 16yo or more
+tab ros_employed 
+
+bys qhemp: tab QH203  if survey_rsi == 1
+
+
+**** WAGE INCOME ****
+
+*HH survey
+tab QH502_2, m //Wage income last month (cat)
+tab QH502_4, m //Wage income last 12 months (cat)
+
+*RSI survey
+tab QR608, m //wage income last month (cont)
+tab QR609, m //wage income typical (cont)
+
+mdesc QH502_2 QH502_4 QR608 QR609
+
+
+ren QH502_2 hh_wage_income_lm_cat
+ren QH502_4 hh_wage_income_l12m_cat
+ren QR608   rsi_wage_income_lm_cont
+ren QR609   rsi_wage_income_typ_cont
+
+gen rsi_wage_income_lm_cont_ln = ln(1+ rsi_wage_income_lm_cont)
+tab rsi_wage_income_lm_cont_ln, m
+
+**** SELF-EMPLOYED INCOME ****
+
+*HH survey
+tab QH503_2, m //se income last month (cat)
+tab QH503_4, m //se income last 12 months (cat)
+
+*Section 5.1: INCOME
+tab QH504_A // Income private transfer = 1
+tab QH504_B // Income private transfer last 12 months (cat)
+
+tab QH505_A // Income institutional transfer = 1
+tab QH505_B // Income institutional transfer last 12 months (cat)
+
+tab QH506_A // Income properties = 1
+tab QH506_B // Income proeperties last 12 monhts (cat)
+
+tab QH507_A // Other income = 1
+tab QH507_B // Other income last 12 monhts (Cat)
+
+tab QH507O
+
+*RSI survey
+tab QR705, m //se income last month (cont)
+tab QR706, m //se income last 12 months (cont)
+
+mdesc QH503_2 QH503_4 QR705 QR706
+
+ren QH503_2 hh_se_income_lm_cat
+ren QH503_4 hh_se_income_l12m_cat
+ren QR705   rsi_se_income_lm_cont
+ren QR706   rsi_se_income_typ_cont
+
+**** ADDITIONAL INCOME ****
+
+*RSI : Additional Income 
+
+tab QR805, m
+tab QR806, m
+
+**** WORKING HOURS  ****
+
+tab QR506, m //Number of hours work during the past 7 das
+tab QR507, m //Number of hours work during the past month
+ren QR506 rsi_work_hours_7d
+ren QR507 rsi_work_hours_m
+
+
+bys refugee : tab rsi_work_permit ros_employed , m
+/*
+-> refugee = Refugee
+
+    Have a |
+valid work |     ros_employed
+    permit |        No        Yes |     Total
+-----------+----------------------+----------
+        No |       434        112 |       546 
+       Yes |        23         78 |       101 
+-----------+----------------------+----------
+     Total |       457        190 |       647 
+*/
+
+****** DEMOGRAPHICS ******
+
+tab qrgender, m
+tab headgender, m
+ren qrgender ros_gender
+ren headgender hh_gender 
+
+tab hhsize, m 
+ren hhsize hh_hhsize
+
+tab qrage, m
+ren qrage ros_age
+
+tab economy, m 
+ren economy hh_poor
+
+
+***** DETERMINANT OF GETTING A WORK PERMIT 
+preserve
+
+keep if refugee == 1
+logit rsi_work_permit ///
+        ros_employed  ///
+        rsi_wage_income_lm_cont ///
+        rsi_work_hours_m ///
+        
+restore
+
+***** CHARACTERISTICS OF INDIVIDUAALS/HOUSEHOLDS GETTING A WP
+preserve
+
+keep if refugee == 1
+ttest hh_hhsize, by(rsi_work_permit)
+ttest ros_gender, by(rsi_work_permit)
+ttest hh_gender, by(rsi_work_permit)
+ttest ros_age, by(rsi_work_permit)
+ttest hh_poor, by(rsi_work_permit)
+ttest refugee, by(rsi_work_permit)
+
+logit rsi_work_permit hh_hhsize ros_gender hh_gender ros_age hh_poor 
+
+  *i.industry i.occupation 
+restore
+
+***** HOW DOES HAVING A WP AFFECTS OUTCOME VAR 
+preserve
+
+keep if refugee == 1
+reg rsi_wage_income_lm_cont_ln rsi_work_permit, robust
+reg rsi_work_hours_m rsi_work_permit, robust
+reg ros_employed rsi_work_permit, robust
+restore
 
 preserve
-keep district_en district_lat district_long
-duplicates drop district_en, force 
-ren district_en geo_unit 
-ren district_long geo_long 
-ren district_lat geo_lat
-tempfile district_geo 
-save `district_geo'
-restore 
-preserve 
-keep governorate_syria gov_syria_long gov_syria_lat
-duplicates drop governorate_syria, force 
-ren governorate_syria geo_unit 
-ren gov_syria_long geo_long 
-ren gov_syria_lat geo_lat
-tempfile gov_syria_geo
-save `gov_syria_geo'
-restore 
+keep if refugee == 1
+tab rsi_work_permit QR112
+tab rsi_work_permit QR113 
+tab rsi_work_permit QR114 
+tab rsi_work_permit QR115
 
-use  `district_geo', clear 
-gen gunit = "Districts"
-append using `gov_syria_geo'
-replace gunit = "Governorates" if mi(gunit) & (geo_unit != "-99 Missing" & ///
-                                             geo_unit != "-98 Non Applicable")
-drop if geo_unit == "-99 Missing" 
-drop if geo_unit == "-98 Non Applicable" 
+tab rsi_work_permit QR301 
 
-encode gunit, gen(unit)
+tab QR501 rsi_work_permit
+tab QR502 rsi_work_permit
 
-save "$data_2020_temp/Jordan2020_geo.dta", replace 
+tab rsi_work_permit QR512
+tab QR514 rsi_work_permit 
+tab rsi_work_permit QR601
+
+tab QR605S rsi_work_permit 
+corr  QR605S rsi_work_permit
+
+corr rsi_work_permit QR1312
+corr rsi_work_permit QR1313_1 QR1313_2 QR1313_3 QR1313_4 QR1313_5 QR1314 QR1315
+
+foreach var of varlist * {
+    capture assert missing(`var')
+    if !_rc drop `var'
+}
 
 
+ tab QR213
+ tab rsi_work_permit QR213 
+ corr rsi_work_permit QR213
 
-*ssc install geodist
-h geodist
+ gen indsutry_wp = 0 
+ replace indsutry_wp = QR204 if rsi_work_permit == 1 
+ replace indsutry_wp = QR213 if rsi_work_permit == 1 & mi(indsutry_wp)
 
-**** MAP OF JORDAN + POINT DISTRICT
-use "$data_LFS_temp/governorate_names.dta", clear
-spmap using "$data_LFS_temp/coord1.dta",    ///
-  id(_ID) fcolor(eggshell) ocolor(sienna) osize( vthin)   ///
-  label(data("$data_LFS_temp/governorate_names.dta") xcoord(mlong_x)      ///
-        ycoord(mlat_y) label(governorate) color(black) size(*0.7) position(0 6)) ///  
-  legend(title("Number of project", size(*0.5)                      ///
-        justification(left)) region(lcolor(white) fcolor(white))        ///
-        position(4))                          ///
-   plotregion(margin(small) icolor(white) color(white))         ///
-   graphregion(icolor(white) color(white))    ///
-   point(data("$data_2020_final/Jordan2020_02_Clean.dta") xcoord(district_long)      ///
-        ycoord(district_lat) size(*0.7) fcolor(blue)) 
+ tab indsutry_wp rsi_work_permit 
+ corr industry indsutry_wp 
 
-*MAP OF SYRIA + POINT GOVERNROATE
-use "$data_LFS_temp/governorate_names.dta", clear
-spmap using "$data_LFS_temp/coord1.dta",    ///
-  id(_ID) fcolor(eggshell) ocolor(sienna) osize( vthin)   ///
-  label(data("$data_LFS_temp/governorate_names.dta") xcoord(mlong_x)      ///
-        ycoord(mlat_y) label(governorate) color(black) size(*0.7) position(0 6)) ///  
-  legend(title("Number of project", size(*0.5)                      ///
-        justification(left)) region(lcolor(white) fcolor(white))        ///
-        position(4))                          ///
-   plotregion(margin(small) icolor(white) color(white))         ///
-   graphregion(icolor(white) color(white))    ///
-   point(data("$data_2020_final/governorate_loc_syr.dta") xcoord(gov_syria_long)      ///
-        ycoord(gov_syria_lat) size(*0.7) fcolor(blue)) 
+ *Documented migrants
 
-use "$data_2020_final/Jordan2020_02_Clean.dta", clear
+drop if refugee == 2
+tab QR112, m
+tab QR113, m
+tab QR114, m
+tab QR115, m
+tab QR215, m
+* B = No need/No Necessary
 
+tab QR112 rsi_work_permit 
+tab QR114 rsi_work_permit 
+tab QR215 rsi_work_permit 
+tab industry rsi_work_permit 
+mdesc industry
+tab employ, m
+tab employ rsi_work_permit 
 
-**** MAP OF JORDAN AND SYRIA (VIZUALIZING DISTANCE)
-use "$data_LFS_temp/governorate_names.dta", clear
-spmap using "$data_LFS_temp/coord1.dta",    ///
-  id(_ID) fcolor(eggshell) ocolor(sienna) osize( vthin)   ///
-  label(data("$data_LFS_temp/governorate_names.dta") xcoord(mlong_x)      ///
-        ycoord(mlat_y) label(governorate) color(black) size(*0.7) position(0 6)) ///  
-  legend(title("Number of project", size(*0.5)                      ///
-        justification(left)) region(lcolor(white) fcolor(white))        ///
-        position(4))                          ///
-   plotregion(margin(small) icolor(white) color(white))         ///
-   graphregion(icolor(white) color(white))    ///
-   point(data("$data_2020_temp/Jordan2020_geo.dta") xcoord(geo_long)      ///
-        ycoord(geo_lat) by(unit) size(*0.7) fcolor(red blue))
+tab QR117, m
 
-graph export "$out_2020/map_districtJOR_govSYR.pdf", as(pdf) replace
+ graph bar, ///
+  over(QR117, sort(1) descending label(angle(ninety))) ///
+  blabel(bar, format(%3.2g)) ///
+  title("In which Syrian governorate did you live before" "ariving to Jordan?") ///
+  subtitle(In Percentage) ///
+  note("n=677, missing=30" "FAFO, 2020, RSI")
+graph export "$out_LFS/bar_gov_origin.pdf", as(pdf) replace
 
-use "$data_2020_final/Jordan2020_geo_Syria.dta", clear 
+restore
 
-h geodist
-
-geodist district_lat district_long gov_syria_lat gov_syria_long, gen(distance_dis_gov)
-tab distance_dis_gov, m
-lab var distance_dis_gov "Distance (km) between JORD districts and SYR centroid governorates"
-
-geodist sub_district_lat sub_district_long gov_syria_lat gov_syria_long, gen(distance_subdis_gov)
-tab distance_subdis_gov, m
-lab var distance_subdis_gov "Distance (km) between JORD sub-districts and SYR centroid governorates"
-
-geodist locality_lat locality_long gov_syria_lat gov_syria_long, gen(distance_loc_gov)
-tab distance_loc_gov, m 
-lab var distance_loc_gov "Distance (km) between JORD localities and SYR centroid governorates"
-
-geodist area_lat area_long gov_syria_lat gov_syria_long, gen(distance_area_gov)
-tab distance_area_gov, m
-lab var distance_area_gov "Distance (km) between JORD areas and SYR centroid governorates"
-
-unique distance_dis_gov //53
-unique distance_subdis_gov //63
-unique distance_loc_gov //69
-unique distance_area_gov //82
-
+lab list nationality
 /*
-SHIFT 
+           1 Jordanian
+           2 Syrian
+           3 Egyptian
+           4 Palestinian
 */
+tab industry rsi_work_permit  if nationality == 2
+tab industry rsi_work_permit  if nationality == 1
 
-*Number of refugee with work permits 
-*In 2020
-use "$data_2020_final/Jordan2020_02_Clean.dta", clear
-tab rsi_work_permit, m
-*In 2014
-use "$data_2014_final/Jordan2014_02_Clean.dta", clear
-tab rsi_work_permit, m
+
+
+
+
+
 

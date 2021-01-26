@@ -15,10 +15,6 @@ set mem 100m
 	** Authors  : Julie Bousquet                                              **
 	****************************************************************************
 
-
-
-
-
 use "$data_2020_final/Jordan2020_HH_RSI.dta", clear
 
 **** INDUSTRIES AND OCCUPATION ****
@@ -342,67 +338,6 @@ order industry industry_ar industry_en industry_orig, b(QR501)
 
 
 
-desc 
-
-/*
- obs:         1,243                          
- vars:        572                         
-*/
-
-distinct hhid 
-* 622 
-
-distinct iid 
-* 1242
-
-************ DEMOGRAPHICS ************
-
-*Governorate
-tab ID101, m 
-/*
-Governorate |      Freq.     Percent        Cum.
-------------+-----------------------------------
-      Amman |        293       23.59       23.59
-      Zarqa |        365       29.39       52.98
-      Irbid |        285       22.95       75.93
-     Mafraq |        299       24.07      100.00
-------------+-----------------------------------
-      Total |      1,242      100.00
-*/
-
-*District
-bys ID101: tab ID102, m 
-bys ID101: distinct ID102
-/*
-Amman: 4
-Zarqa: 2
-Irbid: 1
-Mafraq: 3
-*/
-
-*Sub-District
-bys ID101: distinct ID103
-desc ID103 
-
-*Locality
-desc ID104
-bys ID101: distinct ID104
-/*
-Amman: 4
-Zarqa: 3
-Irbid: 1
-Mafraq: 5
-*/
-*Area
-desc ID105 
-*Neighborhood
-desc ID106
-*Block Number
-desc ID107
-*Building Number
-desc ID108
-
-
 *************
 ** REFUGEE **
 *************
@@ -489,258 +424,9 @@ recode rsi_work_permit (3=0) (2=1)
 lab def yesno 1 "Yes" 0 "No", modify
 lab val rsi_work_permit yesno
 
-******************
-**** OUTCOMES ****
-******************
 
-**** EMPLOYEMENT ****
 
-*If yes to 1, 2, 3, 4: Employed 
-tab QH301, m 
-tab QH302, m
-tab QH303, m 
-tab QH304, m 
-*If yes to 5, 6, 7: Unemployed 
-tab QH305, m 
-tab QH306, m 
-tab QH307, m
-*Otherwise, out of the labor force
-
-*Variable created by FAFO 
-tab qhemp, m 
-codebook qhemp
-gen ros_employed = 0
-replace ros_employed = 1 if QH301 == 1 | QH302 == 1 | QH303== 1 | QH304 == 1
-tab ros_employed, m
-lab val ros_employed yesno
-
-tab QH205, m //only have 16yo or more
-tab ros_employed 
-
-bys qhemp: tab QH203  if survey_rsi == 1
-
-
-**** WAGE INCOME ****
-
-*HH survey
-tab QH502_2, m //Wage income last month (cat)
-tab QH502_4, m //Wage income last 12 months (cat)
-
-*RSI survey
-tab QR608, m //wage income last month (cont)
-tab QR609, m //wage income typical (cont)
-
-mdesc QH502_2 QH502_4 QR608 QR609
-
-
-ren QH502_2 hh_wage_income_lm_cat
-ren QH502_4 hh_wage_income_l12m_cat
-ren QR608 	rsi_wage_income_lm_cont
-ren QR609 	rsi_wage_income_typ_cont
-
-gen rsi_wage_income_lm_cont_ln = ln(1+ rsi_wage_income_lm_cont)
-tab rsi_wage_income_lm_cont_ln, m
-
-**** SELF-EMPLOYED INCOME ****
-
-*HH survey
-tab QH503_2, m //se income last month (cat)
-tab QH503_4, m //se income last 12 months (cat)
-
-*Section 5.1: INCOME
-tab QH504_A // Income private transfer = 1
-tab QH504_B // Income private transfer last 12 months (cat)
-
-tab QH505_A // Income institutional transfer = 1
-tab QH505_B // Income institutional transfer last 12 months (cat)
-
-tab QH506_A // Income properties = 1
-tab QH506_B // Income proeperties last 12 monhts (cat)
-
-tab QH507_A // Other income = 1
-tab QH507_B // Other income last 12 monhts (Cat)
-
-tab QH507O
-
-*RSI survey
-tab QR705, m //se income last month (cont)
-tab QR706, m //se income last 12 months (cont)
-
-mdesc QH503_2 QH503_4 QR705 QR706
-
-ren QH503_2 hh_se_income_lm_cat
-ren QH503_4 hh_se_income_l12m_cat
-ren QR705 	rsi_se_income_lm_cont
-ren QR706 	rsi_se_income_typ_cont
-
-**** ADDITIONAL INCOME ****
-
-*RSI : Additional Income 
-
-tab QR805, m
-tab QR806, m
-
-**** WORKING HOURS  ****
-
-tab QR506, m //Number of hours work during the past 7 das
-tab QR507, m //Number of hours work during the past month
-ren QR506 rsi_work_hours_7d
-ren QR507 rsi_work_hours_m
-
-
-bys refugee : tab rsi_work_permit ros_employed , m
-/*
--> refugee = Refugee
-
-    Have a |
-valid work |     ros_employed
-    permit |        No        Yes |     Total
------------+----------------------+----------
-        No |       434        112 |       546 
-       Yes |        23         78 |       101 
------------+----------------------+----------
-     Total |       457        190 |       647 
-*/
-
-****** DEMOGRAPHICS ******
-
-tab qrgender, m
-tab headgender, m
-ren qrgender ros_gender
-ren headgender hh_gender 
-
-tab hhsize, m 
-ren hhsize hh_hhsize
-
-tab qrage, m
-ren qrage ros_age
-
-tab economy, m 
-ren economy hh_poor
-
-
-***** DETERMINANT OF GETTING A WORK PERMIT 
-preserve
-
-keep if refugee == 1
-logit rsi_work_permit ///
-        ros_employed  ///
-        rsi_wage_income_lm_cont ///
-        rsi_work_hours_m ///
-        
-restore
-
-***** CHARACTERISTICS OF INDIVIDUAALS/HOUSEHOLDS GETTING A WP
-preserve
-
-keep if refugee == 1
-ttest hh_hhsize, by(rsi_work_permit)
-ttest ros_gender, by(rsi_work_permit)
-ttest hh_gender, by(rsi_work_permit)
-ttest ros_age, by(rsi_work_permit)
-ttest hh_poor, by(rsi_work_permit)
-ttest refugee, by(rsi_work_permit)
-
-logit rsi_work_permit hh_hhsize ros_gender hh_gender ros_age hh_poor 
-
-  *i.industry i.occupation 
-restore
-
-***** HOW DOES HAVING A WP AFFECTS OUTCOME VAR 
-preserve
-
-keep if refugee == 1
-reg rsi_wage_income_lm_cont_ln rsi_work_permit, robust
-reg rsi_work_hours_m rsi_work_permit, robust
-reg ros_employed rsi_work_permit, robust
-restore
-
-preserve
-keep if refugee == 1
-tab rsi_work_permit QR112
-tab rsi_work_permit QR113 
-tab rsi_work_permit QR114 
-tab rsi_work_permit QR115
-
-tab rsi_work_permit QR301 
-
-tab QR501 rsi_work_permit
-tab QR502 rsi_work_permit
-
-tab rsi_work_permit QR512
-tab QR514 rsi_work_permit 
-tab rsi_work_permit QR601
-
-tab QR605S rsi_work_permit 
-corr  QR605S rsi_work_permit
-
-corr rsi_work_permit QR1312
-corr rsi_work_permit QR1313_1 QR1313_2 QR1313_3 QR1313_4 QR1313_5 QR1314 QR1315
-
-foreach var of varlist * {
-    capture assert missing(`var')
-    if !_rc drop `var'
-}
-
-
- tab QR213
- tab rsi_work_permit QR213 
- corr rsi_work_permit QR213
-
- gen indsutry_wp = 0 
- replace indsutry_wp = QR204 if rsi_work_permit == 1 
- replace indsutry_wp = QR213 if rsi_work_permit == 1 & mi(indsutry_wp)
-
- tab indsutry_wp rsi_work_permit 
- corr industry indsutry_wp 
-
- *Documented migrants
-
-drop if refugee == 2
-tab QR112, m
-tab QR113, m
-tab QR114, m
-tab QR115, m
-tab QR215, m
-* B = No need/No Necessary
-
-tab QR112 rsi_work_permit 
-tab QR114 rsi_work_permit 
-tab QR215 rsi_work_permit 
-tab industry rsi_work_permit 
-mdesc industry
-tab employ, m
-tab employ rsi_work_permit 
-
-tab QR117, m
-
- graph bar, ///
-  over(QR117, sort(1) descending label(angle(ninety))) ///
-  blabel(bar, format(%3.2g)) ///
-  title("In which Syrian governorate did you live before" "ariving to Jordan?") ///
-  subtitle(In Percentage) ///
-  note("n=677, missing=30" "FAFO, 2020, RSI")
-graph export "$out_LFS/bar_gov_origin.pdf", as(pdf) replace
-
-restore
-
-lab list nationality
-/*
-           1 Jordanian
-           2 Syrian
-           3 Egyptian
-           4 Palestinian
-*/
-tab industry rsi_work_permit  if nationality == 2
-tab industry rsi_work_permit  if nationality == 1
-
-*save "$data_2020_final/Jordan2020_02_Clean.dta", replace
-
-*********** INSTRUMENT *************
-
-
-
-*use "$data_2020_final/Jordan2020_02_Clean.dta", clear
+*********** GEO UNITS *************
 
 tab ID102, m 
 tab ID102N, m 
@@ -1878,7 +1564,7 @@ gen apt_nb = ID109
 
 save "$data_2020_final/Jordan2020_02_Clean.dta", replace
 
-
+/*
 duplicates tab ID103N, gen(dup)
 egen id_subdis = group(ID103N) 
 bys id_subdis: gen id_subdisdrop = _n
@@ -1886,3 +1572,4 @@ drop if id_subdisdrop != 1
 list ID103N
 tab ID103, m 
 
+*/
