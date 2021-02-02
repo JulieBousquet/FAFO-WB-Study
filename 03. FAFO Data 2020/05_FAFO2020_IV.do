@@ -93,6 +93,8 @@ ren Moneyinsuranceandrealestat banking
 ren Services services 
 
 
+
+
 gen share_agriculture = agriculture / total
 gen share_factory = factory / total
 gen share_construction = construction / total
@@ -103,7 +105,7 @@ gen share_services = services / total
 
 ren total total_empl_syr
 
-/*
+preserve
 gen share_1 = agriculture / total
 gen share_2 = factory / total
 gen share_3 = construction / total
@@ -141,7 +143,25 @@ lab var id_indus "ID Industry Syria"
 lab var industry "Name Industry Syria"
 lab var share_empl_syr "Employment Share in Syria, 2010, out of total employed in all industries, by gov"
 lab var total_empl_syr "Total employment, 2010"
-*/
+
+replace share_empl_syr = share_empl_syr*100
+ graph bar share_empl_syr, ///
+  over(industry, sort(1) descending label(angle(ninety))) ///
+  blabel(bar, format(%3.2g)) ///
+  title("Employment by industry in Syria") ///
+  subtitle("In Percentage") ///
+  note("LFS, 2010")
+graph export "$out_2020/bar_indus_origin.pdf", as(pdf) replace
+
+graph bar (mean) share_empl_syr, over(industry, sort(1) descending ///
+ label(angle(ninety))) asyvars by(governorate_syria) ///
+  by(,note("LFS 2010; In Percentage")) ///
+by(, title("Employment by industry in Syria"))
+graph export "$out_2020/bar_indus_origin_bygov.pdf", as(pdf) replace
+
+
+restore
+
 
 drop agriculture factory construction trade transportation banking services 
 
