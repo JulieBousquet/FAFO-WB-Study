@@ -221,6 +221,20 @@ save "$data_2020_final/governorate_loc_syr.dta", replace
 
 use "$data_2020_final/Jordan2020_02_Clean.dta", clear
 
+tab governorate 
+/*
+11 Amman
+13 Zarqa
+21 Irbid
+22 Mafraq
+*/
+lab def governorate 11 "Amman" ///
+                    13 "Zarqa" ///
+                    21 "Irbid" ///
+                    22 "Mafraq" ///
+                    , modify
+lab val governorate governorate 
+
 tab district_en, m 
 tab district_lat, m
 tab district_long, m
@@ -317,6 +331,9 @@ drop _merge
 *h geodist
 drop if refugee != 1 
 
+merge m:m "$data_2020_temp/UNHCR_shift.dta", replace 
+
+
 geodist district_lat district_long gov_syria_lat gov_syria_long, gen(distance_dis_gov)
 tab distance_dis_gov, m
 lab var distance_dis_gov "Distance (km) between JORD districts and SYR centroid governorates"
@@ -358,9 +375,73 @@ SHIFT
 *In 2020
 use "$data_2020_final/Jordan2020_02_Clean.dta", clear
 tab rsi_work_permit, m
+bys governorate_en: tab rsi_work_permit, m
 *In 2014
 use "$data_2014_final/Jordan2014_02_Clean.dta", clear
 tab rsi_work_permit, m
 
 bys district_en: gen shift_IV = rsi_work_permit if refguees == 1 
 
+import excel "$data_sec_UNHCR\Datasets_WP_RegisteredSyrians.xlsx", sheet("WP_REF - byGov byYear") firstrow clear
+
+/* Data collected by hand
+
+*WP_Registered - byYear 
+Sheet for the number of work permit per year, and the number of 
+registered refugee per year. Aim is to compute the share of 
+refugees with work permit every year
+
+*RegisteredRef - byMonth
+Sheet with the number of refugees every month since 2016. 
+With a separation by whether they are in the camps or 
+in urban areas.
+
+*WP - byIndustry
+WP by Industry for 2016, 2017, 2018, 2019 and 2020.
+
+*WP - byGov
+WP every other months and by governorate of interest (Amman,
+Irbid, Zarqa, Mafraq)
+
+*WP_REF - byGov byYear
+Number of refugees with WP and number of refugee ; from 2015 to 2020 ;
+per gorvernorate
+*/
+
+ren Year year
+ren Governorates governorate_en
+ren NbRefugeesoutcamp nb_refugee_bygov
+ren TotalRefoutcamp tot_refugee
+ren NbofWP nb_wp_bygov
+ren TotalWP tot_wp
+
+lab var year "Year"
+lab var governorate "Governorate"
+lab var nb_refugee_bygov "Number of refugees outside camps, by governorate by year"
+lab var tot_refugee "Total number of refugee by year"
+lab var nb_wp_bygov "Number of work permits, bu governroate by year"
+lab var tot_wp "Total number of work permit, by year"
+
+sort year governorate
+gen share_wp = nb_wp_bygov / nb_refugee_bygov
+
+
+gen governorate = . 
+replace governorate = 11 if governorate_en == "Amman"
+replace governorate = 13 if governorate_en == "Zarqa"
+replace governorate = 21 if governorate_en == "Irbid"
+replace governorate = 22 if governorate_en == "Mafraq"
+/*
+11 Amman
+13 Zarqa
+21 Irbid
+22 Mafraq
+*/
+lab def governorate 11 "Amman" ///
+                    13 "Zarqa" ///
+                    21 "Irbid" ///
+                    22 "Mafraq" ///
+                    , modify
+lab val governorate governorate 
+
+save "$data_2020_temp/UNHCR_shift.dta", replace 
