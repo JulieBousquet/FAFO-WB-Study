@@ -17,8 +17,6 @@ set mem 100m
 	****************************************************************************
 
 
-
-
 /*
 Share
 Number of refguees coming from gov X in syra and residing in Jordan
@@ -321,52 +319,6 @@ spmap using "$data_LFS_temp/coord1.dta",    ///
 graph export "$out_2020/map_districtJOR_govSYR.pdf", as(pdf) replace
 
 
-
-use "$data_2020_final/Jordan2020_geo_Syria.dta", clear 
-tab id_gov_syria
-*Merge with number of employed syrian by gov, by indus 
-*remember:
-merge m:1 id_gov_syria using "$data_2020_final/governorate_indus_syr_emplshare.dta"
-drop _merge
-*h geodist
-drop if refugee != 1 
-
-merge m:m "$data_2020_temp/UNHCR_shift.dta", replace 
-
-
-geodist district_lat district_long gov_syria_lat gov_syria_long, gen(distance_dis_gov)
-tab distance_dis_gov, m
-lab var distance_dis_gov "Distance (km) between JORD districts and SYR centroid governorates"
-
-geodist sub_district_lat sub_district_long gov_syria_lat gov_syria_long, gen(distance_subdis_gov)
-tab distance_subdis_gov, m
-lab var distance_subdis_gov "Distance (km) between JORD sub-districts and SYR centroid governorates"
-
-geodist locality_lat locality_long gov_syria_lat gov_syria_long, gen(distance_loc_gov)
-tab distance_loc_gov, m 
-lab var distance_loc_gov "Distance (km) between JORD localities and SYR centroid governorates"
-
-geodist area_lat area_long gov_syria_lat gov_syria_long, gen(distance_area_gov)
-tab distance_area_gov, m
-lab var distance_area_gov "Distance (km) between JORD areas and SYR centroid governorates"
-
-unique distance_dis_gov //53
-unique distance_subdis_gov //63
-unique distance_loc_gov //69
-unique distance_area_gov //82
-
-tab QR117, m
-bys refugee: tab QR117, m
-
-ren QR117 gov_syr_origin_ref
-
-keep iid gov_syr_origin_ref distance_dis_gov id_gov_syria share_* district_en rsi_work_permit
-bys district_en: gen share_IV = ( gov_syr_origin_ref * share_agriculture ) / distance_dis_gov
-bys district_en: gen shift_IV = rsi_work_permit 
-
-gen IV = share_IV * shift_IV
-tab IV, m
-
 /*
 SHIFT 
 */
@@ -444,4 +396,68 @@ lab def governorate 11 "Amman" ///
                     , modify
 lab val governorate governorate 
 
+*TRHEE OPTIONS
+*1) Mean number of WP, per gov
+*collapse (mean) nb_wp_bygov, by(governorate)
+*2) Mean share of WP per refugee, per gov
+*collapse (mean) share_wp, by(governorate)
+*3) Keep share of wp in year 2020
+keep if year == 2020
+codebook governorate 
 save "$data_2020_temp/UNHCR_shift.dta", replace 
+
+
+/**************
+THE INSTRUMENT 
+**************/
+
+use "$data_2020_final/Jordan2020_geo_Syria.dta", clear 
+tab id_gov_syria
+*Merge with number of employed syrian by gov, by indus 
+*remember:
+merge m:1 id_gov_syria using "$data_2020_final/governorate_indus_syr_emplshare.dta"
+drop _merge
+*h geodist
+drop if refugee != 1 
+codebook governorate 
+lab def governorate 11 "Amman" ///
+                    13 "Zarqa" ///
+                    21 "Irbid" ///
+                    22 "Mafraq" ///
+                    , modify
+lab val governorate governorate 
+merge m:1 governorate using "$data_2020_temp/UNHCR_shift.dta" 
+drop _merge
+
+geodist district_lat district_long gov_syria_lat gov_syria_long, gen(distance_dis_gov)
+tab distance_dis_gov, m
+lab var distance_dis_gov "Distance (km) between JORD districts and SYR centroid governorates"
+
+geodist sub_district_lat sub_district_long gov_syria_lat gov_syria_long, gen(distance_subdis_gov)
+tab distance_subdis_gov, m
+lab var distance_subdis_gov "Distance (km) between JORD sub-districts and SYR centroid governorates"
+
+geodist locality_lat locality_long gov_syria_lat gov_syria_long, gen(distance_loc_gov)
+tab distance_loc_gov, m 
+lab var distance_loc_gov "Distance (km) between JORD localities and SYR centroid governorates"
+
+geodist area_lat area_long gov_syria_lat gov_syria_long, gen(distance_area_gov)
+tab distance_area_gov, m
+lab var distance_area_gov "Distance (km) between JORD areas and SYR centroid governorates"
+
+unique distance_dis_gov //53
+unique distance_subdis_gov //63
+unique distance_loc_gov //69
+unique distance_area_gov //82
+
+tab QR117, m
+bys refugee: tab QR117, m
+
+ren QR117 gov_syr_origin_ref
+
+keep iid gov_syr_origin_ref distance_dis_gov id_gov_syria share_* district_en rsi_work_permit
+bys district_en: gen share_IV = ( gov_syr_origin_ref * share_agriculture ) / distance_dis_gov
+bys district_en: gen shift_IV = rsi_work_permit 
+
+gen IV = share_IV * shift_IV
+tab IV, m
