@@ -703,6 +703,7 @@ tab industry rsi_work_permit  if nationality == 2
 tab industry rsi_work_permit  if nationality == 1
 
 
+save "$data_2020_temp/Jordan2020_03_Compared.dta", replace
 
 
 
