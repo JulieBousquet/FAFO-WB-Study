@@ -389,11 +389,25 @@ save "$data_2014_final/Jordan2014_02_Clean.dta", replace
 
 
 
-
-
 use "$data_2020_final/Jordan2020_02_Clean.dta", clear
 
+/*
+      district_en |      Freq.     Percent        Cum.
+------------------+-----------------------------------
+    Al Quwaysimah |         21        1.69        1.69
+    Irbid Qasabah |        285       22.95       24.64
+   Mafraq Qasabah |        101        8.13       32.77
+            Marka |         22        1.77       34.54
+North West Badiah |         35        2.82       37.36
+   Northern Badia |        163       13.12       50.48
+      Oman Kasbah |        104        8.37       58.86
+         Russeifa |        107        8.62       67.47
+     Wadi As-Seir |        146       11.76       79.23
+    Zarqa Qasabah |        258       20.77      100.00
+------------------+-----------------------------------
+            Total |      1,242      100.00
 
+*/
 
 desc 
 

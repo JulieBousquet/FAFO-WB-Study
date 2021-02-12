@@ -85,6 +85,27 @@ if inlist(c(username), "u0131185", "julie") == 1 {
 	*Master to locate the folder
 	global data_sec_UNHCR "$dropbox/04. Secondary Data/04. UNHCR/"
 
+	*********************************
+	**    SECONDARY DATA: JLMPS    **
+	*********************************
+
+	*Master to locate the folder
+	global data_sec_JLMPS "$dropbox/04. Secondary Data/05. JLMPS/"
+		* 2010 *
+		global data_sec_JLMPS_2010 "$data_sec_JLMPS/2010/"
+			global data_JLMPS_2010 		"$data_sec_JLMPS_2010/01. Datasets/"
+				global data_JLMPS_2010_base 		"$data_JLMPS_2010/01. Base"
+				global data_JLMPS_2010_temp 		"$data_JLMPS_2010/02. Temp"
+				global data_JLMPS_2010_final 		"$data_JLMPS_2010/03. Final"
+			global out_JLMPS_2010  		"$data_sec_JLMPS_2010/02. Output/"
+
+		* 2016 *
+		global data_sec_JLMPS_2016 "$data_sec_JLMPS/2016/"
+			global data_JLMPS_2016 		"$data_sec_JLMPS_2016/01. Datasets/"
+				global data_JLMPS_2016_base 		"$data_JLMPS_2016/01. Base"
+				global data_JLMPS_2016_temp 		"$data_JLMPS_2016/02. Temp"
+				global data_JLMPS_2016_final 		"$data_JLMPS_2016/03. Final"
+			global out_JLMPS_2016  		"$data_sec_JLMPS_2016/02. Output/"
 
 exit
 /* End of do-file */

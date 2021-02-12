@@ -62,9 +62,12 @@ replace governorate_syria = "Idlib" if governorate_syria == "Idleb"
 replace governorate_syria = "Rural Damascus" if governorate_syria == "Damascus Rural"
 replace governorate_syria = "Al Hasakah" if governorate_syria == "AL-Hasakeh"
 
+drop if governorate_syria == "Total"
+
 list governorate_syria 
 
-keep if governorate_syria ==  "Al Hasakah" | ///
+*We want to keep all the governorates
+/*keep if governorate_syria ==  "Al Hasakah" | ///
         governorate_syria ==  "Aleppo" | ///
         governorate_syria ==  "Al Raqqah" | ///
         governorate_syria ==  "Al Suwayda" | ///
@@ -76,11 +79,11 @@ keep if governorate_syria ==  "Al Hasakah" | ///
         governorate_syria ==  "Quneitra" | ///
         governorate_syria ==  "Damascus" | ///
         governorate_syria ==  "Rural Damascus" 
+*/
 sort governorate_syria 
 gen id_gov_syria = _n
 list id_gov_syria governorate_syria
 
-drop if governorate == "Total"
 ren Total total
 ren Agricultureandforestry agriculture 
 ren Industry factory 
@@ -195,9 +198,10 @@ replace governorate_syria = "Hama" if governorate_syria == "Hamah"
 replace governorate_syria = "Homs" if governorate_syria == "Hims"
 replace governorate_syria = "Rural Damascus" if governorate_syria == "Rif Dimashq"
 replace governorate_syria = "Al Hasakah" if governorate_syria == "Al Ḥasakah"
+replace governorate_syria = "Tartous" if governorate_syria == "Tartus"
 
 list governorate_syria 
-
+/*
 keep if governorate_syria ==  "Al Hasakah" | ///
         governorate_syria ==  "Aleppo" | ///
         governorate_syria ==  "Al Raqqah" | ///
@@ -210,13 +214,102 @@ keep if governorate_syria ==  "Al Hasakah" | ///
         governorate_syria ==  "Quneitra" | ///
         governorate_syria ==  "Damascus" | ///
         governorate_syria ==  "Rural Damascus" 
+*/
 sort governorate_syria 
-gen id_gov_syria = _n
-list id_gov_syria governorate_syria
+*gen id_gov_syria = _n
+*list id_gov_syria governorate_syria
+preserve
+ren governorate_syria govs_1 
+ren gov_syria_long govs_long_1
+ren gov_syria_lat govs_lat_1
+gen id_gov_syria_1 = 1
+tempfile district_1 
+save `district_1'
+restore 
 
-save "$data_2020_final/governorate_loc_syr.dta", replace
+preserve
+ren governorate_syria govs_2
+ren gov_syria_long govs_long_2
+ren gov_syria_lat govs_lat_2
+gen id_gov_syria_2 = 2
+tempfile district_2 
+save `district_2'
+restore 
 
+preserve
+ren governorate_syria govs_3
+ren gov_syria_long govs_long_3
+ren gov_syria_lat govs_lat_3
+gen id_gov_syria_3 = 3
+tempfile district_3 
+save `district_3'
+restore 
 
+preserve
+ren governorate_syria govs_4
+ren gov_syria_long govs_long_4
+ren gov_syria_lat govs_lat_4
+gen id_gov_syria_4 = 4
+tempfile district_4 
+save `district_4'
+restore 
+
+preserve
+ren governorate_syria govs_5
+ren gov_syria_long govs_long_5
+ren gov_syria_lat govs_lat_5
+gen id_gov_syria_5 = 5
+tempfile district_5 
+save `district_5'
+restore 
+
+preserve
+ren governorate_syria govs_6
+ren gov_syria_long govs_long_6
+ren gov_syria_lat govs_lat_6
+gen id_gov_syria_6 = 6
+tempfile district_6 
+save `district_6'
+restore 
+
+preserve
+ren governorate_syria govs_7
+ren gov_syria_long govs_long_7
+ren gov_syria_lat govs_lat_7
+gen id_gov_syria_7 = 7
+tempfile district_7 
+save `district_7'
+restore 
+
+preserve
+ren governorate_syria govs_8
+ren gov_syria_long govs_long_8
+ren gov_syria_lat govs_lat_8
+gen id_gov_syria_8 = 8
+tempfile district_8 
+save `district_8'
+restore 
+
+preserve
+ren governorate_syria govs_9
+ren gov_syria_long govs_long_9
+ren gov_syria_lat govs_lat_9
+gen id_gov_syria_9 = 9
+tempfile district_9 
+save `district_9'
+restore 
+
+preserve
+ren governorate_syria govs_10
+ren gov_syria_long govs_long_10
+ren gov_syria_lat govs_lat_10
+gen id_gov_syria_10 = 10
+tempfile district_10 
+save `district_10'
+restore
+*save "$data_2020_final/governorate_loc_syr.dta", replace
+
+/*
 use "$data_2020_final/Jordan2020_02_Clean.dta", clear
 
 tab governorate 
@@ -260,7 +353,86 @@ tab gov_syria_long, m
 tab gov_syria_lat, m
 
 save "$data_2020_final/Jordan2020_geo_Syria.dta", replace 
+*/
 
+
+use "$data_2020_final/Jordan2020_02_Clean.dta", clear
+
+tab governorate 
+/*
+11 Amman
+13 Zarqa
+21 Irbid
+22 Mafraq
+*/
+lab def governorate 11 "Amman" ///
+                    13 "Zarqa" ///
+                    21 "Irbid" ///
+                    22 "Mafraq" ///
+                    , modify
+lab val governorate governorate 
+
+tab district_en, m 
+tab district_lat, m
+tab district_long, m
+tab sub_district_en, m  
+tab locality_en, m 
+tab area_en, m 
+
+keep district_en  district_lat district_long
+duplicates drop district_en , force
+tab district_en 
+*bys refugee: tab QR117, m
+gen id_gov_syria_1 = _n
+*replace governorate_syria = "-99 Missing" if mi(governorate_syria) & refugee == 1
+*replace governorate_syria = "-98 Non Applicable" if mi(governorate_syria) & (refugee == 2 | refugee == 3)
+
+*ren id_gov_syria_1 id_gov_syria_2
+*merge m:m id_gov_syria_1 using "$data_2020_final/governorate_loc_syr.dta"
+*merge m:m id_gov_syria_2 using "$data_2020_final/governorate_loc_syr.dta"
+
+*drop _merge
+
+merge m:m id_gov_syria_1 using `district_1'
+drop _merge 
+ren id_gov_syria_1 id_gov_syria_2
+merge m:m id_gov_syria_2 using `district_2'
+drop _merge 
+ren id_gov_syria_2 id_gov_syria_3
+merge m:m id_gov_syria_3 using `district_3'
+drop _merge 
+ren id_gov_syria_3 id_gov_syria_4
+merge m:m id_gov_syria_4 using `district_4'
+drop _merge 
+ren id_gov_syria_4 id_gov_syria_5
+merge m:m id_gov_syria_5 using `district_5'
+drop _merge 
+ren id_gov_syria_5 id_gov_syria_6
+merge m:m id_gov_syria_6 using `district_6'
+drop _merge 
+ren id_gov_syria_6 id_gov_syria_7
+merge m:m id_gov_syria_7 using `district_7'
+drop _merge 
+ren id_gov_syria_7 id_gov_syria_8
+merge m:m id_gov_syria_8 using `district_8'
+drop _merge 
+ren id_gov_syria_8 id_gov_syria_9
+merge m:m id_gov_syria_9 using `district_9'
+drop _merge 
+ren id_gov_syria_9 id_gov_syria_10
+merge m:m id_gov_syria_10 using `district_10'
+drop _merge 
+
+egen governorate_syria = concat(govs_9 govs_8 govs_7 govs_6 govs_5 govs_4 govs_3 govs_2 govs_10 govs_1)
+egen gov_syria_long = rsum(govs_long_9 govs_long_8 govs_long_7 govs_long_6 govs_long_5 govs_long_4 govs_long_3 govs_long_2 govs_long_10 govs_long_1)
+egen gov_syria_lat = rsum(govs_lat_9 govs_lat_8 govs_lat_7 govs_lat_6 govs_lat_5 govs_lat_4 govs_lat_3 govs_lat_2 govs_lat_10 govs_lat_1)
+tab governorate_syria, m
+tab gov_syria_long, m
+tab gov_syria_lat, m
+
+keep governorate_syria gov_syria_long gov_syria_lat district_en district_lat district_long
+
+save "$data_2020_final/Jordan2020_geo_Syria.dta", replace 
 
 keep  gov_syria_lat gov_syria_long district_lat district_long sub_district_long ///
       sub_district_lat area_long area_lat governorate_en locality_long locality_lat ///
@@ -316,7 +488,7 @@ spmap using "$data_LFS_temp/coord1.dta",    ///
    point(data("$data_2020_temp/Jordan2020_geo.dta") xcoord(geo_long)      ///
         ycoord(geo_lat) by(unit) size(*0.7) fcolor(red blue))
 
-graph export "$out_2020/map_districtJOR_govSYR.pdf", as(pdf) replace
+graph export "$out_2020/map_districtJOR_ALLgovSYR.pdf", as(pdf) replace
 
 
 /*

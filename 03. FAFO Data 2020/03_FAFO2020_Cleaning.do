@@ -36,6 +36,7 @@ duplicates tag id, gen(dup)
 bys id: gen idn = _n
 *drop if idn != 1
 *drop if dup > 0
+drop idn
 list industry
 *br industry
 *gen id = _n 
@@ -1560,6 +1561,19 @@ gen neighborhood_ar = ID106N
 gen block_nb = ID107
 gen building_nb = ID108 
 gen apt_nb = ID109
+
+
+*RENAMING DISTRICT BASED ON JLMPS CLASSIFICATION 
+replace district_en = "Quaismeh" if district_en == "Al Quwaysimah"
+replace district_en = "Qasabet Irbid" if district_en == "Irbid Qasabah"
+replace district_en = "Qasabet El-Mafraq" if district_en == "Mafraq Qasabah"
+replace district_en = "Marka" if district_en == "Marka"
+replace district_en = "Badiah Shamaliyyeh" if district_en == "North West Badiah"
+replace district_en = "Badiah Shamaliyyeh Gharbiyyeh" if district_en == "Northern Badia"
+replace district_en = "Qasabet Amman" if district_en == "Oman Kasbah"
+replace district_en = "Russeifa" if district_en == "Russeifa"
+replace district_en = "Wadi Essier" if district_en == "Wadi As-Seir"
+replace district_en = "Qasabet Ezzarqa" if district_en == "Zarqa Qasabah"
 
 
 save "$data_2020_final/Jordan2020_02_Clean.dta", replace
