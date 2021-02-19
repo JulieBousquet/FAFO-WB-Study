@@ -283,6 +283,7 @@ replace industry = "Accommodation and food service activities" if industry_en ==
 replace industry = "Accommodation and food service activities" if industry_en == "Restaurant worker"
 replace industry = "Accommodation and food service activities" if industry_en == "Resturant"
 replace industry = "Accommodation and food service activities" if industry_en == "Factor" & iid == 2210294151
+replace industry = "Accommodation and food service activities" if industry_en == "A hotel worker"
 
 replace industry = "Education" if industry_en == "School. Teaching"
 replace industry = "Education" if industry_en == "School"
@@ -307,8 +308,6 @@ replace industry = "Education" if industry_en == "teaching"
 
 replace industry = "Financial and insurance activities" if industry_en == "Trading"
 replace industry = "Financial and insurance activities" if industry_en == "Financial collection"
-
-replace industry = "Hotels and restaurants" if industry_en == "A hotel worker"
 
 replace industry = "Electricity, gas and water supply" if industry_en == "Homes electrician"
 replace industry = "Electricity, gas and water supply" if industry_en == "Its services"

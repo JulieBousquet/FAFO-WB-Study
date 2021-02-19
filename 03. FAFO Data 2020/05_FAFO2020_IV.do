@@ -66,20 +66,6 @@ drop if governorate_syria == "Total"
 
 list governorate_syria 
 
-*We want to keep all the governorates
-/*keep if governorate_syria ==  "Al Hasakah" | ///
-        governorate_syria ==  "Aleppo" | ///
-        governorate_syria ==  "Al Raqqah" | ///
-        governorate_syria ==  "Al Suwayda" | ///
-        governorate_syria ==  "Daraa" | ///
-        governorate_syria ==  "Deir El Zour" | ///
-        governorate_syria ==  "Hama" | ///
-        governorate_syria ==  "Homs" | ///
-        governorate_syria ==  "Idlib" | ///
-        governorate_syria ==  "Quneitra" | ///
-        governorate_syria ==  "Damascus" | ///
-        governorate_syria ==  "Rural Damascus" 
-*/
 sort governorate_syria 
 gen id_gov_syria = _n
 list id_gov_syria governorate_syria
@@ -93,9 +79,6 @@ ren Transportationstoragecommun transportation
 ren Moneyinsuranceandrealestat banking 
 ren Services services 
 
-
-
-
 gen share_agriculture = agriculture / total
 gen share_factory = factory / total
 gen share_construction = construction / total
@@ -106,6 +89,7 @@ gen share_services = services / total
 
 ren total total_empl_syr
 
+/*
 preserve
 gen share_1 = agriculture / total
 gen share_2 = factory / total
@@ -160,11 +144,30 @@ graph bar (mean) share_empl_syr, over(industry, sort(1) descending ///
 by(, title("Employment by industry in Syria"))
 graph export "$out_2020/bar_indus_origin_bygov.pdf", as(pdf) replace
 
-
 restore
 
+*/
 
 drop agriculture factory construction trade transportation banking services 
+drop total_empl_syr
+ren share_agriculture share_1 
+ren share_factory share_2
+ren share_construction share_3 
+ren share_trade share_4
+ren share_transportation share_5
+ren share_banking share_6 
+ren share_services share_7
+
+reshape long share_ , i(id_gov_syria) j(industry_id)
+gen industry_en = ""
+replace industry_en = "agriculture" if industry_id == 1 
+replace industry_en = "industry" if industry_id == 2 
+replace industry_en = "construction" if industry_id == 3 
+replace industry_en = "food" if industry_id == 4 
+replace industry_en = "transportation" if industry_id == 5 
+replace industry_en = "banking" if industry_id == 6 
+replace industry_en = "services" if industry_id == 7 
+ren share_ share 
 
 save "$data_2020_final/governorate_indus_syr_emplshare.dta", replace
 
@@ -201,21 +204,10 @@ replace governorate_syria = "Al Hasakah" if governorate_syria == "Al Ḥasakah"
 replace governorate_syria = "Tartous" if governorate_syria == "Tartus"
 
 list governorate_syria 
-/*
-keep if governorate_syria ==  "Al Hasakah" | ///
-        governorate_syria ==  "Aleppo" | ///
-        governorate_syria ==  "Al Raqqah" | ///
-        governorate_syria ==  "Al Suwayda" | ///
-        governorate_syria ==  "Daraa" | ///
-        governorate_syria ==  "Deir El Zour" | ///
-        governorate_syria ==  "Hama" | ///
-        governorate_syria ==  "Homs" | ///
-        governorate_syria ==  "Idlib" | ///
-        governorate_syria ==  "Quneitra" | ///
-        governorate_syria ==  "Damascus" | ///
-        governorate_syria ==  "Rural Damascus" 
-*/
-sort governorate_syria 
+
+sort governorate_syria
+
+
 *gen id_gov_syria = _n
 *list id_gov_syria governorate_syria
 preserve
@@ -307,54 +299,6 @@ gen id_gov_syria_10 = 10
 tempfile district_10 
 save `district_10'
 restore
-*save "$data_2020_final/governorate_loc_syr.dta", replace
-
-/*
-use "$data_2020_final/Jordan2020_02_Clean.dta", clear
-
-tab governorate 
-/*
-11 Amman
-13 Zarqa
-21 Irbid
-22 Mafraq
-*/
-lab def governorate 11 "Amman" ///
-                    13 "Zarqa" ///
-                    21 "Irbid" ///
-                    22 "Mafraq" ///
-                    , modify
-lab val governorate governorate 
-
-tab district_en, m 
-tab district_lat, m
-tab district_long, m
-tab sub_district_en, m  
-tab locality_en, m 
-tab area_en, m 
-
-bys refugee: tab QR117, m
-decode QR117, gen(governorate_syria)
-tab governorate_syria, m 
-
-sort governorate_syria
-egen id_gov_syria = group(governorate_syria)
-tab id_gov_syria 
-list id_gov_syria governorate_syria
-
-replace governorate_syria = "-99 Missing" if mi(governorate_syria) & refugee == 1
-replace governorate_syria = "-98 Non Applicable" if mi(governorate_syria) & (refugee == 2 | refugee == 3)
-
-merge m:1 id_gov_syria using "$data_2020_final/governorate_loc_syr.dta"
-drop _merge
-
-tab governorate_syria, m
-tab gov_syria_long, m
-tab gov_syria_lat, m
-
-save "$data_2020_final/Jordan2020_geo_Syria.dta", replace 
-*/
-
 
 use "$data_2020_final/Jordan2020_02_Clean.dta", clear
 
@@ -384,14 +328,6 @@ duplicates drop district_en , force
 tab district_en 
 *bys refugee: tab QR117, m
 gen id_gov_syria_1 = _n
-*replace governorate_syria = "-99 Missing" if mi(governorate_syria) & refugee == 1
-*replace governorate_syria = "-98 Non Applicable" if mi(governorate_syria) & (refugee == 2 | refugee == 3)
-
-*ren id_gov_syria_1 id_gov_syria_2
-*merge m:m id_gov_syria_1 using "$data_2020_final/governorate_loc_syr.dta"
-*merge m:m id_gov_syria_2 using "$data_2020_final/governorate_loc_syr.dta"
-
-*drop _merge
 
 merge m:m id_gov_syria_1 using `district_1'
 drop _merge 
@@ -434,9 +370,280 @@ keep governorate_syria gov_syria_long gov_syria_lat district_en district_lat dis
 
 save "$data_2020_final/Jordan2020_geo_Syria.dta", replace 
 
-keep  gov_syria_lat gov_syria_long district_lat district_long sub_district_long ///
-      sub_district_lat area_long area_lat governorate_en locality_long locality_lat ///
-      locality_en district_en sub_district_en governorate_syria
+
+use "$data_2020_final/Jordan2020_geo_Syria.dta", clear 
+
+sort governorate_syria district_en
+egen id_gov_syria = group(governorate_syria)
+gen id_district_jordan = _n 
+
+levelsof id_gov_syria, local(gov_lev)
+levelsof id_district_jordan, local(dis_lev)
+qui foreach igov of local gov_lev {
+  qui foreach jdis of local dis_lev {
+    preserve
+    keep if id_gov_syria == `igov'
+    keep if id_district_jordan == `jdis'
+    tempfile gov_`igov'_dist_`jdis'
+    save `gov_`igov'_dist_`jdis''
+    restore
+  }
+}
+
+use "$data_2020_final/governorate_indus_syr_emplshare.dta", clear
+
+/*
+levelsof id_gov_syria, local(gov_lev)
+  qui forvalues jdis = 1(1)140 {
+    qui foreach igov of local gov_lev {
+    preserve 
+    keep if id_gov_syria == 1 
+    merge m:1 id_gov_syria using `gov_`igov'_dist_`jdis''
+    drop _merge
+    tempfile gov_`igov'_dist_`jdis'
+    save `gov_`igov'_dist_`jdis''
+    restore 
+  }
+}
+
+*/
+
+levelsof id_gov_syria, local(gov_lev)
+  qui forvalues jdis = 1(1)10 {
+    preserve 
+    keep if id_gov_syria == 1 
+    merge m:1 id_gov_syria using `gov_1_dist_`jdis''
+    drop _merge
+    tempfile gov_1_dist_`jdis'
+    save `gov_1_dist_`jdis''
+    restore 
+  }
+
+levelsof id_gov_syria, local(gov_lev)
+  qui forvalues jdis = 11(1)20 {
+    preserve 
+    keep if id_gov_syria == 2 
+    merge m:1 id_gov_syria using `gov_2_dist_`jdis''
+    drop _merge
+    tempfile gov_2_dist_`jdis'
+    save `gov_2_dist_`jdis''
+    restore 
+  }
+
+levelsof id_gov_syria, local(gov_lev)
+  qui forvalues jdis = 21(1)30 {
+    preserve 
+    keep if id_gov_syria == 3 
+    merge m:1 id_gov_syria using `gov_3_dist_`jdis''
+    drop _merge
+    tempfile gov_3_dist_`jdis'
+    save `gov_3_dist_`jdis''
+    restore 
+  }
+
+levelsof id_gov_syria, local(gov_lev)
+  qui forvalues jdis = 31(1)40 {
+    preserve 
+    keep if id_gov_syria == 4 
+    merge m:1 id_gov_syria using `gov_4_dist_`jdis''
+    drop _merge
+    tempfile gov_4_dist_`jdis'
+    save `gov_4_dist_`jdis''
+    restore 
+  }
+
+levelsof id_gov_syria, local(gov_lev)
+  qui forvalues jdis = 41(1)50 {
+    preserve 
+    keep if id_gov_syria == 5 
+    merge m:1 id_gov_syria using `gov_5_dist_`jdis''
+    drop _merge
+    tempfile gov_5_dist_`jdis'
+    save `gov_5_dist_`jdis''
+    restore 
+  }
+
+levelsof id_gov_syria, local(gov_lev)
+  qui forvalues jdis = 51(1)60 {
+    preserve 
+    keep if id_gov_syria == 6 
+    merge m:1 id_gov_syria using `gov_6_dist_`jdis''
+    drop _merge
+    tempfile gov_6_dist_`jdis'
+    save `gov_6_dist_`jdis''
+    restore 
+  }
+
+levelsof id_gov_syria, local(gov_lev)
+  qui forvalues jdis = 61(1)70 {
+    preserve 
+    keep if id_gov_syria == 7 
+    merge m:1 id_gov_syria using `gov_7_dist_`jdis''
+    drop _merge
+    tempfile gov_7_dist_`jdis'
+    save `gov_7_dist_`jdis''
+    restore 
+  }
+
+levelsof id_gov_syria, local(gov_lev)
+  qui forvalues jdis = 71(1)80 {
+    preserve 
+    keep if id_gov_syria == 8 
+    merge m:1 id_gov_syria using `gov_8_dist_`jdis''
+    drop _merge
+    tempfile gov_8_dist_`jdis'
+    save `gov_8_dist_`jdis''
+    restore 
+  }
+
+levelsof id_gov_syria, local(gov_lev)
+  qui forvalues jdis = 81(1)90 {
+    preserve 
+    keep if id_gov_syria == 9 
+    merge m:1 id_gov_syria using `gov_9_dist_`jdis''
+    drop _merge
+    tempfile gov_9_dist_`jdis'
+    save `gov_9_dist_`jdis''
+    restore 
+  }
+
+levelsof id_gov_syria, local(gov_lev)
+  qui forvalues jdis = 91(1)100 {
+    preserve 
+    keep if id_gov_syria == 10 
+    merge m:1 id_gov_syria using `gov_10_dist_`jdis''
+    drop _merge
+    tempfile gov_10_dist_`jdis'
+    save `gov_10_dist_`jdis''
+    restore 
+  }
+
+levelsof id_gov_syria, local(gov_lev)
+  qui forvalues jdis = 101(1)110 {
+    preserve 
+    keep if id_gov_syria == 11 
+    merge m:1 id_gov_syria using `gov_11_dist_`jdis''
+    drop _merge
+    tempfile gov_11_dist_`jdis'
+    save `gov_11_dist_`jdis''
+    restore 
+  }
+
+levelsof id_gov_syria, local(gov_lev)
+  qui forvalues jdis = 111(1)120 {
+    preserve 
+    keep if id_gov_syria == 12 
+    merge m:1 id_gov_syria using `gov_12_dist_`jdis''
+    drop _merge
+    tempfile gov_12_dist_`jdis'
+    save `gov_12_dist_`jdis''
+    restore 
+  }
+
+levelsof id_gov_syria, local(gov_lev)
+  qui forvalues jdis = 121(1)130 {
+    preserve 
+    keep if id_gov_syria == 13 
+    merge m:1 id_gov_syria using `gov_13_dist_`jdis''
+    drop _merge
+    tempfile gov_13_dist_`jdis'
+    save `gov_13_dist_`jdis''
+    restore 
+  }
+
+levelsof id_gov_syria, local(gov_lev)
+  qui forvalues jdis = 131(1)140 {
+    preserve 
+    keep if id_gov_syria == 14 
+    merge m:1 id_gov_syria using `gov_14_dist_`jdis''
+    drop _merge
+    tempfile gov_14_dist_`jdis'
+    save `gov_14_dist_`jdis''
+    restore 
+  }
+
+
+
+
+use `gov_1_dist_1', clear 
+  qui forvalues jdis = 2(1)10 {
+    append using `gov_1_dist_`jdis''
+  } 
+
+append using `gov_2_dist_1' 
+  qui forvalues jdis = 11(1)20 {
+    append using `gov_2_dist_`jdis''
+  } 
+
+append using `gov_3_dist_1' 
+  qui forvalues jdis = 21(1)30 {
+    append using `gov_3_dist_`jdis''
+  } 
+
+append using `gov_4_dist_1' 
+  qui forvalues jdis = 31(1)40 {
+    append using `gov_4_dist_`jdis''
+  } 
+
+append using `gov_5_dist_1' 
+  qui forvalues jdis = 41(1)50 {
+    append using `gov_5_dist_`jdis''
+  } 
+
+append using `gov_6_dist_1' 
+  qui forvalues jdis = 51(1)60 {
+    append using `gov_6_dist_`jdis''
+  } 
+
+append using `gov_7_dist_1' 
+  qui forvalues jdis = 61(1)70 {
+    append using `gov_7_dist_`jdis''
+  } 
+
+append using `gov_8_dist_1' 
+  qui forvalues jdis = 71(1)80 {
+    append using `gov_8_dist_`jdis''
+  } 
+
+append using `gov_9_dist_1' 
+  qui forvalues jdis = 81(1)90 {
+    append using `gov_9_dist_`jdis''
+  } 
+
+append using `gov_10_dist_1' 
+  qui forvalues jdis = 91(1)100 {
+    append using `gov_10_dist_`jdis''
+  } 
+
+append using `gov_11_dist_1' 
+  qui forvalues jdis = 101(1)110 {
+    append using `gov_11_dist_`jdis''
+  } 
+
+append using `gov_12_dist_1' 
+  qui forvalues jdis = 111(1)120 {
+    append using `gov_12_dist_`jdis''
+  } 
+
+append using `gov_13_dist_1' 
+  qui forvalues jdis = 121(1)130 {
+    append using `gov_13_dist_`jdis''
+  } 
+
+append using `gov_14_dist_1' 
+  qui forvalues jdis = 131(1)140 {
+    append using `gov_14_dist_`jdis''
+  } 
+
+save "$data_2020_final/Jordan2020_geo_Syria_empl_Syria"
+
+
+use "$data_2020_final/governorate_indus_syr_emplshare.dta", clear
+
+/*
+***************************
+******** MAPPING **********
+***************************
 
 preserve
 keep district_en district_lat district_long
@@ -490,6 +697,8 @@ spmap using "$data_LFS_temp/coord1.dta",    ///
 
 graph export "$out_2020/map_districtJOR_ALLgovSYR.pdf", as(pdf) replace
 
+********************************
+*/
 
 /*
 SHIFT 
@@ -506,6 +715,7 @@ tab rsi_work_permit, m
 
 bys district_en: gen shift_IV = rsi_work_permit if refguees == 1 
 
+/*
 import excel "$data_sec_UNHCR\Datasets_WP_RegisteredSyrians.xlsx", sheet("WP_REF - byGov byYear") firstrow clear
 
 /* Data collected by hand
@@ -576,20 +786,115 @@ lab val governorate governorate
 *3) Keep share of wp in year 2020
 keep if year == 2020
 codebook governorate 
-save "$data_2020_temp/UNHCR_shift.dta", replace 
+save "$data_2020_temp/UNHCR_shift_byGov.dta", replace 
+*/
 
+import excel "$data_sec_UNHCR\Datasets_WP_RegisteredSyrians.xlsx", sheet("WP - byIndustry") firstrow clear
+
+keep year_2020 Activity
+
+ren year_2020 wp_2020
+ren Activity industry_orig
+gen industry_en = ""
+replace industry_en = "agriculture" if industry_orig == "Agriculture, forestry, and fishing "
+replace industry_en = "industry" if industry_orig == "Mining and quarrying "
+replace industry_en = "industry" if industry_orig == "Manufacturing "
+replace industry_en = "industry" if industry_orig == "Electricity, gas, steam and air conditioning "
+replace industry_en = "industry" if industry_orig == "Water supply, sewage, waste management activities "
+replace industry_en = "construction" if industry_orig == "Construction "
+replace industry_en = "industry" if industry_orig == "Wholesale and retail trade; repair of motor vehicles "
+replace industry_en = "transportation" if industry_orig == "Transportation and storage "
+replace industry_en = "food" if industry_orig == "Hospitality and food service activities "
+replace industry_en = "services" if industry_orig == "Information and communication "
+replace industry_en = "banking" if industry_orig == "Financial and insurance activities "
+replace industry_en = "banking" if industry_orig == "Real estate activities "
+replace industry_en = "services" if industry_orig == "Professional, scientific and technical activities "
+replace industry_en = "services" if industry_orig == "Administrative and support service activities "
+replace industry_en = "services" if industry_orig == "Public administration and defense; compulsory social "
+replace industry_en = "services" if industry_orig == "Education "
+replace industry_en = "services" if industry_orig == "Human health and social work activities "
+replace industry_en = "services" if industry_orig == "Arts, entertainment and recreation "
+replace industry_en = "services" if industry_orig == "Other service activities "
+
+drop if mi(industry_en)
+*It removes the Self employed jobs 
+
+collapse (sum) wp_2020, by(industry_en)
+*Harmonize based on Syrian classification of industries
+
+sort industry_en 
+gen industry_id = _n
+list industry_id industry_en 
+
+/*    +---------------------------+
+     | indust~d      industry_en |
+     |---------------------------|
+  1. |        1      agriculture |
+  2. |        2          banking |
+  3. |        3     construction |
+  4. |        4             food |
+  5. |        5         industry |
+     |---------------------------|
+  6. |        6         services |
+  7. |        7   transportation |
+     +---------------------------+
+*/
+save "$data_2020_temp/UNHCR_shift_byOccup.dta", replace 
 
 /**************
 THE INSTRUMENT 
 **************/
 
-use "$data_2020_final/Jordan2020_geo_Syria.dta", clear 
-tab id_gov_syria
-*Merge with number of employed syrian by gov, by indus 
-*remember:
-merge m:1 id_gov_syria using "$data_2020_final/governorate_indus_syr_emplshare.dta"
-drop _merge
-*h geodist
+use "$data_2020_final/Jordan2020_geo_Syria_empl_Syria", clear 
+
+*use "$data_2020_final/Jordan2020_geo_Syria.dta", clear 
+*tab id_gov_syria
+
+geodist district_lat district_long gov_syria_lat gov_syria_long, gen(distance_dis_gov)
+tab distance_dis_gov, m
+lab var distance_dis_gov "Distance (km) between JORD districts and SYR centroid governorates"
+
+unique distance_dis_gov //140
+
+drop district_long district_lat gov_syria_long gov_syria_lat
+sort district_en governorate_syria 
+
+drop id_district_jordan 
+egen id_district_jordan = group(district_en) 
+
+list id_gov_syria governorate_syria
+sort district_en governorate_syria industry_id
+
+tab industry_en industry_id
+drop industry_id 
+egen industry_id = group(industry_en)
+
+merge m:1 industry_id using  "$data_2020_temp/UNHCR_shift_byOccup.dta"
+drop _merge 
+
+ren share share_empl_syr 
+
+order id_gov_syria governorate_syria id_district_jordan district_en industry_id industry_en share_empl_syr wp_2020
+
+lab var id_gov_syria "ID Governorate Syria"
+lab var governorate_syria "Name Governorate Syria"
+lab var id_district_jordan "ID District Jordan"
+lab var district_en "Name District Jordan"
+lab var industry_id "ID Industry"
+lab var industry_en "Name Industry"
+lab var share_empl_syr "Share Employment over Governorates Syria"
+lab var wp_2020 "WP in Jordan by industry"
+lab var distance_dis_gov "Distance Districts Jordan to Governorates Syria"
+
+sort id_gov_syria district_en industry_id
+
+gen IV_SS = (wp_2020*share_empl_syr)/distance_dis_gov 
+collapse (sum) IV_SS, by(district_en)
+lab var IV_SS "IV: Shift Share"
+
+save "$data_2020_final/Jordan2020_IV", replace 
+
+/*
 drop if refugee != 1 
 codebook governorate 
 lab def governorate 11 "Amman" ///
@@ -600,27 +905,6 @@ lab def governorate 11 "Amman" ///
 lab val governorate governorate 
 merge m:1 governorate using "$data_2020_temp/UNHCR_shift.dta" 
 drop _merge
-
-geodist district_lat district_long gov_syria_lat gov_syria_long, gen(distance_dis_gov)
-tab distance_dis_gov, m
-lab var distance_dis_gov "Distance (km) between JORD districts and SYR centroid governorates"
-
-geodist sub_district_lat sub_district_long gov_syria_lat gov_syria_long, gen(distance_subdis_gov)
-tab distance_subdis_gov, m
-lab var distance_subdis_gov "Distance (km) between JORD sub-districts and SYR centroid governorates"
-
-geodist locality_lat locality_long gov_syria_lat gov_syria_long, gen(distance_loc_gov)
-tab distance_loc_gov, m 
-lab var distance_loc_gov "Distance (km) between JORD localities and SYR centroid governorates"
-
-geodist area_lat area_long gov_syria_lat gov_syria_long, gen(distance_area_gov)
-tab distance_area_gov, m
-lab var distance_area_gov "Distance (km) between JORD areas and SYR centroid governorates"
-
-unique distance_dis_gov //53
-unique distance_subdis_gov //63
-unique distance_loc_gov //69
-unique distance_area_gov //82
 
 tab QR117, m
 bys refugee: tab QR117, m
@@ -633,3 +917,4 @@ bys district_en: gen shift_IV = rsi_work_permit
 
 gen IV = share_IV * shift_IV
 tab IV, m
+*/
