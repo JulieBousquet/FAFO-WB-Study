@@ -394,22 +394,6 @@ qui foreach igov of local gov_lev {
 
 use "$data_2020_final/governorate_indus_syr_emplshare.dta", clear
 
-/*
-levelsof id_gov_syria, local(gov_lev)
-  qui forvalues jdis = 1(1)140 {
-    qui foreach igov of local gov_lev {
-    preserve 
-    keep if id_gov_syria == 1 
-    merge m:1 id_gov_syria using `gov_`igov'_dist_`jdis''
-    drop _merge
-    tempfile gov_`igov'_dist_`jdis'
-    save `gov_`igov'_dist_`jdis''
-    restore 
-  }
-}
-
-*/
-
 levelsof id_gov_syria, local(gov_lev)
   qui forvalues jdis = 1(1)10 {
     preserve 

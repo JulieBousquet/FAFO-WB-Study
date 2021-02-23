@@ -52,6 +52,9 @@ replace district_en = "Badiah Shamaliyyeh Gharbiyyeh" if  q102 == 3 & governorat
 tab district_en, m 
 drop if mi(district_en) // remove those that are not in the district 2020
 
+sort  district_en 
+egen district_id = group(district_en)
+
 desc q102 q103 q104 q105 q106 q107 q108
 
 *District
