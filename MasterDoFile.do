@@ -84,6 +84,11 @@ if inlist(c(username), "u0131185", "julie") == 1 {
 	***********************************
 	*Master to locate the folder
 	global data_sec_UNHCR "$dropbox/04. Secondary Data/04. UNHCR/"
+		global data_UNHCR		"$data_sec_UNHCR/01. Datasets/"
+			global data_UNHCR_base 		"$data_UNHCR/01. Base"
+			global data_UNHCR_temp 		"$data_UNHCR/02. Temp"
+			global data_UNHCR_final 	"$data_UNHCR/03. Final"
+		global out_UNHCR  		"$data_sec_UNHCR/02. Output/"
 
 	*********************************
 	**    SECONDARY DATA: JLMPS    **

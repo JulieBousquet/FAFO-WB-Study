@@ -300,7 +300,9 @@ tempfile district_10
 save `district_10'
 restore
 
-use "$data_2020_final/Jordan2020_02_Clean.dta", clear
+*use "$data_2020_final/Jordan2020_02_Clean.dta", clear
+use "$data_2020_temp/Jordan2020_03_Compared.dta", clear
+
 
 tab governorate 
 /*
@@ -635,7 +637,7 @@ append using `gov_14_dist_1'
     append using `gov_14_dist_`jdis''
   } 
 
-save "$data_2020_final/Jordan2020_geo_Syria_empl_Syria"
+save "$data_2020_final/Jordan2020_geo_Syria_empl_Syria", replace
 
 
 use "$data_2020_final/governorate_indus_syr_emplshare.dta", clear
@@ -704,19 +706,9 @@ graph export "$out_2020/map_districtJOR_ALLgovSYR.pdf", as(pdf) replace
 SHIFT 
 */
 
-*Number of refugee with work permits 
-*In 2020
-use "$data_2020_final/Jordan2020_02_Clean.dta", clear
-tab rsi_work_permit, m
-bys governorate_en: tab rsi_work_permit, m
-*In 2014
-use "$data_2014_final/Jordan2014_02_Clean.dta", clear
-tab rsi_work_permit, m
-
-bys district_en: gen shift_IV = rsi_work_permit if refguees == 1 
 
 /*
-import excel "$data_sec_UNHCR\Datasets_WP_RegisteredSyrians.xlsx", sheet("WP_REF - byGov byYear") firstrow clear
+import excel "$data_UNHCR_base\Datasets_WP_RegisteredSyrians.xlsx", sheet("WP_REF - byGov byYear") firstrow clear
 
 /* Data collected by hand
 
@@ -789,7 +781,7 @@ codebook governorate
 save "$data_2020_temp/UNHCR_shift_byGov.dta", replace 
 */
 
-import excel "$data_sec_UNHCR\Datasets_WP_RegisteredSyrians.xlsx", sheet("WP - byIndustry") firstrow clear
+import excel "$data_UNHCR_base\Datasets_WP_RegisteredSyrians.xlsx", sheet("WP - byIndustry") firstrow clear
 
 keep year_2020 Activity
 
@@ -891,6 +883,10 @@ sort id_gov_syria district_en industry_id
 gen IV_SS = (wp_2020*share_empl_syr)/distance_dis_gov 
 collapse (sum) IV_SS, by(district_en)
 lab var IV_SS "IV: Shift Share"
+
+tab district_en, m
+sort district_en
+egen district_id = group(district_en) 
 
 save "$data_2020_final/Jordan2020_IV", replace 
 

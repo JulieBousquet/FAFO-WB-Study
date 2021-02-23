@@ -15,6 +15,8 @@ distinct iid
 * 21524 
 
 ************ DEMOGRAPHICS ************
+tab HHgr1
+drop if HHgr1 == 1 //Remove everyone in camp
 
 *Governorate
 tab governorate, m 
@@ -28,7 +30,27 @@ Governorate |      Freq.     Percent        Cum.
 ------------+-----------------------------------
       Total |     21,524      100.00
 */
+sort q101 
+gen governorate_en = ""
+replace governorate_en = "Amman" if q101 == 11
+replace governorate_en = "Irbid" if q101 == 21 
+replace governorate_en = "Mafraq" if q101 == 22 
 
+egen governorate_id = group(governorate_en)
+
+sort governorate_id q102
+gen district_en = ""
+replace district_en = "Qasabet Amman" if q102 == 1 & governorate_en == "Amman"
+replace district_en = "Marka" if  q102 == 2 & governorate_en == "Amman"
+replace district_en = "Quaismeh" if  q102 == 3 & governorate_en == "Amman"
+replace district_en = "Wadi Essier" if  q102 == 5 & governorate_en == "Amman"
+replace district_en = "Qasabet Irbid" if  q102 == 1 & governorate_en == "Irbid"
+replace district_en = "Qasabet El-Mafraq" if  q102 == 1 & governorate_en == "Mafraq"
+replace district_en = "Badiah Shamaliyyeh" if  q102 == 2 & governorate_en == "Mafraq"
+replace district_en = "Badiah Shamaliyyeh Gharbiyyeh" if  q102 == 3 & governorate_en == "Mafraq"
+
+tab district_en, m 
+drop if mi(district_en) // remove those that are not in the district 2020
 
 desc q102 q103 q104 q105 q106 q107 q108
 
@@ -346,6 +368,16 @@ reg ros_wage_income_lm_cont_ln rsi_work_permit, robust
 reg rsi_work_hours_7d rsi_work_permit, robust
 reg ros_employed rsi_work_permit, robust
 restore
+
+tab q101, nol
+/*
+       11  Amman
+       21  Irbid
+       22  Mafraq
+*/
+
+tab q102, m 
+tab q103, m
 
 save "$data_2014_final/Jordan2014_02_Clean.dta", replace
 
