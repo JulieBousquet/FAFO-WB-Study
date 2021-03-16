@@ -44,6 +44,8 @@ bys year: tab district_en, m
 
 replace IV_SS = 0 if year == 2014
 
+save "$data_2020_final/Jordan2020_IV_fullds", replace 
+
 *2SLS
 *First stage
 
@@ -57,7 +59,6 @@ reg rsi_work_permit IV_SS NbRefugeesoutcamp i.year c.district_id, robust cl(dist
 predict iv_WPhat, xb
 
 reg  rsi_work_hours_7d 			iv_WPhat i.year c.district_id ros_age ros_gender hh_hhsize hh_gender, robust cl(district_id)	
-reg  rsi_se_income_lm_cont 		iv_WPhat i.year c.district_id ros_age ros_gender hh_hhsize hh_gender, robust cl(district_id)	
 reg  rsi_wage_income_lm_cont 	iv_WPhat i.year c.district_id ros_age ros_gender hh_hhsize hh_gender, robust cl(district_id)	
 reg  ros_employed 				iv_WPhat i.year c.district_id ros_age ros_gender hh_hhsize hh_gender, robust cl(district_id)	
 

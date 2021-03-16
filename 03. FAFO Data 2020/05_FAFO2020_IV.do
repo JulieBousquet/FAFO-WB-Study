@@ -864,15 +864,15 @@ lab var distance_dis_gov "Distance Districts Jordan to Governorates Syria"
 
 sort id_gov_syria district_en industry_id
 
+* STANDARD SS IV
 gen IV_SS = (wp_2020*share_empl_syr)/distance_dis_gov 
 collapse (sum) IV_SS, by(district_en)
 lab var IV_SS "IV: Shift Share"
 
-tab district_en, m
-sort district_en
-egen district_id = group(district_en) 
-
 save "$data_2020_final/Jordan2020_IV", replace 
+
+
+
 
 /*
 drop if refugee != 1 
