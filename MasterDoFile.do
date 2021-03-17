@@ -106,7 +106,7 @@ if inlist(c(username), "u0131185", "julie") == 1 {
 
 		* 2016 *
 		global data_sec_JLMPS_2016 "$data_sec_JLMPS/2016/"
-			global data_JLMPS_2016 		"$data_sec_JLMPS_2016/01. Datasets/"
+			global data_JLMPS_2016 		"$data_sec_JLMPS_2016/02. Datasets/"
 				global data_JLMPS_2016_base 		"$data_JLMPS_2016/01. Base"
 				global data_JLMPS_2016_temp 		"$data_JLMPS_2016/02. Temp"
 				global data_JLMPS_2016_final 		"$data_JLMPS_2016/03. Final"

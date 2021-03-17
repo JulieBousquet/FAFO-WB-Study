@@ -869,6 +869,10 @@ gen IV_SS = (wp_2020*share_empl_syr)/distance_dis_gov
 collapse (sum) IV_SS, by(district_en)
 lab var IV_SS "IV: Shift Share"
 
+tab district_en
+sort district_en
+egen district_id = group(district_en) 
+
 save "$data_2020_final/Jordan2020_IV", replace 
 
 

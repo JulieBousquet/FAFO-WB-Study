@@ -56,8 +56,11 @@ egen district_id = group(district_en)
 *bys id_gov_syria: gen IV_SS = (wp_2020*share_empl_syr)/distance_dis_gov 
 preserve
 bys id_gov_syria: gen IV_share = share_empl_syr/distance_dis_gov 
-collapse (sum) IV_share, by(id_gov_syria district_en)
-reshape wide IV_share, i(district_en) j(id_gov_syria)
+*collapse (sum) IV_share, by(id_gov_syria district_en) //SHARE BY GOV
+*reshape wide IV_share, i(district_en) j(id_gov_syria)
+
+collapse (sum) IV_share, by(industry_id district_en)
+reshape wide IV_share, i(district_en) j(industry_id)
 
 tab district_en, m
 sort district_en
@@ -68,11 +71,37 @@ save `shares'
 restore
 
 merge m:1 district_id using `shares'
-br id_gov_syria district_en wp_2020 industry_en
+drop _merge 
+
+preserve
+br id_gov_syria district_en wp_2020 industry_en industry_id
 sort district_en id_gov_syria industry_en
-collapse (sum) wp_2020, by(id_gov_syria district_en)
+ren wp_2020 IV_shifts
+gen n = _n
+collapse (sum) n, by(district_en IV_shifts)
+drop n 
+gen industry_id = .
+replace industry_id = 1 if IV_shifts == 12270
+replace industry_id = 2 if IV_shifts == 12
+replace industry_id = 3 if IV_shifts == 9402
+replace industry_id = 4 if IV_shifts == 1647
+replace industry_id = 5 if IV_shifts == 4139
+replace industry_id = 6 if IV_shifts == 2223
+replace industry_id = 7 if IV_shifts == 93
 
+reshape wide IV_shifts, i(district_en) j(industry_id)
 
+tab district_en, m
+sort district_en
+egen district_id = group(district_en) 
+
+tempfile shifts
+save `shifts'
+restore
+
+merge m:1 district_id using `shifts'
+drop _merge 
+duplicates drop district_id, force
 
 save "$data_2020_final/Jordan2020_IV_robust", replace 
 
@@ -123,17 +152,64 @@ drop _merge
 bys year: tab governorate_en, m
 bys year: tab district_en, m
 
-*replace IV_SS = 0 if year == 2014
+/*
+replace IV_shifts1 = 0 if year == 2014
+replace IV_shifts2 = 0 if year == 2014
+replace IV_shifts3 = 0 if year == 2014
+replace IV_shifts4 = 0 if year == 2014
+replace IV_shifts5 = 0 if year == 2014
+replace IV_shifts6 = 0 if year == 2014
+replace IV_shifts7 = 0 if year == 2014
+br  IV_share* IV_shifts* district_en year
+*/
 
-bartik_weight, z() weightstub(IV_SS*) x(rsi_work_permit) y(ros_employed) absorb(year district_id)
+local IV_share IV_share
+local IV_shifts IV_shifts
+
+*CORE Instrument
+forvalues t = 2014(6)2020 {
+	foreach var of varlist `IV_share'* {
+		gen t`t'_`var' = (year == `t') * `var'
+		}
+	foreach var of varlist `IV_shifts'* {
+		gen t`t'_`var'b = `var' if year == `t'
+		egen t`t'_`var' = max(t`t'_`var'b), by(district_en)
+		drop t`t'_`var'b
+		}
+	}
+
+bartik_weight, 	z(t*_`IV_share'*) ///
+				weightstub(t*_`IV_shifts'*) ///
+				x(rsi_work_permit) ///
+				y(ros_employed) 
+
+return list 
+
+mat beta = r(beta)
+mat alpha = r(alpha)
+mat gamma = r(gam)
+mat pi = r(pi)
+mat G = r(G)
+
+matrix list beta
+matrix list alpha
+matrix list gamma
+matrix list pi 
+matrix list G
+
+/*
+r(alpha): Rotemberg weight vector 
+r(beta): just-identified coefficient vector
+r(G): ghrowth weight vector   
+*/
 
 /*
 Main
 ----
- y(varname): 			outcome variable        
- x(varname): 			endogeous variable  
- z(varlist): 			variable list of instruments    
- weightstub(varlist): 	variable list of weights       
+ y(varname): 			outcome variable: EMPLOYED        
+ x(varname): 			endogeous variable: WORK PERMIT
+ z(varlist): 			variable list of instruments: SHARE: INDUS COM IN SYR * DIST TO GOV  
+ weightstub(varlist): 	variable list of weights : SHIFT: (1) REF WITH WP BY GOV (2) REF WITH WP BY INDUS
 
 Options
 -------                        
@@ -143,4 +219,3 @@ weight_var(varname): 	name of analytic weight variable for regression
 by(varname): 			name of the time variable that is interacted with the shares
 */
 
- IV_SS NbRefugeesoutcamp

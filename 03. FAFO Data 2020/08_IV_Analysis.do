@@ -13,10 +13,11 @@ egen governorate_id = group(governorate_en)
 save "$data_UNHCR_final/UNHCR_NbRef_byGov.dta", replace
 
 
-use "$data_2020_temp/Jordan2020_03_Compared.dta", clear
+use "$data_2020_temp/Jordan2020_03_Compared.dta", clear 
 
 tab governorate_en
-drop if governorate_en == "Zarqa"
+drop if governorate_en == "Zarqa" 
+//Keep Mafraq, Irbid, Amman: data 2014 are on those. Zarqa was 2016 only
 tab governorate
 sort governorate_en
 egen governorate_id = group(governorate_en)
@@ -53,6 +54,9 @@ save "$data_2020_final/Jordan2020_IV_fullds", replace
 *In 2020
 bys year: tab rsi_work_permit, m
 bys year governorate_en: tab rsi_work_permit, m
+
+tab nationality, m
+
 
 reg rsi_work_permit IV_SS NbRefugeesoutcamp i.year c.district_id, robust cl(district_id) 
 
@@ -140,9 +144,84 @@ bys district_en: gen shift_IV = rsi_work_permit if refguees == 1
 
 
 
+use "$data_2020_temp/Jordan2020_03_Compared.dta", clear 
+
+keep governorate_en district_en rsi_work_permit
+
+tab governorate_en
+drop if governorate_en == "Zarqa" 
+//Keep Mafraq, Irbid, Amman: data 2014 are on those. Zarqa was 2016 only
+tab governorate
+sort governorate_en
+egen governorate_id = group(governorate_en)
+
+tab district_en
+sort district_en
+egen district_id = group(district_en) 
+
+gen year = 2020
+
+append using "$data_2014_final/Jordan2014_02_Clean.dta"
+
+keep year governorate_en governorate_id district_en district_id rsi_work_permit
 
 
 
+
+use "$data_2020_final/Jordan2020_IV_fullds", clear 
+
+*2SLS
+*First stage
+
+*Number of refugee with work permits 
+*In 2020
+bys year: tab rsi_work_permit, m
+bys year governorate_en: tab rsi_work_permit, m
+
+tab nationality, m
+
+
+reg rsi_work_permit IV_SS NbRefugeesoutcamp i.year c.district_id, robust cl(district_id) 
+
+predict iv_WPhat, xb
+
+collapse (mean) iv_WPhat, by(district_en governorate_en)
+
+merge 1:m district_en using "$data_JLMPS_2016_final/JLMPS_2010-2016_xs.dta"
+drop _merge 
+ren round year 
+
+/*
+*IN JLMPS 
+use "$data_JLMPS_2016_final/JLMPS_2010-2016_xs.dta", clear
+ren round year 
+
+
+tab nationality
+codebook nationality
+keep if nationality == 400
+
+
+merge m:1 district_id using "$data_2020_final/Jordan2020_IV"
+drop if _merge == 2
+drop _merge
+
+merge m:1 governorate_id using "$data_UNHCR_final/UNHCR_NbRef_byGov.dta"
+drop if _merge == 2
+drop _merge
+*/
+
+bys year: tab governorate_en, m
+bys year: tab district_en, m
+
+*replace IV_SS = 0 if year == 2014
+*reg rsi_work_permit IV_SS NbRefugeesoutcamp i.year c.district_id, robust cl(district_id) 
+
+*predict iv_WPhat, xb
+
+reg  rsi_work_hours_7d 			iv_WPhat i.year c.district_id ros_age ros_gender hh_hhsize hh_gender, robust cl(district_id)	
+reg  rsi_wage_income_lm_cont 	iv_WPhat i.year c.district_id ros_age ros_gender hh_hhsize hh_gender, robust cl(district_id)	
+reg  ros_employed 				iv_WPhat i.year c.district_id ros_age ros_gender hh_hhsize hh_gender, robust cl(district_id)	
 
 
 
