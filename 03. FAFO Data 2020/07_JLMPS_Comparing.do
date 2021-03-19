@@ -16,6 +16,7 @@ districtcode
 use "$data_2020_final/Jordan2020_02_Clean.dta", clear
 tab governorate_en
 tab district_en
+
 use "$data_2014_final/Jordan2014_02_Clean.dta", clear 
 tab governorate_en
 tab district_en
@@ -52,9 +53,7 @@ Qasabet Ezzarqa               Zarqa Qasabah
 
 
 
-
-
-*USE LSMS 2016
+*USE LSMS 2016 & LSMS 2010
 
 use "$data_JLMPS_2016_base/JLMPS 2016 rep xs v1.1.dta", clear 
 
@@ -112,8 +111,8 @@ egen district_id = group(district_en)
 sort gov
 gen governorate_en = ""
 replace governorate_en = "Amman" if gov == 11
-replace governorate_en = "Irbid" if gov == 11
-replace governorate_en = "Mafraq" if gov == 11
+replace governorate_en = "Irbid" if gov == 21
+replace governorate_en = "Mafraq" if gov == 22
 sort governorate_en
 egen governorate_id = group(governorate_en)
 

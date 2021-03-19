@@ -91,7 +91,7 @@ if inlist(c(username), "u0131185", "julie") == 1 {
 		global out_UNHCR  		"$data_sec_UNHCR/02. Output/"
 
 	*********************************
-	**    SECONDARY DATA: JLMPS    **
+	**    SECONDgARY DATA: JLMPS    **
 	*********************************
 
 	*Master to locate the folder

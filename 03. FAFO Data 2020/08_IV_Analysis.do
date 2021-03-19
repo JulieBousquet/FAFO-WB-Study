@@ -55,13 +55,17 @@ save "$data_2020_final/Jordan2020_IV_fullds", replace
 bys year: tab rsi_work_permit, m
 bys year governorate_en: tab rsi_work_permit, m
 
-tab nationality, m
 
 
 reg rsi_work_permit IV_SS NbRefugeesoutcamp i.year c.district_id, robust cl(district_id) 
 
 predict iv_WPhat, xb
 
+tab nationality, m
+codebook nationality
+drop if nationality != 1
+
+corr rsi_work_permit iv_WPhat
 reg  rsi_work_hours_7d 			iv_WPhat i.year c.district_id ros_age ros_gender hh_hhsize hh_gender, robust cl(district_id)	
 reg  rsi_wage_income_lm_cont 	iv_WPhat i.year c.district_id ros_age ros_gender hh_hhsize hh_gender, robust cl(district_id)	
 reg  ros_employed 				iv_WPhat i.year c.district_id ros_age ros_gender hh_hhsize hh_gender, robust cl(district_id)	
@@ -129,6 +133,42 @@ ren 	se_11 se_1
 collapse (mean) se*
 */
 
+*HAUSNAN TEST OF ENDO 
+ivregress 2sls rsi_work_hours_7d (rsi_work_permit = IV_SS)
+est store IV
+reg  rsi_work_hours_7d 			rsi_work_permit  	
+hausman IV 
+drop _est_IV
+
+
+
+reg  rsi_wage_income_lm_cont 			iv_WPhat
+estimates table, star(.05 .01 .001)
+reg  rsi_wage_income_lm_cont 			iv_WPhat i.year
+estimates table, star(.05 .01 .001)
+reg  rsi_wage_income_lm_cont 			iv_WPhat c.district_id
+estimates table, star(.05 .01 .001)
+reg  rsi_wage_income_lm_cont 			iv_WPhat i.year c.district_id
+estimates table, star(.05 .01 .001)
+
+reg  rsi_wage_income_lm_cont 			iv_WPhat, robust
+estimates table, star(.05 .01 .001)
+reg  rsi_wage_income_lm_cont 			iv_WPhat i.year, robust
+estimates table, star(.05 .01 .001)
+reg  rsi_wage_income_lm_cont 			iv_WPhat c.district_id, robust
+estimates table, star(.05 .01 .001)
+reg  rsi_wage_income_lm_cont 			iv_WPhat i.year c.district_id, robust
+estimates table, star(.05 .01 .001)
+
+reg  rsi_wage_income_lm_cont 			iv_WPhat, robust cl(district_id)	
+estimates table, star(.05 .01 .001)
+reg  rsi_wage_income_lm_cont 			iv_WPhat i.year, robust cl(district_id)	
+estimates table, star(.05 .01 .001)
+reg  rsi_wage_income_lm_cont 			iv_WPhat c.district_id, robust cl(district_id)	
+estimates table, star(.05 .01 .001)
+reg  rsi_wage_income_lm_cont 			iv_WPhat i.year c.district_id, robust cl(district_id)	
+estimates table, star(.05 .01 .001)
+
 
 *In 2014
 use "$data_2014_final/Jordan2014_02_Clean.dta", clear
@@ -167,6 +207,17 @@ keep year governorate_en governorate_id district_en district_id rsi_work_permit
 
 
 
+
+
+
+
+
+
+
+
+**************************************
+************ USING JLMPS *************
+**************************************
 
 use "$data_2020_final/Jordan2020_IV_fullds", clear 
 
