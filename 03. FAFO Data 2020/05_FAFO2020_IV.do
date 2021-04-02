@@ -877,6 +877,72 @@ save "$data_2020_final/Jordan2020_IV", replace
 
 
 
+*NEW 
+
+import excel "$data_RW_base/syr_ref_bygov.xlsx", firstrow clear
+save "$data_RW_final/syr_ref_bygov.dta", replace 
+
+
+use "$data_2020_final/Jordan2020_geo_Syria_empl_Syria", clear 
+
+*use "$data_2020_final/Jordan2020_geo_Syria.dta", clear 
+*tab id_gov_syria
+
+geodist district_lat district_long gov_syria_lat gov_syria_long, gen(distance_dis_gov)
+tab distance_dis_gov, m
+lab var distance_dis_gov "Distance (km) between JORD districts and SYR centroid governorates"
+
+unique distance_dis_gov //140
+
+drop district_long district_lat gov_syria_long gov_syria_lat
+sort district_en governorate_syria 
+
+drop id_district_jordan 
+egen id_district_jordan = group(district_en) 
+
+list id_gov_syria governorate_syria
+sort district_en governorate_syria industry_id
+
+tab industry_en industry_id
+drop industry_id 
+egen industry_id = group(industry_en)
+
+merge m:1 industry_id using  "$data_2020_temp/UNHCR_shift_byOccup.dta"
+drop _merge 
+
+ren share share_empl_syr 
+
+order id_gov_syria governorate_syria id_district_jordan district_en industry_id industry_en share_empl_syr wp_2020
+
+lab var id_gov_syria "ID Governorate Syria"
+lab var governorate_syria "Name Governorate Syria"
+lab var id_district_jordan "ID District Jordan"
+lab var district_en "Name District Jordan"
+lab var industry_id "ID Industry"
+lab var industry_en "Name Industry"
+lab var share_empl_syr "Share Employment over Governorates Syria"
+lab var wp_2020 "WP in Jordan by industry"
+lab var distance_dis_gov "Distance Districts Jordan to Governorates Syria"
+
+sort id_gov_syria district_en industry_id
+
+merge m:1 id_gov_syria using "$data_RW_final/syr_ref_bygov.dta"
+
+
+* STANDARD SS IV
+gen IV_SS = (wp_2020*share_empl_syr*nb_ref_syr_bygov)/distance_dis_gov 
+collapse (sum) IV_SS, by(district_en)
+lab var IV_SS "IV: Shift Share"
+
+tab district_en
+sort district_en
+egen district_id = group(district_en) 
+
+
+save "$data_2020_final/Jordan2020_IV", replace 
+
+
+
 
 /*
 drop if refugee != 1 

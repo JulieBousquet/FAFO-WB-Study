@@ -178,6 +178,73 @@ bys district_en: gen shift_IV = rsi_work_permit if refguees == 1
 
 
 
+************ NEW USING JF ********
+use "$data_2020_final/Jordan2020_IV_fullds", clear 
+
+preserve
+tab refugee
+codebook refugee
+drop if refugee != 1
+collapse (sum) rsi_work_permit if year == 2020, by(district_id)
+ren rsi_work_permit agg_wp_2020
+gen year = 2020
+tempfile wp2020
+save `wp2020'
+restore
+
+preserve
+tab refugee
+codebook refugee
+drop if refugee != 1
+collapse (sum) rsi_work_permit if year == 2014, by(district_id)
+ren rsi_work_permit agg_wp_2014
+gen year = 2014
+tempfile wp2014
+save `wp2014'
+restore
+
+merge m:1 district_id using `wp2020'
+drop _merge
+merge m:1 district_id using `wp2014'
+drop _merge
+gen agg_wp = agg_wp_2020
+replace agg_wp = agg_wp_2014 if mi(agg_wp)
+
+tab agg_wp
+
+xi: ivreg2 rsi_wage_income_lm_cont 
+
+xtset district_id  
+xtivreg rsi_wage_income_lm_cont i.year i.district_id (agg_wp= IV_SS)  if refugee==2, re first
+xtoverid, nois
+
+xi: ivreg2 rsi_wage_income_lm_cont i.year i.district_id (agg_wp= IV_SS) if refugee==2, cluster(district_id)
+ivregress 2sls rsi_wage_income_lm_cont (agg_wp = IV_SS)
+est store IV
+
+
+
+reg agg_wp IV_SS NbRefugeesoutcamp i.year c.district_id, robust cl(district_id) 
+
+predict iv_WPhat, xb
+
+tab nationality, m
+codebook nationality
+drop if nationality != 1
+
+corr agg_wp iv_WPhat
+reg  rsi_work_hours_7d 			iv_WPhat i.year c.district_id ros_age ros_gender hh_hhsize hh_gender, robust cl(district_id)	
+reg  rsi_wage_income_lm_cont 	iv_WPhat i.year c.district_id ros_age ros_gender hh_hhsize hh_gender, robust cl(district_id)	
+reg  ros_employed 				iv_WPhat i.year c.district_id ros_age ros_gender hh_hhsize hh_gender, robust cl(district_id)	
+
+
+
+
+
+
+
+
+
 
 
 
