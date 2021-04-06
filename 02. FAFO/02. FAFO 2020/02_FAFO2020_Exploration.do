@@ -1,5 +1,5 @@
 
-use "$data_2020_base/Jordan2020_HH_RSI.dta", clear
+use "$data_2020_final/02_FAFO2020_HH_RSI.dta", clear
 
 tab ID101 
 
@@ -95,12 +95,13 @@ distinct iid
 
 tab qrhhid , m
 tab qhhhid , m
-br qhhhid qrhhid
+*br qhhhid qrhhid
 sort qhhhid qrhhid
 gen hhid_clust = qhhhid
 replace hhid_clust = qrhhid if mi(hhid_clust)
 gen clusterid = qrclust 
 replace clusterid = qhclust if mi(clusterid)
+drop hhid
 egen hhid = concat(clusterid hhid_clust)
 distinct hhid
 

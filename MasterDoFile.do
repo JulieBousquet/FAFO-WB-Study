@@ -28,42 +28,57 @@ if inlist(c(username), "u0131185", "julie") == 1 {
 	****************************
 	*Master to locate the folder
 	global masterdata "$dropbox/01. Master Data/"
-		global data 	 		"$masterdata/01. Datasets/"
-			global data_base 		"$data/02. Base"
-			global data_temp 		"$data/03. Temp"
-			global data_final 		"$data/04. Final"
-		global out  			"$masterdata/02. Output/"
-		global do				"$github/01. Master Data/Dofiles/"
+		global data_master 	 	"$masterdata/01. Datasets/"
+		global out_master		"$masterdata/02. Output/"
 
+	global do_master 	"$github/01. Master Data/Dofiles/"
 
 	****************************
-	**        DATA 2014       **
+	**        FAFO            **
 	****************************
-	
+
 	*Master to locate the folder
-	global data_fafo2014 "$dropbox/02. Data Jordan 2014/"
-		global data_2014 		"$data_fafo2014/01. Datasets/"
-			global data_2014_base 		"$data_2014/02. Base"
-			global data_2014_temp 		"$data_2014/03. Temp"
-			global data_2014_final 		"$data_2014/04. Final"
-		global out_2014  		"$data_fafo2014/02. Output/"
-		global do_2014 			"$github/02. FAFO Data 2014/Dofiles/"
-
-		global do_master 	"$github/01. Master Data/Dofiles/"
-	
+	global data_fafo "$dropbox/02. FAFO/"
 
 	****************************
-	**        DATA 2020       **
+	**        FAFO 2014       **
+	****************************
+		
+	*Master to locate the folder
+	global folder_fafo2014 "$data_fafo/01. FAFO 2014/"
+		global data_fafo2014 		"$folder_fafo2014/01. Datasets/"
+			global data_2014_base 		"$data_fafo2014/02. Base"
+			global data_2014_temp 		"$data_fafo2014/03. Temp"
+			global data_2014_final 		"$data_fafo2014/04. Final"
+		global out_2014  		"$folder_fafo2014/02. Output/"
+
+	****************************
+	**        FAFO 2020       **
 	****************************
 	*Master to locate the folder
-	global data_fafo2020 "$dropbox/03. Data Jordan 2020/"
-		global data_2020 		"$data_fafo2020/01. Datasets/"
-			global data_2020_base 		"$data_2020/02. Base"
-			global data_2020_temp 		"$data_2020/03. Temp"
-			global data_2020_final 		"$data_2020/04. Final"
-		global out_2020  		"$data_fafo2020/02. Output/"
-		global do_2020			"$github/03. FAFO Data 2020/Dofiles/"
+	global folder_fafo2020 "$data_fafo/02. FAFO 2020/"
+		global data_fafo2020 		"$folder_fafo2020/01. Datasets/"
+			global data_2020_base 		"$data_fafo2020/02. Base"
+			global data_2020_temp 		"$data_fafo2020/03. Temp"
+			global data_2020_final 		"$data_fafo2020/04. Final"
+		global out_2020  		"$folder_fafo2020/02. Output/"
 
+	****************************
+	**        JLMPS           **
+	****************************
+
+	*Master to locate the folder
+	global folder_JLMPS "$dropbox/03. JLMPS/"
+		global data_JLMPS 		"$folder_JLMPS/02. Datasets/"
+			global data_JLMPS_base 		"$data_JLMPS/01. Base"
+			global data_JLMPS_temp 		"$data_JLMPS/02. Temp"
+			global data_JLMPS_final 	"$data_JLMPS/03. Final"
+		global out_JLMPS  	"$folder_JLMPS/02. Output/"
+
+
+	****************************
+	**     SECONDARY DATA     **
+	****************************
 
 	*********************************
 	**     SECONDARY DATA: LFS     **
@@ -76,8 +91,6 @@ if inlist(c(username), "u0131185", "julie") == 1 {
 			global data_LFS_final 		"$data_LFS/04. Final"
 			global data_LFS_shp			"$data_LFS/05. Shapefile"
 		global out_LFS  		"$data_sec_LFS/02. Output/"
-		global do_LFS			"$github/04. Secondary Data/Dofiles/"
-
 
 	***********************************
 	**     SECONDARY DATA: UNHCR     **
@@ -90,39 +103,28 @@ if inlist(c(username), "u0131185", "julie") == 1 {
 			global data_UNHCR_final 	"$data_UNHCR/03. Final"
 		global out_UNHCR  		"$data_sec_UNHCR/02. Output/"
 
-	*********************************
-	**    SECONDARY DATA: JLMPS    **
-	*********************************
-
-	*Master to locate the folder
-	global data_sec_JLMPS "$dropbox/04. Secondary Data/05. JLMPS/"
-		* 2010 *
-		global data_sec_JLMPS_2010 "$data_sec_JLMPS/2010/"
-			global data_JLMPS_2010 		"$data_sec_JLMPS_2010/01. Datasets/"
-				global data_JLMPS_2010_base 		"$data_JLMPS_2010/01. Base"
-				global data_JLMPS_2010_temp 		"$data_JLMPS_2010/02. Temp"
-				global data_JLMPS_2010_final 		"$data_JLMPS_2010/03. Final"
-			global out_JLMPS_2010  		"$data_sec_JLMPS_2010/02. Output/"
-
-		* 2016 *
-		global data_sec_JLMPS_2016 "$data_sec_JLMPS/2016/"
-			global data_JLMPS_2016 		"$data_sec_JLMPS_2016/02. Datasets/"
-				global data_JLMPS_2016_base 		"$data_JLMPS_2016/01. Base"
-				global data_JLMPS_2016_temp 		"$data_JLMPS_2016/02. Temp"
-				global data_JLMPS_2016_final 		"$data_JLMPS_2016/03. Final"
-			global out_JLMPS_2016  		"$data_sec_JLMPS_2016/02. Output/"
-
 
 	***********************************
 	**    SECONDARY DATA: RELIEF     **
 	***********************************
 	*Master to locate the folder
-	global data_sec_RW "$dropbox/04. Secondary Data/07. Relief World/"
+	global data_sec_RW "$dropbox/04. Secondary Data/05. Relief World/"
 		global data_RW 		"$data_sec_RW/01. Datasets/"
 			global data_RW_base 	"$data_RW/01. Base"
 			global data_RW_temp 	"$data_RW/02. Temp"
 			global data_RW_final 	"$data_RW/03. Final"
 
+
+	**********************
+	**     ANALYSIS     **
+	**********************
+	*Master to locate the folder
+	global folder_analysis "$dropbox/05. Analysis/"
+		global data_analysis	"$folder_analysis/01. Datasets/"
+			global data_base 		"$data_analysis/01. Base"
+			global data_temp 		"$data_analysis/02. Temp"
+			global data_final 		"$data_analysis/03. Final"
+		global out  			"$folder_analysis/02. Output/"
 
 exit
 /* End of do-file */

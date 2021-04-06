@@ -15,7 +15,7 @@ set mem 100m
 	****************************************************************************
 
 
-use "$data_2014_base/Jordan2014_ROS_HH_RSI.dta", clear
+use "$data_2014_final/01_FAFO2014_ROS_HH_RSI.dta", clear
 
 *
 distinct hhid 
@@ -450,7 +450,7 @@ bys HHrefugee: tab q303, m
 
 
 
-use "$data_2014_base/Jordan2014_ROS_HH_RSI.dta", clear
+*use "$data_2014_final/01_FAFO2014_ROS_HH_RSI.dta", clear
 
 ******* ARD *******
   
@@ -478,13 +478,15 @@ tab q409, m
 tab q702, m 
 tab q700, m
 tab q306
+
+preserve
 duplicates drop hhid, force
 tab HHchildren, m
 
 codebook HHrefugee
 tab ClusterID HHrefugee
+restore
 
-use "$data_2014_base/Jordan2014_ROS_HH_RSI.dta", clear
 
 *drop in camp
 tab HHgr1
@@ -492,13 +494,13 @@ drop if HHgr1 == 1
 
 tab ClusterID HHrefugee
 sort ClusterID
-br HHrefugee ClusterID
+*br HHrefugee ClusterID
 *refugee = 1
 gen refug = 1 if HHrefugee == 1 
 gen host = 1 if HHrefugee == 2 
 
 egen count_ref = count(refug), by(ClusterID)
-egen count_ref = count(host), by(ClusterID)
+egen count_host = count(host), by(ClusterID)
 
 collapse (sum) refug host , by(ClusterID)
 
@@ -513,6 +515,8 @@ distinct ClusterID if host == 0
 
 distinct ClusterID
 *348
+
+
 
 
 
@@ -1361,7 +1365,7 @@ lab var iid "Individual ID: concat hhid and main resp nb"
 ******************
 
 use "$data_2014_base/Jordan2014 ILO ROS_UserFile_Jul 2014.dta", clear
-isid ques_no
+*isid ques_no
 sort ques_no
 
 *Serial Number of household member
@@ -1495,6 +1499,10 @@ ren q115_t q115_t_hh_members
         q115_m_hh_members  ///
         q115_f_hh_members  ///
         , a(q123_interview_compl) 
+
+
+
+
 
 
 ***************

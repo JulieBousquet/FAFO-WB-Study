@@ -151,7 +151,7 @@ isid iid
 keep iid hhid 
 replace iid = 113066171  if hhid == 11306617
 
-save "$data_2020_temp/list_household_heads.dta", replace
+save "$data_2020_temp/01_FAFO2020_List_HH.dta", replace
 
 
 
@@ -263,7 +263,7 @@ format iid %18.0g
 isid iid
 
 *MERGE WITH HOUSEHOLD HEAD LIST TO LOCATE THEM
-merge 1:1 iid using "$data_2020_temp/list_household_heads.dta"
+merge 1:1 iid using "$data_2020_temp/01_FAFO2020_List_HH.dta"
 
 gen survey_hh = 1 if _merge == 3
 lab var survey_hh "Individual did the HH survey"
@@ -275,6 +275,6 @@ order iid hhid rsiid
 order survey_rsi survey_hh, b(ID101)
      
 
-save "$data_2020_final/Jordan2020_HH_RSI.dta", replace
+save "$data_2020_temp/02_FAFO2020_HH_RSI.dta", replace
 
 
