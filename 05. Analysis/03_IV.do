@@ -304,8 +304,6 @@ restore
 *use "$data_2020_temp/Jordan2020_03_Compared.dta", clear
 use "$data_final/01_FAFO_14_20.dta", clear
 
-
-
 tab governorate 
 /*
 11 Amman

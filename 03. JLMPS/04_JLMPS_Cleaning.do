@@ -1,12 +1,14 @@
 
 
+*DATA 2016 ONLY
 use "$data_JLMPS_base/JLMPS 2016 xs v1.1.dta", clear 
 
 
 tab gov 
 codebook gov
 lab list Lgov
-keep if gov == 11 | gov == 21 | gov == 22  
+*To be in line with the 
+*keep if gov == 11 | gov == 21 | gov == 22  
 /*
 11 Amman
 21 Irbid
