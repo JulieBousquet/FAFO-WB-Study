@@ -32,7 +32,7 @@ sort governorate district_id
 save "$data_JLMPS_temp/JLMPS_GeoUnits_Dico.dta", replace
 
 
-*DATA 2016 ONLY
+*DATA 2016 ONLY to extract the WORK PERMIT VARIABLE AT THE INDIV LEVEL
 use "$data_JLMPS_base/JLMPS 2016 xs v1.1.dta", clear 
 
 tab gov 
@@ -118,7 +118,10 @@ save "$data_JLMPS_final/01_JLMPS_16_xs_clear.dta", replace
 
 
 
-*USE LSMS 2016 & LSMS 2010
+*USE LSMS 2016 & LSMS 2010: CROSS SECTIONAL AND THE TWO years
+*BUT REMOVED NON HARMNONIZED VARIABLES: WHICH MEANS THAT THE VARIABLES
+*ON WORK PERMIT IN 2016 WAS NOT ASKED IN 2010 AND THUS REMOVED HERE.
+*I WILL JUST MERGE BY INDIV ID LATER
 use "$data_JLMPS_base/JLMPS 2016 rep xs v1.1.dta", clear 
 
 
@@ -170,6 +173,11 @@ use "$data_JLMPS_final/01_JLMPS_16_xs_clear.dta", clear
 
 *Work Permit 
 tab q11207
+*Do you have a legal contract?
+bys forced_migr: tab q6145 q11207 
+*TRIAL NOT: give 1 to refugees who said they have no WP but a legal contract
+replace q11207 = 1 if q6145 == 1 & forced_migr == 1 
+
 *Understanding the NON APPLICABLE OPTION in work permit variable.
 *"NA (do not work)" is specified in Q. 
 *Check that
@@ -303,6 +311,7 @@ tab employed, m //YES = 1
 codebook q11207 //WP yes = 1
 tab employed q11207
 
+*Why NON APPLICABLE ? Should be 0/1/or missing?
 recode q11207 (2=0) (99=.a) , gen(work_permit)
 tab work_permit, m
 lab def yesnona 0 "No" 1 "Yes" .a "Non Applicable"
@@ -318,7 +327,8 @@ keep 	indid district_iid governorate_iid work_permit nationality_cl forced_migr 
 		q11201a q11201b q11202 q11203 q11204a q11204b q11205 q11206 ///
 		q11208a q11208b q11212 q11213 q11214 employed
 
-
+*MERGE BY INDIVD ID TO INCLUDET THE WORK PERMIT VARIABLE INTO THE MAIN
+*DATASET
 merge 1:1 indid using "$data_JLMPS_final/02_JLMPS_10_16_rep_xs_clear.dta"
 
 tab year, m
@@ -421,11 +431,19 @@ tab work_permit year , m
 
 tab  nationality_cl work_permit  if year == 2016 
 tab work_permit, m
-
-*Why NON APPLICABLE ? Should be 0/1/or missing?
+bys work_permit: distinct district_iid  
+*WP are only in 27 distircts. That may be a problem once 
+*we aggregate
 
 bys year: tab governorate_en, m
 bys year: tab district_en, m
+
+*Employed
+tab cremp1, m //1 weeks
+bys year: tab cremp1
+tab usemp1, m //3 months
+bys year: tab usemp1
+
 
 *save "$data_JLMPS_final/JLMPS_2010-2016.dta", replace
 save "$data_final/02_JLMPS_10_16.dta", replace
@@ -450,9 +468,9 @@ save "$data_final/02_JLMPS_10_16.dta", replace
 	****************************************************************************
 
 
-*****************************
-**** SHARE EMPLOYEMENT ******
-*****************************
+********************************
+**** SHARE 1: EMPLOYEMENT ******
+********************************
 
 /*
 *Number of syrians employed in Y industry in Syria pre crisis in each gov
@@ -751,12 +769,6 @@ save "$data_temp/03_IV_geo_Syria.dta", replace
 
 
 
-
-
-
-
-
-
 use "$data_temp/03_IV_geo_Syria.dta", clear 
 
 sort governorate_syria district_en
@@ -1009,7 +1021,7 @@ append using `gov_14_dist_1'
     append using `gov_14_dist_`jdis''
   } 
 
-save "$data_temp/04_IV_geo_empl_Syria", replace
+save "$data_temp/04_IV_Share_Empl_Syria", replace
 
 
 
@@ -1066,10 +1078,14 @@ list industry_id industry_en
 *save "$data_UNHCR_temp/UNHCR_shift_byOccup.dta", replace 
 save "$data_temp/05_IV_shift_byIndus.dta", replace 
 
-* GOVERNROATE OF ORIGIN REFUGES
-import excel "$data_RW_base/syr_ref_bygov.xlsx", firstrow clear
-*save "$data_RW_final/syr_ref_bygov.dta", replace 
-save "$data_temp/06_Ctrl_GovOrig_Refugee.dta", replace 
+***************************
+* SHARE 2 : GOV OF ORIGIN *
+***************************
+
+* SYRIAN GOVERNROATE OF ORIGIN REFUGES
+import excel "$data_UNHCR_base/Datasets_WP_RegisteredSyrians.xlsx" , sheet("Registered Syrian by Gov Orig") firstrow clear
+*I will use 2016
+save "$data_temp/06_IV_Share_GovOrig_Refugee.dta", replace 
 
 
 **CONTROL: Number of refugees
@@ -1080,24 +1096,24 @@ import excel "$data_UNHCR_base/Datasets_WP_RegisteredSyrians.xlsx", sheet("WP_RE
 ren Year year
 keep if year == 2016 
 
-sort Governorates
-ren Governorates governorate_en
+sort Governorate
+ren Governorate governorate_en
 sort governorate_en
 egen governorate_iid = group(governorate_en)
 
+keep year governorate_en governorate_iid NbRefbyGovoutcamp NbWP
 *save "$data_UNHCR_final/UNHCR_NbRef_byGov.dta", replace
 save "$data_temp/07_Ctrl_Nb_Refugee_byGov.dta", replace
-
-*GET THE NUMBER OF REFUGEES BY GOVERNORATE , NOT ONLY FOR THE 4 SELECTED !!!!!
-*GO IN THE EXCEL FILE AND CHANGE THAT USING THE PDFS, FOR 2016 FOR NOW
 
 /**************
 THE INSTRUMENT 
 **************/
 
+use "$data_temp/04_IV_Share_Empl_Syria", clear 
 
-
-use "$data_temp/04_IV_geo_empl_Syria", clear 
+***********************************************
+* SHARE 3 : DISTANCE FROM SYR GOV TO DIST JOR *
+***********************************************
 
 *Distance between governorates syria and districts jordan
 geodist district_lat district_long gov_syria_lat gov_syria_long, gen(distance_dis_gov)
@@ -1142,11 +1158,16 @@ lab var distance_dis_gov "Distance Districts Jordan to Governorates Syria"
 sort id_gov_syria district_en industry_id
 
 *merge m:1 id_gov_syria using "$data_RW_final/syr_ref_bygov.dta"
-merge m:1 id_gov_syria using "$data_temp/06_Ctrl_GovOrig_Refugee.dta"
+merge m:1 id_gov_syria using "$data_temp/06_IV_Share_GovOrig_Refugee.dta", keepusing(nb_ref_syr_bygov_2016)
 
 
-* STANDARD SS IV
-gen IV_SS = (wp_2016*share_empl_syr*nb_ref_syr_bygov)/distance_dis_gov 
+****************
+****************
+  *  SS IV  *
+****************
+****************
+
+gen IV_SS = (wp_2016*share_empl_syr*nb_ref_syr_bygov_2016)/distance_dis_gov 
 collapse (sum) IV_SS, by(district_en)
 lab var IV_SS "IV: Shift Share"
 
@@ -1159,39 +1180,42 @@ save "$data_final/03_ShiftShare_IV", replace
 
 
 
-***************************
 
 	****************************************************************************
 	**                            IV ANALYSIS / REG                           **  
 	****************************************************************************
 
-
-
+*Merge JLMPS and SHIFT SHARE
 use "$data_final/02_JLMPS_10_16.dta", clear
 
 merge m:1 district_iid using "$data_final/03_ShiftShare_IV.dta" 
 drop _merge 
 
-*merge m:1 governorate_id using "$data_temp/07_Ctrl_Nb_Refugee_byGov.dta"
-*drop if _merge == 2
-*drop _merge
+merge m:1 governorate_iid using "$data_temp/07_Ctrl_Nb_Refugee_byGov.dta"
+drop _merge
 
 tab work_permit, m
 tab IV_SS, m
+*NO INSTRUMENT / NO WP IN 2010
 replace IV_SS = 0 if year == 2010
 tab IV_SS , m
 
-*merge m:1 governorate_iid using "$data_temp/07_Ctrl_Nb_Refugee_byGov.dta", keepusing(year NbRefugeesoutcamp)
-
-
 save "$data_final/05_IV_JLMPS_Analysis.dta", replace
+
+
+
 
 use "$data_final/05_IV_JLMPS_Analysis.dta", clear
 
+*Missing district IN 2010: nb 25 - Husaynia 
+
+*AGGREGATED NUMBER OF WORK PERMIT
 preserve
 tab forced_migr
 codebook forced_migr
 drop if forced_migr != 1
+distinct district_iid
+tab work_permit, m
 collapse (sum) work_permit if year == 2016, by(district_iid)
 ren work_permit agg_wp_2016
 gen year = 2016
@@ -1203,81 +1227,324 @@ merge m:1 district_iid using `wp2016'
 drop _merge
 
 gen agg_wp = agg_wp_2016
-replace agg_wp = 0 if mi(agg_wp)
-
+replace agg_wp = 0 if year == 2010 //No WP in 2016
+replace agg_wp = 0 if mi(agg_wp) //No WP in District
+*A few districts do not have indiv with WP: should I remove them?
+*drop if mi(agg_wp)
 tab agg_wp, m
+tab agg_wp year, m
+*br agg_wp year IV_SS 
+*sort year 
 
-xi: ivreg2 rsi_wage_income_lm_cont 
+bys year: distinct district_iid
+bys year: tab district_iid
+bys year: tab district_en
 
-xtset district_iid  
-xtivreg basicwg3 i.year i.district_iid (agg_wp= IV_SS)  if forced_migr==0, re first
-xtoverid, nois
+**********
+*Controls*
+**********
 
-xi: ivreg2 basicwg3 i.year i.district_iid (agg_wp= IV_SS) if forced_migr==0, cluster(district_iid)
-ivregress 2sls basicwg3 (agg_wp = IV_SS)
-est store IV
+gen ln_ref = ln(1 + NbRefbyGovoutcamp)
+*ln_ref, as of now, does not include refugees in 2010, only in 2016
+
+gen age2 = age^2
+codebook educ1d
+
+*Distance between zaatari camp and districts jordan
+gen dist_zaatari_lat = 32.30888675674741
+gen dist_zaatari_long = 36.31329385051756
+geodist district_lat district_long dist_zaatari_lat dist_zaatari_long, gen(distance_dis_camp)
+tab distance_dis_camp, m
+lab var distance_dis_camp "Distance (km) between JORD districts and ZAATARI CAMP"
+
+global controls ln_ref age age2 sex hhsize educ1d
+
+************
+*Instrument*
+************
+
+tab IV_SS, m
+tab work_permit, m
+tab agg_wp, m
+corr IV_SS agg_wp //0.64
+
+**********
+*Outcomes*
+**********
+
+tab basicwg3, m //Basic Wage
+gen ln_wage = ln(1+basicwg3)
+tab ln_wage, m
+
+tab mnthwgAllJob, m //Monthly wage
+gen ln_mthly_wage = ln(1+mnthwgAllJob)
+
+su hrwgAllJob, d //Hourly wage
+gen ln_hourly_wage = ln(1+hrwgAllJob)
+
+tab avdwirmn , m //Informal Wage 
+gen ln_avdwirmn = ln(1+avdwirmn)
+
+tab unemp1m, m //Unemp1m
+tab crnumdys, m //Days per week
+tab crhrsday, m //Hours per day
+tab crnumhrs1, m //Hours per week
+
+******WEIGHTS*******
+*expan_Hh 
+*expan_ref_hh
+*expan_indiv
+*expan_ref_indiv
+
+codebook hhid
+destring hhid, replace
+codebook indid
+destring indid, replace 
 
 
+save "$data_final/06_IV_JLMPS_Regression.dta", replace
 
 
+use "$data_final/06_IV_JLMPS_Regression.dta", clear
 
+************
+*REGRESSION*
+************
 
+xtset indid year 
 
+*Can add control :  c.distance_dis_camp##i.year
 
-
-reg  basicwg3 			iv_WPhat
+*WITHOUT YEAR FIXED EFFECT.
+preserve
+keep if usemp1 == 1 //Remove the unemployed people. Only the employed for the wage outcome
+keep if nationality_cl == 1 //Analysis on the Jordanians only
+*keep if !mi(ln_wage) //Only for those who have a wage
+*replace ln_wage = 0 if mi(ln_wage) //Unconditional wage
+tab district_iid
+tab year
+*tab ln_wage, m
+xi: ivreg2 ln_wage i.district_iid $controls  (agg_wp = IV_SS) ///
+  if forced_migr==0 [pweight = expan_indiv],  cluster(district_iid) ///
+                      robust partial(i.district_iid)
 estimates table, star(.05 .01 .001)
-reg  basicwg3 			iv_WPhat i.year
-estimates table, star(.05 .01 .001)
-reg  basicwg3 			iv_WPhat c.district_id
-estimates table, star(.05 .01 .001)
-reg  basicwg3 			iv_WPhat i.year c.district_id
-estimates table, star(.05 .01 .001)
+restore
 
-reg  basicwg3 			iv_WPhat, robust
+*WITH YEAR FIXED EFFECT
+*District as an idcator variable, fixed effect
+preserve
+keep if usemp1 == 1 //Remove the unemployed people. Only the employed for the wage outcome
+keep if nationality_cl == 1 //Analysis on the Jordanians only
+*keep if !mi(ln_wage) //Only for those who have a wage
+tab district_iid
+tab year
+tab ln_wage, m
+xi: ivreg2 ln_wage i.year i.district_iid $controls  (agg_wp = IV_SS) ///
+  if forced_migr==0 [pweight = expan_indiv],  cluster(district_iid) ///
+                      robust partial(i.district_iid) 
 estimates table, star(.05 .01 .001)
-reg  basicwg3 			iv_WPhat i.year, robust
-estimates table, star(.05 .01 .001)
-reg  basicwg3 			iv_WPhat c.district_id, robust
-estimates table, star(.05 .01 .001)
-reg  basicwg3 			iv_WPhat i.year c.district_id, robust
-estimates table, star(.05 .01 .001)
+restore
 
-reg  basicwg3 			iv_WPhat, robust cl(district_id)	
+*District as a continuous variable, fixed effect
+preserve
+keep if usemp1 == 1 //Remove the unemployed people. Only the employed for the wage outcome
+keep if nationality_cl == 1 //Analysis on the Jordanians only
+tab district_iid
+tab year
+tab ln_wage, m
+replace ln_wage = 0 if mi(ln_wage) //Unconditional wage
+xi: ivreg2 ln_wage i.year c.district_iid $controls  (agg_wp = IV_SS) ///
+  if forced_migr==0 [pweight = expan_indiv], first cluster(district_iid) ///
+                      robust 
 estimates table, star(.05 .01 .001)
-reg  basicwg3 			iv_WPhat i.year, robust cl(district_id)	
-estimates table, star(.05 .01 .001)
-reg  basicwg3 			iv_WPhat c.district_id, robust cl(district_id)	
-estimates table, star(.05 .01 .001)
-reg  basicwg3 			iv_WPhat i.year c.district_id, robust cl(district_id)	
-estimates table, star(.05 .01 .001)
+restore
 
-reg  basicwg3 			iv_WPhat i.year c.district_id , robust cl(district_id)	
+*Fixed effect at the Jordanian governorate level
+preserve
+keep if usemp1 == 1 //Remove the unemployed people. Only the employed for the wage outcome
+keep if nationality_cl == 1 //Analysis on the Jordanians only
+tab district_iid
+tab year
+tab ln_wage, m
+xi: ivreg2 ln_wage i.year c.governorate_iid $controls  (agg_wp = IV_SS) ///
+  if forced_migr==0 [pweight = expan_indiv],  cluster(governorate_iid) ///
+                      robust 
+estimates table, star(.05 .01 .001)
+restore
+
+
+/*Interpretation
+UnderIDF test (Kleibergen-Paap rk LM statistic)
+So my p-value=0.0896 < 0.1. 
+Therefore, I reject the null hypothesis that my 
+model is underidentified. 
+
+Hansen J statsitics
+Here, my p-value=0.00 < 0.1. 
+I reject the null hypothesis that my overidentification is valid. 
+
+With the Hansen J test of overidentification 
+I test whether an instrument is valid,
+i.e. uncorrelated with the error term (Cov (z,u)=0) 
+=> exogeneity requirement
+
+With the Kleibergen-Paap Lm statistic of underidentification, 
+I test whether the excluded instruments are correlated 
+with the endogenous regressors (Cov(z,x)≠0) 
+=> relevance requirement
+
+My instrument does not satify the exo requirment but satisfy 
+the relevance requirement
+*/
+
+*EMPLOYEMENT
+preserve
+tab unemp1m, m
+drop if mi(unemp1m) //Drop out of the labor force
+keep if nationality_cl == 1 //Analysis on the Jordanians only
+tab district_iid
+tab year
+tab ln_wage, m
+ivreg2 unemp1m  c.district_iid $controls (agg_wp = IV_SS) ///
+      if forced_migr==0 [aweight = expan_indiv], ///
+     cluster(district_iid) robust 
+estimates table, star(.05 .01 .001)
+restore
+
+*WORK HOURS
+preserve
+tab crnumdys, m //Days per week
+tab crhrsday, m //Hours per day
+tab crnumhrs1, m //Hours per week
+keep if usemp1 == 1 //Remove the unemployed people. Only the employed for the wage outcome
+drop if mi(unemp1m) //Drop out of the labor force
+keep if nationality_cl == 1 //Analysis on the Jordanians only
+tab district_iid
+tab year
+*replace ln_wage = 0 if mi(ln_wage) //Unconditional wage
+ivreg2 crnumdys i.district_iid $controls (agg_wp = IV_SS) ///
+      if forced_migr==0 [aweight = expan_indiv], ///
+      cluster(district_iid) robust partial(i.district_iid)
+estimates table, star(.05 .01 .001)
+ivreg2 crhrsday i.year i.district_iid $controls (agg_wp = IV_SS) ///
+      if forced_migr==0 [aweight = expan_indiv], ///
+       cluster(district_iid) robust partial(i.district_iid)
+estimates table, star(.05 .01 .001)
+ivreg2 crnumhrs1 i.year i.district_iid $controls (agg_wp = IV_SS) ///
+      if forced_migr==0 [aweight = expan_indiv], ///
+       cluster(district_iid) robust partial(i.district_iid)
+estimates table, star(.05 .01 .001)
+restore
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/*
+/* DISREGARD */
 
 *HAUSNAB TEST OF ENDO 
-ivregress 2sls basicwg3 (work_permit = IV_SS)
+ivregress 2sls basicwg3 (agg_wp = IV_SS)
 est store IV
-reg  basicwg3 work_permit 	
+reg  basicwg3 agg_wp 	
 hausman IV 
 drop _est_IV
 
 
-reg  usemp1 			iv_WPhat i.year c.district_id , robust cl(district_id)	
-reg  cremp1 			iv_WPhat i.year c.district_id , robust cl(district_id)	
-reg  crhrsday 			iv_WPhat i.year c.district_id , robust cl(district_id)	
+************ FAFO ********
+
+use "$data_temp/02_FAFO_2020_Harmo14.dta", clear 
+
+tab governorate_en
+drop if governorate_en == "Zarqa" 
+//Keep Mafraq, Irbid, Amman: data 2014 are on those. Zarqa was 2016 only
+tab governorate
+sort governorate_en
+egen governorate_id = group(governorate_en)
+
+tab district_en
+sort district_en
+egen district_id = group(district_en) 
+
+*gen year = 2020
+
+*append using "$data_temp/01_FAFO2020_Clean.dta"
+append using "$data_2020_final/01_FAFO2020_Clean.dta"
+
+ren district_id district_iid 
+ren governorate_id governorate_iid
+tab year 
+
+merge m:1 district_iid using "$data_final/03_ShiftShare_IV"
+drop if _merge == 2
+drop _merge
+
+merge m:1 governorate_iid using "$data_temp/07_Ctrl_Nb_Refugee_byGov.dta"
+drop if _merge == 2
+drop _merge
+
+bys year: tab governorate_en, m
+bys year: tab district_en, m
+
+replace IV_SS = 0 if year == 2014
+
+save "$data_final/04_IV_FAFO_Analysis", replace 
 
 
 
 
+use "$data_final/04_IV_FAFO_Analysis", clear 
+
+preserve
+tab refugee
+codebook refugee
+drop if refugee != 1
+collapse (sum) rsi_work_permit if year == 2020, by(district_iid)
+ren rsi_work_permit agg_wp_2020
+gen year = 2020
+tempfile wp2020
+save `wp2020'
+restore
+
+merge m:1 district_iid using `wp2020'
+drop _merge
+gen agg_wp = agg_wp_2020
+replace agg_wp = 0 if mi(agg_wp)
+
+tab agg_wp
+
+
+xtset iid year  
+xi: ivreg2 rsi_wage_income_lm_cont i.year i.district_iid $control_fafo (agg_wp= IV_SS) if refugee==2, cluster(district_iid) robust partial(i.district_iid) 
+
+
+ivregress 2sls rsi_wage_income_lm_cont (agg_wp = IV_SS)
+est store IV
 
 
 
+global control_fafo ros_age ros_gender hh_hhsize hh_gender
+xtset iid year 
 
 
+*replace ln_wage = 0 if mi(ln_wage) //Unconditional wage
+xi: ivreg2 ln_wage i.year i.district_iid $controls  (agg_wp = IV_SS) ///
+  if forced_migr==0 [pweight = expan_indiv],  cluster(district_iid) ///
+                      robust partial(i.district_iid) 
+estimates table, star(.05 .01 .001)
 
-
-
-
-
-
-
+*/

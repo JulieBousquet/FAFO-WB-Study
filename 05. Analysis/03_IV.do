@@ -623,7 +623,8 @@ append using `gov_14_dist_1'
   } 
 
 *save "$data_temp/Jordan2020_geo_Syria_empl_Syria", replace
-save "$data_temp/04_IV_geo_empl_Syria", replace
+*save "$data_temp/04_IV_geo_empl_Syria", replace
+save "$data_temp/04_IV_Share_Empl_Syria", replace
 
 
 
@@ -883,12 +884,15 @@ save "$data_final/03_ShiftShare_IV", replace
 
 *NEW 
 
-import excel "$data_RW_base/syr_ref_bygov.xlsx", firstrow clear
+import excel "$data_UNHCR_base/Datasets_WP_RegisteredSyrians.xlsx" , sheet("Registered Syrian by Gov Orig") firstrow clear
+*import excel "$data_RW_base/syr_ref_bygov.xlsx", firstrow clear
 *save "$data_RW_final/syr_ref_bygov.dta", replace 
-save "$data_temp/06_Ctrl_Nb_Refugee.dta", replace 
+*save "$data_temp/06_Ctrl_Nb_Refugee.dta", replace 
+save "$data_temp/06_IV_Share_GovOrig_Refugee.dta", replace 
 
 
-use "$data_temp/04_IV_geo_empl_Syria", clear 
+*use "$data_temp/04_IV_geo_empl_Syria", clear 
+use "$data_temp/04_IV_Share_Empl_Syria", clear 
 
 *use "$data_2020_final/Jordan2020_geo_Syria.dta", clear 
 *tab id_gov_syria
@@ -934,7 +938,7 @@ lab var distance_dis_gov "Distance Districts Jordan to Governorates Syria"
 sort id_gov_syria district_en industry_id
 
 *merge m:1 id_gov_syria using "$data_RW_final/syr_ref_bygov.dta"
-merge m:1 id_gov_syria using "$data_temp/06_Ctrl_Nb_Refugee.dta"
+merge m:1 id_gov_syria using "$data_temp/06_IV_Share_GovOrig_Refugee.dta"
 
 
 * STANDARD SS IV
