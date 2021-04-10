@@ -176,7 +176,7 @@ tab q11207
 *Do you have a legal contract?
 bys forced_migr: tab q6145 q11207 
 *TRIAL NOT: give 1 to refugees who said they have no WP but a legal contract
-replace q11207 = 1 if q6145 == 1 & forced_migr == 1 
+*replace q11207 = 1 if q6145 == 1 & forced_migr == 1 
 
 *Understanding the NON APPLICABLE OPTION in work permit variable.
 *"NA (do not work)" is specified in Q. 
@@ -312,18 +312,23 @@ codebook q11207 //WP yes = 1
 tab employed q11207
 
 *Why NON APPLICABLE ? Should be 0/1/or missing?
-recode q11207 (2=0) (99=.a) , gen(work_permit)
-tab work_permit, m
+recode q11207 (2=0) (99=.a) , gen(work_permit_orig)
+tab work_permit_orig, m
 lab def yesnona 0 "No" 1 "Yes" .a "Non Applicable"
-lab val work_permit yesnona
+lab val work_permit_orig yesnona
 *If refugees with NA work (employed = 1), then we will say they do not 
 *have a work permit. 
-replace work_permit = 0 if q11207 == 99 & employed == 1 & nationality_cl == 2 //Syrians
+replace work_permit_orig = 0 if q11207 == 99 & employed == 1 & nationality_cl == 2 //Syrians
 *If refugees with NA DO NOT work, then we will say missing.
-replace work_permit = . if q11207 == 99 & employed == 0 & nationality_cl == 2 //Syrians
-tab work_permit
+replace work_permit_orig = . if q11207 == 99 & employed == 0 & nationality_cl == 2 //Syrians
+tab work_permit_orig
 
-keep 	indid district_iid governorate_iid work_permit nationality_cl forced_migr ///
+*TRIAL: give 1 to refugees who said they have no WP but a legal contract
+gen work_permit = work_permit_orig 
+replace work_permit = 1 if q6145 == 1 & forced_migr == 1 
+
+keep 	indid district_iid governorate_iid work_permit work_permit_orig ///
+    nationality_cl forced_migr ///
 		q11201a q11201b q11202 q11203 q11204a q11204b q11205 q11206 ///
 		q11208a q11208b q11212 q11213 q11214 employed
 
@@ -1236,6 +1241,36 @@ tab agg_wp year, m
 *br agg_wp year IV_SS 
 *sort year 
 
+
+* ORIGINAL *
+
+*AGGREGATED NUMBER OF WORK PERMIT
+preserve
+tab forced_migr
+codebook forced_migr
+drop if forced_migr != 1
+distinct district_iid
+tab work_permit_orig, m
+collapse (sum) work_permit_orig if year == 2016, by(district_iid)
+ren work_permit_orig agg_wp_orig_2016
+gen year = 2016
+tempfile wp_orig_2016
+save `wp_orig_2016'
+restore
+
+merge m:1 district_iid using `wp_orig_2016'
+drop _merge
+
+gen agg_wp_orig = agg_wp_orig_2016
+replace agg_wp_orig = 0 if year == 2010 //No WP in 2016
+replace agg_wp_orig = 0 if mi(agg_wp_orig) //No WP in District
+*A few districts do not have indiv with WP: should I remove them?
+*drop if mi(agg_wp)
+tab agg_wp_orig, m
+tab agg_wp_orig year, m
+*br agg_wp year IV_SS 
+*sort year 
+
 bys year: distinct district_iid
 bys year: tab district_iid
 bys year: tab district_en
@@ -1257,7 +1292,6 @@ geodist district_lat district_long dist_zaatari_lat dist_zaatari_long, gen(dista
 tab distance_dis_camp, m
 lab var distance_dis_camp "Distance (km) between JORD districts and ZAATARI CAMP"
 
-global controls ln_ref age age2 sex hhsize educ1d
 
 ************
 *Instrument*
@@ -1267,6 +1301,8 @@ tab IV_SS, m
 tab work_permit, m
 tab agg_wp, m
 corr IV_SS agg_wp //0.64
+corr IV_SS agg_wp_orig //0.58
+
 
 **********
 *Outcomes*
@@ -1275,6 +1311,7 @@ corr IV_SS agg_wp //0.64
 tab basicwg3, m //Basic Wage
 gen ln_wage = ln(1+basicwg3)
 tab ln_wage, m
+gen IHS_wage=log(basicwg3+((basicwg3^2+1)^0.5))
 
 tab mnthwgAllJob, m //Monthly wage
 gen ln_mthly_wage = ln(1+mnthwgAllJob)
@@ -1289,6 +1326,14 @@ tab unemp1m, m //Unemp1m
 tab crnumdys, m //Days per week
 tab crhrsday, m //Hours per day
 tab crnumhrs1, m //Hours per week
+
+gen informal = 1 if ussocinsp == 0 
+replace informal = 1 if uscontrp == 0 
+replace informal = 0 if ussocinsp == 1
+replace informal = 0 if uscontrp == 1
+tab informal, m
+
+tab informal usemp1
 
 ******WEIGHTS*******
 *expan_Hh 
@@ -1305,13 +1350,546 @@ destring indid, replace
 save "$data_final/06_IV_JLMPS_Regression.dta", replace
 
 
+cap log close
+clear all
+set mem 100m
+set more off, permanently
+
+use "$data_final/06_IV_JLMPS_Regression.dta", clear
+
+*adoupdate, update
+*findfile  ivreg2.ado
+*adoupdate, update **
+*ssc inst ivreg2, replace
+
+************
+*REGRESSION*
+**********
+
+*br indid indid_2010 indid_2016 year
+keep if nationality_cl == 1 
+gen flag = 1 if !mi(indid_2010) & !mi(indid_2016)
+keep if flag == 1 
+sort indid_2010
+distinct indid_2010
+duplicates tag indid_2010, gen(dup)
+tab dup
+drop if dup == 0
+*28020 indiv surveyed twice in 2010 and 2020
+mdesc indid_2010
+destring indid_2010, replace 
+
+sum IV_SS agg_wp $controls
+gen log_IV_SS=log(1+IV_SS)
+gen IHS_IV_SS=log(IV_SS+((IV_SS^2+1)^0.5))
+
+xtset indid_2010  year 
+
+replace ln_ref=0 if year==2010
+global controls age age2 sex hhsize 
+
+
+*keep if !mi(unemp1m) //Drop out of the labor force
+*keep if usemp1 == 1 //Remove the unemployed people. Only the employed for the wage outcome
+*keep if nationality_cl == 1 //Analysis on the Jordanians only
+*keep if !mi(ln_wage) //Only for those who have a wage
+*replace IHS_wage = 0 if mi(IHS_wage) //Unconditional wage
+
+
+*SIMPLE OLS: 
+xi: reg ln_wage agg_wp  $controls   ///
+  if forced_migr==0 & usemp1 == 1 & nationality_cl == 1 [pweight = expan_indiv],  ///
+  cluster(district_iid) robust 
+estimates table, star(.05 .01 .001)
+
+*SIMPLE OLS: DISTRICT FE
+xi: reg ln_wage agg_wp i.district_iid $controls   ///
+  if forced_migr==0 & usemp1 == 1 & nationality_cl == 1 [pweight = expan_indiv],  ///
+  cluster(district_iid) robust 
+estimates table, star(.05 .01 .001)
+
+*SIMPLE OLS: YEAR FE / DISTRICT FE
+xi: reg ln_wage agg_wp i.district_iid i.year $controls   ///
+  if forced_migr==0 & usemp1 == 1 & nationality_cl == 1 [pweight = expan_indiv],  ///
+  cluster(district_iid) robust 
+estimates table, star(.05 .01 .001)
+
+*SIMPLE OLS / YEAR FE / DISTRICT FE / CONTROL NUMBER OF REFUGEE
+xi: reg ln_wage agg_wp i.district_iid i.year ln_ref $controls  ///
+  if forced_migr==0 & usemp1 == 1 & nationality_cl == 1 [pweight = expan_indiv],  ///
+  cluster(district_iid) robust 
+estimates table, star(.05 .01 .001)
+
+*SIMPLE OLS / YEAR FE / DISTRICT FE / SECOTRAL FE 
+xi: reg ln_wage agg_wp i.district_iid i.year i.crsectrp $controls  ///
+  if forced_migr==0 & usemp1 == 1 & nationality_cl == 1 [pweight = expan_indiv],  ///
+  cluster(district_iid) robust 
+estimates table, star(.05 .01 .001)
+
+*SIMPLE OLS / YEAR FE / DISTRICT FE / SECOTRAL FE / CONTROL NUMBER OF REFUGEE
+xi: reg ln_wage agg_wp i.district_iid i.year i.crsectrp ln_ref $controls  ///
+  if forced_migr==0 & usemp1 == 1 & nationality_cl == 1 [pweight = expan_indiv],  ///
+  cluster(district_iid) robust 
+estimates table, star(.05 .01 .001)
+
+*OLS / YEAR FE / INDIV FE 
+reghdfe ln_wage agg_wp  $controls [pw=expan_indiv], absorb(year indid_2010) cluster(district_iid) 
+
+*OLS / YEAR FE / INDIV FE / CONTROL NUMBER OF REFUGEE
+reghdfe ln_wage agg_wp ln_ref $controls [pw=expan_indiv], absorb(year indid_2010) cluster(district_iid) 
+
+/*
+* Then I partial out all variables
+foreach y in ln_wage agg_wp $controls   {
+
+reghdfe `y' [pw=expan_indiv], absorb(year indid_2010) residuals(`y'_c2wr)
+rename `y' o_`y'
+rename `y'_c2wr `y'
+}
+
+
+drop ln_wage $controls  agg_wp  
+
+foreach y in ln_wage $controls  agg_wp  {
+
+rename o_`y' `y' 
+}
+
+   
+reg ln_wage agg_wp  $controls [pw=expan_indiv], cluster(district_iid) robust
+*/
+
+*Same with: usemp1 ; informal 
+
+*IV: YEAR FE / DISTRICT FE
+xi: ivreg2 ln_wage i.year i.district_iid $controls (agg_wp = IHS_IV_SS) ///
+  if forced_migr==0 & usemp1 == 1 & nationality_cl == 1  [pweight = expan_indiv],  cluster(district_iid) ///
+                      partial(i.district_iid) first robust
+estimates table, star(.05 .01 .001)           
+            
+* With equivalent first-stage
+gen smpl=0
+replace smpl=1 if e(sample)==1
+
+xi: reg agg_wp IHS_IV_SS i.year i.district_iid $controls  ///
+  if smpl == 1 [pweight = expan_indiv],  cluster(district_iid) ///
+                      robust
+estimates table, star(.05 .01 .001)           
+  drop smpl 
+            
+
+*IV: YEAR FE / DISTRICT FE / CONTROL NUMBER OF REFUGEE
+xi: ivreg2 ln_wage i.year i.district_iid ln_ref $controls (agg_wp = IHS_IV_SS) ///
+  if forced_migr==0 & usemp1 == 1 & nationality_cl == 1  [pweight = expan_indiv],  cluster(district_iid) ///
+                      partial(i.district_iid) first
+estimates table, star(.05 .01 .001)
+
+* With equivalent first-stage
+gen smpl=0
+replace smpl=1 if e(sample)==1
+
+xi: reg agg_wp IHS_IV_SS i.year i.district_iid ln_ref $controls  ///
+  if smpl == 1 [pweight = expan_indiv],  cluster(district_iid) ///
+                      robust
+estimates table, star(.05 .01 .001)           
+  drop smpl 
+
+*IV: YEAR FE / DISTRICT FE / SECTORAL FE
+xi: ivreg2 ln_wage i.year i.district_iid i.crsectrp $controls (agg_wp = IHS_IV_SS) ///
+  if forced_migr==0 & usemp1 == 1 & nationality_cl == 1  [pweight = expan_indiv],  cluster(district_iid) ///
+                      partial(i.district_iid) first
+estimates table, star(.05 .01 .001)
+
+* With equivalent first-stage
+gen smpl=0
+replace smpl=1 if e(sample)==1
+
+xi: reg agg_wp IHS_IV_SS i.year i.district_iid i.crsectrp $controls  ///
+  if smpl == 1 [pweight = expan_indiv],  cluster(district_iid) ///
+                      robust
+estimates table, star(.05 .01 .001)           
+  drop smpl 
+
+*IV: YEAR FE / DISTRICT FE / SECTORAL FE / CONTROL NUMBER OF REFUGEE
+xi: ivreg2 ln_wage i.year i.district_iid i.crsectrp ln_ref $controls (agg_wp = IHS_IV_SS) ///
+  if forced_migr==0 & usemp1 == 1 & nationality_cl == 1  [pweight = expan_indiv],  cluster(district_iid) ///
+                      partial(i.district_iid) first
+estimates table, star(.05 .01 .001)
+* With equivalent first-stage
+gen smpl=0
+replace smpl=1 if e(sample)==1
+
+xi: reg agg_wp IHS_IV_SS i.year i.district_iid i.crsectrp ln_ref $controls  ///
+  if smpl == 1 [pweight = expan_indiv],  cluster(district_iid) ///
+                      robust
+estimates table, star(.05 .01 .001)           
+  drop smpl 
+
+*IV: YEAR FE / INDIV FE
+xi: ivreg2 ln_wage i.year i.indid $controls (agg_wp = IHS_IV_SS) ///
+  if forced_migr==0 & usemp1 == 1 & nationality_cl == 1  [pweight = expan_indiv],  cluster(district_iid) ///
+                      partial(i.district_iid) first
+estimates table, star(.05 .01 .001)
+
+*IV: YEAR FE / INDIV FE
+xi: ivreg2 ln_wage i.year i.district_iid $controls  (agg_wp = log_IV_SS) ///
+  if forced_migr==0 & usemp1 == 1 & nationality_cl == 1  [pweight = expan_indiv],  cluster(district_iid) ///
+                      partial(i.district_iid) 
+
+gen smpl=0
+replace smpl=1 if e(sample)==1
+
+* Then I partial out all variables
+foreach y in ln_wage $controls agg_wp log_IV_SS {
+
+reghdfe `y' [pw=expan_indiv] if smpl==1, absorb(year indid_2010) residuals(`y'_c2wr)
+rename `y' o_`y'
+rename `y'_c2wr `y'
+}
+
+ivreg2 ln_wage $controls (agg_wp = log_IV_SS) [pweight = expan_indiv], cluster(district_iid) robust first
+
+drop ln_wage $controls  agg_wp log_IV_SS smpl
+
+foreach y in ln_wage $controls  agg_wp log_IV_SS {
+
+rename o_`y' `y' 
+}
+
+*IV: YEAR FE / INDIV FE / CONTROL NUMBER OF REFUGEE
+xi: ivreg2 ln_wage i.year i.district_iid ln_ref $controls  (agg_wp = log_IV_SS) ///
+  if forced_migr==0 & usemp1 == 1 & nationality_cl == 1  [pweight = expan_indiv],  cluster(district_iid) ///
+                      partial(i.district_iid) 
+
+gen smpl=0
+replace smpl=1 if e(sample)==1
+
+* Then I partial out all variables
+foreach y in ln_wage $controls agg_wp log_IV_SS {
+
+reghdfe `y' [pw=expan_indiv] if smpl==1, absorb(year indid_2010) residuals(`y'_c2wr)
+rename `y' o_`y'
+rename `y'_c2wr `y'
+}
+
+ivreg2 ln_wage ln_ref $controls (agg_wp = log_IV_SS) [pweight = expan_indiv], cluster(district_iid) robust first
+
+drop ln_wage $controls  agg_wp log_IV_SS smpl
+
+foreach y in ln_wage $controls  agg_wp log_IV_SS {
+
+rename o_`y' `y' 
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+* With log transformation
+***********************************************************************************
+***********************************************************************************
+***********************************************************************************
+
+*Can add control :  c.distance_dis_camp##i.year
+
+*SIMPLE OLS: YEAR FE / DISTRICT FE
+xi: reg ln_wage agg_wp i.district_iid i.year $controls   ///
+  if forced_migr==0 & usemp1 == 1 & nationality_cl == 1 [pweight = expan_indiv],  ///
+  cluster(district_iid) robust 
+estimates table, star(.05 .01 .001)
+
+            * With time FE
+xi: ivreg2 ln_wage i.year i.district_iid $controls (agg_wp = IHS_IV_SS) ///
+  if forced_migr==0 & usemp1 == 1 & nationality_cl == 1  [pweight = expan_indiv],  cluster(district_iid) ///
+                      partial(i.district_iid) 
+
+                    
+            
+            
+* With equivalent first-stage
+gen smpl=0
+replace smpl=1 if e(sample)==1
+
+xi: reg agg_wp i.year i.district_iid $controls log_IV_SS ///
+  if smpl == 1 [pweight = expan_indiv],  cluster(district_iid) ///
+                      robust
+  drop smpl 
+            
+* With IHS
+***********************************************************************************
+***********************************************************************************
+***********************************************************************************
+
+*Can add control :  c.distance_dis_camp##i.year
+
+xi: ivreg2 ln_wage i.year i.district_iid $controls  (agg_wp = IHS_IV_SS) ///
+  if forced_migr==0 & usemp1 == 1 & nationality_cl == 1 [pweight = expan_indiv],  cluster(district_iid) ///
+                      partial(i.district_iid) 
+
+  
+* With equivalent first-stage
+gen smpl=0
+replace smpl=1 if e(sample)==1
+
+xi: reg agg_wp i.year i.district_iid $controls IHS_IV_SS ///
+  if smpl == 1 [pweight = expan_indiv],  cluster(district_iid) ///
+                      robust        
+
+drop smpl    
+
+*** Sample restriction
+***********************************************************************************
+***********************************************************************************
+***********************************************************************************
+
+           
+xi: ivreg2 ln_wage i.year i.district_iid $controls  (agg_wp = IHS_IV_SS) ///
+  if forced_migr==0 & usemp1 == 1 & nationality_cl == 1 & age>14 & age<65 [pweight = expan_indiv],  cluster(district_iid) ///
+                      partial(i.district_iid) 
+ 
+            
+
+* With log transformation
+*Can add control :  c.distance_dis_camp##i.year
+
+
+            * With time FE
+xi: ivreg2 ln_wage i.year i.district_iid $controls  (agg_wp = log_IV_SS) ///
+  if forced_migr==0 & usemp1 == 1 & nationality_cl == 1  [pweight = expan_indiv],  cluster(district_iid) ///
+                      partial(i.district_iid ) 
+
+* With equivalent first-stage
+gen smpl=0
+replace smpl=1 if e(sample)==1
+
+xi: reg agg_wp i.year i.district_iid $controls log_IV_SS ///
+  if smpl == 1 [pweight = expan_indiv],  cluster(district_iid) ///
+                      robust
+  drop smpl 
+
+
+* With sector FE
+***********************************************************************************
+***********************************************************************************
+***********************************************************************************
+
+
+            * With time FE
+xi: ivreg2 ln_wage i.year i.district_iid i.crsectrp $controls  (agg_wp = log_IV_SS) ///
+  if forced_migr==0 & usemp1 == 1 & nationality_cl == 1  [pweight = expan_indiv],  cluster(district_iid) ///
+                      partial(i.district_iid  i.crsectrp) 
+
+* With equivalent first-stage
+gen smpl=0
+replace smpl=1 if e(sample)==1
+
+xi: reg agg_wp i.year i.district_iid i.crsectrp $controls log_IV_SS ///
+  if smpl == 1 [pweight = expan_indiv],  cluster(district_iid) ///
+                      robust
+  drop smpl 
+
+
+* With categorized education
+***********************************************************************************
+***********************************************************************************
+***********************************************************************************
+
+    * With time FE
+xi: reg ln_wage i.year i.district_iid i.crsectrp i.educ1d ln_ref $controls  agg_wp ///
+  if forced_migr==0 & usemp1 == 1 & nationality_cl == 1  [pweight = expan_indiv],  cluster(district_iid) 
+                    
+
+
+            * With time FE
+xi: ivreg2 ln_wage i.year i.district_iid i.crsectrp i.educ1d ln_ref $controls  (agg_wp = log_IV_SS) ///
+  if forced_migr==0 & usemp1 == 1 & nationality_cl == 1  [pweight = expan_indiv],  cluster(district_iid) ///
+                      partial(i.district_iid  i.crsectrp) 
+
+* With equivalent first-stage
+sum fteducst
+    * With father's education FE
+xi: ivreg2 ln_wage i.year i.district_iid i.crsectrp i.educ1d i.fteducst $controls  (agg_wp = log_IV_SS) ///
+  if forced_migr==0 & usemp1 == 1 & nationality_cl == 1  [pweight = expan_indiv],  cluster(district_iid) ///
+                      partial(i.district_iid  i.crsectrp) 
+  
+    * With mother's education FE
+xi: ivreg2 ln_wage i.year i.district_iid i.crsectrp i.educ1d i.fteducst i.mteducst $controls  (agg_wp = log_IV_SS) ///
+  if forced_migr==0 & usemp1 == 1 & nationality_cl == 1  [pweight = expan_indiv],  cluster(district_iid) ///
+                      partial(i.district_iid  i.crsectrp) 
+  
+  
+*** Controlling for c.distance_dis_camp##i.year or usig it as an IV
+***********************************************************************************
+***********************************************************************************
+***********************************************************************************
+
+
+sum distance_dis_camp year
+gen d2016=0
+replace d2016=1 if year==2016
+gen ldistance_dis_camp=log(distance_dis_camp)
+gen inter_dist=ldistance_dis_camp*d2016
+
+sum $controls 
+
+xi: ivreg2 ln_wage i.year i.district_iid i.crsectrp i.educ1d i.fteducst i.mteducst age age2 sex hhsize (agg_wp ln_ref= log_IV_SS inter_dist) ///
+  if forced_migr==0 & usemp1 == 1 & nationality_cl == 1  [pweight = expan_indiv],  liml cluster(district_iid) ///
+                      partial(i.district_iid  i.crsectrp) 
+  
+  
+    
+  * With Individual FE (High-dimensional FE)
+* I firs partial-out all variables  
+  ***********************************************************************************
+***********************************************************************************
+***********************************************************************************
+
 use "$data_final/06_IV_JLMPS_Regression.dta", clear
 
 ************
 *REGRESSION*
 ************
+bys year: tab nationality_cl //53094 : 28398 in 2016 and 24696 in 2010
+*br indid indid_2010 indid_2016 year
+keep if nationality_cl == 1 
+gen flag = 1 if !mi(indid_2010) & !mi(indid_2016)
+keep if flag == 1 
+sort indid_2010
+distinct indid_2010
+duplicates tag indid_2010, gen(dup)
+tab dup
+drop if dup == 0
+*28020 indiv surveyed twice in 2010 and 2020
 
-xtset indid year 
+destring indid_2010, replace 
+
+xtset indid_2010 year
+
+sum IV_SS agg_wp $controls
+gen log_IV_SS=log(1+IV_SS)
+gen IHS_IV_SS=log(IV_SS+((IV_SS^2+1)^0.5))
+
+xi: ivreg2 ln_wage i.year i.district_iid $controls  (agg_wp = log_IV_SS) ///
+  if forced_migr==0 & usemp1 == 1 & nationality_cl == 1  [pweight = expan_indiv],  cluster(district_iid) ///
+                      partial(i.district_iid) 
+
+gen smpl=0
+replace smpl=1 if e(sample)==1
+
+* Then I partial out all variables
+foreach y in ln_wage $controls agg_wp log_IV_SS {
+
+reghdfe `y' [pw=expan_indiv] if smpl==1, absorb(year indid_2010) residuals(`y'_c2wr)
+rename `y' o_`y'
+rename `y'_c2wr `y'
+}
+
+ivreg2 ln_wage $controls (agg_wp = log_IV_SS) [pweight = expan_indiv], cluster(district_iid) robust
+reg ln_wage agg_wp $controls   [pweight = expan_indiv], cluster(district_iid) robust
+
+drop ln_wage $controls  agg_wp log_IV_SS smpl
+
+foreach y in ln_wage $controls  agg_wp log_IV_SS {
+
+rename o_`y' `y' 
+}
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/*
+
+*FIRST STAGE 
+
+preserve
+keep if usemp1 == 1 //Remove the unemployed people. Only the employed for the wage outcome
+keep if nationality_cl == 1 //Analysis on the Jordanians only
+*keep if !mi(ln_wage) //Only for those who have a wage
+*replace ln_wage = 0 if mi(ln_wage) //Unconditional wage
+tab district_iid
+tab year
+*tab ln_wage, m
+xi: ivreg2 ln_wage i.district_iid i.year (agg_wp = IHS_IV_SS) ///
+  if forced_migr==0 [pweight = expan_indiv],  cluster(district_iid) ///
+                      robust partial(i.district_iid) first 
+estimates table, star(.05 .01 .001)
+restore
+
+preserve
+keep if usemp1 == 1 //Remove the unemployed people. Only the employed for the wage outcome
+keep if nationality_cl == 1 //Analysis on the Jordanians only
+*keep if !mi(ln_wage) //Only for those who have a wage
+*replace ln_wage = 0 if mi(ln_wage) //Unconditional wage
+tab district_iid
+tab year
+*tab ln_wage, m
+xi: ivreg2 ln_wage i.district_iid i.year $controls (agg_wp = IV_SS) ///
+  if forced_migr==0 [pweight = expan_indiv],  cluster(district_iid) ///
+                      robust partial(i.district_iid) first 
+estimates table, star(.05 .01 .001)
+restore
 
 *Can add control :  c.distance_dis_camp##i.year
 
@@ -1324,7 +1902,7 @@ keep if nationality_cl == 1 //Analysis on the Jordanians only
 tab district_iid
 tab year
 *tab ln_wage, m
-xi: ivreg2 ln_wage i.district_iid $controls  (agg_wp = IV_SS) ///
+xi: ivreg2 ln_wage i.district_iid i.year  $controls  (agg_wp_orig = IV_SS) ///
   if forced_migr==0 [pweight = expan_indiv],  cluster(district_iid) ///
                       robust partial(i.district_iid)
 estimates table, star(.05 .01 .001)
@@ -1547,4 +2125,5 @@ xi: ivreg2 ln_wage i.year i.district_iid $controls  (agg_wp = IV_SS) ///
                       robust partial(i.district_iid) 
 estimates table, star(.05 .01 .001)
 
+*/
 */
