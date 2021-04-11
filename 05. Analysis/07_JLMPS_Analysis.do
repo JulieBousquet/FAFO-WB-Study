@@ -1429,20 +1429,23 @@ global    controls ///
           age age2 sex hhsize 
 global    lm_out ///
           ln_wage_natives_cond     /// Wage Cond   (no empl = . / out LF = .)
-          *ln_wage_uncond_unemp     /// Wage Uncond (no empl = 0 / out LF = .)
-          *ln_wage_uncond_unemp_olf /// Wage Uncond (no empl = 0 / out LF = 0)
-          usemp1 /// Employed
+           usemp1 /// Employed
           unemp1 /// Unemp 
-          *crnumdys /// Days of work per week
-          *crhrsday /// Hours of work per day 
-          crnumhrs1 /// Hours of work per week
+           crnumhrs1 /// Hours of work per week
           informal // Informal if no contract and no insurance
+
+         *ln_wage_uncond_unemp     /// Wage Uncond (no empl = 0 / out LF = .)
+          *ln_wage_uncond_unemp_olf /// Wage Uncond (no empl = 0 / out LF = 0)
+         *crnumdys /// Days of work per week
+          *crhrsday /// Hours of work per day 
 
 ***********************
 * DESCRIPTIVE STATISTICS
 
 *Summary statstics
-sum IV_SS agg_wp $controls
+bys year: sum IV_SS agg_wp work_permit ///
+              $lm_out $controls ln_ref basicwg3 NbRefbyGovoutcamp ///
+              educ1d fteducst mteducst [aweight = expan_indiv] 
 
 *Dividing into treated areas: WP against NO WP: District differences?
 tab agg_wp, m
@@ -1509,6 +1512,9 @@ foreach outcome of global lm_out {
           [pweight = expan_indiv],  ///
           cluster(district_iid) robust 
   estimates table, star(.05 .01 .001)
+}
+
+foreach outcome of global lm_out {
   *IV
   xi: ivreg2  `outcome' ///
               i.year i.district_iid ///
@@ -1541,6 +1547,8 @@ foreach outcome of global lm_out {
           [pweight = expan_indiv],  ///
           cluster(district_iid) robust 
   estimates table, star(.05 .01 .001)
+}
+foreach outcome of global lm_out {
   *IV
   xi: ivreg2  `outcome' ///
               i.year i.district_iid ///
@@ -1556,7 +1564,7 @@ foreach outcome of global lm_out {
   gen smpl=0
   replace smpl=1 if e(sample)==1
 
-  xi: reg `outcome' IHS_IV_SS ///
+  xi: reg agg_wp IHS_IV_SS ///
           i.year i.district_iid ///
           ln_ref $controls i.educ1d i.fteducst i.mteducst  ///
           if smpl == 1 [pweight = expan_indiv], ///
@@ -1574,6 +1582,9 @@ foreach outcome of global lm_out {
           [pweight = expan_indiv],  ///
           cluster(district_iid) robust 
   estimates table, star(.05 .01 .001)
+}
+
+foreach outcome of global lm_out {
   *IV
   xi: ivreg2  `outcome' ///
               i.year i.district_iid i.crsectrp ///
@@ -1607,6 +1618,8 @@ foreach outcome of global lm_out {
           [pweight = expan_indiv],  ///
           cluster(district_iid) robust 
   estimates table, star(.05 .01 .001)
+}
+foreach outcome of global lm_out {
   *IV
   xi: ivreg2  `outcome' ///
               i.year i.district_iid i.crsectrp ///
@@ -1638,6 +1651,7 @@ foreach outcome of global lm_out {
           [pw=expan_indiv], ///
           absorb(year indid_2010) ///
           cluster(district_iid) 
+}
   /*
   * Then I partial out all variables
   foreach y in ln_wage agg_wp $controls educ1d fteducst mteducst   {
@@ -1652,7 +1666,9 @@ foreach outcome of global lm_out {
   reg ln_wage agg_wp  $controls [pw=expan_indiv], cluster(district_iid) robust
   */
   *IV
-  preserve
+
+ foreach outcome of global lm_out {
+ preserve
   xi: ivreg2  `outcome' ///
               i.year i.district_iid ///
               $controls i.educ1d i.fteducst i.mteducst ///
@@ -1690,6 +1706,8 @@ foreach outcome of global lm_out {
           [pw=expan_indiv], ///
           absorb(year indid_2010) ///
           cluster(district_iid) 
+  }
+  foreach outcome of global lm_out {
   *IV
   preserve
   xi: ivreg2  `outcome' ///
@@ -1704,7 +1722,7 @@ foreach outcome of global lm_out {
   replace smpl=1 if e(sample)==1
 
   * Then I partial out all variables
-  foreach y in `outcome' agg_wp IHS_IV_SS $controls educ1d fteducst mteducst  {
+  foreach y in `outcome' agg_wp IHS_IV_SS $controls ln_ref educ1d fteducst mteducst  {
     reghdfe `y' [pw=expan_indiv] if smpl==1, absorb(year indid_2010) residuals(`y'_c2wr)
     rename `y' o_`y'
     rename `y'_c2wr `y'
@@ -1715,8 +1733,8 @@ foreach outcome of global lm_out {
           [pweight = expan_indiv], ///
           cluster(district_iid) robust ///
           first
-  drop `outcome' agg_wp IHS_IV_SS $controls  educ1d fteducst mteducst smpl
-  foreach y in `outcome' agg_wp IHS_IV_SS $controls {
+  drop `outcome' agg_wp IHS_IV_SS $controls ln_ref educ1d fteducst mteducst smpl
+  foreach y in `outcome' agg_wp IHS_IV_SS $controls ln_ref educ1d fteducst mteducst  {
     rename o_`y' `y' 
   }
   restore
