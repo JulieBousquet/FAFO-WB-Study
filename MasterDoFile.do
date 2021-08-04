@@ -73,7 +73,7 @@ if inlist(c(username), "u0131185", "julie") == 1 {
 			global data_JLMPS_base 		"$data_JLMPS/01. Base"
 			global data_JLMPS_temp 		"$data_JLMPS/02. Temp"
 			global data_JLMPS_final 	"$data_JLMPS/03. Final"
-		global out_JLMPS  	"$folder_JLMPS/02. Output/"
+		global out_JLMPS  	"$folder_JLMPS/03. Output/"
 
 
 	****************************

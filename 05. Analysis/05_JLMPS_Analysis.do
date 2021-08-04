@@ -299,7 +299,12 @@ mdesc ln_wage ln_wage_natives ln_wage_natives_cond ///
       ln_wage_uncond_unemp ln_wage_uncond_unemp_olf
 
 
+***************************************************
+
   ********** M1: SIMPLE OLS: 
+
+***************************************************
+
 foreach outcome of global lm_out {
   xi: reg `outcome' agg_wp ///
           $controls i.educ1d i.fteducst i.mteducst ///
@@ -308,7 +313,101 @@ foreach outcome of global lm_out {
   estimates table, star(.05 .01 .001)
 }
 
-  ********** M2: SIMPLE OLS: DISTRICT FE
+************ M1 with automatic tables
+
+tab ln_wage_natives_cond
+tab educ1d
+codebook educ1d
+lab def Leduc1d   1  "Illiterate" ///
+                  2  "Read and Write" ///
+                  3  "Basic Education" ///
+                  4  "Secondary Educ" ///
+                  5  "Post Secondary" ///
+                  6  "University" ///
+                  7  "Post Graduate" ///
+                  , modify
+lab val educ1d Leduc1d 
+
+codebook agg_wp
+lab var agg_wp "Work Permits"
+
+reg ln_wage_natives_cond agg_wp $controls i.educ1d i.fteducst i.mteducst ///
+    [pweight = expan_indiv], cluster(district_iid) robust
+estimates table, star(.05 .01 .001)
+estimates store m1, title(Model 1)
+
+sum ln_wage_natives_cond if agg_wp == 1
+estadd scalar ctrl_mean = r(mean)
+
+reg usemp1 agg_wp $controls i.educ1d i.fteducst i.mteducst ///
+    [pweight = expan_indiv], cluster(district_iid) robust
+estimates table, star(.05 .01 .001)
+estimates store m2, title(Model 2)
+
+sum usemp1 if agg_wp == 1
+estadd scalar ctrl_mean = r(mean)
+
+reg unemp1 agg_wp $controls i.educ1d i.fteducst i.mteducst ///
+    [pweight = expan_indiv], cluster(district_iid) robust
+estimates table, star(.05 .01 .001)
+estimates store m3, title(Model 3)
+
+sum unemp1 if agg_wp == 1
+estadd scalar ctrl_mean = r(mean)
+
+reg crnumhrs1 agg_wp $controls i.educ1d i.fteducst i.mteducst ///
+    [pweight = expan_indiv],  cluster(district_iid) robust
+estimates table, star(.05 .01 .001)
+estimates store m4, title(Model 4)
+
+sum crnumhrs1 if agg_wp == 1
+estadd scalar ctrl_mean = r(mean)
+
+reg informal agg_wp $controls i.educ1d i.fteducst i.mteducst ///
+    [pweight = expan_indiv], cluster(district_iid) robust
+estimates table, star(.05 .01 .001)
+estimates store m5, title(Model 5)
+
+sum informal if agg_wp == 1
+estadd scalar ctrl_mean = r(mean)
+
+
+ereturn list
+mat list e(b)
+estout m1 m2 m3 m4 m5, cells(b(star fmt(3)) se(par fmt(2))) ///
+  drop(age age2 sex hhsize 1.educ1d 2.educ1d 3.educ1d 4.educ1d ///
+        5.educ1d 6.educ1d 7.educ1d 1.fteducst 2.fteducst ///
+        3.fteducst 4.fteducst 5.fteducst 6.fteducst ///
+        1.mteducst 2.mteducst 3.mteducst 4.mteducst 5.mteducst ///
+        6.mteducst _cons $controls)   ///
+   legend label varlabels(_cons constant) starlevels(* 0.1 ** 0.05 *** 0.01)           ///
+   stats(r2 df_r bic, fmt(3 0 1) label(R-sqr dfres BIC))
+
+*** (**) [*] indicates significance at the 99%
+*(95%) [90%] level. Based
+
+*erase "$out/reg_infra_access.tex"
+esttab m1 m2 m3 m4 m5 using "$out_JLMPS/reg_01_OLS.tex", se label replace booktabs ///
+mtitles("Wage" "Employ" "Unemploy" "Nb. Hours" "Informal") ///
+scalars(ctrl_mean)  drop(age age2 sex hhsize 1.educ1d 2.educ1d 3.educ1d 4.educ1d ///
+        5.educ1d 6.educ1d 7.educ1d 1.fteducst 2.fteducst ///
+        3.fteducst 4.fteducst 5.fteducst 6.fteducst ///
+        1.mteducst 2.mteducst 3.mteducst 4.mteducst 5.mteducst ///
+        6.mteducst _cons $controls) starlevels(* 0.1 ** 0.05 *** 0.01) ///
+   title("Results OLS Regression"\label{tab1}) nofloat ///
+   stats(N r2_a ctrl_mean, labels("Obs" "Adj. R-Squared" "Control Mean")) ///
+    nonotes ///
+    addnotes("Standard errors clustered at the district level. Significance levels: *p $<$ 0.1, ** p $<$ 0.05, *** p $<$ 0.01") 
+
+estimates drop m1 m2 m3 m4 m5 
+
+
+***************************************************
+
+  ********** M2: SIMPLE OLS: DISTRICT FE 
+
+***************************************************
+
 foreach outcome of global lm_out {
   xi: reg `outcome' agg_wp ///
           i.district_iid ///
@@ -318,7 +417,114 @@ foreach outcome of global lm_out {
   estimates table, star(.05 .01 .001)
 }
 
+
+reg ln_wage_natives_cond agg_wp i.district_iid $controls i.educ1d i.fteducst i.mteducst ///
+    [pweight = expan_indiv], cluster(district_iid) robust
+estimates table, star(.05 .01 .001)
+estimates store m1, title(Model 1)
+
+sum ln_wage_natives_cond if agg_wp == 1
+estadd scalar ctrl_mean = r(mean)
+
+reg usemp1 agg_wp i.district_iid $controls i.educ1d i.fteducst i.mteducst ///
+    [pweight = expan_indiv], cluster(district_iid) robust
+estimates table, star(.05 .01 .001)
+estimates store m2, title(Model 2)
+
+sum usemp1 if agg_wp == 1
+estadd scalar ctrl_mean = r(mean)
+
+reg unemp1 agg_wp i.district_iid $controls i.educ1d i.fteducst i.mteducst ///
+    [pweight = expan_indiv], cluster(district_iid) robust
+estimates table, star(.05 .01 .001)
+estimates store m3, title(Model 3)
+
+sum unemp1 if agg_wp == 1
+estadd scalar ctrl_mean = r(mean)
+
+reg crnumhrs1 agg_wp i.district_iid $controls i.educ1d i.fteducst i.mteducst ///
+    [pweight = expan_indiv],  cluster(district_iid) robust
+estimates table, star(.05 .01 .001)
+estimates store m4, title(Model 4)
+
+sum crnumhrs1 if agg_wp == 1
+estadd scalar ctrl_mean = r(mean)
+
+reg informal agg_wp i.district_iid $controls i.educ1d i.fteducst i.mteducst ///
+    [pweight = expan_indiv], cluster(district_iid) robust
+estimates table, star(.05 .01 .001)
+estimates store m5, title(Model 5)
+
+sum informal if agg_wp == 1
+estadd scalar ctrl_mean = r(mean)
+
+
+ereturn list
+mat list e(b)
+estout m1 m2 m3 m4 m5, cells(b(star fmt(3)) se(par fmt(2))) ///
+  drop(age age2 sex hhsize 1.educ1d 2.educ1d 3.educ1d 4.educ1d ///
+        5.educ1d 6.educ1d 7.educ1d 1.fteducst 2.fteducst ///
+        3.fteducst 4.fteducst 5.fteducst 6.fteducst ///
+        1.mteducst 2.mteducst 3.mteducst 4.mteducst 5.mteducst ///
+        6.mteducst ///
+        1.district_iid 2.district_iid 3.district_iid 4.district_iid ///
+        5.district_iid 6.district_iid 7.district_iid 8.district_iid ///
+        9.district_iid 10.district_iid 11.district_iid 12.district_iid ///
+        13.district_iid 14.district_iid 15.district_iid 16.district_iid ///
+        17.district_iid 18.district_iid 19.district_iid 20.district_iid ///
+        21.district_iid 22.district_iid 23.district_iid 24.district_iid ///
+        25.district_iid ///
+        26.district_iid 27.district_iid 28.district_iid 29.district_iid ///
+        30.district_iid 31.district_iid 32.district_iid 33.district_iid ///
+        34.district_iid 35.district_iid 36.district_iid 37.district_iid ///
+        38.district_iid 39.district_iid 40.district_iid 41.district_iid ///
+        42.district_iid 43.district_iid 44.district_iid 45.district_iid ///
+        46.district_iid 47.district_iid 48.district_iid 49.district_iid ///
+        50.district_iid 51.district_iid  ///
+         _cons $controls)   ///
+   legend label varlabels(_cons constant) starlevels(* 0.1 ** 0.05 *** 0.01)           ///
+   stats(r2 df_r bic, fmt(3 0 1) label(R-sqr dfres BIC))
+
+*** (**) [*] indicates significance at the 99%
+*(95%) [90%] level. Based
+
+*erase "$out/reg_infra_access.tex"
+esttab m1 m2 m3 m4 m5 using "$out_JLMPS/reg_02_OLS_FE_district.tex", se label replace booktabs ///
+mtitles("Wage" "Employ" "Unemploy" "Nb. Hours" "Informal") ///
+scalars(ctrl_mean)  drop(age age2 sex hhsize 1.educ1d 2.educ1d 3.educ1d 4.educ1d ///
+        5.educ1d 6.educ1d 7.educ1d 1.fteducst 2.fteducst ///
+        3.fteducst 4.fteducst 5.fteducst 6.fteducst ///
+        1.mteducst 2.mteducst 3.mteducst 4.mteducst 5.mteducst ///
+        6.mteducst ///
+        1.district_iid 2.district_iid 3.district_iid 4.district_iid ///
+        5.district_iid 6.district_iid 7.district_iid 8.district_iid ///
+        9.district_iid 10.district_iid 11.district_iid 12.district_iid ///
+        13.district_iid 14.district_iid 15.district_iid 16.district_iid ///
+        17.district_iid 18.district_iid 19.district_iid 20.district_iid ///
+        21.district_iid 22.district_iid 23.district_iid 24.district_iid ///
+        25.district_iid ///
+        26.district_iid 27.district_iid 28.district_iid 29.district_iid ///
+        30.district_iid 31.district_iid 32.district_iid 33.district_iid ///
+        34.district_iid 35.district_iid 36.district_iid 37.district_iid ///
+        38.district_iid 39.district_iid 40.district_iid 41.district_iid ///
+        42.district_iid 43.district_iid 44.district_iid 45.district_iid ///
+        46.district_iid 47.district_iid 48.district_iid 49.district_iid ///
+        50.district_iid 51.district_iid  ///
+        _cons $controls) starlevels(* 0.1 ** 0.05 *** 0.01) ///
+   title("Results OLS Regression with District FE"\label{tab1}) nofloat ///
+   stats(N r2_a ctrl_mean, labels("Obs" "Adj. R-Squared" "Control Mean")) ///
+    nonotes ///
+    addnotes("Standard errors clustered at the district level. Significance levels: *p $<$ 0.1, ** p $<$ 0.05, *** p $<$ 0.01") 
+
+estimates drop m1 m2 m3 m4 m5 
+
+
+***************************************************
+
   ********** M3: YEAR FE / DISTRICT FE
+
+***************************************************
+
 foreach outcome of global lm_out {
   *OLS
   xi: reg `outcome' agg_wp ///
@@ -329,6 +535,111 @@ foreach outcome of global lm_out {
   estimates table, star(.05 .01 .001)
 }
 
+
+reg ln_wage_natives_cond agg_wp i.district_iid i.year $controls i.educ1d i.fteducst i.mteducst ///
+    [pweight = expan_indiv], cluster(district_iid) robust
+estimates table, star(.05 .01 .001)
+estimates store m1, title(Model 1)
+
+sum ln_wage_natives_cond if agg_wp == 1
+estadd scalar ctrl_mean = r(mean)
+
+reg usemp1 agg_wp i.district_iid i.year $controls i.educ1d i.fteducst i.mteducst ///
+    [pweight = expan_indiv], cluster(district_iid) robust
+estimates table, star(.05 .01 .001)
+estimates store m2, title(Model 2)
+
+sum usemp1 if agg_wp == 1
+estadd scalar ctrl_mean = r(mean)
+
+reg unemp1 agg_wp i.district_iid i.year $controls i.educ1d i.fteducst i.mteducst ///
+    [pweight = expan_indiv], cluster(district_iid) robust
+estimates table, star(.05 .01 .001)
+estimates store m3, title(Model 3)
+
+sum unemp1 if agg_wp == 1
+estadd scalar ctrl_mean = r(mean)
+
+reg crnumhrs1 agg_wp i.district_iid i.year $controls i.educ1d i.fteducst i.mteducst ///
+    [pweight = expan_indiv],  cluster(district_iid) robust
+estimates table, star(.05 .01 .001)
+estimates store m4, title(Model 4)
+
+sum crnumhrs1 if agg_wp == 1
+estadd scalar ctrl_mean = r(mean)
+
+reg informal agg_wp i.district_iid i.year $controls i.educ1d i.fteducst i.mteducst ///
+    [pweight = expan_indiv], cluster(district_iid) robust
+estimates table, star(.05 .01 .001)
+estimates store m5, title(Model 5)
+
+sum informal if agg_wp == 1
+estadd scalar ctrl_mean = r(mean)
+
+
+ereturn list
+mat list e(b)
+estout m1 m2 m3 m4 m5, cells(b(star fmt(3)) se(par fmt(2))) ///
+  drop(age age2 sex hhsize 1.educ1d 2.educ1d 3.educ1d 4.educ1d ///
+        5.educ1d 6.educ1d 7.educ1d 1.fteducst 2.fteducst ///
+        3.fteducst 4.fteducst 5.fteducst 6.fteducst ///
+        1.mteducst 2.mteducst 3.mteducst 4.mteducst 5.mteducst ///
+        6.mteducst 2010.year 2016.year ///
+        1.district_iid 2.district_iid 3.district_iid 4.district_iid ///
+        5.district_iid 6.district_iid 7.district_iid 8.district_iid ///
+        9.district_iid 10.district_iid 11.district_iid 12.district_iid ///
+        13.district_iid 14.district_iid 15.district_iid 16.district_iid ///
+        17.district_iid 18.district_iid 19.district_iid 20.district_iid ///
+        21.district_iid 22.district_iid 23.district_iid 24.district_iid ///
+        25.district_iid ///
+        26.district_iid 27.district_iid 28.district_iid 29.district_iid ///
+        30.district_iid 31.district_iid 32.district_iid 33.district_iid ///
+        34.district_iid 35.district_iid 36.district_iid 37.district_iid ///
+        38.district_iid 39.district_iid 40.district_iid 41.district_iid ///
+        42.district_iid 43.district_iid 44.district_iid 45.district_iid ///
+        46.district_iid 47.district_iid 48.district_iid 49.district_iid ///
+        50.district_iid 51.district_iid  ///
+         _cons $controls)   ///
+   legend label varlabels(_cons constant) starlevels(* 0.1 ** 0.05 *** 0.01)           ///
+   stats(r2 df_r bic, fmt(3 0 1) label(R-sqr dfres BIC))
+
+*** (**) [*] indicates significance at the 99%
+*(95%) [90%] level. Based
+
+*erase "$out/reg_infra_access.tex"
+esttab m1 m2 m3 m4 m5 using "$out_JLMPS/reg_03_OLS_FE_district_year.tex", se label replace booktabs ///
+mtitles("Wage" "Employ" "Unemploy" "Nb. Hours" "Informal") ///
+scalars(ctrl_mean)  drop(age age2 sex hhsize 1.educ1d 2.educ1d 3.educ1d 4.educ1d ///
+        5.educ1d 6.educ1d 7.educ1d 1.fteducst 2.fteducst ///
+        3.fteducst 4.fteducst 5.fteducst 6.fteducst ///
+        1.mteducst 2.mteducst 3.mteducst 4.mteducst 5.mteducst ///
+        6.mteducst 2010.year 2016.year ///
+        1.district_iid 2.district_iid 3.district_iid 4.district_iid ///
+        5.district_iid 6.district_iid 7.district_iid 8.district_iid ///
+        9.district_iid 10.district_iid 11.district_iid 12.district_iid ///
+        13.district_iid 14.district_iid 15.district_iid 16.district_iid ///
+        17.district_iid 18.district_iid 19.district_iid 20.district_iid ///
+        21.district_iid 22.district_iid 23.district_iid 24.district_iid ///
+        25.district_iid ///
+        26.district_iid 27.district_iid 28.district_iid 29.district_iid ///
+        30.district_iid 31.district_iid 32.district_iid 33.district_iid ///
+        34.district_iid 35.district_iid 36.district_iid 37.district_iid ///
+        38.district_iid 39.district_iid 40.district_iid 41.district_iid ///
+        42.district_iid 43.district_iid 44.district_iid 45.district_iid ///
+        46.district_iid 47.district_iid 48.district_iid 49.district_iid ///
+        50.district_iid 51.district_iid  ///
+        _cons $controls) starlevels(* 0.1 ** 0.05 *** 0.01) ///
+   title("Results OLS Regression with District and Year FE"\label{tab1}) nofloat ///
+   stats(N r2_a ctrl_mean, labels("Obs" "Adj. R-Squared" "Control Mean")) ///
+    nonotes ///
+    addnotes("Standard errors clustered at the district level. Significance levels: *p $<$ 0.1, ** p $<$ 0.05, *** p $<$ 0.01") 
+
+estimates drop m1 m2 m3 m4 m5 
+
+
+********* IV *********
+
+/*
 foreach outcome of global lm_out {
   *IV
   xi: ivreg2  `outcome' ///
@@ -353,7 +664,252 @@ foreach outcome of global lm_out {
     drop smpl 
 }
 
+*/
+
+  *IV
+  xi: ivreg2  ln_wage_natives_cond ///
+              i.year i.district_iid ///
+              $controls i.educ1d i.fteducst i.mteducst  ///
+              (agg_wp = IHS_IV_SS) ///
+              [pweight = expan_indiv], ///
+              cluster(district_iid) robust ///
+              partial(i.district_iid) ///
+              first 
+  estimates table, star(.05 .01 .001) 
+  estimates store m1, title(Model 1)
+
+  * With equivalent first-stage
+  gen smpl=0
+  replace smpl=1 if e(sample)==1
+
+  xi: reg agg_wp IHS_IV_SS ///
+          i.year i.district_iid ///
+          $controls i.educ1d i.fteducst i.mteducst  ///
+          if smpl == 1 [pweight = expan_indiv], ///
+          cluster(district_iid) robust
+  estimates table, star(.05 .01 .001)           
+    drop smpl 
+
+estimates store m11, title(Model 11)
+
+sum ln_wage_natives_cond if agg_wp == 1
+estadd scalar ctrl_mean = r(mean)
+
+
+
+ *IV
+  xi: ivreg2  usemp1 ///
+              i.year i.district_iid ///
+              $controls i.educ1d i.fteducst i.mteducst  ///
+              (agg_wp = IHS_IV_SS) ///
+              [pweight = expan_indiv], ///
+              cluster(district_iid) robust ///
+              partial(i.district_iid) ///
+              first 
+  estimates table, star(.05 .01 .001) 
+  estimates store m2, title(Model 2)
+
+  * With equivalent first-stage
+  gen smpl=0
+  replace smpl=1 if e(sample)==1
+
+  xi: reg agg_wp IHS_IV_SS ///
+          i.year i.district_iid ///
+          $controls i.educ1d i.fteducst i.mteducst  ///
+          if smpl == 1 [pweight = expan_indiv], ///
+          cluster(district_iid) robust
+  estimates table, star(.05 .01 .001)           
+    drop smpl 
+
+estimates store m21, title(Model 21)
+
+sum usemp1 if agg_wp == 1
+estadd scalar ctrl_mean = r(mean)
+
+ *IV
+  xi: ivreg2  unemp1 ///
+              i.year i.district_iid ///
+              $controls i.educ1d i.fteducst i.mteducst  ///
+              (agg_wp = IHS_IV_SS) ///
+              [pweight = expan_indiv], ///
+              cluster(district_iid) robust ///
+              partial(i.district_iid) ///
+              first 
+  estimates table, star(.05 .01 .001) 
+  estimates store m3, title(Model 3)
+
+  * With equivalent first-stage
+  gen smpl=0
+  replace smpl=1 if e(sample)==1
+
+  xi: reg agg_wp IHS_IV_SS ///
+          i.year i.district_iid ///
+          $controls i.educ1d i.fteducst i.mteducst  ///
+          if smpl == 1 [pweight = expan_indiv], ///
+          cluster(district_iid) robust
+  estimates table, star(.05 .01 .001)           
+    drop smpl 
+
+estimates store m31, title(Model 31)
+
+sum unemp1 if agg_wp == 1
+estadd scalar ctrl_mean = r(mean)
+
+ *IV
+  xi: ivreg2  crnumhrs1 ///
+              i.year i.district_iid ///
+              $controls i.educ1d i.fteducst i.mteducst  ///
+              (agg_wp = IHS_IV_SS) ///
+              [pweight = expan_indiv], ///
+              cluster(district_iid) robust ///
+              partial(i.district_iid) ///
+              first 
+  estimates table, star(.05 .01 .001) 
+  estimates store m4, title(Model 4)
+
+  * With equivalent first-stage
+  gen smpl=0
+  replace smpl=1 if e(sample)==1
+
+  xi: reg agg_wp IHS_IV_SS ///
+          i.year i.district_iid ///
+          $controls i.educ1d i.fteducst i.mteducst  ///
+          if smpl == 1 [pweight = expan_indiv], ///
+          cluster(district_iid) robust
+  estimates table, star(.05 .01 .001)           
+    drop smpl 
+
+estimates store m41, title(Model 41)
+
+sum crnumhrs1 if agg_wp == 1
+estadd scalar ctrl_mean = r(mean)
+
+ *IV
+  xi: ivreg2  informal ///
+              i.year i.district_iid ///
+              $controls i.educ1d i.fteducst i.mteducst  ///
+              (agg_wp = IHS_IV_SS) ///
+              [pweight = expan_indiv], ///
+              cluster(district_iid) robust ///
+              partial(i.district_iid) ///
+              first 
+  estimates table, star(.05 .01 .001) 
+  estimates store m5, title(Model 5)
+
+  * With equivalent first-stage
+  gen smpl=0
+  replace smpl=1 if e(sample)==1
+
+  xi: reg agg_wp IHS_IV_SS ///
+          i.year i.district_iid ///
+          $controls i.educ1d i.fteducst i.mteducst  ///
+          if smpl == 1 [pweight = expan_indiv], ///
+          cluster(district_iid) robust
+  estimates table, star(.05 .01 .001)           
+    drop smpl 
+
+estimates store m51, title(Model 51)
+
+sum informal if agg_wp == 1
+estadd scalar ctrl_mean = r(mean)
+
+ereturn list
+mat list e(b)
+estout m1 m2 m3 m4 m5, cells(b(star fmt(3)) se(par fmt(2))) ///
+  drop(age age2 sex hhsize _Ieduc1d_2 _Ieduc1d_3 _Ieduc1d_4 _Ieduc1d_5 ///
+        _Ieduc1d_6 _Ieduc1d_7 _Ifteducst_2 ///
+        _Ifteducst_3 _Ifteducst_4 _Ifteducst_5 _Ifteducst_6 ///
+        _Imteducst_2 _Imteducst_3 _Imteducst_4 _Imteducst_5 ///
+        _Imteducst_6 _Iyear_2016 ///
+         $controls)   ///
+   legend label varlabels(_cons constant) starlevels(* 0.1 ** 0.05 *** 0.01)           ///
+   stats(r2 df_r bic, fmt(3 0 1) label(R-sqr dfres BIC))
+
+*** (**) [*] indicates significance at the 99%
+*(95%) [90%] level. Based
+
+*erase "$out/reg_infra_access.tex"
+esttab m1 m2 m3 m4 m5 using "$out_JLMPS/reg_04_IV_FE_district_year.tex", se label replace booktabs ///
+mtitles("Wage" "Employ" "Unemploy" "Nb. Hours" "Informal") ///
+scalars(ctrl_mean)  drop(age age2 sex hhsize _Ieduc1d_2 _Ieduc1d_3 _Ieduc1d_4 _Ieduc1d_5 ///
+        _Ieduc1d_6 _Ieduc1d_7 _Ifteducst_2 ///
+        _Ifteducst_3 _Ifteducst_4 _Ifteducst_5 _Ifteducst_6 ///
+        _Imteducst_2 _Imteducst_3 _Imteducst_4 _Imteducst_5 ///
+        _Imteducst_6 _Iyear_2016 ///
+         $controls) starlevels(* 0.1 ** 0.05 *** 0.01) ///
+   title("Results IV Regression with District and Year FE"\label{tab1}) nofloat ///
+   stats(N r2_a ctrl_mean, labels("Obs" "Adj. R-Squared" "Control Mean")) ///
+    nonotes ///
+    addnotes("Standard errors clustered at the district level. Significance levels: *p $<$ 0.1, ** p $<$ 0.05, *** p $<$ 0.01") 
+
+estimates drop m1 m2 m3 m4 m5
+*m2 m3 m4 m5 
+
+ereturn list
+mat list e(b)
+estout m11 m21 m31 m41 m51, cells(b(star fmt(3)) se(par fmt(2))) ///
+  drop(age age2 sex hhsize _Ieduc1d_2 _Ieduc1d_3 _Ieduc1d_4 _Ieduc1d_5 ///
+        _Ieduc1d_6 _Ieduc1d_7 _Ifteducst_2 ///
+        _Ifteducst_3 _Ifteducst_4 _Ifteducst_5 _Ifteducst_6 ///
+        _Imteducst_2 _Imteducst_3 _Imteducst_4 _Imteducst_5 ///
+        _Imteducst_6 _Iyear_2016 ///
+        _Idistrict__2 _Idistrict__3 ///
+        _Idistrict__4 _Idistrict__5 _Idistrict__6 _Idistrict__7 ///
+        _Idistrict__8 _Idistrict__9 _Idistrict__10 _Idistrict__11 ///
+        _Idistrict__12 _Idistrict__13 _Idistrict__14 _Idistrict__15 ///
+        _Idistrict__16 _Idistrict__17 _Idistrict__18 _Idistrict__19 ///
+        _Idistrict__20 _Idistrict__21 _Idistrict__22 _Idistrict__23 ///
+        _Idistrict__24 _Idistrict__25 _Idistrict__26 _Idistrict__27 ///
+        _Idistrict__28 _Idistrict__29 _Idistrict__30 _Idistrict__31 ///
+        _Idistrict__32 _Idistrict__33 _Idistrict__34 _Idistrict__35 ///
+        _Idistrict__36 _Idistrict__37 _Idistrict__38 _Idistrict__39 ///
+        _Idistrict__40 _Idistrict__41 _Idistrict__42 _Idistrict__43 ///
+        _Idistrict__44 _Idistrict__45 _Idistrict__46 _Idistrict__47 ///
+        _Idistrict__48 _Idistrict__49 _Idistrict__50 _Idistrict__51 ///
+        _cons $controls)   ///
+   legend label varlabels(_cons constant) starlevels(* 0.1 ** 0.05 *** 0.01)           ///
+   stats(r2 df_r bic, fmt(3 0 1) label(R-sqr dfres BIC))
+
+*** (**) [*] indicates significance at the 99%
+*(95%) [90%] level. Based
+
+*erase "$out/reg_infra_access.tex"
+esttab m11 m21 m31 m41 m51 using "$out_JLMPS/reg_04_IV_FE_district_year_stage1.tex", se label replace booktabs ///
+mtitles("Wage" "Employ" "Unemploy" "Nb. Hours" "Informal") ///
+scalars(ctrl_mean)  drop(age age2 sex hhsize _Ieduc1d_2 _Ieduc1d_3 _Ieduc1d_4 _Ieduc1d_5 ///
+        _Ieduc1d_6 _Ieduc1d_7 _Ifteducst_2 ///
+        _Ifteducst_3 _Ifteducst_4 _Ifteducst_5 _Ifteducst_6 ///
+        _Imteducst_2 _Imteducst_3 _Imteducst_4 _Imteducst_5 ///
+        _Imteducst_6 _Iyear_2016 ///
+        _Idistrict__2 _Idistrict__3 ///
+        _Idistrict__4 _Idistrict__5 _Idistrict__6 _Idistrict__7 ///
+        _Idistrict__8 _Idistrict__9 _Idistrict__10 _Idistrict__11 ///
+        _Idistrict__12 _Idistrict__13 _Idistrict__14 _Idistrict__15 ///
+        _Idistrict__16 _Idistrict__17 _Idistrict__18 _Idistrict__19 ///
+        _Idistrict__20 _Idistrict__21 _Idistrict__22 _Idistrict__23 ///
+        _Idistrict__24 _Idistrict__25 _Idistrict__26 _Idistrict__27 ///
+        _Idistrict__28 _Idistrict__29 _Idistrict__30 _Idistrict__31 ///
+        _Idistrict__32 _Idistrict__33 _Idistrict__34 _Idistrict__35 ///
+        _Idistrict__36 _Idistrict__37 _Idistrict__38 _Idistrict__39 ///
+        _Idistrict__40 _Idistrict__41 _Idistrict__42 _Idistrict__43 ///
+        _Idistrict__44 _Idistrict__45 _Idistrict__46 _Idistrict__47 ///
+        _Idistrict__48 _Idistrict__49 _Idistrict__50 _Idistrict__51 ///
+        _cons $controls) starlevels(* 0.1 ** 0.05 *** 0.01) ///
+   title("Results Stage 1 IV Regression with District and Year FE"\label{tab1}) nofloat ///
+   stats(N r2_a ctrl_mean, labels("Obs" "Adj. R-Squared" "Control Mean")) ///
+    nonotes ///
+    addnotes("Standard errors clustered at the district level. Significance levels: *p $<$ 0.1, ** p $<$ 0.05, *** p $<$ 0.01") 
+
+estimates drop m11 m21 m31 m41 m51
+
+
+***************************************************
+
   ********** M4: YEAR FE / DISTRICT FE / CONTROL NUMBER OF REFUGEE
+
+***************************************************
+
+/*
 foreach outcome of global lm_out {
   *OLS
   xi: reg `outcome' agg_wp ///
@@ -363,6 +919,7 @@ foreach outcome of global lm_out {
           cluster(district_iid) robust 
   estimates table, star(.05 .01 .001)
 }
+
 foreach outcome of global lm_out {
   *IV
   xi: ivreg2  `outcome' ///
@@ -387,8 +944,125 @@ foreach outcome of global lm_out {
   estimates table, star(.05 .01 .001)           
     drop smpl 
 }
+*/
+
+
+xi: ivreg2    ln_wage_natives_cond ///
+              i.year i.district_iid ///
+              ln_ref $controls i.educ1d i.fteducst i.mteducst ///
+              (agg_wp = IHS_IV_SS) ///
+              [pweight = expan_indiv], ///
+              cluster(district_iid) robust ///
+              partial(i.district_iid) ///
+              first
+estimates table, star(.05 .01 .001)
+
+estimates store m1, title(Model 1)
+
+sum ln_wage_natives_cond if agg_wp == 1
+estadd scalar ctrl_mean = r(mean)
+
+xi: ivreg2    usemp1 ///
+              i.year i.district_iid ///
+              ln_ref $controls i.educ1d i.fteducst i.mteducst ///
+              (agg_wp = IHS_IV_SS) ///
+              [pweight = expan_indiv], ///
+              cluster(district_iid) robust ///
+              partial(i.district_iid) ///
+              first
+estimates table, star(.05 .01 .001)
+
+estimates store m2, title(Model 2)
+
+sum usemp1 if agg_wp == 1
+estadd scalar ctrl_mean = r(mean)
+
+
+xi: ivreg2    unemp1 ///
+              i.year i.district_iid ///
+              ln_ref $controls i.educ1d i.fteducst i.mteducst ///
+              (agg_wp = IHS_IV_SS) ///
+              [pweight = expan_indiv], ///
+              cluster(district_iid) robust ///
+              partial(i.district_iid) ///
+              first
+estimates table, star(.05 .01 .001)
+
+estimates store m3, title(Model 3)
+
+sum unemp1 if agg_wp == 1
+estadd scalar ctrl_mean = r(mean)
+
+
+xi: ivreg2    crnumhrs1 ///
+              i.year i.district_iid ///
+              ln_ref $controls i.educ1d i.fteducst i.mteducst ///
+              (agg_wp = IHS_IV_SS) ///
+              [pweight = expan_indiv], ///
+              cluster(district_iid) robust ///
+              partial(i.district_iid) ///
+              first
+estimates table, star(.05 .01 .001)
+
+estimates store m4, title(Model 4)
+
+sum crnumhrs1 if agg_wp == 1
+estadd scalar ctrl_mean = r(mean)
+
+
+xi: ivreg2    informal ///
+              i.year i.district_iid ///
+              ln_ref $controls i.educ1d i.fteducst i.mteducst ///
+              (agg_wp = IHS_IV_SS) ///
+              [pweight = expan_indiv], ///
+              cluster(district_iid) robust ///
+              partial(i.district_iid) ///
+              first
+estimates table, star(.05 .01 .001)
+
+estimates store m5, title(Model 5)
+
+sum informal if agg_wp == 1
+estadd scalar ctrl_mean = r(mean)
+
+ereturn list
+mat list e(b)
+estout m1 m2 m3 m4 m5, cells(b(star fmt(3)) se(par fmt(2))) ///
+  drop(age age2 sex hhsize _Ieduc1d_2 _Ieduc1d_3 _Ieduc1d_4 _Ieduc1d_5 ///
+        _Ieduc1d_6 _Ieduc1d_7 _Ifteducst_2 ///
+        _Ifteducst_3 _Ifteducst_4 _Ifteducst_5 _Ifteducst_6 ///
+        _Imteducst_2 _Imteducst_3 _Imteducst_4 _Imteducst_5 ///
+        _Imteducst_6 _Iyear_2016 ///
+         $controls)   ///
+   legend label varlabels(_cons constant) starlevels(* 0.1 ** 0.05 *** 0.01)           ///
+   stats(r2 df_r bic, fmt(3 0 1) label(R-sqr dfres BIC))
+
+*** (**) [*] indicates significance at the 99%
+*(95%) [90%] level. Based
+
+*erase "$out/reg_infra_access.tex"
+esttab m1 m2 m3 m4 m5 using "$out_JLMPS/reg_05_IV_FE_district_year_ctrlref.tex", se label replace booktabs ///
+mtitles("Wage" "Employ" "Unemploy" "Nb. Hours" "Informal") ///
+scalars(ctrl_mean)  drop(age age2 sex hhsize _Ieduc1d_2 _Ieduc1d_3 _Ieduc1d_4 _Ieduc1d_5 ///
+        _Ieduc1d_6 _Ieduc1d_7 _Ifteducst_2 ///
+        _Ifteducst_3 _Ifteducst_4 _Ifteducst_5 _Ifteducst_6 ///
+        _Imteducst_2 _Imteducst_3 _Imteducst_4 _Imteducst_5 ///
+        _Imteducst_6 _Iyear_2016 ///
+         $controls) starlevels(* 0.1 ** 0.05 *** 0.01) ///
+   title("Results IV Regression with District and Year FE, controling for the number of refugees"\label{tab1}) nofloat ///
+   stats(N r2_a ctrl_mean, labels("Obs" "Adj. R-Squared" "Control Mean")) ///
+    nonotes ///
+    addnotes("Standard errors clustered at the district level. Significance levels: *p $<$ 0.1, ** p $<$ 0.05, *** p $<$ 0.01") 
+
+estimates drop m1 m2 m3 m4 m5
+
+***************************************************
 
   ********** M5:  YEAR FE / DISTRICT FE / SECOTRAL FE 
+
+***************************************************
+
+/*
 foreach outcome of global lm_out {
   *OLS
   xi: reg `outcome' agg_wp ///
@@ -423,8 +1097,118 @@ foreach outcome of global lm_out {
   estimates table, star(.05 .01 .001)           
     drop smpl 
 }
+*/
+
+  xi: ivreg2  ln_wage_natives_cond ///
+              i.year i.district_iid i.crsectrp ///
+              $controls i.educ1d i.fteducst i.mteducst ///
+              (agg_wp = IHS_IV_SS) ///
+              [pweight = expan_indiv], ///
+              cluster(district_iid) robust ///
+              partial(i.district_iid i.crsectrp) ///
+              first
+  estimates table, star(.05 .01 .001)
+  estimates store m1, title(Model 1)
+
+sum ln_wage_natives_cond if agg_wp == 1
+estadd scalar ctrl_mean = r(mean)
+
+  xi: ivreg2  usemp1 ///
+              i.year i.district_iid i.crsectrp ///
+              $controls i.educ1d i.fteducst i.mteducst ///
+              (agg_wp = IHS_IV_SS) ///
+              [pweight = expan_indiv], ///
+              cluster(district_iid) robust ///
+              partial(i.district_iid i.crsectrp) ///
+              first
+  estimates table, star(.05 .01 .001)
+  estimates store m2, title(Model 2)
+
+sum usemp1 if agg_wp == 1
+estadd scalar ctrl_mean = r(mean)
+
+  xi: ivreg2  unemp1 ///
+              i.year i.district_iid i.crsectrp ///
+              $controls i.educ1d i.fteducst i.mteducst ///
+              (agg_wp = IHS_IV_SS) ///
+              [pweight = expan_indiv], ///
+              cluster(district_iid) robust ///
+              partial(i.district_iid i.crsectrp) ///
+              first
+  estimates table, star(.05 .01 .001)
+  estimates store m3, title(Model 3)
+
+sum unemp1 if agg_wp == 1
+estadd scalar ctrl_mean = r(mean)
+
+  xi: ivreg2  crnumhrs1 ///
+              i.year i.district_iid i.crsectrp ///
+              $controls i.educ1d i.fteducst i.mteducst ///
+              (agg_wp = IHS_IV_SS) ///
+              [pweight = expan_indiv], ///
+              cluster(district_iid) robust ///
+              partial(i.district_iid i.crsectrp) ///
+              first
+  estimates table, star(.05 .01 .001)
+  estimates store m4, title(Model 4)
+
+sum crnumhrs1 if agg_wp == 1
+estadd scalar ctrl_mean = r(mean)
+
+  xi: ivreg2  informal ///
+              i.year i.district_iid i.crsectrp ///
+              $controls i.educ1d i.fteducst i.mteducst ///
+              (agg_wp = IHS_IV_SS) ///
+              [pweight = expan_indiv], ///
+              cluster(district_iid) robust ///
+              partial(i.district_iid i.crsectrp) ///
+              first
+  estimates table, star(.05 .01 .001)
+  estimates store m5, title(Model 5)
+
+sum informal if agg_wp == 1
+estadd scalar ctrl_mean = r(mean)
+
+ereturn list
+mat list e(b)
+estout m1 m2 m3 m4 m5, cells(b(star fmt(3)) se(par fmt(2))) ///
+  drop(age age2 sex hhsize _Ieduc1d_2 _Ieduc1d_3 _Ieduc1d_4 _Ieduc1d_5 ///
+        _Ieduc1d_6 _Ieduc1d_7 _Ifteducst_2 ///
+        _Ifteducst_3 _Ifteducst_4 _Ifteducst_5 _Ifteducst_6 ///
+        _Imteducst_2 _Imteducst_3 _Imteducst_4 _Imteducst_5 ///
+        _Imteducst_6 _Iyear_2016 ///
+         $controls)   ///
+   legend label varlabels(_cons constant) starlevels(* 0.1 ** 0.05 *** 0.01)           ///
+   stats(r2 df_r bic, fmt(3 0 1) label(R-sqr dfres BIC))
+
+*** (**) [*] indicates significance at the 99%
+*(95%) [90%] level. Based
+
+*erase "$out/reg_infra_access.tex"
+esttab m1 m2 m3 m4 m5 using "$out_JLMPS/reg_06_IV_FE_district_year_sector.tex", se label replace booktabs ///
+mtitles("Wage" "Employ" "Unemploy" "Nb. Hours" "Informal") ///
+scalars(ctrl_mean)  drop(age age2 sex hhsize _Ieduc1d_2 _Ieduc1d_3 _Ieduc1d_4 _Ieduc1d_5 ///
+        _Ieduc1d_6 _Ieduc1d_7 _Ifteducst_2 ///
+        _Ifteducst_3 _Ifteducst_4 _Ifteducst_5 _Ifteducst_6 ///
+        _Imteducst_2 _Imteducst_3 _Imteducst_4 _Imteducst_5 ///
+        _Imteducst_6 _Iyear_2016 ///
+         $controls) starlevels(* 0.1 ** 0.05 *** 0.01) ///
+   title("Results IV Regression with District, Year and Sectoral FE"\label{tab1}) nofloat ///
+   stats(N r2_a ctrl_mean, labels("Obs" "Adj. R-Squared" "Control Mean")) ///
+    nonotes ///
+    addnotes("Standard errors clustered at the district level. Significance levels: *p $<$ 0.1, ** p $<$ 0.05, *** p $<$ 0.01") 
+
+estimates drop m1 m2 m3 m4 m5
+
+***************************************************
 
   ********** M6:  YEAR FE / DISTRICT FE / SECOTRAL FE / CONTROL NUMBER OF REFUGEE
+
+***************************************************
+
+
+/*
+
 foreach outcome of global lm_out {
   *OLS
   xi: reg `outcome' agg_wp ///
@@ -458,7 +1242,118 @@ foreach outcome of global lm_out {
     drop smpl 
 }
 
+*/
+
+  xi: ivreg2  ln_wage_natives_cond ///
+              i.year i.district_iid i.crsectrp ln_ref ///
+              $controls i.educ1d i.fteducst i.mteducst ///
+              (agg_wp = IHS_IV_SS) ///
+              [pweight = expan_indiv], ///
+              cluster(district_iid) robust ///
+              partial(i.district_iid i.crsectrp) ///
+              first
+  estimates table, star(.05 .01 .001)
+  estimates store m1, title(Model 1)
+
+sum ln_wage_natives_cond if agg_wp == 1
+estadd scalar ctrl_mean = r(mean)
+
+  xi: ivreg2  usemp1 ///
+              i.year i.district_iid i.crsectrp ln_ref ///
+              $controls i.educ1d i.fteducst i.mteducst ///
+              (agg_wp = IHS_IV_SS) ///
+              [pweight = expan_indiv], ///
+              cluster(district_iid) robust ///
+              partial(i.district_iid i.crsectrp) ///
+              first
+  estimates table, star(.05 .01 .001)
+  estimates store m2, title(Model 2)
+
+sum usemp1 if agg_wp == 1
+estadd scalar ctrl_mean = r(mean)
+
+  xi: ivreg2  unemp1 ///
+              i.year i.district_iid i.crsectrp ln_ref ///
+              $controls i.educ1d i.fteducst i.mteducst ///
+              (agg_wp = IHS_IV_SS) ///
+              [pweight = expan_indiv], ///
+              cluster(district_iid) robust ///
+              partial(i.district_iid i.crsectrp) ///
+              first
+  estimates table, star(.05 .01 .001)
+  estimates store m3, title(Model 3)
+
+sum unemp1 if agg_wp == 1
+estadd scalar ctrl_mean = r(mean)
+
+  xi: ivreg2  crnumhrs1 ///
+              i.year i.district_iid i.crsectrp ln_ref ///
+              $controls i.educ1d i.fteducst i.mteducst ///
+              (agg_wp = IHS_IV_SS) ///
+              [pweight = expan_indiv], ///
+              cluster(district_iid) robust ///
+              partial(i.district_iid i.crsectrp) ///
+              first
+  estimates table, star(.05 .01 .001)
+  estimates store m4, title(Model 4)
+
+sum crnumhrs1 if agg_wp == 1
+estadd scalar ctrl_mean = r(mean)
+
+  xi: ivreg2  informal ///
+              i.year i.district_iid i.crsectrp ln_ref ///
+              $controls i.educ1d i.fteducst i.mteducst ///
+              (agg_wp = IHS_IV_SS) ///
+              [pweight = expan_indiv], ///
+              cluster(district_iid) robust ///
+              partial(i.district_iid i.crsectrp) ///
+              first
+  estimates table, star(.05 .01 .001)
+  estimates store m5, title(Model 5)
+  
+sum informal if agg_wp == 1
+estadd scalar ctrl_mean = r(mean)
+
+ereturn list
+mat list e(b)
+estout m1 m2 m3 m4 m5, cells(b(star fmt(3)) se(par fmt(2))) ///
+  drop(age age2 sex hhsize _Ieduc1d_2 _Ieduc1d_3 _Ieduc1d_4 _Ieduc1d_5 ///
+        _Ieduc1d_6 _Ieduc1d_7 _Ifteducst_2 ///
+        _Ifteducst_3 _Ifteducst_4 _Ifteducst_5 _Ifteducst_6 ///
+        _Imteducst_2 _Imteducst_3 _Imteducst_4 _Imteducst_5 ///
+        _Imteducst_6 _Iyear_2016 ln_ref ///
+         $controls)   ///
+   legend label varlabels(_cons constant) starlevels(* 0.1 ** 0.05 *** 0.01)           ///
+   stats(r2 df_r bic, fmt(3 0 1) label(R-sqr dfres BIC))
+
+*** (**) [*] indicates significance at the 99%
+*(95%) [90%] level. Based
+
+*erase "$out/reg_infra_access.tex"
+esttab m1 m2 m3 m4 m5 using "$out_JLMPS/reg_07_IV_FE_district_year_sector_ctrlref.tex", se label replace booktabs ///
+mtitles("Wage" "Employ" "Unemploy" "Nb. Hours" "Informal") ///
+scalars(ctrl_mean)  drop(age age2 sex hhsize ///
+        ln_ref _Ieduc1d_2 _Ieduc1d_3 _Ieduc1d_4 _Ieduc1d_5 ///
+        _Ieduc1d_6 _Ieduc1d_7 _Ifteducst_2 ///
+        _Ifteducst_3 _Ifteducst_4 _Ifteducst_5 _Ifteducst_6 ///
+        _Imteducst_2 _Imteducst_3 _Imteducst_4 _Imteducst_5 ///
+        _Imteducst_6 _Iyear_2016 ln_ref ///
+         $controls) starlevels(* 0.1 ** 0.05 *** 0.01) ///
+   title("Results IV Regression with District, Year and Sectoral FE, controling for the nb of refugees"\label{tab1}) nofloat ///
+   stats(N r2_a ctrl_mean, labels("Obs" "Adj. R-Squared" "Control Mean")) ///
+    nonotes ///
+    addnotes("Standard errors clustered at the district level. Significance levels: *p $<$ 0.1, ** p $<$ 0.05, *** p $<$ 0.01") 
+
+estimates drop m1 m2 m3 m4 m5
+
+
+***************************************************
+
   ********** M7: YEAR FE / INDIV FE 
+
+***************************************************
+
+/*
 foreach outcome of global lm_out {
   *OLS
   reghdfe `outcome' agg_wp ///
@@ -467,7 +1362,7 @@ foreach outcome of global lm_out {
           absorb(year indid_2010) ///
           cluster(district_iid) 
 }
-  /*
+  
   * Then I partial out all variables
   foreach y in ln_wage agg_wp $controls educ1d fteducst mteducst   {
     reghdfe `y' [pw=expan_indiv], absorb(year indid_2010) residuals(`y'_c2wr)
@@ -479,8 +1374,9 @@ foreach outcome of global lm_out {
     rename o_`y' `y' 
   } 
   reg ln_wage agg_wp  $controls [pw=expan_indiv], cluster(district_iid) robust
-  */
+  
   *IV
+
 
  foreach outcome of global lm_out {
  preserve
@@ -512,8 +1408,223 @@ foreach outcome of global lm_out {
   }
   restore
 }
+*/
 
-  ********** M8:  YEAR FE / INDIV FE / CONTROL NUMBER OF REFUGEE
+preserve
+  xi: ivreg2  ln_wage_natives_cond ///
+              i.year i.district_iid ///
+              $controls i.educ1d i.fteducst i.mteducst ///
+              (agg_wp = IHS_IV_SS) ///
+              [pweight = expan_indiv], ///
+              cluster(district_iid) robust ///
+              partial(i.district_iid) 
+
+  gen smpl=0
+  replace smpl=1 if e(sample)==1
+  * Then I partial out all variables
+  foreach y in ln_wage_natives_cond $controls agg_wp IHS_IV_SS educ1d fteducst mteducst  {
+    reghdfe `y' [pw=expan_indiv] if smpl==1, absorb(year indid_2010) residuals(`y'_c2wr)
+    rename `y' o_`y'
+    rename `y'_c2wr `y'
+  }
+  ivreg2 ln_wage_natives_cond ///
+         $controls educ1d fteducst mteducst ///
+         (agg_wp = IHS_IV_SS) ///
+         [pweight = expan_indiv], ///
+         cluster(district_iid) robust ///
+         first
+  drop ln_wage_natives_cond agg_wp IHS_IV_SS $controls educ1d fteducst mteducst smpl
+  foreach y in ln_wage_natives_cond $controls  agg_wp IHS_IV_SS {
+    rename o_`y' `y' 
+  }
+
+  estimates table, star(.05 .01 .001)
+  estimates store m1, title(Model 1)
+  
+sum ln_wage_natives_cond if agg_wp == 1
+estadd scalar ctrl_mean = r(mean)
+
+  restore
+
+  preserve
+  xi: ivreg2  usemp1 ///
+              i.year i.district_iid ///
+              $controls i.educ1d i.fteducst i.mteducst ///
+              (agg_wp = IHS_IV_SS) ///
+              [pweight = expan_indiv], ///
+              cluster(district_iid) robust ///
+              partial(i.district_iid) 
+
+  gen smpl=0
+  replace smpl=1 if e(sample)==1
+  * Then I partial out all variables
+  foreach y in usemp1 $controls agg_wp IHS_IV_SS educ1d fteducst mteducst  {
+    reghdfe `y' [pw=expan_indiv] if smpl==1, absorb(year indid_2010) residuals(`y'_c2wr)
+    rename `y' o_`y'
+    rename `y'_c2wr `y'
+  }
+  ivreg2 usemp1 ///
+         $controls educ1d fteducst mteducst ///
+         (agg_wp = IHS_IV_SS) ///
+         [pweight = expan_indiv], ///
+         cluster(district_iid) robust ///
+         first
+  drop usemp1 agg_wp IHS_IV_SS $controls educ1d fteducst mteducst smpl
+  foreach y in usemp1 $controls  agg_wp IHS_IV_SS {
+    rename o_`y' `y' 
+  }
+
+  estimates table, star(.05 .01 .001)
+  estimates store m2, title(Model 2)
+  
+sum usemp1 if agg_wp == 1
+estadd scalar ctrl_mean = r(mean)
+
+  restore
+
+
+preserve
+  xi: ivreg2  unemp1 ///
+              i.year i.district_iid ///
+              $controls i.educ1d i.fteducst i.mteducst ///
+              (agg_wp = IHS_IV_SS) ///
+              [pweight = expan_indiv], ///
+              cluster(district_iid) robust ///
+              partial(i.district_iid) 
+
+  gen smpl=0
+  replace smpl=1 if e(sample)==1
+  * Then I partial out all variables
+  foreach y in unemp1 $controls agg_wp IHS_IV_SS educ1d fteducst mteducst  {
+    reghdfe `y' [pw=expan_indiv] if smpl==1, absorb(year indid_2010) residuals(`y'_c2wr)
+    rename `y' o_`y'
+    rename `y'_c2wr `y'
+  }
+  ivreg2 unemp1 ///
+         $controls educ1d fteducst mteducst ///
+         (agg_wp = IHS_IV_SS) ///
+         [pweight = expan_indiv], ///
+         cluster(district_iid) robust ///
+         first
+  drop unemp1 agg_wp IHS_IV_SS $controls educ1d fteducst mteducst smpl
+  foreach y in unemp1 $controls  agg_wp IHS_IV_SS {
+    rename o_`y' `y' 
+  }
+
+  estimates table, star(.05 .01 .001)
+  estimates store m3, title(Model 3)
+  
+sum unemp1 if agg_wp == 1
+estadd scalar ctrl_mean = r(mean)
+
+  restore
+
+  preserve
+  xi: ivreg2  crnumhrs1 ///
+              i.year i.district_iid ///
+              $controls i.educ1d i.fteducst i.mteducst ///
+              (agg_wp = IHS_IV_SS) ///
+              [pweight = expan_indiv], ///
+              cluster(district_iid) robust ///
+              partial(i.district_iid) 
+
+  gen smpl=0
+  replace smpl=1 if e(sample)==1
+  * Then I partial out all variables
+  foreach y in crnumhrs1 $controls agg_wp IHS_IV_SS educ1d fteducst mteducst  {
+    reghdfe `y' [pw=expan_indiv] if smpl==1, absorb(year indid_2010) residuals(`y'_c2wr)
+    rename `y' o_`y'
+    rename `y'_c2wr `y'
+  }
+  ivreg2 crnumhrs1 ///
+         $controls educ1d fteducst mteducst ///
+         (agg_wp = IHS_IV_SS) ///
+         [pweight = expan_indiv], ///
+         cluster(district_iid) robust ///
+         first
+  drop crnumhrs1 agg_wp IHS_IV_SS $controls educ1d fteducst mteducst smpl
+  foreach y in crnumhrs1 $controls  agg_wp IHS_IV_SS {
+    rename o_`y' `y' 
+  }
+
+  estimates table, star(.05 .01 .001)
+  estimates store m4, title(Model 4)
+  
+sum crnumhrs1 if agg_wp == 1
+estadd scalar ctrl_mean = r(mean)
+
+  restore
+
+  preserve
+  xi: ivreg2  informal ///
+              i.year i.district_iid ///
+              $controls i.educ1d i.fteducst i.mteducst ///
+              (agg_wp = IHS_IV_SS) ///
+              [pweight = expan_indiv], ///
+              cluster(district_iid) robust ///
+              partial(i.district_iid) 
+
+  gen smpl=0
+  replace smpl=1 if e(sample)==1
+  * Then I partial out all variables
+  foreach y in informal $controls agg_wp IHS_IV_SS educ1d fteducst mteducst  {
+    reghdfe `y' [pw=expan_indiv] if smpl==1, absorb(year indid_2010) residuals(`y'_c2wr)
+    rename `y' o_`y'
+    rename `y'_c2wr `y'
+  }
+  ivreg2 informal ///
+         $controls educ1d fteducst mteducst ///
+         (agg_wp = IHS_IV_SS) ///
+         [pweight = expan_indiv], ///
+         cluster(district_iid) robust ///
+         first
+  drop informal agg_wp IHS_IV_SS $controls educ1d fteducst mteducst smpl
+  foreach y in informal $controls  agg_wp IHS_IV_SS {
+    rename o_`y' `y' 
+  }
+
+  estimates table, star(.05 .01 .001)
+  estimates store m5, title(Model 5)
+  
+sum informal if agg_wp == 1
+estadd scalar ctrl_mean = r(mean)
+
+  restore
+
+
+ereturn list
+mat list e(b)
+estout m1 m2 m3 m4 m5, cells(b(star fmt(3)) se(par fmt(2))) ///
+  drop(age age2 sex hhsize educ1d fteducst mteducst _cons ///
+         $controls)   ///
+   legend label varlabels(_cons constant) starlevels(* 0.1 ** 0.05 *** 0.01)           ///
+   stats(r2 df_r bic, fmt(3 0 1) label(R-sqr dfres BIC))
+
+*** (**) [*] indicates significance at the 99%
+*(95%) [90%] level. Based
+
+*erase "$out/reg_infra_access.tex"
+esttab m1 m2 m3 m4 m5 using "$out_JLMPS/reg_08_IV_FE_year_indiv.tex", se label replace booktabs ///
+mtitles("Wage" "Employ" "Unemploy" "Nb. Hours" "Informal") ///
+scalars(ctrl_mean)  drop(age age2 sex hhsize  educ1d fteducst mteducst ///
+       _cons ///
+         $controls) starlevels(* 0.1 ** 0.05 *** 0.01) ///
+   title("Results IV Regression with Year and Individual FE"\label{tab1}) nofloat ///
+   stats(N r2_a ctrl_mean, labels("Obs" "Adj. R-Squared" "Control Mean")) ///
+    nonotes ///
+    addnotes("Standard errors clustered at the district level. Significance levels: *p $<$ 0.1, ** p $<$ 0.05, *** p $<$ 0.01") 
+
+estimates drop m1 m2 m3 m4 m5
+
+
+
+***************************************************
+
+  ********** M8:  YEAR FE / INDIV FE / CONTROL NUMBER OF REFUGEE 
+
+***************************************************
+
+/*
 foreach outcome of global lm_out {
   *OLS
   reghdfe `outcome' agg_wp ///
@@ -554,6 +1665,235 @@ foreach outcome of global lm_out {
   }
   restore
 }
+*/
+
+preserve
+  xi: ivreg2  ln_wage_natives_cond ///
+              i.year i.district_iid ///
+              $controls i.educ1d i.fteducst i.mteducst ///
+              (agg_wp = IHS_IV_SS) ///
+              [pweight = expan_indiv], ///
+              cluster(district_iid) robust ///
+              partial(i.district_iid) 
+
+  gen smpl=0
+  replace smpl=1 if e(sample)==1
+  * Then I partial out all variables
+  foreach y in ln_wage_natives_cond $controls agg_wp IHS_IV_SS ln_ref educ1d fteducst mteducst  {
+    reghdfe `y' [pw=expan_indiv] if smpl==1, absorb(year indid_2010) residuals(`y'_c2wr)
+    rename `y' o_`y'
+    rename `y'_c2wr `y'
+  }
+  ivreg2 ln_wage_natives_cond ///
+         ln_ref $controls educ1d fteducst mteducst ///
+         (agg_wp = IHS_IV_SS) ///
+         [pweight = expan_indiv], ///
+         cluster(district_iid) robust ///
+         first
+  drop ln_wage_natives_cond agg_wp IHS_IV_SS $controls ln_ref educ1d fteducst mteducst smpl
+  foreach y in ln_wage_natives_cond $controls  agg_wp IHS_IV_SS ln_ref {
+    rename o_`y' `y' 
+  }
+
+  estimates table, star(.05 .01 .001)
+  estimates store m1, title(Model 1)
+  
+sum ln_wage_natives_cond if agg_wp == 1
+estadd scalar ctrl_mean = r(mean)
+
+  restore
+
+  preserve
+  xi: ivreg2  usemp1 ///
+              i.year i.district_iid ///
+              $controls ln_ref i.educ1d i.fteducst i.mteducst ///
+              (agg_wp = IHS_IV_SS) ///
+              [pweight = expan_indiv], ///
+              cluster(district_iid) robust ///
+              partial(i.district_iid) 
+
+  gen smpl=0
+  replace smpl=1 if e(sample)==1
+  * Then I partial out all variables
+  foreach y in usemp1 $controls agg_wp IHS_IV_SS ln_ref educ1d fteducst mteducst  {
+    reghdfe `y' [pw=expan_indiv] if smpl==1, absorb(year indid_2010) residuals(`y'_c2wr)
+    rename `y' o_`y'
+    rename `y'_c2wr `y'
+  }
+  ivreg2 usemp1 ///
+         $controls educ1d fteducst mteducst ///
+         (agg_wp = IHS_IV_SS) ///
+         [pweight = expan_indiv], ///
+         cluster(district_iid) robust ///
+         first
+  drop usemp1 agg_wp IHS_IV_SS $controls ln_ref educ1d fteducst mteducst smpl
+  foreach y in usemp1 $controls  agg_wp IHS_IV_SS ln_ref {
+    rename o_`y' `y' 
+  }
+
+  estimates table, star(.05 .01 .001)
+  estimates store m2, title(Model 2)
+  
+sum usemp1 if agg_wp == 1
+estadd scalar ctrl_mean = r(mean)
+
+  restore
+
+
+preserve
+  xi: ivreg2  unemp1 ///
+              i.year i.district_iid ///
+              $controls ln_ref i.educ1d i.fteducst i.mteducst ///
+              (agg_wp = IHS_IV_SS) ///
+              [pweight = expan_indiv], ///
+              cluster(district_iid) robust ///
+              partial(i.district_iid) 
+
+  gen smpl=0
+  replace smpl=1 if e(sample)==1
+  * Then I partial out all variables
+  foreach y in unemp1 $controls agg_wp IHS_IV_SS ln_ref educ1d fteducst mteducst  {
+    reghdfe `y' [pw=expan_indiv] if smpl==1, absorb(year indid_2010) residuals(`y'_c2wr)
+    rename `y' o_`y'
+    rename `y'_c2wr `y'
+  }
+  ivreg2 unemp1 ///
+         $controls ln_ref educ1d fteducst mteducst ///
+         (agg_wp = IHS_IV_SS) ///
+         [pweight = expan_indiv], ///
+         cluster(district_iid) robust ///
+         first
+  drop unemp1 agg_wp IHS_IV_SS $controls ln_ref educ1d fteducst mteducst smpl
+  foreach y in unemp1 $controls  agg_wp IHS_IV_SS {
+    rename o_`y' `y' 
+  }
+
+  estimates table, star(.05 .01 .001)
+  estimates store m3, title(Model 3)
+  
+sum unemp1 if agg_wp == 1
+estadd scalar ctrl_mean = r(mean)
+
+  restore
+
+  preserve
+  xi: ivreg2  crnumhrs1 ///
+              i.year i.district_iid ///
+              $controls ln_ref i.educ1d i.fteducst i.mteducst ///
+              (agg_wp = IHS_IV_SS) ///
+              [pweight = expan_indiv], ///
+              cluster(district_iid) robust ///
+              partial(i.district_iid) 
+
+  gen smpl=0
+  replace smpl=1 if e(sample)==1
+  * Then I partial out all variables
+  foreach y in crnumhrs1 $controls agg_wp IHS_IV_SS ln_ref educ1d fteducst mteducst  {
+    reghdfe `y' [pw=expan_indiv] if smpl==1, absorb(year indid_2010) residuals(`y'_c2wr)
+    rename `y' o_`y'
+    rename `y'_c2wr `y'
+  }
+  ivreg2 crnumhrs1 ///
+         $controls ln_ref educ1d fteducst mteducst ///
+         (agg_wp = IHS_IV_SS) ///
+         [pweight = expan_indiv], ///
+         cluster(district_iid) robust ///
+         first
+  drop crnumhrs1 agg_wp IHS_IV_SS $controls ln_ref educ1d fteducst mteducst smpl
+  foreach y in crnumhrs1 $controls  agg_wp IHS_IV_SS {
+    rename o_`y' `y' 
+  }
+
+  estimates table, star(.05 .01 .001)
+  estimates store m4, title(Model 4)
+  
+sum crnumhrs1 if agg_wp == 1
+estadd scalar ctrl_mean = r(mean)
+
+  restore
+
+  preserve
+  xi: ivreg2  informal ///
+              i.year i.district_iid ///
+              $controls ln_ref i.educ1d i.fteducst i.mteducst ///
+              (agg_wp = IHS_IV_SS) ///
+              [pweight = expan_indiv], ///
+              cluster(district_iid) robust ///
+              partial(i.district_iid) 
+
+  gen smpl=0
+  replace smpl=1 if e(sample)==1
+  * Then I partial out all variables
+  foreach y in informal $controls ln_ref agg_wp IHS_IV_SS educ1d fteducst mteducst  {
+    reghdfe `y' [pw=expan_indiv] if smpl==1, absorb(year indid_2010) residuals(`y'_c2wr)
+    rename `y' o_`y'
+    rename `y'_c2wr `y'
+  }
+  ivreg2 informal ///
+         $controls educ1d fteducst mteducst ///
+         (agg_wp = IHS_IV_SS) ///
+         [pweight = expan_indiv], ///
+         cluster(district_iid) robust ///
+         first
+  drop informal agg_wp IHS_IV_SS $controls ln_ref educ1d fteducst mteducst smpl
+  foreach y in informal $controls  agg_wp IHS_IV_SS {
+    rename o_`y' `y' 
+  }
+
+  estimates table, star(.05 .01 .001)
+  estimates store m5, title(Model 5)
+  
+sum informal if agg_wp == 1
+estadd scalar ctrl_mean = r(mean)
+
+  restore
+
+
+
+ereturn list
+mat list e(b)
+estout m1 m2 m3 m4 m5, cells(b(star fmt(3)) se(par fmt(2))) ///
+  drop(age age2 sex hhsize educ1d fteducst mteducst _cons ///
+         $controls ln_ref)   ///
+   legend label varlabels(_cons constant) starlevels(* 0.1 ** 0.05 *** 0.01)           ///
+   stats(r2 df_r bic, fmt(3 0 1) label(R-sqr dfres BIC))
+
+*** (**) [*] indicates significance at the 99%
+*(95%) [90%] level. Based
+
+*erase "$out/reg_infra_access.tex"
+esttab m1 m2 m3 m4 m5 using "$out_JLMPS/reg_09_IV_FE_year_indiv_ctrlref.tex", se label replace booktabs ///
+mtitles("Wage" "Employ" "Unemploy" "Nb. Hours" "Informal") ///
+scalars(ctrl_mean)  drop(age age2 sex hhsize ln_ref educ1d fteducst mteducst ///
+       _cons ///
+         $controls) starlevels(* 0.1 ** 0.05 *** 0.01) ///
+   title("Results IV Regression with Year and Individual FE, controling for the number of refugees"\label{tab1}) nofloat ///
+   stats(N r2_a ctrl_mean, labels("Obs" "Adj. R-Squared" "Control Mean")) ///
+    nonotes ///
+    addnotes("Standard errors clustered at the district level. Significance levels: *p $<$ 0.1, ** p $<$ 0.05, *** p $<$ 0.01") 
+
+estimates drop m1 m2 m3 m4 m5
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
