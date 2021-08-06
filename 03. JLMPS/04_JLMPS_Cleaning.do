@@ -1,6 +1,25 @@
 
 
-*DATA 2016 ONLY
+/*====================================================================
+project:       FAFO - Master Do File
+Author:        Julie Bousquet 
+----------------------------------------------------------------------
+Creation Date:    18 September 2020 
+====================================================================*/
+
+/*====================================================================
+                        1: JLMPS Cleaning and merging
+====================================================================*/
+
+
+
+
+
+*DATA 2016 ONLY : 
+/* I use this dataset because in the 2016 dataset, it has the variable
+on work permits for refugees that is the true measure from
+the sample. We will use this measure in the OLS so it will be essential */
+
 use "$data_JLMPS_base/JLMPS 2016 xs v1.1.dta", clear 
 
 
@@ -17,6 +36,9 @@ lab list Lgov
 
 bys gov: tab district, m 
 
+*Change coding to match with another dataset who has a different district 
+*coding. We keep these districts only because... 
+
 gen district_en = ""
 *Amman 11
 replace district_en = "Marka" if district == 2 & gov == 11
@@ -32,6 +54,7 @@ replace district_en = "Badiah Shamaliyyeh" if district == 2 & gov == 22
 replace district_en = "Badiah Shamaliyyeh Gharbiyyeh" if district == 3 & gov == 22
 replace district_en = "Qasabet El-Mafraq" if district == 1 & gov == 22
 
+*Drop the districts we do not want to use for the analysis
 drop if mi(district_en)
 /*
  Amman
@@ -122,12 +145,6 @@ save "$data_JLMPS_final/01_JLMPS_10_16_xs_clear.dta", replace
 
 
 
-
-
-
-
-
-
 *USE LSMS 2016 & LSMS 2010
 
 use "$data_JLMPS_base/JLMPS 2016 rep xs v1.1.dta", clear 
@@ -193,6 +210,7 @@ egen governorate_id = group(governorate_en)
 
 *save "$data_JLMPS_temp/JLMPS_2010-2016_xs.dta", replace
 save "$data_JLMPS_final/02_JLMPS_10_16_rep_xs_clear.dta", replace
+
 
 
 

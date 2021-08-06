@@ -8,6 +8,7 @@
 *Merge JLMPS and SHIFT SHARE
 use "$data_final/02_JLMPS_10_16.dta", clear
 
+
 merge m:1 district_iid using "$data_final/03_ShiftShare_IV.dta" 
 drop _merge 
 
@@ -19,6 +20,12 @@ tab IV_SS, m
 *NO INSTRUMENT / NO WP IN 2010
 replace IV_SS = 0 if year == 2010
 tab IV_SS , m
+
+
+tab nationality q11203
+tab q11203
+tab nationality_cl
+tab year 
 
 save "$data_final/05_IV_JLMPS_Analysis.dta", replace
 
