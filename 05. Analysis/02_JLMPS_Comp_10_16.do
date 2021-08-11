@@ -329,6 +329,7 @@ tab work_permit_orig
 *TRIAL: give 1 to refugees who said they have no WP but a legal contract
 gen work_permit = work_permit_orig 
 replace work_permit = 1 if q6145 == 1 & forced_migr == 1 
+lab var work_permit "work_permit_orig + 1 to refugees who said they have no WP but a legal contract"
 
 keep  indid district_iid governorate_iid work_permit work_permit_orig ///
     nationality_cl forced_migr ///
@@ -466,7 +467,7 @@ save "$data_final/02_JLMPS_10_16.dta", replace
 
 
 
-
+use "$data_JLMPS_final/02_JLMPS_10_16_rep_xs_clear.dta", clear
 
 
 

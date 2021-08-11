@@ -1,223 +1,67 @@
 
 
 
-	****************************************************************************
-	**                            IV ANALYSIS / REG                           **  
-	****************************************************************************
-
-*Merge JLMPS and SHIFT SHARE
-use "$data_final/02_JLMPS_10_16.dta", clear
-
-
-merge m:1 district_iid using "$data_final/03_ShiftShare_IV.dta" 
-drop _merge 
-
-merge m:1 governorate_iid using "$data_temp/07_Ctrl_Nb_Refugee_byGov.dta"
-drop _merge
-
-tab work_permit, m
-tab IV_SS, m
-*NO INSTRUMENT / NO WP IN 2010
-replace IV_SS = 0 if year == 2010
-tab IV_SS , m
-
-
-tab nationality q11203
-tab q11203
-tab nationality_cl
-tab year 
-
-save "$data_final/05_IV_JLMPS_Analysis.dta", replace
-
-
-
-
-use "$data_final/05_IV_JLMPS_Analysis.dta", clear
-
-*Missing district IN 2010: nb 25 - Husaynia 
-
-*AGGREGATED NUMBER OF WORK PERMIT
-preserve
-tab forced_migr
-codebook forced_migr
-drop if forced_migr != 1
-distinct district_iid
-tab work_permit, m
-collapse (sum) work_permit if year == 2016, by(district_iid)
-ren work_permit agg_wp_2016
-gen year = 2016
-tempfile wp2016
-save `wp2016'
-restore
-
-merge m:1 district_iid using `wp2016'
-drop _merge
-
-gen agg_wp = agg_wp_2016
-replace agg_wp = 0 if year == 2010 //No WP in 2016
-replace agg_wp = 0 if mi(agg_wp) //No WP in District
-*A few districts do not have indiv with WP: should I remove them?
-*drop if mi(agg_wp)
-tab agg_wp, m
-tab agg_wp year, m
-*br agg_wp year IV_SS 
-*sort year 
-
-
-* ORIGINAL *
-
-*AGGREGATED NUMBER OF WORK PERMIT
-preserve
-tab forced_migr
-codebook forced_migr
-drop if forced_migr != 1
-distinct district_iid
-tab work_permit_orig, m
-collapse (sum) work_permit_orig if year == 2016, by(district_iid)
-ren work_permit_orig agg_wp_orig_2016
-gen year = 2016
-tempfile wp_orig_2016
-save `wp_orig_2016'
-restore
-
-merge m:1 district_iid using `wp_orig_2016'
-drop _merge
-
-gen agg_wp_orig = agg_wp_orig_2016
-replace agg_wp_orig = 0 if year == 2010 //No WP in 2016
-replace agg_wp_orig = 0 if mi(agg_wp_orig) //No WP in District
-*A few districts do not have indiv with WP: should I remove them?
-*drop if mi(agg_wp)
-tab agg_wp_orig, m
-tab agg_wp_orig year, m
-*br agg_wp year IV_SS 
-*sort year 
-
-bys year: distinct district_iid
-bys year: tab district_iid
-bys year: tab district_en
-
-**********
-*Controls*
-**********
-
-tab NbRefbyGovoutcamp, m
-replace NbRefbyGovoutcamp = 0 if year == 2010
-gen ln_ref = ln(1 + NbRefbyGovoutcamp)
-*ln_ref, as of now, does not include refugees in 2010, only in 2016
-
-gen age2 = age^2
-
-*Distance between zaatari camp and districts jordan
-gen dist_zaatari_lat = 32.30888675674741
-gen dist_zaatari_long = 36.31329385051756
-geodist district_lat district_long dist_zaatari_lat dist_zaatari_long, gen(distance_dis_camp)
-tab distance_dis_camp, m
-lab var distance_dis_camp "Distance (km) between JORD districts and ZAATARI CAMP"
-
-*Education
-*-Father
-tab fteducst
-*-Mother
-tab mteducst
-*-Own
-tab educ1d
-
-************
-*Instrument*
-************
-
-tab IV_SS, m
-tab work_permit, m
-tab agg_wp, m
-corr IV_SS agg_wp //0.64
-corr IV_SS agg_wp_orig //0.58
-
-gen log_IV_SS=log(1+IV_SS)
-gen IHS_IV_SS=log(IV_SS+((IV_SS^2+1)^0.5))
-
-
-**********
-*Outcomes*
-**********
-
-tab basicwg3, m //Basic Wage
-gen ln_wage = ln(1+basicwg3)
-tab ln_wage, m
-gen IHS_wage=log(basicwg3+((basicwg3^2+1)^0.5))
-
-*WAGE ONLY 
-gen ln_wage_natives = ln_wage if nationality_cl == 1
-
-*Unconditional wage: IF UNEMPLOYED (&OUT LF): WAGE IS 0
-gen ln_wage_uncond_unemp_olf = ln_wage_natives if usemp1 == 1
-replace ln_wage_uncond_unemp_olf = 0 if usemp1 == 0
-tab ln_wage_uncond_unemp_olf
-
-*Unconditional wage: IF UNEMPLOYED : WAGE IS 0 / IF OUT OF LF : WAGE IS MISSING
-gen ln_wage_uncond_unemp = ln_wage_natives if usemp1 == 1
-replace ln_wage_uncond_unemp = 0 if usemp1 == 0
-replace ln_wage_uncond_unemp = . if mi(unemp1m) 
-tab ln_wage_uncond_unemp
-
-*Conditional wage: EMPLOYED ONLY
-gen ln_wage_natives_cond = ln_wage_natives if usemp1 == 1 
-tab ln_wage_natives_cond
-
-tab mnthwgAllJob, m //Monthly wage
-gen ln_mthly_wage = ln(1+mnthwgAllJob)
-
-su hrwgAllJob, d //Hourly wage
-gen ln_hourly_wage = ln(1+hrwgAllJob)
-
-tab avdwirmn , m //Informal Wage 
-gen ln_avdwirmn = ln(1+avdwirmn)
-
-tab unemp1m, m //Unemp1m
-tab crnumdys, m //Days per week
-tab crhrsday, m //Hours per day
-tab crnumhrs1, m //Hours per week
-
-gen informal = 1 if ussocinsp == 0 
-replace informal = 1 if uscontrp == 0 
-replace informal = 0 if ussocinsp == 1
-replace informal = 0 if uscontrp == 1
-tab informal, m
-
-tab informal usemp1
-
-
-
-******WEIGHTS*******
-*expan_Hh 
-*expan_ref_hh
-*expan_indiv
-*expan_ref_indiv
-
-codebook hhid
-destring hhid, replace
-codebook indid
-destring indid, replace 
-
-
-save "$data_final/06_IV_JLMPS_Regression.dta", replace
-
 
 cap log close
 clear all
-set mem 100m
 set more off, permanently
+set mem 100m
 
-use "$data_final/06_IV_JLMPS_Regression.dta", clear
+*log using "$analysis_do/01_Data_Cleaning_EL1.log", replace
+
+   ****************************************************************************
+   **                            DATA JLMPS                                  **
+   **                  DESCRIPTIVE STATISTICS AND ANALYSIS                   **  
+   ** ---------------------------------------------------------------------- **
+   ** Type Do  :  DATA JLMPS   REGRESSION ANALYSIS                           **
+   **                                                                        **
+   ** Authors  : Julie Bousquet                                              **
+   ****************************************************************************
+
+use "$data_final/06_IV_JLMPS_Construct_Outcomes.dta", clear
 
 *adoupdate, update
 *findfile  ivreg2.ado
 *adoupdate, update **
 *ssc inst ivreg2, replace
 
-************
-*REGRESSION*
-**********
+
+***********************************************************************
+**DEFINING THE SAMPLE *************************************************
+***********************************************************************
+
+**************
+* JORDANIANS *
+**************
+codebook nationality_cl
+lab list Lnationality_cl
+/*
+                        53,094         1  Jordanian
+                         3,003         2  Syrian
+                           623         3  Egyptian
+                         2,551         4  Other Arab
+                           132         5  Other
+
+*/
+
+keep if nationality_cl == 1 //Keep only the jordanians
+*keep if nationality_cl != 2 //Keep all but the syrians
+tab year 
+tab age
+
+***************
+* WORKING AGE *
+*************** 
+
+*Keep only working age pop? 15-64 ? As defined by the ERF
+tab age year 
+drop if age < 15 
+drop if age > 64
+tab year 
+
+**********************************
+* PEOPLE SURVEYED IN BOTH ROUNDS *
+**********************************
 
 *br indid indid_2010 indid_2016 year
 *SAMPLE: SAME INDIVIDUALS WERE SURVEYED IN 2010 AND 2016
@@ -225,8 +69,6 @@ use "$data_final/06_IV_JLMPS_Regression.dta", clear
 *AND A FEW JORDANIANS. I DECDIE TO KEEP ONLY THE PANEL STRUCTURE 
 *FOR FIXED EFFECT AT THE INDIV LEVEL 
 
-*Among the natives
-keep if nationality_cl == 1
 *Flag those who were surveyed in both rounds 
 gen surveyed_2_rounds = 1 if !mi(indid_2010) & !mi(indid_2016)
 *Keep only the surveyed in both round
@@ -245,6 +87,15 @@ mdesc indid_2010
 destring indid_2010, replace 
 
 
+
+*********************************************************************
+*********************************************************************
+
+************
+*REGRESSION*
+************
+
+
 **************
 *GLOBALS 
 global    controls ///
@@ -261,8 +112,9 @@ global    lm_out ///
          *crnumdys /// Days of work per week
           *crhrsday /// Hours of work per day 
 
-***********************
+************************
 * DESCRIPTIVE STATISTICS
+************************
 
 *Summary statstics
 bys year: sum IV_SS agg_wp work_permit ///
@@ -278,33 +130,16 @@ tab bi_agg_wp, m
 reg age agg_wp
 ttest age == agg_wp
 
-
 xtset, clear 
 *xtset year
 xtset indid_2010 year 
-**************
-*REGRESSIONS
 
-*Apply the same restriction as in the questionnaire
-keep if age > 15 & age < 64 
-*Keep the Jordanian Sample 
-keep if  nationality_cl == 1
-tab forced_migr 
-*A few jordanian are forced migrants, maybe internal? 
-
-tab year 
-/*
-       year |      Freq.     Percent        Cum.
-------------+-----------------------------------
-       2010 |      7,575       43.98       43.98
-       2016 |      9,650       56.02      100.00
-------------+-----------------------------------
-      Total |     17,225      100.00
-*/
+************
+*REGRESSION*
+************
 
 mdesc ln_wage ln_wage_natives ln_wage_natives_cond ///
       ln_wage_uncond_unemp ln_wage_uncond_unemp_olf
-
 
 ***************************************************
 
