@@ -94,19 +94,80 @@ destring indid_2010, replace
 ************
 *REGRESSION*
 ************
+global    lm_out ///
+                unemployed /// From unemp2m - ext def, search not req; 1 week, empl or unemp, OLF is miss
+                unempdurmth ///    Current unemployment duration (in months)
+                jobless2  ///  Jobless, Extended Definition (Among non-students)
+                employed_3m  ///   From uswrkst2 - ext def, search not req; 3 months, empl or unemp, OLF is miss
+                employed_1w  ///   From uswrkst1 - ext def, search not req; 1 week, empl or unemp, OLF is miss
+                employed_3m_olf  ///   From usemp2 - ext def, 3 months, 1 empl - 0 unemp&OLF
+                employed_1w_olf  ///   From cremp2 - ext def, 1 week, 1 empl - 0 unemp&OLF
+                job_stability_permanent_1w /// From crstablp - Stability of employement (1w) - 1 permanent - 0 temp, seas, cas
+                job_stability_permanent_3m /// From usstablp - Stability of employement (3m) - 1 permanent - 0 temp, seas, cas
+                job_regular_1w /// From crirreg - Current job (1w) is regular - 1 Yes - 0 No
+                job_regular_3m /// From usirreg - Usual job (3m) is regular - 1 Yes - 0 No
+                incidence_soc_insur_1w /// Incidence of wrk social insurance in prim. job (ref. 1-week)
+                incidence_soc_insur_3m /// Incidence of wrk social insurance in prim. job (ref. 3-month)
+                incidence_wrk_contract_1w ///  Incidence of wrk contract in prim. job (ref. 1-week)
+                incidence_wrk_contract_3m ///  Incidence of wrk contract in prim. job (ref. 3-month)
+                job_formal_1w  /// Formality of prim. job (ref. 1-Week) - 0 Informal - 1 Formal
+                job_formal_3m  /// Formality of prim. job (ref. 3-month) - 0 Informal - 1 Formal
+                informal  ///  1 Informal - 0 Formal - Informal if no contract (uscontrp=0) and no insurance (ussocinsp=0)
+                work_hours_pday_1w /// No. of Hours/Day (Ref. 1 Week) Market Work
+                work_hours_pday_1w_w  ///  Winsorized 
+                work_hours_pday_3m /// No. of Hours/Day (Ref. 3 mnths) Market Work
+                work_hours_pday_3m_w ///   Winsorized 
+                work_hours_pweek_1w /// Crr. No. of Hours/Week, Market & Subsistence Work, (Ref. 1 Week)
+                work_hours_pweek_1w_w  /// Winsorized
+                work_hours_pweek_3m /// Usual No. of Hours/Week, Market & Subsistence Work, (Ref. 3-month)
+                work_hours_pweek_3m_w ///  Winsorized
+                work_days_pweek_1w /// No. of Days/Week (Ref. 1 Week) Market Work
+                work_days_pweek_3m /// Avg. num. of wrk. days per week during 3 mnth.
+                work_hours_pmonth_informal /// Average worked hour per month for irregular job
+                work_hours_pmonth_informal_w ///   Winsorized
+                basic_wage_3m  /// Basic Wage (3-month)
+                real_basic_wage_3m /// CORRECTED INFLATION - Basic Wage (3-month)
+                ln_basic_rwage_3m ///  LOG Basic Wage (3-month)
+                IHS_basic_rwage_3m /// IHS Basic Wage (3-month)
+                ln_basic_rwage_natives_cond /// CONDITIONAL - UNEMPLOYED & OLF: WAGE MISSING - NATIVES LOG Basic Wage (3m)
+                ln_basic_rwage_uncond_unemp_olf /// UNCONDITIONAL - UNEMPLOYED & OLF: WAGE 0 - NATIVES - LOG - Basic Wage (3-month)
+                ln_basic_rwage_uncond_unemp /// UNCONDITIONAL - UNEMPLOYED WAGE 0 / OLF WAGE MISSING - NATIVES LOG Basic (3m)
+                total_wage_3m  /// Total Wages (3-month)
+                real_total_wage_3m /// CORRECTED INFLATION - Total Wage (3-month)
+                ln_total_rwage_3m  /// LOG Total Wage (3-month)
+                IHS_total_rwage_3m /// IHS Total Wage (3-month)
+                ln_total_rwage_natives_cond /// CONDITIONAL - UNEMPLOYED & OLF: WAGE MISSING - NATIVES LOG Total Wage (3m)
+                ln_total_rwage_uncond_unemp_olf /// UNCONDITIONAL - UNEMPLOYED & OLF: WAGE 0 - NATIVES - LOG - Total Wage (3-month)
+                ln_total_rwage_uncond_unemp /// UNCONDITIONAL - UNEMPLOYED WAGE 0 / OLF WAGE MISSING - NATIVES LOG Total (3m)
+                mthly_wage /// Monthly Wage (Prim.& Second. Jobs)
+                real_mthly_wage /// CORRECTED INFLATION - Monthly Wage (Prim.& Second. Jobs)
+                ln_mthly_rwage /// LOG Monthly Wage (Prim.& Second. Jobs)
+                hourly_wage /// Hourly Wage (Prim.& Second. Jobs)
+                real_hourly_wage  ///  CORRECTED INFLATION - Hourly Wage (Prim.& Second. Jobs)
+                ln_hourly_rwage /// LOG Hourly Wage (Prim.& Second. Jobs)
+                daily_wage_irregular   /// Average Daily Wage (Irregular Workers)
+                real_daily_wage_irregular  /// CORRECTED INFLATION - Average Daily Wage (Irregular Workers)
+                ln_daily_rwage_irregular  ///  LOG Average Daily Wage (Irregular Workers)
+                wp_industry_jlmps_1w  ///  Industries with work permits for refugees - Economic Activity of prim. job 1w
+                wp_industry_jlmps_3m ///   Industries with work permits for refugees - Economic Activity of prim. job 3m
+                member_union_3m /// Member of a syndicate/trade union (ref. 3-mnths)
+                skills_required_pjob  ///  Does primary job require any skill
+                stability_main_job /// From job1_07 : Degree of stability - Job 01 - 1 Stable
+                permanent_contract // From job1_08 : Type of work contract - Job 01 - 1 Permanent
 
 
 **************
 *GLOBALS 
 global    controls ///
           age age2 sex hhsize 
-global    lm_out ///
+
+/*global    lm_out ///
           ln_wage_natives_cond     /// Wage Cond   (no empl = . / out LF = .)
            usemp1 /// Employed
           unemp1 /// Unemp 
            crnumhrs1 /// Hours of work per week
           informal // Informal if no contract and no insurance
-
+*/
          *ln_wage_uncond_unemp     /// Wage Uncond (no empl = 0 / out LF = .)
           *ln_wage_uncond_unemp_olf /// Wage Uncond (no empl = 0 / out LF = 0)
          *crnumdys /// Days of work per week
