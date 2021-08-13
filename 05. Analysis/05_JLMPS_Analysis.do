@@ -215,7 +215,7 @@ xtset indid_2010 year
 ***************************************************
 
 foreach outcome of global outcome_var_empl {
-  xi: reg `outcome' agg_wp ///
+  qui xi: reg `outcome' agg_wp ///
           $controls i.educ1d i.fteducst i.mteducst ///
           [pweight = expan_indiv],  ///
           cluster(district_iid) robust 
@@ -224,7 +224,7 @@ foreach outcome of global outcome_var_empl {
 }
 
 foreach outcome of global outcome_var_wage {
-  xi: reg `outcome' agg_wp ///
+  qui xi: reg `outcome' agg_wp ///
           $controls i.educ1d i.fteducst i.mteducst ///
           [pweight = expan_indiv],  ///
           cluster(district_iid) robust 
@@ -233,7 +233,7 @@ foreach outcome of global outcome_var_wage {
 }
 
 foreach outcome of global outcome_var_hours {
-  xi: reg `outcome' agg_wp ///
+  qui xi: reg `outcome' agg_wp ///
           $controls i.educ1d i.fteducst i.mteducst ///
           [pweight = expan_indiv],  ///
           cluster(district_iid) robust
@@ -336,7 +336,6 @@ estimates drop m1 m2 m3 m4 m5
 
 ***************************************************
 
-
 foreach outcome of global outcome_var_empl {
   qui xi: reg `outcome' agg_wp i.district_iid ///
           $controls i.educ1d i.fteducst i.mteducst ///
@@ -347,7 +346,7 @@ foreach outcome of global outcome_var_empl {
 }
 
 foreach outcome of global outcome_var_wage {
-  xi: reg `outcome' agg_wp i.district_iid ///
+  qui xi: reg `outcome' agg_wp i.district_iid ///
           $controls i.educ1d i.fteducst i.mteducst ///
           [pweight = expan_indiv],  ///
           cluster(district_iid) robust 
@@ -356,7 +355,7 @@ foreach outcome of global outcome_var_wage {
 }
 
 foreach outcome of global outcome_var_hours {
-  xi: reg `outcome' agg_wp i.district_iid ///
+  qui xi: reg `outcome' agg_wp i.district_iid ///
           $controls i.educ1d i.fteducst i.mteducst ///
           [pweight = expan_indiv],  ///
           cluster(district_iid) robust 
@@ -472,16 +471,32 @@ estimates drop m1 m2 m3 m4 m5
 
 ***************************************************
 
-foreach outcome of global lm_out {
-  *OLS
-  xi: reg `outcome' agg_wp ///
-          i.district_iid i.year ///
-          $controls i.educ1d i.fteducst i.mteducst   ///
+foreach outcome of global outcome_var_empl {
+  qui xi: reg `outcome' agg_wp i.district_iid i.year  ///
+          $controls i.educ1d i.fteducst i.mteducst ///
           [pweight = expan_indiv],  ///
           cluster(district_iid) robust 
-  estimates table, star(.05 .01 .001)
+    codebook `outcome', c
+  estimates table, k(agg_wp) star(.05 .01 .001)
 }
 
+foreach outcome of global outcome_var_wage {
+  qui xi: reg `outcome' agg_wp i.district_iid i.year  ///
+          $controls i.educ1d i.fteducst i.mteducst ///
+          [pweight = expan_indiv],  ///
+          cluster(district_iid) robust 
+  codebook `outcome', c
+  estimates table, k(agg_wp) star(.05 .01 .001)
+}
+
+foreach outcome of global outcome_var_hours {
+  qui xi: reg `outcome' agg_wp i.district_iid i.year  ///
+          $controls i.educ1d i.fteducst i.mteducst ///
+          [pweight = expan_indiv],  ///
+          cluster(district_iid) robust 
+  codebook `outcome', c
+  estimates table, k(agg_wp) star(.05 .01 .001)
+}
 
 reg ln_wage_natives_cond agg_wp i.district_iid i.year $controls i.educ1d i.fteducst i.mteducst ///
     [pweight = expan_indiv], cluster(district_iid) robust
@@ -586,10 +601,10 @@ estimates drop m1 m2 m3 m4 m5
 
 ********* IV *********
 
-/*
-foreach outcome of global lm_out {
+
+foreach outcome of global outcome_var_empl {
   *IV
-  xi: ivreg2  `outcome' ///
+  qui xi: ivreg2  `outcome' ///
               i.year i.district_iid ///
               $controls i.educ1d i.fteducst i.mteducst  ///
               (agg_wp = IHS_IV_SS) ///
@@ -597,21 +612,82 @@ foreach outcome of global lm_out {
               cluster(district_iid) robust ///
               partial(i.district_iid) ///
               first 
-  estimates table, star(.05 .01 .001) 
+    codebook `outcome', c
+  estimates table, k(agg_wp)  star(.05 .01 .001) 
   * With equivalent first-stage
   gen smpl=0
   replace smpl=1 if e(sample)==1
 
-  xi: reg agg_wp IHS_IV_SS ///
+  qui xi: reg agg_wp IHS_IV_SS ///
           i.year i.district_iid ///
           $controls i.educ1d i.fteducst i.mteducst  ///
           if smpl == 1 [pweight = expan_indiv], ///
           cluster(district_iid) robust
-  estimates table, star(.05 .01 .001)           
+    estimates table, k(IHS_IV_SS)  star(.05 .01 .001) 
     drop smpl 
 }
 
-*/
+foreach outcome of global outcome_var_wage {
+  *IV
+  qui xi: ivreg2  `outcome' ///
+              i.year i.district_iid ///
+              $controls i.educ1d i.fteducst i.mteducst  ///
+              (agg_wp = IHS_IV_SS) ///
+              [pweight = expan_indiv], ///
+              cluster(district_iid) robust ///
+              partial(i.district_iid) ///
+              first 
+    codebook `outcome', c
+  estimates table, k(agg_wp)  star(.05 .01 .001) 
+  * With equivalent first-stage
+  gen smpl=0
+  replace smpl=1 if e(sample)==1
+
+  qui xi: reg agg_wp IHS_IV_SS ///
+          i.year i.district_iid ///
+          $controls i.educ1d i.fteducst i.mteducst  ///
+          if smpl == 1 [pweight = expan_indiv], ///
+          cluster(district_iid) robust
+    estimates table, k(IHS_IV_SS)  star(.05 .01 .001) 
+    drop smpl 
+}
+
+foreach outcome of global outcome_var_hours {
+  *IV
+  qui xi: ivreg2  `outcome' ///
+              i.year i.district_iid ///
+              $controls i.educ1d i.fteducst i.mteducst  ///
+              (agg_wp = IHS_IV_SS) ///
+              [pweight = expan_indiv], ///
+              cluster(district_iid) robust ///
+              partial(i.district_iid) ///
+              first 
+    codebook `outcome', c
+  estimates table, k(agg_wp)  star(.05 .01 .001) 
+  * With equivalent first-stage
+  gen smpl=0
+  replace smpl=1 if e(sample)==1
+
+  qui xi: reg agg_wp IHS_IV_SS ///
+          i.year i.district_iid ///
+          $controls i.educ1d i.fteducst i.mteducst  ///
+          if smpl == 1 [pweight = expan_indiv], ///
+          cluster(district_iid) robust
+    estimates table, k(IHS_IV_SS)  star(.05 .01 .001) 
+    drop smpl 
+}
+
+
+
+
+
+
+
+
+
+
+
+
 
   *IV
   xi: ivreg2  ln_wage_natives_cond ///
