@@ -94,7 +94,7 @@ destring indid_2010, replace
 ************
 *REGRESSION*
 ************
-global    lm_out ///
+global    outcome_var_empl ///
                 unemployed /// From unemp2m - ext def, search not req; 1 week, empl or unemp, OLF is miss
                 unempdurmth ///    Current unemployment duration (in months)
                 jobless2  ///  Jobless, Extended Definition (Among non-students)
@@ -113,18 +113,14 @@ global    lm_out ///
                 job_formal_1w  /// Formality of prim. job (ref. 1-Week) - 0 Informal - 1 Formal
                 job_formal_3m  /// Formality of prim. job (ref. 3-month) - 0 Informal - 1 Formal
                 informal  ///  1 Informal - 0 Formal - Informal if no contract (uscontrp=0) and no insurance (ussocinsp=0)
-                work_hours_pday_1w /// No. of Hours/Day (Ref. 1 Week) Market Work
-                work_hours_pday_1w_w  ///  Winsorized 
-                work_hours_pday_3m /// No. of Hours/Day (Ref. 3 mnths) Market Work
-                work_hours_pday_3m_w ///   Winsorized 
-                work_hours_pweek_1w /// Crr. No. of Hours/Week, Market & Subsistence Work, (Ref. 1 Week)
-                work_hours_pweek_1w_w  /// Winsorized
-                work_hours_pweek_3m /// Usual No. of Hours/Week, Market & Subsistence Work, (Ref. 3-month)
-                work_hours_pweek_3m_w ///  Winsorized
-                work_days_pweek_1w /// No. of Days/Week (Ref. 1 Week) Market Work
-                work_days_pweek_3m /// Avg. num. of wrk. days per week during 3 mnth.
-                work_hours_pmonth_informal /// Average worked hour per month for irregular job
-                work_hours_pmonth_informal_w ///   Winsorized
+                wp_industry_jlmps_1w  ///  Industries with work permits for refugees - Economic Activity of prim. job 1w
+                wp_industry_jlmps_3m ///   Industries with work permits for refugees - Economic Activity of prim. job 3m
+                member_union_3m /// Member of a syndicate/trade union (ref. 3-mnths)
+                skills_required_pjob  ///  Does primary job require any skill
+                stability_main_job /// From job1_07 : Degree of stability - Job 01 - 1 Stable
+                permanent_contract // From job1_08 : Type of work contract - Job 01 - 1 Permanent
+
+global outcome_var_wage ///
                 basic_wage_3m  /// Basic Wage (3-month)
                 real_basic_wage_3m /// CORRECTED INFLATION - Basic Wage (3-month)
                 ln_basic_rwage_3m ///  LOG Basic Wage (3-month)
@@ -147,15 +143,21 @@ global    lm_out ///
                 ln_hourly_rwage /// LOG Hourly Wage (Prim.& Second. Jobs)
                 daily_wage_irregular   /// Average Daily Wage (Irregular Workers)
                 real_daily_wage_irregular  /// CORRECTED INFLATION - Average Daily Wage (Irregular Workers)
-                ln_daily_rwage_irregular  ///  LOG Average Daily Wage (Irregular Workers)
-                wp_industry_jlmps_1w  ///  Industries with work permits for refugees - Economic Activity of prim. job 1w
-                wp_industry_jlmps_3m ///   Industries with work permits for refugees - Economic Activity of prim. job 3m
-                member_union_3m /// Member of a syndicate/trade union (ref. 3-mnths)
-                skills_required_pjob  ///  Does primary job require any skill
-                stability_main_job /// From job1_07 : Degree of stability - Job 01 - 1 Stable
-                permanent_contract // From job1_08 : Type of work contract - Job 01 - 1 Permanent
+                ln_daily_rwage_irregular  //  LOG Average Daily Wage (Irregular Workers)
 
-
+global outcome_var_hours ///
+                work_hours_pday_1w /// No. of Hours/Day (Ref. 1 Week) Market Work
+                work_hours_pday_1w_w  ///  Winsorized 
+                work_hours_pday_3m /// No. of Hours/Day (Ref. 3 mnths) Market Work
+                work_hours_pday_3m_w ///   Winsorized 
+                work_hours_pweek_1w /// Crr. No. of Hours/Week, Market & Subsistence Work, (Ref. 1 Week)
+                work_hours_pweek_1w_w  /// Winsorized
+                work_hours_pweek_3m /// Usual No. of Hours/Week, Market & Subsistence Work, (Ref. 3-month)
+                work_hours_pweek_3m_w ///  Winsorized
+                work_days_pweek_1w /// No. of Days/Week (Ref. 1 Week) Market Work
+                work_days_pweek_3m /// Avg. num. of wrk. days per week during 3 mnth.
+                work_hours_pmonth_informal /// Average worked hour per month for irregular job
+                work_hours_pmonth_informal_w //   Winsorized
 **************
 *GLOBALS 
 global    controls ///
@@ -179,8 +181,11 @@ global    controls ///
 
 *Summary statstics
 bys year: sum IV_SS agg_wp work_permit ///
-              $lm_out $controls ln_ref basicwg3 NbRefbyGovoutcamp ///
+              $outcome_var_empl  $outcome_var_wage $outcome_var_hours ///
+              $controls ln_ref NbRefbyGovoutcamp ///
               educ1d fteducst mteducst [aweight = expan_indiv] 
+
+mdesc $outcome_var_empl  $outcome_var_wage $outcome_var_hours 
 
 *Dividing into treated areas: WP against NO WP: District differences?
 tab agg_wp, m
@@ -191,16 +196,17 @@ tab bi_agg_wp, m
 reg age agg_wp
 ttest age == agg_wp
 
-xtset, clear 
-*xtset year
-xtset indid_2010 year 
 
 ************
 *REGRESSION*
 ************
 
-mdesc ln_wage ln_wage_natives ln_wage_natives_cond ///
-      ln_wage_uncond_unemp ln_wage_uncond_unemp_olf
+* SET THE PANEL STRUCTURE
+xtset, clear 
+*xtset year
+xtset indid_2010 year 
+
+
 
 ***************************************************
 
@@ -208,12 +214,31 @@ mdesc ln_wage ln_wage_natives ln_wage_natives_cond ///
 
 ***************************************************
 
-foreach outcome of global lm_out {
+foreach outcome of global outcome_var_empl {
   xi: reg `outcome' agg_wp ///
           $controls i.educ1d i.fteducst i.mteducst ///
           [pweight = expan_indiv],  ///
           cluster(district_iid) robust 
-  estimates table, star(.05 .01 .001)
+  codebook `outcome', c
+  estimates table, k(agg_wp) star(.05 .01 .001)
+}
+
+foreach outcome of global outcome_var_wage {
+  xi: reg `outcome' agg_wp ///
+          $controls i.educ1d i.fteducst i.mteducst ///
+          [pweight = expan_indiv],  ///
+          cluster(district_iid) robust 
+  codebook `outcome', c
+  estimates table, k(agg_wp) star(.05 .01 .001)
+}
+
+foreach outcome of global outcome_var_hours {
+  xi: reg `outcome' agg_wp ///
+          $controls i.educ1d i.fteducst i.mteducst ///
+          [pweight = expan_indiv],  ///
+          cluster(district_iid) robust
+  codebook `outcome', c 
+  estimates table, k(agg_wp) star(.05 .01 .001)
 }
 
 ************ M1 with automatic tables
@@ -311,13 +336,32 @@ estimates drop m1 m2 m3 m4 m5
 
 ***************************************************
 
-foreach outcome of global lm_out {
-  xi: reg `outcome' agg_wp ///
-          i.district_iid ///
-          $controls i.educ1d i.fteducst i.mteducst   ///
+
+foreach outcome of global outcome_var_empl {
+  qui xi: reg `outcome' agg_wp i.district_iid ///
+          $controls i.educ1d i.fteducst i.mteducst ///
           [pweight = expan_indiv],  ///
           cluster(district_iid) robust 
-  estimates table, star(.05 .01 .001)
+    codebook `outcome', c
+  estimates table, k(agg_wp) star(.05 .01 .001)
+}
+
+foreach outcome of global outcome_var_wage {
+  xi: reg `outcome' agg_wp i.district_iid ///
+          $controls i.educ1d i.fteducst i.mteducst ///
+          [pweight = expan_indiv],  ///
+          cluster(district_iid) robust 
+  codebook `outcome', c
+  estimates table, k(agg_wp) star(.05 .01 .001)
+}
+
+foreach outcome of global outcome_var_hours {
+  xi: reg `outcome' agg_wp i.district_iid ///
+          $controls i.educ1d i.fteducst i.mteducst ///
+          [pweight = expan_indiv],  ///
+          cluster(district_iid) robust 
+  codebook `outcome', c
+  estimates table, k(agg_wp) star(.05 .01 .001)
 }
 
 
