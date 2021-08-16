@@ -120,28 +120,119 @@ bys year: tab district_en
                                        *Controls*
                                        **********
 
+*********************
+** NUMBER REFUGEES **
+*********************
+
 tab NbRefbyGovoutcamp, m
-replace NbRefbyGovoutcamp = 0 if year == 2010
-gen ln_ref = ln(1 + NbRefbyGovoutcamp)
+ren NbRefbyGovoutcamp nb_refugees_bygov
+replace nb_refugees_bygov = 0 if year == 2010
+lab var nb_refugees_bygov "[CTRL] Number of refugees out of camps by governorate in 2016"
+
+gen ln_nb_refugees_bygov = ln(1 + nb_refugees_bygov) if year == 2016
+lab var ln_nb_refugees_bygov "[CTRL] LOG Number of refugees out of camps by governorate in 2016"
 *ln_ref, as of now, does not include refugees in 2010, only in 2016
 
+*********
+** AGE **
+*********
+
+/*respondents' age and age squared. */
+su age
+lab var age "[CTRL] Age"
+
 gen age2 = age^2
+lab var age2 "[CTRL] Age Square"
+
+*******************
+** DISTANCE CAMP **
+*******************
 
 *Distance between zaatari camp and districts jordan
 gen dist_zaatari_lat = 32.30888675674741
 gen dist_zaatari_long = 36.31329385051756
 geodist district_lat district_long dist_zaatari_lat dist_zaatari_long, gen(distance_dis_camp)
 tab distance_dis_camp, m
-lab var distance_dis_camp "Distance (km) between JORD districts and ZAATARI CAMP"
+lab var distance_dis_camp "[CTRL] Distance (km) between JORD districts and ZAATARI CAMP in 2016"
+replace distance_dis_camp = 0 if year == 2010
 
+gen ln_distance_dis_camp = log(1 + distance_dis_camp) if year == 2016
+lab var ln_distance_dis_camp "[CTRL] LOG Distance (km) between JORD districts and ZAATARI CAMP in 2016"
+
+************
+** GENDER **
+************
+
+tab sex , m 
+codebook sex
+gen gender = 0 if sex == 2 //Female
+replace gender = 1 if sex == 1 //Male
+lab def gender 0 "Female" 1 "Male", modify 
+lab val gender gender 
+lab var gender "[CTRL] Gender - 1 Male 0 Female"
+
+********************
+** HOUSEHOLD SIZE **
+********************
+
+tab hhsize
+codebook hhsize 
+lab var hhsize "[CTRL] Total No. of Individuals in the Household"
+
+***************
+** EDUCATION **
+***************
 *Education
+
+*-Own
+/*
+Seven levels of education are controlled for: (1) illiterate (reference) (2) read & write 
+(3) basic (ten years) (4) secondary (two additional years) (5) post-secondary (two additional 
+years beyond secondary) (6) university (four additional years beyond secondary) and
+(7) post-graduate. 
+*/
+tab educ1d, m
+codebook educ1d
+lab var educ1d "[CTRL] Education Levels (1-digit)" 
+
+/*These same education categories are included for mother's and father's education, 
+although we aggregate post-graduate studies with university for parents. */
+
 *-Father
 tab fteducst, m
 codebook fteducst
+lab list Leduc1d
+replace fteducst = 6 if fteducst == 7
+lab def Leduc1d_agg     ///
+           1 "Illiterate" ///
+           2 "Read and Write" ///
+           3 "Basic Education" ///
+           4 "Secondary Educ" ///
+           5 "Post-Secondary" ///
+           6 "University and more", ///
+           modify
+lab val fteducst Leduc1d_agg
+lab var fteducst "[CTRL] Father's Level of education attained" 
+
 *-Mother
 tab mteducst, m
-*-Own
-tab educ1d, m
+replace mteducst = 6 if mteducst == 7
+lab val mteducst Leduc1d_agg
+lab var mteducst "[CTRL] Mother's Level of education attained" 
+
+/*
+father's employment status when the respondent was aged 15 as: (1) waged employee 
+(2) employer (3) self-employed (4) unpaid worker (5) non-employed or (6) don't know. 
+*/
+tab ftempst, m 
+lab var ftempst "[CTRL] Father's Employment Status (When Resp. 15)" 
+
+
+/*
+In some specifications we also control for geographic or individual fixed effects (in which
+case some invariant controls drop out of the models).
+*/
+
 
                                        ************
                                        *Instrument*
@@ -165,7 +256,48 @@ tab agg_wp_orig, m //Adding another more accurate measure
 corr IV_SS agg_wp //0.64
 corr IV_SS agg_wp_orig //0.58
 
+/*
+labor market status 
+employed, unemployed, or out of the labor force
 
+border between unemployment and non-participation
+we require individuals to have been actively searching for work during unemployment 
+(within the past four weeks in the contemporaneous data sources, within the period of
+non-employment for retrospective data)
+ 
+Work is defined in terms of market work in the past three months;
+ those who do subsistence work only are considered not working.
+
+Number of outcomes among the employed,
+including 
+
+- whether individuals have formal work (with a contract or social
+insurance) or informal work (neither a contract nor social insurance).
+
+We also look at whether workers are in an “open sector,” that is, a sector
+open to Syrians with work permits (agriculture, manufacturing, construction,
+food service, or domestic/cleaning work (Kelberer, 2017)).
+
+While Jordanians may be facing competition in the open sector, they may
+also be receiving more opportunities in other sectors, particularly the
+public sector. For instance, additional provision of services and international
+funds may increase public sector employment, which is open
+exclusively to Jordanians, while displacement may occur in the private
+sector. We therefore examine the probability of employment in the private
+sector among the employed (the complement necessarily being
+public sector work). 
+
+To specifically examine whether aid is likely to be
+creating jobs in human services, we examine the probability of being
+employed in the education or health care field among the employed.
+
+Further, we examine occupations, specifically an outcome of being in a
+managerial or professional occupation among the employed, in case
+there is occupational upgrading occurring. 
+
+For all workers, we examine hours per week, and for wage workers, we examine both hourly wages
+and monthly wages.
+*/
                                           **********
                                           *Outcomes*
                                           **********
