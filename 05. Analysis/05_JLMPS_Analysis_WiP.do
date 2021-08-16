@@ -1,3 +1,22 @@
+
+
+cap log close
+clear all
+set more off, permanently
+set mem 100m
+
+log using "$out_JLMPS/01_Analysis.log", replace
+
+   ****************************************************************************
+   **                            DATA JLMPS                                  **
+   **                 REGRESSION ANALYSIS - V2 FOR TRIALS                    **  
+   ** ---------------------------------------------------------------------- **
+   ** Type Do  :  DATA JLMPS   REGRESSION ANALYSIS                           **
+   **                                                                        **
+   ** Authors  : Julie Bousquet                                              **
+   ****************************************************************************
+
+
 use "$data_final/06_IV_JLMPS_Construct_Outcomes.dta", clear
 
 *adoupdate, update
@@ -26,8 +45,6 @@ lab list Lnationality_cl
 
 keep if nationality_cl == 1 //Keep only the jordanians
 *keep if nationality_cl != 2 //Keep all but the syrians
-tab year 
-tab age
 
 ***************
 * WORKING AGE *
@@ -71,9 +88,10 @@ destring indid_2010, replace
 *********************************************************************
 *********************************************************************
 
-************
-*REGRESSION*
-************
+                              ************
+                              *  GLOBALS *
+                              ************
+
 global    outcome_var_empl ///
                 unemployed /// From unemp2m - ext def, search not req; 1 week, empl or unemp, OLF is miss
                 unempdurmth ///    Current unemployment duration (in months)
@@ -106,14 +124,14 @@ global outcome_var_wage ///
                 ln_basic_rwage_3m ///  LOG Basic Wage (3-month)
                 IHS_basic_rwage_3m /// IHS Basic Wage (3-month)
                 ln_basic_rwage_natives_cond /// CONDITIONAL - UNEMPLOYED & OLF: WAGE MISSING - NATIVES LOG Basic Wage (3m)
-                ln_basic_rwage_uncond_unemp_olf /// UNCONDITIONAL - UNEMPLOYED & OLF: WAGE 0 - NATIVES - LOG - Basic Wage (3-month)
+                ln_basic_rwage_uncond_unolf /// UNCONDITIONAL - UNEMPLOYED & OLF: WAGE 0 - NATIVES - LOG - Basic Wage (3-month)
                 ln_basic_rwage_uncond_unemp /// UNCONDITIONAL - UNEMPLOYED WAGE 0 / OLF WAGE MISSING - NATIVES LOG Basic (3m)
                 total_wage_3m  /// Total Wages (3-month)
                 real_total_wage_3m /// CORRECTED INFLATION - Total Wage (3-month)
                 ln_total_rwage_3m  /// LOG Total Wage (3-month)
                 IHS_total_rwage_3m /// IHS Total Wage (3-month)
                 ln_total_rwage_natives_cond /// CONDITIONAL - UNEMPLOYED & OLF: WAGE MISSING - NATIVES LOG Total Wage (3m)
-                ln_total_rwage_uncond_unemp_olf /// UNCONDITIONAL - UNEMPLOYED & OLF: WAGE 0 - NATIVES - LOG - Total Wage (3-month)
+                ln_total_rwage_uncond_unolf /// UNCONDITIONAL - UNEMPLOYED & OLF: WAGE 0 - NATIVES - LOG - Total Wage (3-month)
                 ln_total_rwage_uncond_unemp /// UNCONDITIONAL - UNEMPLOYED WAGE 0 / OLF WAGE MISSING - NATIVES LOG Total (3m)
                 mthly_wage /// Monthly Wage (Prim.& Second. Jobs)
                 real_mthly_wage /// CORRECTED INFLATION - Monthly Wage (Prim.& Second. Jobs)
@@ -138,24 +156,27 @@ global outcome_var_hours ///
                 work_days_pweek_3m /// Avg. num. of wrk. days per week during 3 mnth.
                 work_hours_pmonth_informal /// Average worked hour per month for irregular job
                 work_hours_pmonth_informal_w //   Winsorized
-**************
-*GLOBALS 
+
+
+global    globals_list ///
+            outcome_var_empl outcome_var_wage outcome_var_hours
+
 global    controls ///
-          age age2 sex hhsize 
+            age age2 sex hhsize 
 
 
-
-
-************
-*REGRESSION*
-************
+                                  ************
+                                  *   PANEL  *
+                                  ************
 
 * SET THE PANEL STRUCTURE
 xtset, clear 
 *xtset year
 xtset indid_2010 year 
 
-
+                                  ************
+                                  *REGRESSION*
+                                  ************
 
               ***************************************************
                 *****         M1: SIMPLE OLS:           *******
@@ -165,31 +186,15 @@ xtset indid_2010 year
 ********* OLS ********
 **********************
 
-foreach outcome of global outcome_var_empl {
-  qui xi: reg `outcome' agg_wp ///
-          $controls i.educ1d i.fteducst i.mteducst ///
-          [pweight = expan_indiv],  ///
-          cluster(district_iid) robust 
-  codebook `outcome', c
-  estimates table, k(agg_wp) star(.05 .01 .001)
-}
-
-foreach outcome of global outcome_var_wage {
-  qui xi: reg `outcome' agg_wp ///
-          $controls i.educ1d i.fteducst i.mteducst ///
-          [pweight = expan_indiv],  ///
-          cluster(district_iid) robust 
-  codebook `outcome', c
-  estimates table, k(agg_wp) star(.05 .01 .001)
-}
-
-foreach outcome of global outcome_var_hours {
-  qui xi: reg `outcome' agg_wp ///
-          $controls i.educ1d i.fteducst i.mteducst ///
-          [pweight = expan_indiv],  ///
-          cluster(district_iid) robust
-  codebook `outcome', c 
-  estimates table, k(agg_wp) star(.05 .01 .001)
+foreach globals of global globals_list {
+  foreach outcome of global `globals' {
+    qui xi: reg `outcome' agg_wp ///
+            $controls i.educ1d i.fteducst i.mteducst ///
+            [pweight = expan_indiv],  ///
+            cluster(district_iid) robust 
+    codebook `outcome', c
+    estimates table, k(agg_wp) star(.05 .01 .001)
+  }
 }
 
 
@@ -201,31 +206,15 @@ foreach outcome of global outcome_var_hours {
 ********* OLS ********
 **********************
 
-foreach outcome of global outcome_var_empl {
-  qui xi: reg `outcome' agg_wp i.district_iid ///
-          $controls i.educ1d i.fteducst i.mteducst ///
-          [pweight = expan_indiv],  ///
-          cluster(district_iid) robust 
+foreach globals of global globals_list {
+  foreach outcome of global `globals' {
+    qui xi: reg `outcome' agg_wp i.district_iid ///
+            $controls i.educ1d i.fteducst i.mteducst ///
+            [pweight = expan_indiv],  ///
+            cluster(district_iid) robust 
     codebook `outcome', c
-  estimates table, k(agg_wp) star(.05 .01 .001)
-}
-
-foreach outcome of global outcome_var_wage {
-  qui xi: reg `outcome' agg_wp i.district_iid ///
-          $controls i.educ1d i.fteducst i.mteducst ///
-          [pweight = expan_indiv],  ///
-          cluster(district_iid) robust 
-  codebook `outcome', c
-  estimates table, k(agg_wp) star(.05 .01 .001)
-}
-
-foreach outcome of global outcome_var_hours {
-  qui xi: reg `outcome' agg_wp i.district_iid ///
-          $controls i.educ1d i.fteducst i.mteducst ///
-          [pweight = expan_indiv],  ///
-          cluster(district_iid) robust 
-  codebook `outcome', c
-  estimates table, k(agg_wp) star(.05 .01 .001)
+    estimates table, k(agg_wp) star(.05 .01 .001)
+  }
 }
 
               ***************************************************
@@ -236,107 +225,45 @@ foreach outcome of global outcome_var_hours {
 ********* OLS ********
 **********************
 
-foreach outcome of global outcome_var_empl {
-  qui xi: reg `outcome' agg_wp i.district_iid i.year  ///
-          $controls i.educ1d i.fteducst i.mteducst ///
-          [pweight = expan_indiv],  ///
-          cluster(district_iid) robust 
+foreach globals of global globals_list {
+  foreach outcome of global `globals' {
+    qui xi: reg `outcome' agg_wp i.district_iid i.year  ///
+            $controls i.educ1d i.fteducst i.mteducst ///
+            [pweight = expan_indiv],  ///
+            cluster(district_iid) robust 
     codebook `outcome', c
-  estimates table, k(agg_wp) star(.05 .01 .001)
-}
-
-foreach outcome of global outcome_var_wage {
-  qui xi: reg `outcome' agg_wp i.district_iid i.year  ///
-          $controls i.educ1d i.fteducst i.mteducst ///
-          [pweight = expan_indiv],  ///
-          cluster(district_iid) robust 
-  codebook `outcome', c
-  estimates table, k(agg_wp) star(.05 .01 .001)
-}
-
-foreach outcome of global outcome_var_hours {
-  qui xi: reg `outcome' agg_wp i.district_iid i.year  ///
-          $controls i.educ1d i.fteducst i.mteducst ///
-          [pweight = expan_indiv],  ///
-          cluster(district_iid) robust 
-  codebook `outcome', c
-  estimates table, k(agg_wp) star(.05 .01 .001)
+    estimates table, k(agg_wp) star(.05 .01 .001)
+  }
 }
 
 **********************
 ********* IV *********
 **********************
 
-foreach outcome of global outcome_var_empl {
-  qui xi: ivreg2  `outcome' ///
-              i.year i.district_iid ///
-              $controls i.educ1d i.fteducst i.mteducst  ///
-              (agg_wp = IHS_IV_SS) ///
-              [pweight = expan_indiv], ///
-              cluster(district_iid) robust ///
-              partial(i.district_iid) ///
-              first 
+foreach globals of global globals_list {
+  foreach outcome of global `globals' {
+    qui xi: ivreg2  `outcome' ///
+                i.year i.district_iid ///
+                $controls i.educ1d i.fteducst i.mteducst  ///
+                (agg_wp = IHS_IV_SS) ///
+                [pweight = expan_indiv], ///
+                cluster(district_iid) robust ///
+                partial(i.district_iid) ///
+                first 
     codebook `outcome', c
-  estimates table, k(agg_wp)  star(.05 .01 .001) 
-  * With equivalent first-stage
-  gen smpl=0
-  replace smpl=1 if e(sample)==1
+    estimates table, k(agg_wp)  star(.05 .01 .001) 
+    * With equivalent first-stage
+    gen smpl=0
+    replace smpl=1 if e(sample)==1
 
-  qui xi: reg agg_wp IHS_IV_SS ///
-          i.year i.district_iid ///
-          $controls i.educ1d i.fteducst i.mteducst  ///
-          if smpl == 1 [pweight = expan_indiv], ///
-          cluster(district_iid) robust
+    qui xi: reg agg_wp IHS_IV_SS ///
+            i.year i.district_iid ///
+            $controls i.educ1d i.fteducst i.mteducst  ///
+            if smpl == 1 [pweight = expan_indiv], ///
+            cluster(district_iid) robust
     estimates table, k(IHS_IV_SS)  star(.05 .01 .001) 
     drop smpl 
-}
-
-foreach outcome of global outcome_var_wage {
-  qui xi: ivreg2  `outcome' ///
-              i.year i.district_iid ///
-              $controls i.educ1d i.fteducst i.mteducst  ///
-              (agg_wp = IHS_IV_SS) ///
-              [pweight = expan_indiv], ///
-              cluster(district_iid) robust ///
-              partial(i.district_iid) ///
-              first 
-    codebook `outcome', c
-  estimates table, k(agg_wp)  star(.05 .01 .001) 
-  * With equivalent first-stage
-  gen smpl=0
-  replace smpl=1 if e(sample)==1
-
-  qui xi: reg agg_wp IHS_IV_SS ///
-          i.year i.district_iid ///
-          $controls i.educ1d i.fteducst i.mteducst  ///
-          if smpl == 1 [pweight = expan_indiv], ///
-          cluster(district_iid) robust
-    estimates table, k(IHS_IV_SS)  star(.05 .01 .001) 
-    drop smpl 
-}
-
-foreach outcome of global outcome_var_hours {
-  qui xi: ivreg2  `outcome' ///
-              i.year i.district_iid ///
-              $controls i.educ1d i.fteducst i.mteducst  ///
-              (agg_wp = IHS_IV_SS) ///
-              [pweight = expan_indiv], ///
-              cluster(district_iid) robust ///
-              partial(i.district_iid) ///
-              first 
-  codebook `outcome', c
-  estimates table, k(agg_wp)  star(.05 .01 .001) 
-  * With equivalent first-stage
-  gen smpl=0
-  replace smpl=1 if e(sample)==1
-
-  qui xi: reg agg_wp IHS_IV_SS ///
-          i.year i.district_iid ///
-          $controls i.educ1d i.fteducst i.mteducst  ///
-          if smpl == 1 [pweight = expan_indiv], ///
-          cluster(district_iid) robust
-    estimates table, k(IHS_IV_SS)  star(.05 .01 .001) 
-    drop smpl 
+  }
 }
 
 
@@ -344,121 +271,52 @@ foreach outcome of global outcome_var_hours {
               ***** M4: YEAR FE / DISTRICT FE / CONTROL NUMBER OF REFUGEE   *****
             ***********************************************************************
 
-
-
 **********************
 ********* OLS ********
 **********************
 
-foreach outcome of global outcome_var_empl {
-  qui xi: reg `outcome' agg_wp ///
-          i.district_iid i.year ///
-          ln_ref $controls i.educ1d i.fteducst i.mteducst  ///
-          [pweight = expan_indiv],  ///
-          cluster(district_iid) robust 
-  codebook `outcome', c
-  estimates table, k(agg_wp) star(.05 .01 .001)
-}
-
-foreach outcome of global outcome_var_wage {
-  qui xi: reg `outcome' agg_wp ///
-          i.district_iid i.year ///
-          ln_ref $controls i.educ1d i.fteducst i.mteducst  ///
-          [pweight = expan_indiv],  ///
-          cluster(district_iid) robust 
-  codebook `outcome', c
-  estimates table, k(agg_wp) star(.05 .01 .001)
-}
-
-foreach outcome of global outcome_var_hours {
-  qui xi: reg `outcome' agg_wp ///
-          i.district_iid i.year ///
-          ln_ref $controls i.educ1d i.fteducst i.mteducst  ///
-          [pweight = expan_indiv],  ///
-          cluster(district_iid) robust 
-  codebook `outcome', c
-  estimates table, k(agg_wp) star(.05 .01 .001)
+foreach globals of global globals_list {
+  foreach outcome of global `globals' {
+    qui xi: reg `outcome' agg_wp ///
+            i.district_iid i.year ///
+            ln_ref $controls i.educ1d i.fteducst i.mteducst  ///
+            [pweight = expan_indiv],  ///
+            cluster(district_iid) robust 
+    codebook `outcome', c
+    estimates table, k(agg_wp) star(.05 .01 .001)
+  }
 }
 
 **********************
 ********* IV *********
 **********************
 
-foreach outcome of global outcome_var_empl {
-  qui xi: ivreg2  `outcome' ///
-              i.year i.district_iid ///
-              ln_ref $controls i.educ1d i.fteducst i.mteducst ///
-              (agg_wp = IHS_IV_SS) ///
-              [pweight = expan_indiv], ///
-              cluster(district_iid) robust ///
-              partial(i.district_iid) ///
-              first
-  codebook `outcome', c
-  estimates table, k(agg_wp)  star(.05 .01 .001) 
+foreach globals of global globals_list {
+  foreach outcome of global `globals' {
+    qui xi: ivreg2  `outcome' ///
+                i.year i.district_iid ///
+                ln_ref $controls i.educ1d i.fteducst i.mteducst ///
+                (agg_wp = IHS_IV_SS) ///
+                [pweight = expan_indiv], ///
+                cluster(district_iid) robust ///
+                partial(i.district_iid) ///
+                first
+    codebook `outcome', c
+    estimates table, k(agg_wp)  star(.05 .01 .001) 
 
-  * With equivalent first-stage
-  gen smpl=0
-  replace smpl=1 if e(sample)==1
+    * With equivalent first-stage
+    gen smpl=0
+    replace smpl=1 if e(sample)==1
 
-  qui xi: reg agg_wp IHS_IV_SS ///
-          i.year i.district_iid ///
-          ln_ref $controls i.educ1d i.fteducst i.mteducst  ///
-          if smpl == 1 [pweight = expan_indiv], ///
-          cluster(district_iid) robust
-  estimates table, k(IHS_IV_SS) star(.05 .01 .001)           
+    qui xi: reg agg_wp IHS_IV_SS ///
+            i.year i.district_iid ///
+            ln_ref $controls i.educ1d i.fteducst i.mteducst  ///
+            if smpl == 1 [pweight = expan_indiv], ///
+            cluster(district_iid) robust
+    estimates table, k(IHS_IV_SS) star(.05 .01 .001)           
     drop smpl 
+  }
 }
-
-foreach outcome of global outcome_var_wage {
-  qui xi: ivreg2  `outcome' ///
-              i.year i.district_iid ///
-              ln_ref $controls i.educ1d i.fteducst i.mteducst ///
-              (agg_wp = IHS_IV_SS) ///
-              [pweight = expan_indiv], ///
-              cluster(district_iid) robust ///
-              partial(i.district_iid) ///
-              first
-  codebook `outcome', c
-  estimates table, k(agg_wp)  star(.05 .01 .001) 
-
-  * With equivalent first-stage
-  gen smpl=0
-  replace smpl=1 if e(sample)==1
-
-  qui xi: reg agg_wp IHS_IV_SS ///
-          i.year i.district_iid ///
-          ln_ref $controls i.educ1d i.fteducst i.mteducst  ///
-          if smpl == 1 [pweight = expan_indiv], ///
-          cluster(district_iid) robust
-  estimates table, k(IHS_IV_SS) star(.05 .01 .001)           
-    drop smpl 
-}
-
-foreach outcome of global outcome_var_hours {
-  qui xi: ivreg2  `outcome' ///
-              i.year i.district_iid ///
-              ln_ref $controls i.educ1d i.fteducst i.mteducst ///
-              (agg_wp = IHS_IV_SS) ///
-              [pweight = expan_indiv], ///
-              cluster(district_iid) robust ///
-              partial(i.district_iid) ///
-              first
-  codebook `outcome', c
-  estimates table, k(agg_wp)  star(.05 .01 .001) 
-
-  * With equivalent first-stage
-  gen smpl=0
-  replace smpl=1 if e(sample)==1
-
-  qui xi: reg agg_wp IHS_IV_SS ///
-          i.year i.district_iid ///
-          ln_ref $controls i.educ1d i.fteducst i.mteducst  ///
-          if smpl == 1 [pweight = expan_indiv], ///
-          cluster(district_iid) robust
-  estimates table, k(IHS_IV_SS) star(.05 .01 .001)           
-    drop smpl 
-}
-
 
 
             *****************************************************************
@@ -469,115 +327,48 @@ foreach outcome of global outcome_var_hours {
 ********* OLS ********
 **********************
 
-foreach outcome of global outcome_var_empl {
-  qui xi: reg `outcome' agg_wp ///
-          i.district_iid i.year i.crsectrp ///
-          $controls i.educ1d i.fteducst i.mteducst  ///
-          [pweight = expan_indiv],  ///
-          cluster(district_iid) robust 
-  codebook `outcome', c
-  estimates table, k(agg_wp) star(.05 .01 .001)
-}
-
-foreach outcome of global outcome_var_wage {
-  qui xi: reg `outcome' agg_wp ///
-          i.district_iid i.year i.crsectrp ///
-          $controls i.educ1d i.fteducst i.mteducst  ///
-          [pweight = expan_indiv],  ///
-          cluster(district_iid) robust 
-  codebook `outcome', c
-  estimates table, k(agg_wp) star(.05 .01 .001)
-}
-
-foreach outcome of global outcome_var_hours {
-  qui xi: reg `outcome' agg_wp ///
-          i.district_iid i.year i.crsectrp ///
-          $controls i.educ1d i.fteducst i.mteducst  ///
-          [pweight = expan_indiv],  ///
-          cluster(district_iid) robust 
-  codebook `outcome', c
-  estimates table, k(agg_wp) star(.05 .01 .001)
+foreach globals of global globals_list {
+  foreach outcome of global `globals' {
+    qui xi: reg `outcome' agg_wp ///
+            i.district_iid i.year i.crsectrp ///
+            $controls i.educ1d i.fteducst i.mteducst  ///
+            [pweight = expan_indiv],  ///
+            cluster(district_iid) robust 
+    codebook `outcome', c
+    estimates table, k(agg_wp) star(.05 .01 .001)
+  }
 }
 
 **********************
 ********* IV *********
 **********************
 
-foreach outcome of global outcome_var_empl {
-  qui xi: ivreg2  `outcome' ///
-              i.year i.district_iid i.crsectrp ///
-              $controls i.educ1d i.fteducst i.mteducst ///
-              (agg_wp = IHS_IV_SS) ///
-              [pweight = expan_indiv], ///
-              cluster(district_iid) robust ///
-              partial(i.district_iid i.crsectrp) ///
-              first
-  codebook `outcome', c
-  estimates table, k(agg_wp)  star(.05 .01 .001) 
+foreach globals of global globals_list {
+  foreach outcome of global `globals' {
+    qui xi: ivreg2  `outcome' ///
+                i.year i.district_iid i.crsectrp ///
+                $controls i.educ1d i.fteducst i.mteducst ///
+                (agg_wp = IHS_IV_SS) ///
+                [pweight = expan_indiv], ///
+                cluster(district_iid) robust ///
+                partial(i.district_iid i.crsectrp) ///
+                first
+    codebook `outcome', c
+    estimates table, k(agg_wp)  star(.05 .01 .001) 
 
-  * With equivalent first-stage
-  gen smpl=0
-  replace smpl=1 if e(sample)==1
+    * With equivalent first-stage
+    gen smpl=0
+    replace smpl=1 if e(sample)==1
 
-  qui xi: reg agg_wp IHS_IV_SS ///
-          i.year i.district_iid i.crsectrp ///
-          $controls i.educ1d i.fteducst i.mteducst  ///
-          if smpl == 1 [pweight = expan_indiv], ///
-          cluster(district_iid) robust
-  estimates table,  k(IHS_IV_SS) star(.05 .01 .001)           
+    qui xi: reg agg_wp IHS_IV_SS ///
+            i.year i.district_iid i.crsectrp ///
+            $controls i.educ1d i.fteducst i.mteducst  ///
+            if smpl == 1 [pweight = expan_indiv], ///
+            cluster(district_iid) robust
+    estimates table,  k(IHS_IV_SS) star(.05 .01 .001)           
     drop smpl 
+  }
 }
-
-foreach outcome of global outcome_var_wage {
-  qui xi: ivreg2  `outcome' ///
-              i.year i.district_iid i.crsectrp ///
-              $controls i.educ1d i.fteducst i.mteducst ///
-              (agg_wp = IHS_IV_SS) ///
-              [pweight = expan_indiv], ///
-              cluster(district_iid) robust ///
-              partial(i.district_iid i.crsectrp) ///
-              first
-  codebook `outcome', c
-  estimates table, k(agg_wp)  star(.05 .01 .001) 
-
-  * With equivalent first-stage
-  gen smpl=0
-  replace smpl=1 if e(sample)==1
-
-  qui xi: reg agg_wp IHS_IV_SS ///
-          i.year i.district_iid i.crsectrp ///
-          $controls i.educ1d i.fteducst i.mteducst  ///
-          if smpl == 1 [pweight = expan_indiv], ///
-          cluster(district_iid) robust
-  estimates table,  k(IHS_IV_SS) star(.05 .01 .001)           
-    drop smpl 
-}
-
-foreach outcome of global outcome_var_hours {
-  qui xi: ivreg2  `outcome' ///
-              i.year i.district_iid i.crsectrp ///
-              $controls i.educ1d i.fteducst i.mteducst ///
-              (agg_wp = IHS_IV_SS) ///
-              [pweight = expan_indiv], ///
-              cluster(district_iid) robust ///
-              partial(i.district_iid i.crsectrp) ///
-              first
-  codebook `outcome', c
-  estimates table, k(agg_wp)  star(.05 .01 .001) 
-
-  * With equivalent first-stage
-  gen smpl=0
-  replace smpl=1 if e(sample)==1
-
-  qui xi: reg agg_wp IHS_IV_SS ///
-          i.year i.district_iid i.crsectrp ///
-          $controls i.educ1d i.fteducst i.mteducst  ///
-          if smpl == 1 [pweight = expan_indiv], ///
-          cluster(district_iid) robust
-  estimates table,  k(IHS_IV_SS) star(.05 .01 .001)           
-    drop smpl 
-}
-
 
 ******************************************************************************************
   *****    M6:  YEAR FE / DISTRICT FE / SECOTRAL FE / CONTROL NUMBER OF REFUGEE   ******
@@ -587,40 +378,52 @@ foreach outcome of global outcome_var_hours {
 ********* OLS ********
 **********************
 
-foreach outcome of global outcome_var_empl {
-  qui xi: reg `outcome' agg_wp ///
-          i.district_iid i.year i.crsectrp ///
-          ln_ref $controls i.educ1d i.fteducst i.mteducst  ///
-          [pweight = expan_indiv],  ///
-          cluster(district_iid) robust 
-  codebook `outcome', c
-  estimates table, k(agg_wp) star(.05 .01 .001)
+foreach globals of global globals_list {
+  foreach outcome of global `globals' {
+    qui xi: reg `outcome' agg_wp ///
+            i.district_iid i.year i.crsectrp ///
+            ln_ref $controls i.educ1d i.fteducst i.mteducst  ///
+            [pweight = expan_indiv],  ///
+            cluster(district_iid) robust 
+    codebook `outcome', c
+    estimates table, k(agg_wp) star(.05 .01 .001)
+  }
 }
-
-foreach outcome of global outcome_var_wage {
-  qui xi: reg `outcome' agg_wp ///
-          i.district_iid i.year i.crsectrp ///
-          ln_ref $controls i.educ1d i.fteducst i.mteducst  ///
-          [pweight = expan_indiv],  ///
-          cluster(district_iid) robust 
-  codebook `outcome', c
-  estimates table, k(agg_wp) star(.05 .01 .001)
-}
-
-foreach outcome of global outcome_var_hours {
-  qui xi: reg `outcome' agg_wp ///
-          i.district_iid i.year i.crsectrp ///
-          ln_ref $controls i.educ1d i.fteducst i.mteducst  ///
-          [pweight = expan_indiv],  ///
-          cluster(district_iid) robust 
-  codebook `outcome', c
-  estimates table, k(agg_wp) star(.05 .01 .001)
-}
-
 
 **********************
 ********* IV *********
 **********************
+
+global    globals_list_alt ///
+             outcome_var_wage outcome_var_hours
+
+foreach globals of global globals_list_alt {
+  foreach outcome of global `globals' {
+    qui xi: ivreg2  `outcome' ///
+                i.year i.district_iid i.crsectrp ///
+                ln_ref $controls i.educ1d i.fteducst i.mteducst ///
+                (agg_wp = IHS_IV_SS) ///
+                [pweight = expan_indiv], ///
+                cluster(district_iid) ///
+                partial(i.district_iid i.crsectrp) ///
+                first
+    codebook `outcome', c
+    estimates table, k(agg_wp)  star(.05 .01 .001) 
+
+    * With equivalent first-stage
+    gen smpl=0
+    replace smpl=1 if e(sample)==1
+
+    qui xi: reg agg_wp IHS_IV_SS ///
+            i.year i.district_iid i.crsectrp ///
+            ln_ref $controls i.educ1d i.fteducst i.mteducst  ///
+            if smpl == 1 [pweight = expan_indiv], ///
+            cluster(district_iid) robust
+    estimates table,  k(IHS_IV_SS) star(.05 .01 .001)           
+    drop smpl 
+  }
+}
+
 
 *** something wrong with one variable : unempdurmth : redifine the alternative loop here
 global    outcome_var_empl_alt ///
@@ -655,56 +458,6 @@ foreach outcome of global outcome_var_empl_alt {
   drop smpl 
 }
 
-foreach outcome of global outcome_var_wage {
-  qui xi: ivreg2  `outcome' ///
-              i.year i.district_iid i.crsectrp ///
-              ln_ref $controls i.educ1d i.fteducst i.mteducst ///
-              (agg_wp = IHS_IV_SS) ///
-              [pweight = expan_indiv], ///
-              cluster(district_iid) ///
-              partial(i.district_iid i.crsectrp) ///
-              first
-  codebook `outcome', c
-  estimates table, k(agg_wp)  star(.05 .01 .001) 
-
-  * With equivalent first-stage
-  gen smpl=0
-  replace smpl=1 if e(sample)==1
-
-  qui xi: reg agg_wp IHS_IV_SS ///
-          i.year i.district_iid i.crsectrp ///
-          ln_ref $controls i.educ1d i.fteducst i.mteducst  ///
-          if smpl == 1 [pweight = expan_indiv], ///
-          cluster(district_iid) robust
-  estimates table,  k(IHS_IV_SS) star(.05 .01 .001)           
-  drop smpl 
-}
-
-foreach outcome of global outcome_var_hours {
-  qui xi: ivreg2  `outcome' ///
-              i.year i.district_iid i.crsectrp ///
-              ln_ref $controls i.educ1d i.fteducst i.mteducst ///
-              (agg_wp = IHS_IV_SS) ///
-              [pweight = expan_indiv], ///
-              cluster(district_iid) ///
-              partial(i.district_iid i.crsectrp) ///
-              first
-  codebook `outcome', c
-  estimates table, k(agg_wp)  star(.05 .01 .001) 
-
-  * With equivalent first-stage
-  gen smpl=0
-  replace smpl=1 if e(sample)==1
-
-  qui xi: reg agg_wp IHS_IV_SS ///
-          i.year i.district_iid i.crsectrp ///
-          ln_ref $controls i.educ1d i.fteducst i.mteducst  ///
-          if smpl == 1 [pweight = expan_indiv], ///
-          cluster(district_iid) robust
-  estimates table,  k(IHS_IV_SS) star(.05 .01 .001)           
-  drop smpl 
-}
-
                   *************************************************
                     *****     M7: YEAR FE / INDIV FE        *****
                   *************************************************
@@ -715,122 +468,384 @@ foreach outcome of global outcome_var_hours {
 ********* OLS ********
 **********************
 
-global    lm_out   unemployed
+global    globals_list_alt ///
+            outcome_var_empl outcome_var_wage 
 
-foreach outcome of global lm_out {
-  reghdfe `outcome' agg_wp ///
-          $controls i.educ1d i.fteducst i.mteducst ///
-          [pw=expan_indiv], ///
-          absorb(year indid_2010) ///
-          cluster(district_iid) 
+preserve
+foreach globals of global globals_list_alt {
+  foreach outcome_l1 of global `globals' {
+      foreach outcome_l2 of global  `globals' {
+       qui reghdfe `outcome_l2' agg_wp ///
+                $controls i.educ1d i.fteducst i.mteducst ///
+                [pw=expan_indiv], ///
+                absorb(year indid_2010) ///
+                cluster(district_iid) 
+      }
+        * Then I partial out all variables
+      foreach y in `outcome_l1' agg_wp $controls educ1d fteducst mteducst   {
+        qui reghdfe `y' [pw=expan_indiv], absorb(year indid_2010) residuals(`y'_c2wr)
+        rename `y' o_`y'
+        rename `y'_c2wr `y'
+      }
+      drop `outcome_l1' $controls educ1d fteducst mteducst  agg_wp  
+      foreach y in `outcome_l1' $controls educ1d fteducst mteducst  agg_wp  {
+        rename o_`y' `y' 
+      } 
+      qui reg `outcome_l1' agg_wp  $controls [pw=expan_indiv], cluster(district_iid) robust
+      codebook `outcome_l1', c
+      estimates table,  k(agg_wp) star(.05 .01 .001)           
+   }
 }
-  
-  * Then I partial out all variables
-  foreach y in unemployed agg_wp $controls educ1d fteducst mteducst   {
-    reghdfe `y' [pw=expan_indiv], absorb(year indid_2010) residuals(`y'_c2wr)
-    rename `y' o_`y'
-    rename `y'_c2wr `y'
-  }
+restore
 
-  drop unemployed $controls educ1d fteducst mteducst  agg_wp  
-  
-  foreach y in unemployed $controls educ1d fteducst mteducst  agg_wp  {
-    rename o_`y' `y' 
-  } 
+**An issue with the work_hours_pmonth_informal variable, so play out of loop with new global
+preserve
+global outcome_var_hours_alt ///
+                work_hours_pday_1w work_hours_pday_1w_w work_hours_pday_3m ///
+                work_hours_pday_3m_w  work_hours_pweek_1w work_hours_pweek_1w_w  ///
+                work_hours_pweek_3m work_hours_pweek_3m_w work_days_pweek_1w /// 
+                work_days_pweek_3m 
 
-  reg unemployed agg_wp  $controls [pw=expan_indiv], cluster(district_iid) robust
-  
- 
+  foreach outcome_l1 of global outcome_var_hours_alt {
+      foreach outcome_l2 of global  outcome_var_hours_alt {
+       qui reghdfe `outcome_l2' agg_wp ///
+                $controls i.educ1d i.fteducst i.mteducst ///
+                [pw=expan_indiv], ///
+                absorb(year indid_2010) ///
+                cluster(district_iid) 
+      }
+        * Then I partial out all variables
+      foreach y in `outcome_l1' agg_wp $controls educ1d fteducst mteducst   {
+        qui reghdfe `y' [pw=expan_indiv], absorb(year indid_2010) residuals(`y'_c2wr)
+        rename `y' o_`y'
+        rename `y'_c2wr `y'
+      }
+      drop `outcome_l1' $controls educ1d fteducst mteducst  agg_wp  
+      foreach y in `outcome_l1' $controls educ1d fteducst mteducst  agg_wp  {
+        rename o_`y' `y' 
+      } 
+      qui reg `outcome_l1' agg_wp  $controls [pw=expan_indiv], cluster(district_iid) robust
+      codebook `outcome_l1', c
+      estimates table,  k(agg_wp) star(.05 .01 .001)           
+   }
+restore
+
 **********************
 ********* IV *********
 **********************
 
- foreach outcome of global lm_out {
+preserve
+  foreach outcome_l1 of global outcome_var_empl {     
+      codebook `outcome_l1', c
+      qui xi: ivreg2 `outcome_l1' ///
+                    i.year i.district_iid ///
+                    $controls i.educ1d i.fteducst i.mteducst ///
+                    (agg_wp = IHS_IV_SS) ///
+                    [pweight = expan_indiv], ///
+                    cluster(district_iid) robust ///
+                    partial(i.district_iid) 
+
+        qui gen smpl=0
+        qui replace smpl=1 if e(sample)==1
+        * Then I partial out all variables
+        foreach y in `outcome_l1' $controls agg_wp IHS_IV_SS educ1d fteducst mteducst  {
+          qui reghdfe `y' [pw=expan_indiv] if smpl==1, absorb(year indid_2010) residuals(`y'_c2wr)
+          qui rename `y' o_`y'
+          qui rename `y'_c2wr `y'
+        }
+        qui ivreg2 `outcome_l1' ///
+               $controls educ1d fteducst mteducst ///
+               (agg_wp = IHS_IV_SS) ///
+               [pweight = expan_indiv], ///
+               cluster(district_iid) robust ///
+               first
+        estimates table, k(agg_wp)  star(.05 .01 .001) 
+        qui drop `outcome_l1' agg_wp IHS_IV_SS $controls educ1d fteducst mteducst smpl
+        foreach y in `outcome_l1' $controls  agg_wp IHS_IV_SS educ1d fteducst mteducst  {
+          qui rename o_`y' `y' 
+        }
+    }
+restore                
+
+
+global    globals_list_alt ///
+             outcome_var_wage 
+
+global outcome_var_wage_alt ///
+                basic_wage_3m real_basic_wage_3m ln_basic_rwage_3m IHS_basic_rwage_3m ///
+                ln_basic_rwage_natives_cond ln_basic_rwage_uncond_unolf ln_basic_rwage_uncond_unemp /// 
+                total_wage_3m real_total_wage_3m ln_total_rwage_3m IHS_total_rwage_3m /// 
+                ln_total_rwage_natives_cond ln_total_rwage_uncond_unolf  ln_total_rwage_uncond_unemp /// 
+                mthly_wage real_mthly_wage ln_mthly_rwage hourly_wage real_hourly_wage  /// 
+                ln_hourly_rwage // 
+
  preserve
-  xi: ivreg2  `outcome' ///
-              i.year i.district_iid ///
-              $controls i.educ1d i.fteducst i.mteducst ///
-              (agg_wp = IHS_IV_SS) ///
-              [pweight = expan_indiv], ///
-              cluster(district_iid) robust ///
-              partial(i.district_iid) 
+  foreach outcome_l1 of global outcome_var_wage_alt {     
+      codebook `outcome_l1', c
+      qui xi: ivreg2 `outcome_l1' ///
+                    i.year i.district_iid ///
+                    $controls i.educ1d i.fteducst i.mteducst ///
+                    (agg_wp = IHS_IV_SS) ///
+                    [pweight = expan_indiv], ///
+                    cluster(district_iid) robust ///
+                    partial(i.district_iid) 
 
-  gen smpl=0
-  replace smpl=1 if e(sample)==1
-  * Then I partial out all variables
-  foreach y in `outcome' $controls agg_wp IHS_IV_SS educ1d fteducst mteducst  {
-    reghdfe `y' [pw=expan_indiv] if smpl==1, absorb(year indid_2010) residuals(`y'_c2wr)
-    rename `y' o_`y'
-    rename `y'_c2wr `y'
-  }
-  ivreg2 `outcome' ///
-         $controls educ1d fteducst mteducst ///
-         (agg_wp = IHS_IV_SS) ///
-         [pweight = expan_indiv], ///
-         cluster(district_iid) robust ///
-         first
-  drop `outcome' agg_wp IHS_IV_SS $controls educ1d fteducst mteducst smpl
-  foreach y in `outcome' $controls  agg_wp IHS_IV_SS {
-    rename o_`y' `y' 
-  }
-  restore
-}
+        qui gen smpl=0
+        qui replace smpl=1 if e(sample)==1
+        * Then I partial out all variables
+        foreach y in `outcome_l1' $controls agg_wp IHS_IV_SS educ1d fteducst mteducst  {
+          qui reghdfe `y' [pw=expan_indiv] if smpl==1, absorb(year indid_2010) residuals(`y'_c2wr)
+          qui rename `y' o_`y'
+          qui rename `y'_c2wr `y'
+        }
+        qui ivreg2 `outcome_l1' ///
+               $controls educ1d fteducst mteducst ///
+               (agg_wp = IHS_IV_SS) ///
+               [pweight = expan_indiv], ///
+               cluster(district_iid) robust ///
+               first
+        estimates table, k(agg_wp)  star(.05 .01 .001) 
+        qui drop `outcome_l1' agg_wp IHS_IV_SS $controls educ1d fteducst mteducst smpl
+        foreach y in `outcome_l1' $controls  agg_wp IHS_IV_SS educ1d fteducst mteducst  {
+          qui rename o_`y' `y' 
+        }
+    }
+restore            
 
+**An issue with the work_hours_pmonth_informal_w variable, so play out of loop with new global
+global outcome_var_hours_alt ///
+                work_hours_pday_1w work_hours_pday_1w_w work_hours_pday_3m ///
+                work_hours_pday_3m_w  work_hours_pweek_1w work_hours_pweek_1w_w /// 
+                work_hours_pweek_3m work_hours_pweek_3m_w work_days_pweek_1w /// 
+                work_days_pweek_3m 
+
+ preserve
+  foreach outcome_l1 of global outcome_var_hours_alt {     
+      codebook `outcome_l1', c
+      qui xi: ivreg2 `outcome_l1' ///
+                    i.year i.district_iid ///
+                    $controls i.educ1d i.fteducst i.mteducst ///
+                    (agg_wp = IHS_IV_SS) ///
+                    [pweight = expan_indiv], ///
+                    cluster(district_iid) robust ///
+                    partial(i.district_iid) 
+
+        qui gen smpl=0
+        qui replace smpl=1 if e(sample)==1
+        * Then I partial out all variables
+        foreach y in `outcome_l1' $controls agg_wp IHS_IV_SS educ1d fteducst mteducst  {
+          qui reghdfe `y' [pw=expan_indiv] if smpl==1, absorb(year indid_2010) residuals(`y'_c2wr)
+          qui rename `y' o_`y'
+          qui rename `y'_c2wr `y'
+        }
+        qui ivreg2 `outcome_l1' ///
+               $controls educ1d fteducst mteducst ///
+               (agg_wp = IHS_IV_SS) ///
+               [pweight = expan_indiv], ///
+               cluster(district_iid) robust ///
+               first
+        estimates table, k(agg_wp)  star(.05 .01 .001) 
+        qui drop `outcome_l1' agg_wp IHS_IV_SS $controls educ1d fteducst mteducst smpl
+        foreach y in `outcome_l1' $controls  agg_wp IHS_IV_SS educ1d fteducst mteducst  {
+          qui rename o_`y' `y' 
+        }
+    }
+restore
 
 
           ***********************************************************************
             *****    M8:  YEAR FE / INDIV FE / CONTROL NUMBER OF REFUGEE    *****
           ***********************************************************************
 
-/*
-
 **********************
 ********* OLS ********
 **********************
 
-foreach outcome of global lm_out {
-  reghdfe `outcome' agg_wp ///
-          ln_ref $controls i.educ1d i.fteducst i.mteducst ///
-          [pw=expan_indiv], ///
-          absorb(year indid_2010) ///
-          cluster(district_iid) 
+global    globals_list_alt ///
+            outcome_var_empl outcome_var_wage 
+
+preserve
+foreach globals of global globals_list_alt {
+  foreach outcome_l1 of global `globals' {
+      foreach outcome_l2 of global  `globals' {
+       qui reghdfe `outcome_l2' agg_wp ///
+                $controls ln_ref i.educ1d i.fteducst i.mteducst ///
+                [pw=expan_indiv], ///
+                absorb(year indid_2010) ///
+                cluster(district_iid) 
+      }
+        * Then I partial out all variables
+      foreach y in `outcome_l1' agg_wp $controls ln_ref educ1d fteducst mteducst   {
+        qui reghdfe `y' [pw=expan_indiv], absorb(year indid_2010) residuals(`y'_c2wr)
+        rename `y' o_`y'
+        rename `y'_c2wr `y'
+      }
+      drop `outcome_l1' $controls ln_ref educ1d fteducst mteducst  agg_wp  
+      foreach y in `outcome_l1' $controls ln_ref educ1d fteducst mteducst  agg_wp  {
+        rename o_`y' `y' 
+      } 
+      qui reg `outcome_l1' agg_wp $controls [pw=expan_indiv], cluster(district_iid) robust
+      codebook `outcome_l1', c
+      estimates table,  k(agg_wp) star(.05 .01 .001)           
+    }
   }
-  foreach outcome of global lm_out {
+}
+restore
+
+**An issue with the work_hours_pmonth_informal variable, so play out of loop with new global
+global outcome_var_hours_alt ///
+                work_hours_pday_1w work_hours_pday_1w_w work_hours_pday_3m ///
+                work_hours_pday_3m_w  work_hours_pweek_1w work_hours_pweek_1w_w  ///
+                work_hours_pweek_3m work_hours_pweek_3m_w work_days_pweek_1w /// 
+                work_days_pweek_3m 
+
+  foreach outcome_l1 of global outcome_var_hours_alt {
+      foreach outcome_l2 of global  outcome_var_hours_alt {
+      codebook `outcome_l1', c
+       qui reghdfe `outcome_l2' agg_wp ///
+                $controls ln_ref i.educ1d i.fteducst i.mteducst ///
+                [pw=expan_indiv], ///
+                absorb(year indid_2010) ///
+                cluster(district_iid) 
+      }
+        * Then I partial out all variables
+      foreach y in `outcome_l1' agg_wp $controls ln_ref educ1d fteducst mteducst   {
+        qui reghdfe `y' [pw=expan_indiv], absorb(year indid_2010) residuals(`y'_c2wr)
+        rename `y' o_`y'
+        rename `y'_c2wr `y'
+      }
+      drop `outcome_l1' $controls ln_ref educ1d fteducst mteducst  agg_wp  
+      foreach y in `outcome_l1' $controls ln_ref educ1d fteducst mteducst  agg_wp  {
+        rename o_`y' `y' 
+      } 
+      qui reg `outcome_l1' agg_wp $controls [pw=expan_indiv], cluster(district_iid) robust
+      estimates table,  k(agg_wp) star(.05 .01 .001)           
+    }
+  }
 
 **********************
 ********* IV *********
 **********************
 
-  preserve
-  xi: ivreg2  `outcome' ///
-              i.year i.district_iid ///
-              ln_ref $controls i.educ1d i.fteducst i.mteducst ///
-              (agg_wp = IHS_IV_SS) ///
-              [pweight = expan_indiv], ///
-              cluster(district_iid) robust ///
-              partial(i.district_iid) 
+preserve
+  foreach outcome_l1 of global outcome_var_empl {     
+      codebook `outcome_l1', c
+      qui xi: ivreg2 `outcome_l1' ///
+                    i.year i.district_iid ///
+                    $controls i.educ1d i.fteducst i.mteducst ln_ref ///
+                    (agg_wp = IHS_IV_SS) ///
+                    [pweight = expan_indiv], ///
+                    cluster(district_iid) robust ///
+                    partial(i.district_iid) 
 
-  gen smpl=0
-  replace smpl=1 if e(sample)==1
+        qui gen smpl=0
+        qui replace smpl=1 if e(sample)==1
+        * Then I partial out all variables
+        foreach y in `outcome_l1' $controls agg_wp IHS_IV_SS educ1d fteducst mteducst ln_ref {
+          qui reghdfe `y' [pw=expan_indiv] if smpl==1, absorb(year indid_2010) residuals(`y'_c2wr)
+          qui rename `y' o_`y'
+          qui rename `y'_c2wr `y'
+        }
+        qui ivreg2 `outcome_l1' ///
+               $controls educ1d fteducst mteducst ln_ref ///
+               (agg_wp = IHS_IV_SS) ///
+               [pweight = expan_indiv], ///
+               cluster(district_iid) robust ///
+               first
+        estimates table, k(agg_wp)  star(.05 .01 .001) 
+        qui drop `outcome_l1' agg_wp IHS_IV_SS $controls educ1d fteducst mteducst smpl ln_ref
+        foreach y in `outcome_l1' $controls  agg_wp IHS_IV_SS educ1d fteducst mteducst ln_ref  {
+          qui rename o_`y' `y' 
+        }
+    }
+restore                
 
-  * Then I partial out all variables
-  foreach y in `outcome' agg_wp IHS_IV_SS $controls ln_ref educ1d fteducst mteducst  {
-    reghdfe `y' [pw=expan_indiv] if smpl==1, absorb(year indid_2010) residuals(`y'_c2wr)
-    rename `y' o_`y'
-    rename `y'_c2wr `y'
-  }
-  ivreg2  `outcome' ///
-          ln_ref $controls educ1d fteducst mteducst ///
-          (agg_wp = IHS_IV_SS) ///
-          [pweight = expan_indiv], ///
-          cluster(district_iid) robust ///
-          first
-  drop `outcome' agg_wp IHS_IV_SS $controls ln_ref educ1d fteducst mteducst smpl
-  foreach y in `outcome' agg_wp IHS_IV_SS $controls ln_ref educ1d fteducst mteducst  {
-    rename o_`y' `y' 
-  }
-  restore
-}
-*/
+
+global    globals_list_alt ///
+             outcome_var_wage 
+
+global outcome_var_wage_alt ///
+                basic_wage_3m real_basic_wage_3m ln_basic_rwage_3m IHS_basic_rwage_3m ///
+                ln_basic_rwage_natives_cond ln_basic_rwage_uncond_unolf ln_basic_rwage_uncond_unemp /// 
+                total_wage_3m real_total_wage_3m ln_total_rwage_3m IHS_total_rwage_3m /// 
+                ln_total_rwage_natives_cond ln_total_rwage_uncond_unolf  ln_total_rwage_uncond_unemp /// 
+                mthly_wage real_mthly_wage ln_mthly_rwage hourly_wage real_hourly_wage  /// 
+                ln_hourly_rwage // 
+
+ preserve
+  foreach outcome_l1 of global outcome_var_wage_alt {     
+      codebook `outcome_l1', c
+      qui xi: ivreg2 `outcome_l1' ///
+                    i.year i.district_iid ///
+                    $controls i.educ1d i.fteducst i.mteducst ln_ref ///
+                    (agg_wp = IHS_IV_SS) ///
+                    [pweight = expan_indiv], ///
+                    cluster(district_iid) robust ///
+                    partial(i.district_iid) 
+
+        qui gen smpl=0
+        qui replace smpl=1 if e(sample)==1
+        * Then I partial out all variables
+        foreach y in `outcome_l1' $controls agg_wp IHS_IV_SS educ1d fteducst mteducst ln_ref {
+          qui reghdfe `y' [pw=expan_indiv] if smpl==1, absorb(year indid_2010) residuals(`y'_c2wr)
+          qui rename `y' o_`y'
+          qui rename `y'_c2wr `y'
+        }
+        qui ivreg2 `outcome_l1' ///
+               $controls educ1d fteducst mteducst ln_ref ///
+               (agg_wp = IHS_IV_SS) ///
+               [pweight = expan_indiv], ///
+               cluster(district_iid) robust ///
+               first
+        estimates table, k(agg_wp)  star(.05 .01 .001) 
+        qui drop `outcome_l1' agg_wp IHS_IV_SS $controls educ1d fteducst mteducst smpl ln_ref
+        foreach y in `outcome_l1' $controls  agg_wp IHS_IV_SS educ1d fteducst mteducst ln_ref {
+          qui rename o_`y' `y' 
+        }
+    }
+restore            
+
+**An issue with the work_hours_pmonth_informal_w variable, so play out of loop with new global
+global outcome_var_hours_alt ///
+                work_hours_pday_1w work_hours_pday_1w_w work_hours_pday_3m ///
+                work_hours_pday_3m_w  work_hours_pweek_1w work_hours_pweek_1w_w /// 
+                work_hours_pweek_3m work_hours_pweek_3m_w work_days_pweek_1w /// 
+                work_days_pweek_3m 
+
+ preserve
+  foreach outcome_l1 of global outcome_var_hours_alt {     
+      codebook `outcome_l1', c
+      qui xi: ivreg2 `outcome_l1' ///
+                    i.year i.district_iid ///
+                    $controls i.educ1d i.fteducst i.mteducst ln_ref ///
+                    (agg_wp = IHS_IV_SS) ///
+                    [pweight = expan_indiv], ///
+                    cluster(district_iid) robust ///
+                    partial(i.district_iid) 
+
+        qui gen smpl=0
+        qui replace smpl=1 if e(sample)==1
+        * Then I partial out all variables
+        foreach y in `outcome_l1' $controls agg_wp IHS_IV_SS educ1d fteducst mteducst ln_ref {
+          qui reghdfe `y' [pw=expan_indiv] if smpl==1, absorb(year indid_2010) residuals(`y'_c2wr)
+          qui rename `y' o_`y'
+          qui rename `y'_c2wr `y'
+        }
+        qui ivreg2 `outcome_l1' ///
+               $controls educ1d fteducst mteducst ln_ref ///
+               (agg_wp = IHS_IV_SS) ///
+               [pweight = expan_indiv], ///
+               cluster(district_iid) robust ///
+               first
+        estimates table, k(agg_wp)  star(.05 .01 .001) 
+        qui drop `outcome_l1' agg_wp IHS_IV_SS $controls educ1d fteducst mteducst smpl ln_ref
+        foreach y in `outcome_l1' $controls  agg_wp IHS_IV_SS educ1d fteducst mteducst ln_ref {
+          qui rename o_`y' `y' 
+        }
+    }
+restore
 
 
+
+
+log close

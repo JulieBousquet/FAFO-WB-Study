@@ -611,10 +611,10 @@ ren basicwg3 basic_wage_3m
       lab var ln_basic_rwage_natives_cond "CONDITIONAL - UNEMPLOYED & OLF: WAGE MISSING - NATIVES LOG Basic Wage (3m)"
 
       *Unconditional wage: IF UNEMPLOYED & OLF: WAGE IS 0
-      gen ln_basic_rwage_uncond_unemp_olf = ln_basic_rwage_natives_cond if employed_3m_olf  == 1
-      replace ln_basic_rwage_uncond_unemp_olf = 0 if employed_3m_olf  == 0
-      tab ln_basic_rwage_uncond_unemp_olf
-      lab var ln_basic_rwage_uncond_unemp_olf "UNCONDITIONAL - UNEMPLOYED & OLF: WAGE 0 - NATIVES - LOG - Basic Wage (3-month)"
+      gen ln_basic_rwage_uncond_unolf = ln_basic_rwage_natives_cond if employed_3m_olf  == 1
+      replace ln_basic_rwage_uncond_unolf = 0 if employed_3m_olf  == 0
+      tab ln_basic_rwage_uncond_unolf
+      lab var ln_basic_rwage_uncond_unolf "UNCONDITIONAL - UNEMPLOYED & OLF: WAGE 0 - NATIVES - LOG - Basic Wage (3-month)"
 
       *Unconditional wage: IF UNEMPLOYED : WAGE IS 0 / IF OLF: WAGE IS MISSING
       gen ln_basic_rwage_uncond_unemp = ln_basic_rwage_natives_cond if employed_3m == 1
@@ -656,10 +656,10 @@ tab total_wage_3m
       lab var ln_total_rwage_natives_cond "CONDITIONAL - UNEMPLOYED & OLF: WAGE MISSING - NATIVES LOG Total Wage (3m)"
 
       *Unconditional wage: IF UNEMPLOYED & OLF: WAGE IS 0
-      gen ln_total_rwage_uncond_unemp_olf = ln_total_rwage_natives_cond if employed_3m_olf  == 1
-      replace ln_total_rwage_uncond_unemp_olf = 0 if employed_3m_olf  == 0
-      tab ln_total_rwage_uncond_unemp_olf
-      lab var ln_total_rwage_uncond_unemp_olf "UNCONDITIONAL - UNEMPLOYED & OLF: WAGE 0 - NATIVES - LOG - Total Wage (3-month)"
+      gen ln_total_rwage_uncond_unolf = ln_total_rwage_natives_cond if employed_3m_olf  == 1
+      replace ln_total_rwage_uncond_unolf = 0 if employed_3m_olf  == 0
+      tab ln_total_rwage_uncond_unolf
+      lab var ln_total_rwage_uncond_unolf "UNCONDITIONAL - UNEMPLOYED & OLF: WAGE 0 - NATIVES - LOG - Total Wage (3-month)"
 
       *Unconditional wage: IF UNEMPLOYED : WAGE IS 0 / IF OLF: WAGE IS MISSING
       gen ln_total_rwage_uncond_unemp = ln_total_rwage_natives_cond if employed_3m == 1
