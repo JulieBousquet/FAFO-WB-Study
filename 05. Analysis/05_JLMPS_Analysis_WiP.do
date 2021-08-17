@@ -83,7 +83,13 @@ drop if dup == 0
 mdesc indid_2010
 destring indid_2010, replace 
 
+/*
+Number of outcomes among the employed,
 
+[NB: We undertook sensitivity analysis as to whether analyzing these outcomes
+unconditional on employment, rather than among the employed, changed our
+results; it did not lead to substantive changes (results available from authors on
+request).]*/
 
 *********************************************************************
 *********************************************************************
@@ -93,78 +99,48 @@ destring indid_2010, replace
                               ************
 
 global    outcome_var_empl ///
-                unemployed /// From unemp2m - ext def, search not req; 1 week, empl or unemp, OLF is miss
-                unempdurmth ///    Current unemployment duration (in months)
-                jobless2  ///  Jobless, Extended Definition (Among non-students)
-                employed_3m  ///   From uswrkst2 - ext def, search not req; 3 months, empl or unemp, OLF is miss
-                employed_3m_olf  ///   From usemp2 - ext def, 3 months, 1 empl - 0 unemp&OLF
-                job_stability_permanent_3m /// From usstablp - Stability of employement (3m) - 1 permanent - 0 temp, seas, cas
-                job_regular_3m /// From usirreg - Usual job (3m) is regular - 1 Yes - 0 No
-                incidence_soc_insur_3m /// Incidence of wrk social insurance in prim. job (ref. 3-month)
-                incidence_wrk_contract_3m ///  Incidence of wrk contract in prim. job (ref. 3-month)
-                job_formal_3m  /// Formality of prim. job (ref. 3-month) - 0 Informal - 1 Formal
-                informal  ///  1 Informal - 0 Formal - Informal if no contract (uscontrp=0) and no insurance (ussocinsp=0)
-                wp_industry_jlmps_3m ///   Industries with work permits for refugees - Economic Activity of prim. job 3m
-                member_union_3m /// Member of a syndicate/trade union (ref. 3-mnths)
-                skills_required_pjob  ///  Does primary job require any skill
-                stability_main_job /// From job1_07 : Degree of stability - Job 01 - 1 Stable
-                permanent_contract // From job1_08 : Type of work contract - Job 01 - 1 Permanent
+              unemployed_3m /// From unempsr1m - mrk def, search req; 3m, empl or unemp, OLF is miss
+              unempdurmth  ///  Current unemployment duration (in months)
+              employed_3m  ///From uswrkstsr1 - mkt def, search req; 3m, 2 empl - 1 unemp - OLF miss
+              job_stability_permanent_3m ///  From usstablp - Stability of employement (3m) - 1 permanent - 0 temp, seas, cas
+              informal  /// 1 Informal - 0 Formal - Informal if no contract (uscontrp=0) and no insurance (ussocinsp=0)
+              wp_industry_jlmps_3m  /// Industries with work permits for refugees - Economic Activity of prim. job 3m
+              member_union_3m /// Member of a syndicate/trade union (ref. 3-mnths)
+              skills_required_pjob //  Does primary job require any skill
+  
+global    outcome_var_wage ///
+              IHS_basic_rwage_3m  /// IHS Basic Wage (3-month) - CONDITIONAL - UNEMPLOYED & OLF: WAGE MISSING
+              IHS_total_rwage_3m  /// IHS Total Wage (3-month) - CONDITIONAL - UNEMPLOYED & OLF: WAGE MISSING
+              IHS_monthly_rwage /// IHS Monthly Wage (Prim.& Second. Jobs)
+              IHS_hourly_rwage  /// IHS Hourly Wage (Prim.& Second. Jobs)
+              IHS_daily_rwage_irregular // IHS Average Daily Wage (Irregular Workers)
 
-global outcome_var_wage ///
-                basic_wage_3m  /// Basic Wage (3-month)
-                real_basic_wage_3m /// CORRECTED INFLATION - Basic Wage (3-month)
-                ln_basic_rwage_3m ///  LOG Basic Wage (3-month)
-                IHS_basic_rwage_3m /// IHS Basic Wage (3-month)
-                ln_basic_rwage_natives_cond /// CONDITIONAL - UNEMPLOYED & OLF: WAGE MISSING - NATIVES LOG Basic Wage (3m)
-                ln_basic_rwage_uncond_unolf /// UNCONDITIONAL - UNEMPLOYED & OLF: WAGE 0 - NATIVES - LOG - Basic Wage (3-month)
-                ln_basic_rwage_uncond_unemp /// UNCONDITIONAL - UNEMPLOYED WAGE 0 / OLF WAGE MISSING - NATIVES LOG Basic (3m)
-                total_wage_3m  /// Total Wages (3-month)
-                real_total_wage_3m /// CORRECTED INFLATION - Total Wage (3-month)
-                ln_total_rwage_3m  /// LOG Total Wage (3-month)
-                IHS_total_rwage_3m /// IHS Total Wage (3-month)
-                ln_total_rwage_natives_cond /// CONDITIONAL - UNEMPLOYED & OLF: WAGE MISSING - NATIVES LOG Total Wage (3m)
-                ln_total_rwage_uncond_unolf /// UNCONDITIONAL - UNEMPLOYED & OLF: WAGE 0 - NATIVES - LOG - Total Wage (3-month)
-                ln_total_rwage_uncond_unemp /// UNCONDITIONAL - UNEMPLOYED WAGE 0 / OLF WAGE MISSING - NATIVES LOG Total (3m)
-                mthly_wage /// Monthly Wage (Prim.& Second. Jobs)
-                real_mthly_wage /// CORRECTED INFLATION - Monthly Wage (Prim.& Second. Jobs)
-                ln_mthly_rwage /// LOG Monthly Wage (Prim.& Second. Jobs)
-                hourly_wage /// Hourly Wage (Prim.& Second. Jobs)
-                real_hourly_wage  ///  CORRECTED INFLATION - Hourly Wage (Prim.& Second. Jobs)
-                ln_hourly_rwage /// LOG Hourly Wage (Prim.& Second. Jobs)
-                daily_wage_irregular   /// Average Daily Wage (Irregular Workers)
-                real_daily_wage_irregular  /// CORRECTED INFLATION - Average Daily Wage (Irregular Workers)
-                ln_daily_rwage_irregular  //  LOG Average Daily Wage (Irregular Workers)
-
-global outcome_var_hours ///
-                work_hours_pday_3m /// No. of Hours/Day (Ref. 3 mnths) Market Work
-                work_hours_pday_3m_w ///   Winsorized 
-                work_hours_pweek_3m /// Usual No. of Hours/Week, Market & Subsistence Work, (Ref. 3-month)
-                work_hours_pweek_3m_w ///  Winsorized
-                work_days_pweek_3m /// Avg. num. of wrk. days per week during 3 mnth.
-                work_hours_pmonth_informal /// Average worked hour per month for irregular job
-                work_hours_pmonth_informal_w //   Winsorized
-
+global    outcome_var_hours ///
+              work_hours_pday_3m  /// Winsorized - No. of Hours/Day (Ref. 3 mnths) Market Work
+              work_hours_pweek_3m  /// Winsorized - Usual No. of Hours/Week, Market Work, (Ref. 3-month)
+              work_days_pweek_3m  /// Avg. num. of wrk. days per week during 3 mnth.
+              work_hours_pmonth_informal_w  //  Winsorized - Average worked hour per month for irregular job
+  
 
 global    globals_list ///
             outcome_var_empl outcome_var_wage outcome_var_hours
 
-global    controls ///
-            age age2 gender hhsize 
 
-global controls 
-          ln_nb_refugees_bygov /// LOG Number of refugees out of camps by governorate in 2016
-          nb_refugees_bygov  /// Number of refugees out of camps by governorate in 2016
+global controls ///
           age  /// Age
           age2 /// Age square
-          distance_dis_camp /// Distance (km) between JORD districts and ZAATARI CAMP in 2016
           ln_distance_dis_camp ///  LOG Distance (km) between JORD districts and ZAATARI CAMP in 2016
+          gender ///  Gender - 1 Male 0 Female
+          hhsize //  Total No. of Individuals in the Household
+
+/*SPECIAL TREATMENTS
+          ln_nb_refugees_bygov /// LOG Number of refugees out of camps by governorate in 2016
           educ1d ///  Education Levels (1-digit)
           fteducst ///  Father's Level of education attained
           mteducst ///  Mother's Level of education attained
           ftempst ///  Father's Employment Status (When Resp. 15)
-          gender ///  Gender - 1 Male 0 Female
-          hhsize //  Total No. of Individuals in the Household
 
+*/
 
 
                                   ************
@@ -191,7 +167,7 @@ xtset indid_2010 year
 foreach globals of global globals_list {
   foreach outcome of global `globals' {
     qui xi: reg `outcome' agg_wp ///
-            $controls i.educ1d i.fteducst i.mteducst i.ftempst ln_ref ///
+             $controls i.educ1d i.fteducst i.mteducst i.ftempst ln_nb_refugees_bygov ///
             [pweight = expan_indiv],  ///
             cluster(district_iid) robust 
     codebook `outcome', c
@@ -212,7 +188,7 @@ foreach globals of global globals_list {
   foreach outcome of global `globals' {
     qui xi: reg `outcome' agg_wp ///
             i.district_iid i.year ///
-            ln_ref $controls i.educ1d i.fteducst i.mteducst i.ftempst  ///
+             $controls i.educ1d i.fteducst i.mteducst i.ftempst ln_nb_refugees_bygov ///
             [pweight = expan_indiv],  ///
             cluster(district_iid) robust 
     codebook `outcome', c
@@ -228,14 +204,14 @@ foreach globals of global globals_list {
   foreach outcome of global `globals' {
     qui xi: ivreg2  `outcome' ///
                 i.year i.district_iid ///
-                ln_ref $controls i.educ1d i.fteducst i.mteducst i.ftempst ///
+                $controls i.educ1d i.fteducst i.mteducst i.ftempst ln_nb_refugees_bygov ///
                 (agg_wp = IHS_IV_SS) ///
                 [pweight = expan_indiv], ///
                 cluster(district_iid) robust ///
                 partial(i.district_iid) ///
                 first
     codebook `outcome', c
-    estimates table, k(agg_wp)  star(.05 .01 .001) 
+    estimates table,   star(.05 .01 .001) 
 
     * With equivalent first-stage
     gen smpl=0
@@ -243,7 +219,7 @@ foreach globals of global globals_list {
 
     qui xi: reg agg_wp IHS_IV_SS ///
             i.year i.district_iid ///
-            ln_ref $controls i.educ1d i.fteducst i.mteducst i.ftempst  ///
+             $controls i.educ1d i.fteducst i.mteducst i.ftempst ln_nb_refugees_bygov ///
             if smpl == 1 [pweight = expan_indiv], ///
             cluster(district_iid) robust
     estimates table, k(IHS_IV_SS) star(.05 .01 .001)           
@@ -263,7 +239,7 @@ foreach globals of global globals_list {
   foreach outcome of global `globals' {
     qui xi: reg `outcome' agg_wp ///
             i.district_iid i.year i.crsectrp ///
-            ln_ref $controls i.educ1d i.fteducst i.mteducst i.ftempst  ///
+             $controls i.educ1d i.fteducst i.mteducst i.ftempst ln_nb_refugees_bygov ///
             [pweight = expan_indiv],  ///
             cluster(district_iid) robust 
     codebook `outcome', c
@@ -282,7 +258,7 @@ foreach globals of global globals_list_alt {
   foreach outcome of global `globals' {
     qui xi: ivreg2  `outcome' ///
                 i.year i.district_iid i.crsectrp ///
-                ln_ref $controls i.educ1d i.fteducst i.mteducst i.ftempst ///
+                $controls i.educ1d i.fteducst i.mteducst i.ftempst ln_nb_refugees_bygov ///
                 (agg_wp = IHS_IV_SS) ///
                 [pweight = expan_indiv], ///
                 cluster(district_iid) ///
@@ -297,7 +273,7 @@ foreach globals of global globals_list_alt {
 
     qui xi: reg agg_wp IHS_IV_SS ///
             i.year i.district_iid i.crsectrp ///
-            ln_ref $controls i.educ1d i.fteducst i.mteducst i.ftempst  ///
+            $controls i.educ1d i.fteducst i.mteducst i.ftempst ln_nb_refugees_bygov ///
             if smpl == 1 [pweight = expan_indiv], ///
             cluster(district_iid) robust
     estimates table,  k(IHS_IV_SS) star(.05 .01 .001)           
@@ -317,7 +293,7 @@ global    outcome_var_empl_alt ///
 foreach outcome of global outcome_var_empl_alt {
   qui xi: ivreg2  `outcome' ///
               i.year i.district_iid i.crsectrp ///
-              ln_ref $controls i.educ1d i.fteducst i.mteducst i.ftempst ///
+              $controls i.educ1d i.fteducst i.mteducst i.ftempst ln_nb_refugees_bygov ///
               (agg_wp = IHS_IV_SS) ///
               [pweight = expan_indiv], ///
               cluster(district_iid) ///
@@ -332,7 +308,7 @@ foreach outcome of global outcome_var_empl_alt {
 
   qui xi: reg agg_wp IHS_IV_SS ///
           i.year i.district_iid i.crsectrp ///
-          ln_ref $controls i.educ1d i.fteducst i.mteducst i.ftempst  ///
+          $controls i.educ1d i.fteducst i.mteducst i.ftempst ln_nb_refugees_bygov ///
           if smpl == 1 [pweight = expan_indiv], ///
           cluster(district_iid) robust
   estimates table,  k(IHS_IV_SS) star(.05 .01 .001)           
