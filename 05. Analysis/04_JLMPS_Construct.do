@@ -129,7 +129,10 @@ ren NbRefbyGovoutcamp nb_refugees_bygov
 replace nb_refugees_bygov = 0 if year == 2010
 lab var nb_refugees_bygov "[CTRL] Number of refugees out of camps by governorate in 2016"
 
-gen ln_nb_refugees_bygov = ln(1 + nb_refugees_bygov) if year == 2016
+gen ln_nb_refugees_bygov = ln(1 + nb_refugees_bygov) 
+*if year == 2016
+*replace ln_nb_refugees_bygov = 0 if year == 2010
+
 lab var ln_nb_refugees_bygov "[CTRL] LOG Number of refugees out of camps by governorate in 2016"
 *ln_ref, as of now, does not include refugees in 2010, only in 2016
 
@@ -156,7 +159,9 @@ tab distance_dis_camp, m
 lab var distance_dis_camp "[CTRL] Distance (km) between JORD districts and ZAATARI CAMP in 2016"
 replace distance_dis_camp = 0 if year == 2010
 
-gen ln_distance_dis_camp = log(1 + distance_dis_camp) if year == 2016
+gen ln_distance_dis_camp = log(1 + distance_dis_camp) 
+*if year == 2016
+*replace ln_distance_dis_camp = 0 if year == 2010
 lab var ln_distance_dis_camp "[CTRL] LOG Distance (km) between JORD districts and ZAATARI CAMP in 2016"
 
 ************
@@ -442,7 +447,8 @@ tab crecac3d, m
                                  ****      SECTORS WP       ****
                                  *******************************
 
-*WORK PERMIT AUTHORIZED SECORS:  construction, care work, agriculture, manufacturing, and food industry
+*WORK PERMIT AUTHORIZED SECORS:  construction [5], care work [16], 
+*agriculture [0], manufacturing [2], and food industry [8]
 *Economic activity of crr. job (Sections(1digit), based on ISIC4, ref. 1-week)
 tab crecac1d, m
 
@@ -458,6 +464,8 @@ replace wp_industry_jlmps_3m = 1 if usecac1d == 0 | ///
                                  usecac1d == 16 
 tab wp_industry_jlmps_3m, m 
 lab var wp_industry_jlmps_3m "Industries with work permits for refugees - Economic Activity of prim. job 3m"
+lab def wp_industry_jlmps_3m 1 "Industries with WP" 0 "Industries without WP", modify
+lab val wp_industry_jlmps_3m wp_industry_jlmps_3m
 
 *Where are the OLF/UNEMPL ?
 tab wp_industry_jlmps_3m uswrkstsr2, m
@@ -684,19 +692,19 @@ tab ushrs3mnth, m
 
 *Average worked hour per month for irregular job
 tab avhrspmir, m 
-ren avhrspmir work_hours_pmonth_informal
-replace work_hours_pmonth_informal = . if work_hours_pmonth_informal == 0 
+ren avhrspmir work_hours_pm_informal
+replace work_hours_pm_informal = . if work_hours_pm_informal == 0 
 
-replace work_hours_pmonth_informal = 672 if work_hours_pmonth_informal > 672 & !mi(work_hours_pmonth_informal)
-tab work_hours_pmonth_informal
-su work_hours_pmonth_informal, d
-winsor2 work_hours_pmonth_informal, s(_w) c(0 98)
-su work_hours_pmonth_informal_w
+replace work_hours_pm_informal = 672 if work_hours_pm_informal > 672 & !mi(work_hours_pm_informal)
+tab work_hours_pm_informal
+su work_hours_pm_informal, d
+winsor2 work_hours_pm_informal, s(_w) c(0 98)
+su work_hours_pm_informal_w
 
 
-tab work_hours_pmonth_informal informal , m
-tab work_hours_pmonth_informal uswrkst2 , m
-tab work_hours_pmonth_informal job_formal_3m , m
+tab work_hours_pm_informal informal , m
+tab work_hours_pm_informal uswrkst2 , m
+tab work_hours_pm_informal job_formal_3m , m
 
                                     *******************************
                                     ****       WAGE            ****
