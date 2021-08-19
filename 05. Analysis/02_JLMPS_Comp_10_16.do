@@ -325,11 +325,15 @@ replace work_permit_orig = 0 if q11207 == 99 & employed == 1 & nationality_cl ==
 *If refugees with NA DO NOT work, then we will say missing.
 replace work_permit_orig = . if q11207 == 99 & employed == 0 & nationality_cl == 2 //Syrians
 tab work_permit_orig
+lab var work_permit "From q11207. Do you have a permit to work in Jordan? - 1 Yes 0 No"
 
 *TRIAL: give 1 to refugees who said they have no WP but a legal contract
+tab q6145
 gen work_permit = work_permit_orig 
-replace work_permit = 1 if q6145 == 1 & forced_migr == 1 
-lab var work_permit "work_permit_orig + 1 to refugees who said they have no WP but a legal contract"
+*replace work_permit = 1 if q6145 == 1 & forced_migr == 1 //Forced Migrants
+replace work_permit = 1 if q6145 == 1 & nationality_cl == 2 //Syrians
+lab val work_permit yesnona
+lab var work_permit "From work_permit_orig + 1 to refugees who said they have no WP but a legal contract"
 
 keep  indid district_iid governorate_iid work_permit work_permit_orig ///
     nationality_cl forced_migr ///

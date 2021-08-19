@@ -25,6 +25,74 @@ use "$data_final/06_IV_JLMPS_Construct_Outcomes.dta", clear
 *ssc inst ivreg2, replace
 
 
+*********************************************************************
+*********************************************************************
+
+                              ************
+                              *  GLOBALS *
+                              ************
+
+
+global    dep_var   agg_wp 
+*global    dep_var   share_wp_100
+*global    dep_var   agg_wp_orig
+
+global    outcome_var_empl ///
+              unemployed_3m /// From unempsr1m - mrk def, search req; 3m, empl or unemp, OLF is miss
+              unempdurmth  ///  Current unemployment duration (in months)
+              employed_3m  ///From uswrkstsr1 - mkt def, search req; 3m, 2 empl - 1 unemp - OLF miss
+
+global    outcome_var_job ///
+              job_stability_permanent_3m ///  From usstablp - Stability of employement (3m) - 1 permanent - 0 temp, seas, cas
+              informal  /// 1 Informal - 0 Formal - Informal if no contract (uscontrp=0) and no insurance (ussocinsp=0)
+              wp_industry_jlmps_3m  /// Industries with work permits for refugees - Economic Activity of prim. job 3m
+              member_union_3m /// Member of a syndicate/trade union (ref. 3-mnths)
+              skills_required_pjob //  Does primary job require any skill
+  
+global    outcome_var_wage ///
+              IHS_basic_rwage_3m  /// IHS Basic Wage (3-month) - CONDITIONAL - UNEMPLOYED & OLF: WAGE MISSING
+              IHS_total_rwage_3m  /// IHS Total Wage (3-month) - CONDITIONAL - UNEMPLOYED & OLF: WAGE MISSING
+              IHS_monthly_rwage /// IHS Monthly Wage (Prim.& Second. Jobs)
+              IHS_hourly_rwage  /// IHS Hourly Wage (Prim.& Second. Jobs)
+              IHS_daily_rwage_irregular // IHS Average Daily Wage (Irregular Workers)
+
+global    outcome_var_hours ///
+              work_hours_pday_3m_w  /// Winsorized - No. of Hours/Day (Ref. 3 mnths) Market Work
+              work_hours_pweek_3m_w  /// Winsorized - Usual No. of Hours/Week, Market Work, (Ref. 3-month)
+              work_days_pweek_3m  /// Avg. num. of wrk. days per week during 3 mnth.
+              work_hours_pm_informal_w  //  Winsorized - Average worked hour per month for irregular job
+  
+global    globals_list ///
+            outcome_var_job outcome_var_wage outcome_var_hours
+
+global controls ///
+          age  /// Age
+          age2 /// Age square
+          gender ///  Gender - 1 Male 0 Female
+          hhsize //  Total No. of Individuals in the Household
+     *     ln_distance_dis_camp //  LOG Distance (km) between JORD districts and ZAATARI CAMP in 2016
+
+/*SPECIAL TREATMENTS
+          ln_nb_refugees_bygov /// LOG Number of refugees out of camps by governorate in 2016
+          educ1d ///  Education Levels (1-digit)
+          fteducst ///  Father's Level of education attained
+          mteducst ///  Mother's Level of education attained
+          ftempst ///  Father's Employment Status (When Resp. 15)
+
+*/
+
+
+tab educ1d 
+tab fteducst 
+tab mteducst
+tab ftempst 
+tab ln_nb_refugees_bygov 
+tab age  // Age
+tab age2 // Age square
+tab ln_distance_dis_camp //  LOG Distance (km) between JORD districts and ZAATARI CAMP in 2016
+tab gender //  Gender - 1 Male 0 Female
+tab hhsize //  Total o. of Individuals in the Household
+
 ***********************************************************************
 **DEFINING THE SAMPLE *************************************************
 ***********************************************************************
@@ -83,6 +151,55 @@ drop if dup == 0
 mdesc indid_2010
 destring indid_2010, replace 
 
+                                  ************
+                                  *   PANEL  *
+                                  ************
+
+* SET THE PANEL STRUCTURE
+xtset, clear 
+*xtset year
+xtset indid_2010 year 
+
+
+            ***********************************************************************
+              ***** M4: YEAR FE / DISTRICT FE / CONTROL NUMBER OF REFUGEE   *****
+            ***********************************************************************
+
+// ANALYSIS EMPLOYED / UNEMPLOYED USING MODEL 4 
+
+codebook employed_3cat_3m
+drop if employed_3cat_3m == 0 
+
+**********************
+********* IV *********
+**********************
+
+  foreach outcome of global outcome_var_empl {
+    qui xi: ivreg2  `outcome' ///
+                i.year i.district_iid ///
+                $controls i.educ1d i.fteducst i.mteducst i.ftempst ln_nb_refugees_bygov ///
+                ($dep_var = IHS_IV_SS) ///
+                [pweight = expan_indiv], ///
+                cluster(district_iid) robust ///
+                partial(i.district_iid) ///
+                first
+    codebook `outcome', c
+    estimates table,  k($dep_var) star(.05 .01 .001) 
+
+    * With equivalent first-stage
+    gen smpl=0
+    replace smpl=1 if e(sample)==1
+
+    qui xi: reg $dep_var IHS_IV_SS ///
+            i.year i.district_iid ///
+             $controls i.educ1d i.fteducst i.mteducst i.ftempst ln_nb_refugees_bygov ///
+            if smpl == 1 [pweight = expan_indiv], ///
+            cluster(district_iid) robust
+    estimates table, k(IHS_IV_SS) star(.05 .01 .001)           
+    drop smpl 
+  }
+
+
 
 ***************
 * EMPLOYED *
@@ -98,81 +215,7 @@ request).]*/
 
 tab employed_3m, m
 codebook employed_3m
-keep if employed_3m == 2
-
-*********************************************************************
-*********************************************************************
-
-                              ************
-                              *  GLOBALS *
-                              ************
-
-global    outcome_var_empl ///
-              unemployed_3m /// From unempsr1m - mrk def, search req; 3m, empl or unemp, OLF is miss
-              unempdurmth  ///  Current unemployment duration (in months)
-              employed_3m  ///From uswrkstsr1 - mkt def, search req; 3m, 2 empl - 1 unemp - OLF miss
-
-global    outcome_var_job ///
-              job_stability_permanent_3m ///  From usstablp - Stability of employement (3m) - 1 permanent - 0 temp, seas, cas
-              informal  /// 1 Informal - 0 Formal - Informal if no contract (uscontrp=0) and no insurance (ussocinsp=0)
-              wp_industry_jlmps_3m  /// Industries with work permits for refugees - Economic Activity of prim. job 3m
-              member_union_3m /// Member of a syndicate/trade union (ref. 3-mnths)
-              skills_required_pjob //  Does primary job require any skill
-  
-global    outcome_var_wage ///
-              IHS_basic_rwage_3m  /// IHS Basic Wage (3-month) - CONDITIONAL - UNEMPLOYED & OLF: WAGE MISSING
-              IHS_total_rwage_3m  /// IHS Total Wage (3-month) - CONDITIONAL - UNEMPLOYED & OLF: WAGE MISSING
-              IHS_monthly_rwage /// IHS Monthly Wage (Prim.& Second. Jobs)
-              IHS_hourly_rwage  /// IHS Hourly Wage (Prim.& Second. Jobs)
-              IHS_daily_rwage_irregular // IHS Average Daily Wage (Irregular Workers)
-
-global    outcome_var_hours ///
-              work_hours_pday_3m_w  /// Winsorized - No. of Hours/Day (Ref. 3 mnths) Market Work
-              work_hours_pweek_3m_w  /// Winsorized - Usual No. of Hours/Week, Market Work, (Ref. 3-month)
-              work_days_pweek_3m  /// Avg. num. of wrk. days per week during 3 mnth.
-              work_hours_pm_informal_w  //  Winsorized - Average worked hour per month for irregular job
-  
-global    globals_list ///
-            outcome_var_job outcome_var_wage outcome_var_hours
-
-global controls ///
-          age  /// Age
-          age2 /// Age square
-          gender ///  Gender - 1 Male 0 Female
-          hhsize //  Total No. of Individuals in the Household
-     *     ln_distance_dis_camp //  LOG Distance (km) between JORD districts and ZAATARI CAMP in 2016
-
-/*SPECIAL TREATMENTS
-          ln_nb_refugees_bygov /// LOG Number of refugees out of camps by governorate in 2016
-          educ1d ///  Education Levels (1-digit)
-          fteducst ///  Father's Level of education attained
-          mteducst ///  Mother's Level of education attained
-          ftempst ///  Father's Employment Status (When Resp. 15)
-
-*/
-
-
-tab educ1d 
-tab fteducst 
-tab mteducst
-tab ftempst 
-tab ln_nb_refugees_bygov 
-tab age  // Age
-tab age2 // Age square
-tab ln_distance_dis_camp //  LOG Distance (km) between JORD districts and ZAATARI CAMP in 2016
-tab gender //  Gender - 1 Male 0 Female
-tab hhsize //  Total o. of Individuals in the Household
-
-
-
-                                  ************
-                                  *   PANEL  *
-                                  ************
-
-* SET THE PANEL STRUCTURE
-xtset, clear 
-*xtset year
-xtset indid_2010 year 
+keep if employed_3m == 2 //Analysis on the EMPLOYED
 
                                   ************
                                   *REGRESSION*
@@ -188,12 +231,12 @@ xtset indid_2010 year
 
 foreach globals of global globals_list {
   foreach outcome of global `globals' {
-    qui xi: reg `outcome' agg_wp ///
+    qui xi: reg `outcome' $dep_var ///
              $controls i.educ1d i.fteducst i.mteducst i.ftempst ln_nb_refugees_bygov ///
             [pweight = expan_indiv],  ///
             cluster(district_iid) robust 
     codebook `outcome', c
-    estimates table, k(agg_wp) star(.05 .01 .001)
+    estimates table, k($dep_var) star(.05 .01 .001)
   }
 }
 
@@ -208,13 +251,13 @@ foreach globals of global globals_list {
 
 foreach globals of global globals_list {
   foreach outcome of global `globals' {
-    qui xi: reg `outcome' agg_wp ///
+    qui xi: reg `outcome' $dep_var ///
             i.district_iid i.year ///
              $controls i.educ1d i.fteducst i.mteducst i.ftempst ln_nb_refugees_bygov ///
             [pweight = expan_indiv],  ///
             cluster(district_iid) robust 
     codebook `outcome', c
-    estimates table, k(agg_wp) star(.05 .01 .001)
+    estimates table, k($dep_var) star(.05 .01 .001)
   }
 }
 
@@ -227,19 +270,19 @@ foreach globals of global globals_list {
     qui xi: ivreg2  `outcome' ///
                 i.year i.district_iid ///
                 $controls i.educ1d i.fteducst i.mteducst i.ftempst ln_nb_refugees_bygov ///
-                (agg_wp = IHS_IV_SS) ///
+                ($dep_var = IHS_IV_SS) ///
                 [pweight = expan_indiv], ///
                 cluster(district_iid) robust ///
                 partial(i.district_iid) ///
                 first
     codebook `outcome', c
-    estimates table,  k(agg_wp) star(.05 .01 .001) 
+    estimates table,  k($dep_var) star(.05 .01 .001) 
 
     * With equivalent first-stage
     gen smpl=0
     replace smpl=1 if e(sample)==1
 
-    qui xi: reg agg_wp IHS_IV_SS ///
+    qui xi: reg $dep_var IHS_IV_SS ///
             i.year i.district_iid ///
              $controls i.educ1d i.fteducst i.mteducst i.ftempst ln_nb_refugees_bygov ///
             if smpl == 1 [pweight = expan_indiv], ///
@@ -259,13 +302,13 @@ foreach globals of global globals_list {
 
 foreach globals of global globals_list {
   foreach outcome of global `globals' {
-    qui xi: reg `outcome' agg_wp ///
+    qui xi: reg `outcome' $dep_var ///
             i.district_iid i.year i.crsectrp ///
              $controls i.educ1d i.fteducst i.mteducst i.ftempst ln_nb_refugees_bygov ///
             [pweight = expan_indiv],  ///
             cluster(district_iid) robust 
     codebook `outcome', c
-    estimates table, k(agg_wp) star(.05 .01 .001)
+    estimates table, k($dep_var) star(.05 .01 .001)
   }
 }
 
@@ -278,19 +321,19 @@ foreach globals of global globals_list {
     qui xi: ivreg2  `outcome' ///
                 i.year i.district_iid i.crsectrp ///
                 $controls i.educ1d i.fteducst i.mteducst i.ftempst ln_nb_refugees_bygov ///
-                (agg_wp = IHS_IV_SS) ///
+                ($dep_var = IHS_IV_SS) ///
                 [pweight = expan_indiv], ///
                 cluster(district_iid) ///
                 partial(i.district_iid i.crsectrp) ///
                 first
     codebook `outcome', c
-    estimates table, k(agg_wp)  star(.05 .01 .001) 
+    estimates table, k($dep_var)  star(.05 .01 .001) 
 
     * With equivalent first-stage
     gen smpl=0
     replace smpl=1 if e(sample)==1
 
-    qui xi: reg agg_wp IHS_IV_SS ///
+    qui xi: reg $dep_var IHS_IV_SS ///
             i.year i.district_iid i.crsectrp ///
             $controls i.educ1d i.fteducst i.mteducst i.ftempst ln_nb_refugees_bygov ///
             if smpl == 1 [pweight = expan_indiv], ///
@@ -312,25 +355,25 @@ preserve
 foreach globals of global globals_list {
   foreach outcome_l1 of global `globals' {
       foreach outcome_l2 of global  `globals' {
-       qui reghdfe `outcome_l2' agg_wp ///
+       qui reghdfe `outcome_l2' $dep_var ///
                 $controls i.educ1d i.fteducst i.mteducst i.ftempst ln_nb_refugees_bygov ///
                 [pw=expan_indiv], ///
                 absorb(year indid_2010) ///
                 cluster(district_iid) 
       }
         * Then I partial out all variables
-      foreach y in `outcome_l1' agg_wp $controls  educ1d fteducst mteducst ftempst ln_nb_refugees_bygov {
+      foreach y in `outcome_l1' $dep_var $controls  educ1d fteducst mteducst ftempst ln_nb_refugees_bygov {
         qui reghdfe `y' [pw=expan_indiv], absorb(year indid_2010) residuals(`y'_c2wr)
         rename `y' o_`y'
         rename `y'_c2wr `y'
       }
-      drop `outcome_l1' $controls  educ1d fteducst mteducst ftempst ln_nb_refugees_bygov agg_wp  
-      foreach y in `outcome_l1' $controls  educ1d fteducst mteducst ftempst ln_nb_refugees_bygov agg_wp  {
+      drop `outcome_l1' $controls  educ1d fteducst mteducst ftempst ln_nb_refugees_bygov $dep_var  
+      foreach y in `outcome_l1' $controls  educ1d fteducst mteducst ftempst ln_nb_refugees_bygov $dep_var  {
         rename o_`y' `y' 
       } 
-      qui reg `outcome_l1' agg_wp $controls i.educ1d i.fteducst i.mteducst i.ftempst ln_nb_refugees_bygov [pw=expan_indiv], cluster(district_iid) robust
+      qui reg `outcome_l1' $dep_var $controls i.educ1d i.fteducst i.mteducst i.ftempst ln_nb_refugees_bygov [pw=expan_indiv], cluster(district_iid) robust
       codebook `outcome_l1', c
-      estimates table,  k(agg_wp) star(.05 .01 .001)           
+      estimates table,  k($dep_var) star(.05 .01 .001)           
     }
   }
 restore
@@ -347,7 +390,7 @@ foreach globals of global globals_list {
       qui xi: ivreg2 `outcome_l1' ///
                     i.year i.district_iid ///
                     $controls i.educ1d i.fteducst i.mteducst i.ftempst ln_nb_refugees_bygov ///
-                    (agg_wp = IHS_IV_SS) ///
+                    ($dep_var = IHS_IV_SS) ///
                     [pweight = expan_indiv], ///
                     cluster(district_iid) robust ///
                     partial(i.district_iid) 
@@ -355,20 +398,20 @@ foreach globals of global globals_list {
         qui gen smpl=0
         qui replace smpl=1 if e(sample)==1
         * Then I partial out all variables
-        foreach y in `outcome_l1' $controls agg_wp IHS_IV_SS educ1d fteducst mteducst ftempst ln_nb_refugees_bygov {
+        foreach y in `outcome_l1' $controls $dep_var IHS_IV_SS educ1d fteducst mteducst ftempst ln_nb_refugees_bygov {
           qui reghdfe `y' [pw=expan_indiv] if smpl==1, absorb(year indid_2010) residuals(`y'_c2wr)
           qui rename `y' o_`y'
           qui rename `y'_c2wr `y'
         }
         qui ivreg2 `outcome_l1' ///
                $controls educ1d fteducst mteducst ftempst ln_nb_refugees_bygov ///
-               (agg_wp = IHS_IV_SS) ///
+               ($dep_var = IHS_IV_SS) ///
                [pweight = expan_indiv], ///
                cluster(district_iid) robust ///
                first
-        estimates table, k(agg_wp)  star(.05 .01 .001) 
-        qui drop `outcome_l1' agg_wp IHS_IV_SS $controls educ1d fteducst mteducst ftempst smpl ln_nb_refugees_bygov
-        foreach y in `outcome_l1' $controls  agg_wp IHS_IV_SS educ1d fteducst mteducst ftempst ln_nb_refugees_bygov  {
+        estimates table, k($dep_var)  star(.05 .01 .001) 
+        qui drop `outcome_l1' $dep_var IHS_IV_SS $controls educ1d fteducst mteducst ftempst smpl ln_nb_refugees_bygov
+        foreach y in `outcome_l1' $controls  $dep_var IHS_IV_SS educ1d fteducst mteducst ftempst ln_nb_refugees_bygov  {
           qui rename o_`y' `y' 
         }
     }
@@ -378,25 +421,3 @@ restore
 
 
 log close
-
-
-** HETEROG 
-
-codebook employed_3cat_3m
-foreach globals of global globals_list {
-  foreach outcome of global `globals'  {  
-    gen cons=1
-    qui xi: ivreg2  `outcome'  ///
-       i.year i.district_iid ///
-       $controls i.educ1d i.fteducst i.mteducst i.ftempst ln_nb_refugees_bygov ///
-       (c.agg_wp#i.wp_industry_jlmps_3m = c.IHS_IV_SS#i.wp_industry_jlmps_3m) ///
-       c.cons#i.wp_industry_jlmps_3m ///       
-       [pweight = expan_indiv], ///
-       cluster(district_iid) robust ///
-       partial(i.district_iid) ///
-       first
-    codebook `outcome', c
-    estimates table,  k(wp_industry_jlmps_3m#c.agg_wp) star(.05 .01 .001) 
-    drop cons
-  } 
-}

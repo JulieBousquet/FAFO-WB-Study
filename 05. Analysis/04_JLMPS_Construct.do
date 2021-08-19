@@ -43,10 +43,66 @@ save "$data_final/05_IV_JLMPS_MergingIV.dta", replace
 
 
 
-
 use "$data_final/05_IV_JLMPS_MergingIV.dta", clear
 
 
+*AGGREGATED NUMBER OF WORK PERMIT
+
+preserve
+codebook  nationality_cl
+drop if forced_migr != 1
+gen sample_pop = 1 
+collapse (sum) sample_pop if year == 2016, by(district_iid)
+bys district_iid: tab sample_pop
+keep sample_pop district_iid
+tempfile popdist
+save `popdist'
+restore 
+
+
+preserve
+tab forced_migr
+codebook forced_migr
+drop if forced_migr != 1
+distinct district_iid
+tab work_permit, m
+collapse (sum) work_permit if year == 2016, by(district_iid)
+ren work_permit agg_wp_2016
+gen year = 2016
+tempfile wp2016
+save `wp2016'
+restore
+
+merge m:1 district_iid using `wp2016'
+drop _merge
+
+gen agg_wp = agg_wp_2016
+replace agg_wp = 0 if year == 2010 //No WP in 2010
+replace agg_wp = 0 if mi(agg_wp) //No WP in District
+*A few districts do not have indiv with WP: should I remove them?
+*drop if mi(agg_wp)
+lab var agg_wp "From work_permit: aggregated at the district level"
+tab agg_wp, m
+tab agg_wp year, m
+*br agg_wp year IV_SS 
+*sort year 
+
+merge m:1 district_iid using `popdist'
+drop _merge
+
+gen share_wp = agg_wp / sample_pop  
+tab share_wp , m 
+tab sample_pop
+lab var share_wp "From work_permit: share of refugees with work permit at the district level"
+replace share_wp = 0 if year == 2010 //No WP in 2010
+replace share_wp = 0 if mi(share_wp) //No WP in District
+gen share_wp_100 = 100*share_wp
+lab var share_wp_100 "PERCENTAGE - From work_permit: share of refugees with work permit at the district level"
+
+
+
+
+/*
 *Missing district IN 2010: nb 25 - Husaynia 
 
 *AGGREGATED NUMBER OF WORK PERMIT
@@ -71,13 +127,26 @@ replace agg_wp = 0 if year == 2010 //No WP in 2016
 replace agg_wp = 0 if mi(agg_wp) //No WP in District
 *A few districts do not have indiv with WP: should I remove them?
 *drop if mi(agg_wp)
+lab var agg_wp "From work_permit: aggregated at the district level"
 tab agg_wp, m
 tab agg_wp year, m
 *br agg_wp year IV_SS 
 *sort year 
+*/
 
 
 * ORIGINAL *
+
+/*Original means that it is the standard variable asked in the questionnaire
+     RECODE of q11207 (q11207. Do you have a permit to work in Jordan?)
+
+NON ORIGINAL means that it is the variable original plus a small transfo
+from me: added the refugee who said they had a legal contract 
+while also declaring having no work permit (or missing in the WP Q)
+I am using this one in the analysis 
+work_permit_orig + 1 to refugees who said they have no WP but a legal contract
+
+*/
 
 *AGGREGATED NUMBER OF WORK PERMIT
 preserve
@@ -102,6 +171,7 @@ replace agg_wp_orig = 0 if mi(agg_wp_orig) //No WP in District
 *A few districts do not have indiv with WP: should I remove them?
 *drop if mi(agg_wp)
 tab agg_wp_orig, m
+lab var agg_wp_orig "From work_permit_orig: aggregated at the district level"
 tab agg_wp_orig year, m
 *br agg_wp year IV_SS 
 *sort year 
@@ -247,8 +317,8 @@ case some invariant controls drop out of the models).
 tab IV_SS, m 
 
 *THE INSTRUMENT + TRANSFORMATION
-gen log_IV_SS=log(1+IV_SS)
-gen IHS_IV_SS=log(IV_SS+((IV_SS^2+1)^0.5))
+gen log_IV_SS = log(1 + IV_SS)
+gen IHS_IV_SS = log(IV_SS + ((IV_SS^2 + 1)^0.5))
 
 *THE ASKED QUESTION IN QUEST (binary)
 tab work_permit, m
@@ -258,8 +328,9 @@ tab agg_wp, m
 tab agg_wp_orig, m //Adding another more accurate measure
 
 *CORRELATIONS
-corr IV_SS agg_wp //0.64
-corr IV_SS agg_wp_orig //0.58
+corr IV_SS agg_wp  //0.64
+corr IV_SS agg_wp_orig //0.59
+corr IV_SS share_wp //0.55
 
 
                                           **********
@@ -640,7 +711,6 @@ tab usnumdys, m
 ren usnumdys work_days_pweek_3m
 tab work_days_pweek_3m , m
 replace work_days_pweek_3m = . if work_days_pweek_3m == 0
-
 
                                  *******************************
                                  ****    HOURS OF WORK      ****
