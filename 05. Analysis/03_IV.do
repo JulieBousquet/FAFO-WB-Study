@@ -725,4 +725,5 @@ egen district_iid = group(district_en)
 
 save "$data_final/03_ShiftShare_IV", replace 
 
+use "$data_final/03_ShiftShare_IV", clear 
 

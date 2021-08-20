@@ -181,7 +181,7 @@ codebook employed_3m
 1  Unemployed (&subs)
 2  Employed (no subs)
 */
-keep if employed_3m == 2
+*keep if employed_3m == 2
 
 foreach globals of global globals_list {
   foreach outcome of global `globals'  {  

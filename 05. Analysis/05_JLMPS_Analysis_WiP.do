@@ -100,6 +100,7 @@ tab hhsize //  Total o. of Individuals in the Household
 **************
 * JORDANIANS *
 **************
+
 codebook nationality_cl
 lab list Lnationality_cl
 /*
@@ -120,9 +121,30 @@ keep if nationality_cl == 1 //Keep only the jordanians
 
 *Keep only working age pop? 15-64 ? As defined by the ERF
 tab age year 
-drop if age < 15 
-drop if age > 64
+drop if age < 15 & year == 2016
+drop if age > 64 & year == 2016
 tab year 
+
+***************
+* EMPLOYED *
+*************** 
+
+/*
+Number of outcomes among the employed,
+
+[NB: We undertook sensitivity analysis as to whether analyzing these outcomes
+unconditional on employment, rather than among the employed, changed our
+results; it did not lead to substantive changes (results available from authors on
+request).]*/
+
+tab employed_3m, m
+codebook employed_3m
+*keep if employed_3m == 2 //Analysis on the EMPLOYED
+
+gen flag = 1 if (employed_3m == 2 & year == 2016) //Analysis on the EMPLOYED
+drop if flag != 1 & year == 2016
+drop if mi(employed_3m) 
+drop flag
 
 **********************************
 * PEOPLE SURVEYED IN BOTH ROUNDS *
@@ -147,6 +169,9 @@ duplicates tag indid_2010, gen(dup)
 bys year: tab dup //(90 in 2010 and 206 in 2016)
 *Dropping those who actually did not the two rounds 
 drop if dup == 0 
+
+drop surveyed_2_rounds dup
+
 *28020 indiv surveyed twice in 2010 and 2020
 mdesc indid_2010
 destring indid_2010, replace 
@@ -160,62 +185,6 @@ xtset, clear
 *xtset year
 xtset indid_2010 year 
 
-
-            ***********************************************************************
-              ***** M4: YEAR FE / DISTRICT FE / CONTROL NUMBER OF REFUGEE   *****
-            ***********************************************************************
-
-// ANALYSIS EMPLOYED / UNEMPLOYED USING MODEL 4 
-
-codebook employed_3cat_3m
-drop if employed_3cat_3m == 0 
-
-**********************
-********* IV *********
-**********************
-
-  foreach outcome of global outcome_var_empl {
-    qui xi: ivreg2  `outcome' ///
-                i.year i.district_iid ///
-                $controls i.educ1d i.fteducst i.mteducst i.ftempst ln_nb_refugees_bygov ///
-                ($dep_var = IHS_IV_SS) ///
-                [pweight = expan_indiv], ///
-                cluster(district_iid) robust ///
-                partial(i.district_iid) ///
-                first
-    codebook `outcome', c
-    estimates table,  k($dep_var) star(.05 .01 .001) 
-
-    * With equivalent first-stage
-    gen smpl=0
-    replace smpl=1 if e(sample)==1
-
-    qui xi: reg $dep_var IHS_IV_SS ///
-            i.year i.district_iid ///
-             $controls i.educ1d i.fteducst i.mteducst i.ftempst ln_nb_refugees_bygov ///
-            if smpl == 1 [pweight = expan_indiv], ///
-            cluster(district_iid) robust
-    estimates table, k(IHS_IV_SS) star(.05 .01 .001)           
-    drop smpl 
-  }
-
-
-
-***************
-* EMPLOYED *
-*************** 
-
-/*
-Number of outcomes among the employed,
-
-[NB: We undertook sensitivity analysis as to whether analyzing these outcomes
-unconditional on employment, rather than among the employed, changed our
-results; it did not lead to substantive changes (results available from authors on
-request).]*/
-
-tab employed_3m, m
-codebook employed_3m
-keep if employed_3m == 2 //Analysis on the EMPLOYED
 
                                   ************
                                   *REGRESSION*
@@ -418,6 +387,78 @@ foreach globals of global globals_list {
   }
 restore                
 
+
+
+************************************************
+// ANALYSIS EMPLOYED / UNEMPLOYED USING MODEL 4 
+************************************************
+
+            ***********************************************************************
+              ***** M4: YEAR FE / DISTRICT FE / CONTROL NUMBER OF REFUGEE   *****
+            ***********************************************************************
+
+use "$data_final/06_IV_JLMPS_Construct_Outcomes.dta", clear
+
+keep if nationality_cl == 1
+drop if age < 15 & year == 2016
+drop if age > 64 & year == 2016
+
+codebook employed_3cat_3m
+drop if employed_3cat_3m == 0 & year == 2016
+drop if mi(employed_3cat_3m)
+tab employed_3cat_3m year, m
+*Flag those who were surveyed in both rounds 
+gen surveyed_2_rounds = 1 if !mi(indid_2010) & !mi(indid_2016)
+*Keep only the surveyed in both round
+keep if surveyed_2_rounds == 1 
+
+*Common identifier
+sort indid_2010
+distinct indid_2010 //28316/2 = 14158 while we have 14306: there is an inbalance
+*Even if they have an ID for both few actually did not do one of the round 
+duplicates tag indid_2010, gen(dup)
+bys year: tab dup //(90 in 2010 and 206 in 2016)
+*Dropping those who actually did not the two rounds 
+drop if dup == 0 
+drop surveyed_2_rounds dup
+
+mdesc indid_2010
+destring indid_2010, replace 
+
+* SET THE PANEL STRUCTURE
+xtset, clear 
+*xtset year
+xtset indid_2010 year 
+
+
+**********************
+********* IV *********
+**********************
+
+  foreach outcome of global outcome_var_empl {
+    qui xi: ivreg2  `outcome' ///
+                i.year i.district_iid ///
+                $controls i.educ1d i.fteducst i.mteducst i.ftempst ln_nb_refugees_bygov ///
+                ($dep_var = IHS_IV_SS) ///
+                [pweight = expan_indiv], ///
+                cluster(district_iid) robust ///
+                partial(i.district_iid) ///
+                first
+    codebook `outcome', c
+    estimates table,  k($dep_var) star(.05 .01 .001) 
+
+    * With equivalent first-stage
+    gen smpl=0
+    replace smpl=1 if e(sample)==1
+
+    qui xi: reg $dep_var IHS_IV_SS ///
+            i.year i.district_iid ///
+             $controls i.educ1d i.fteducst i.mteducst i.ftempst ln_nb_refugees_bygov ///
+            if smpl == 1 [pweight = expan_indiv], ///
+            cluster(district_iid) robust
+    estimates table, k(IHS_IV_SS) star(.05 .01 .001)           
+    drop smpl 
+  }
 
 
 log close

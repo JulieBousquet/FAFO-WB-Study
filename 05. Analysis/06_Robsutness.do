@@ -5,6 +5,62 @@ set more off, permanently
 set mem 100m
 set matsize 11000
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+*** Controlling for c.distance_dis_camp##i.year or usig it as an IV
+***********************************************************************************
+***********************************************************************************
+***********************************************************************************
+
+sum distance_dis_camp year
+gen d2016=0
+replace d2016=1 if year==2016
+gen ldistance_dis_camp=log(distance_dis_camp)
+gen inter_dist=ldistance_dis_camp*d2016
+
+sum $controls 
+
+xi: ivreg2 ln_wage i.year i.district_iid i.crsectrp i.educ1d i.fteducst i.mteducst age age2 sex hhsize (agg_wp ln_ref= log_IV_SS inter_dist) ///
+  if forced_migr==0 & usemp1 == 1 & nationality_cl == 1  [pweight = expan_indiv],  liml cluster(district_iid) ///
+                      partial(i.district_iid  i.crsectrp) 
+  
+  
+
+
+
+**********************
+********* IV *********
+**********************
+
+foreach globals of global globals_list {
+  foreach outcome of global `globals' {
+    qui xi: ivreg2  `outcome' ///
+                i.year i.district_iid ///
+                $controls i.educ1d i.fteducst i.mteducst i.ftempst  ///
+                ($dep_var ln_nb_refugees_bygov = IHS_IV_SS ln_distance_dis_camp) ///
+                [pweight = expan_indiv], ///
+                cluster(district_iid) robust ///
+                partial(i.district_iid) ///
+                first
+    codebook IHS_monthly_rwage, c
+    estimates table,  k($dep_var) star(.05 .01 .001) 
+}
+}
+
+
+
 /*
 import excel "$data_UNHCR_base\Datasets_WP_RegisteredSyrians.xlsx", sheet("WP - byIndustry") firstrow clear
 

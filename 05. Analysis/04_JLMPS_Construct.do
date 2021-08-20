@@ -1013,3 +1013,21 @@ destring indid, replace
 
 *save "$data_final/06_IV_JLMPS_Regression.dta", replace
 save "$data_final/06_IV_JLMPS_Construct_Outcomes.dta", replace
+
+/*
+tab job1_y
+tab job1_m
+tab job1_01 
+tab job1_17
+job1_m job2_m job2_y job1_y
+
+(1) The date of school exit
+(2) Any non-employment between school exit and first job (distinguishing
+between unemployment and out of the labor force).
+(3) First job start date and characteristics.
+(4) Respondents are then asked if they have left that job, and if so,
+when and whether they had a period of non-employment (again
+distinguishing unemployment and out of labor force).
+(5) They are then asked if they had a subsequent job, and if so, the
+start dates and characteristics.
+*/
