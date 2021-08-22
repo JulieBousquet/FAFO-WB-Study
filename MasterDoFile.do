@@ -125,6 +125,22 @@ if inlist(c(username), "u0131185", "julie") == 1 {
 			global data_temp 		"$data_analysis/02. Temp"
 			global data_final 		"$data_analysis/03. Final"
 		global out  			"$folder_analysis/02. Output/"
+	global do_analysis 	"$github/05. Analysis"
+		
+
+
+	*****************************
+	**     RUN THE GLOBALS     **
+	*****************************
+	qui do "$do_analysis/08_Globals.do"
+
+
+
+
+
+
+
+
 
 exit
 /* End of do-file */

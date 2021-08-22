@@ -45,7 +45,6 @@ save "$data_final/05_IV_JLMPS_MergingIV.dta", replace
 
 use "$data_final/05_IV_JLMPS_MergingIV.dta", clear
 
-
 *AGGREGATED NUMBER OF WORK PERMIT
 
 preserve
@@ -180,11 +179,169 @@ bys year: distinct district_iid
 bys year: tab district_iid
 bys year: tab district_en
 
+
+
+
+***********************************************************************
+**PREPARING THE SAMPLE ************************************************
+***********************************************************************
+
+**********************************
+* PEOPLE SURVEYED IN BOTH ROUNDS *
+**********************************
+
+*br indid indid_2010 indid_2016 year
+*SAMPLE: SAME INDIVIDUALS WERE SURVEYED IN 2010 AND 2016
+*BUT A FEW WERE NOT (ALL REFUGEE WEREN'T SURVEYED IN 2010)
+*AND A FEW JORDANIANS. I DECDIE TO KEEP ONLY THE PANEL STRUCTURE 
+*FOR FIXED EFFECT AT THE INDIV LEVEL 
+
+*Flag those who were surveyed in both rounds 
+gen surveyed_2_rounds = 1 if !mi(indid_2010) & !mi(indid_2016)
+*Keep only the surveyed in both round
+keep if surveyed_2_rounds == 1 
+
+*Common identifier
+sort indid_2010
+distinct indid_2010 //28316/2 = 14158 while we have 14306: there is an inbalance
+*Even if they have an ID for both few actually did not do one of the round 
+duplicates tag indid_2010, gen(dup)
+bys year: tab dup //(90 in 2010 and 206 in 2016)
+*Dropping those who actually did not the two rounds 
+drop if dup == 0 
+
+drop surveyed_2_rounds dup
+
+*28020 indiv surveyed twice in 2010 and 2020
+mdesc indid_2010
+destring indid_2010, replace 
+
+
+**************
+* JORDANIANS *
+**************
+
+preserve 
+codebook nationality_cl
+lab list Lnationality_cl
+/*
+                        53,094         1  Jordanian
+                         3,003         2  Syrian
+                           623         3  Egyptian
+                         2,551         4  Other Arab
+                           132         5  Other
+
+*/
+
+*keep if nationality_cl == 1 //Keep only the jordanians
+*keep if nationality_cl != 2 //Keep all but the syrians
+tab nationality_cl year
+
+keep nationality_cl indid_2010 year
+reshape wide nationality_cl, i(indid_2010) j(year)
+
+*Correction #1
+gen flag = 1 if nationality_cl2010 != nationality_cl2016 
+list nationality_cl2016 nationality_cl2010 if flag == 1 
+*If Declare JORDANIAN in 2016 but different in 2010
+*then JORDANIAN
+replace nationality_cl2010 = nationality_cl2016 if flag == 1 & nationality_cl2016 == 1
+drop flag 
+
+*Correction #2
+gen flag = 1 if nationality_cl2010 != nationality_cl2016 
+list nationality_cl2016 nationality_cl2010 if flag == 1 
+*If Declare JORDANIAN in 2010 but different in 2016
+*then JORDANIAN
+replace nationality_cl2016 = nationality_cl2010 if flag == 1 & nationality_cl2010 == 1
+drop flag 
+
+*Corection #3
+gen flag = 1 if nationality_cl2010 != nationality_cl2016 
+list nationality_cl2016 nationality_cl2010 if flag == 1 
+*IF Declare OTHER ARAB in 2010 but differnt in 2016
+replace nationality_cl2010 = nationality_cl2016 if flag == 1 & nationality_cl2016 == 4
+drop flag 
+
+*Corection #4
+gen flag = 1 if nationality_cl2010 != nationality_cl2016 
+list nationality_cl2016 nationality_cl2010 if flag == 1 
+*IF Declare OTHER ARAB in 2016 but differnt in 2010
+replace nationality_cl2016 = nationality_cl2010 if flag == 1 & nationality_cl2010 == 4
+drop flag 
+
+*br nationality_cl2016 nationality_cl2010 
+/*
+1  Jordanian
+2  Syrian
+3  Egyptian
+4  Other Arab
+5  Other
+*/
+
+reshape long nationality_cl, i(indid_2010) j(year)
+format indid_2010 %12.0g
+
+tempfile data_nat
+save `data_nat'
+restore 
+
+drop nationality_cl 
+merge 1:1 indid_2010 year using  `data_nat'
+drop _merge 
+
+***************
+* WORKING AGE *
+*************** 
+
+preserve 
+
+keep age indid_2010 year
+reshape wide age, i(indid_2010) j(year)
+format indid_2010 %12.0g
+
+br indid_2010 age2016 age2010
+
+sort indid_2010
+mdesc age2016 
+
+*There are a lot of discrepencies.
+gen age_diff = age2016 - age2010
+drop age2016 age_diff
+
+*I decide to recreate the age 2016 so that 
+*it matches what was declared in 2010
+gen age2016 = age2010 + 4 
+tab age2016, m
+lab var age2016 "Age 2016"
+
+list if age2010 == 0 
+list if age2016 == 0 
+
+
+
+tab age2016, m
+tab age2010, m
+
+reshape long age, i(indid_2010) j(year)
+format indid_2010 %12.0g
+
+tempfile data_age
+save `data_age'
+restore 
+
+drop age 
+merge 1:1 indid_2010 year using  `data_age'
+drop _merge
+
+
+
 /*---------*********************************************************************-----------
 -----------*********************************************************************-----------
                                    VARIABLES CLEANING 
 -----------*********************************************************************-----------
 -----------*********************************************************************-----------*/
+
 
                                        **********
                                        *Controls*
@@ -336,41 +493,6 @@ corr IV_SS share_wp //0.55
                                           **********
                                           *Outcomes*
                                           **********
-
-
-
-
-
-/*
-
-
-
-including 
-
-
-We also look at whether workers are in an “open sector,” that is, a sector
-open to Syrians with work permits (agriculture, manufacturing, construction,
-food service, or domestic/cleaning work (Kelberer, 2017)).
-
-While Jordanians may be facing competition in the open sector, they may
-also be receiving more opportunities in other sectors, particularly the
-public sector. For instance, additional provision of services and international
-funds may increase public sector employment, which is open
-exclusively to Jordanians, while displacement may occur in the private
-sector. We therefore examine the probability of employment in the private
-sector among the employed (the complement necessarily being
-public sector work). 
-
-To specifically examine whether aid is likely to be
-creating jobs in human services, we examine the probability of being
-employed in the education or health care field among the employed.
-
-Further, we examine occupations, specifically an outcome of being in a
-managerial or professional occupation among the employed, in case
-there is occupational upgrading occurring. 
-
-*/
-
 
                                  *******************************
                                  ****    EMPLOYEMENT        ****
@@ -570,6 +692,73 @@ tab usecac3d, m
 
 *Institutional Sector Prim. Job (ref 3-month)
 tab usinstsec, m 
+
+
+***********************************************************************
+**PREPARING THE SAMPLE ************************************************
+***********************************************************************
+
+***************
+* EMPLOYED *
+*************** 
+
+/*
+Number of outcomes among the employed,
+
+[NB: We undertook sensitivity analysis as to whether analyzing these outcomes
+unconditional on employment, rather than among the employed, changed our
+results; it did not lead to substantive changes (results available from authors on
+request).]*/
+
+preserve 
+
+
+keep employed_3m indid_2010 year
+reshape wide employed_3m, i(indid_2010) j(year)
+format indid_2010 %12.0g
+
+
+br indid_2010 employed_3m2016 employed_3m2010
+
+*MISS 2016 - MISS 2010
+gen miss_16_10 = 1 if mi(employed_3m2016) & mi(employed_3m2010)
+
+*UNEMP 2016 - UNEMP 2010
+gen unemp_16_10 = 1 if employed_3m2016 == 1 & employed_3m2010 == 1 
+
+*OLF 2016 - OLF 2010
+gen olf_16_10 = 1 if  employed_3m2016 == 0 & employed_3m2010 == 0
+
+*EMP 2016 - MISS 2010 
+gen emp_16_miss_10 = 1 if employed_3m2016 == 2 & mi(employed_3m2010)  
+
+*EMP 2010 - MISS 2016 
+gen emp_10_miss_16 = 1 if employed_3m2010 == 2 & mi(employed_3m2016) 
+
+*UNEMP 2016 - MISS 2010 
+gen unemp_16_miss_10 = 1 if employed_3m2016 == 1 & mi(employed_3m2010)
+
+*UNEMP 2010 - MISS 2016 
+gen unemp_10_miss_16 = 1 if employed_3m2010 == 1 & mi(employed_3m2016) 
+
+*OLF 2016 - MISS 2010 
+gen olf_16_miss_10 = 1 if employed_3m2016 == 0 & mi(employed_3m2010) 
+
+*OLF 2010 - MISS 2016
+gen olf_10_miss_16 = 1 if employed_3m2010 == 0 & mi(employed_3m2016) 
+
+sort indid_2010
+
+reshape long employed_3m, i(indid_2010) j(year)
+format indid_2010 %12.0g
+
+tempfile data_empl
+save `data_empl'
+restore 
+
+drop employed_3m 
+merge 1:1 indid_2010 year using  `data_empl'
+drop _merge
 
 
                                  *******************************
@@ -1000,6 +1189,34 @@ gen permanent_contract = 1 if job1_08 == 1
 replace permanent_contract = 0 if job1_08 == 2 | job1_08 == 3
 lab var permanent_contract "From job1_08 : Type of work contract - Job 01 - 1 Permanent"
 
+
+***************************************************************************
+
+
+                              ***********************************
+                              ****       HETEROGENOUS        ****
+                              ***********************************
+
+
+
+                                    *******************************
+                                    ****  EDUCATION BINARY     ****
+                                    *******************************
+
+tab educ1d, m 
+codebook educ1d
+gen bi_education = 1 if educ1d == 7 | /// Post Graduate
+                  educ1d == 6 | /// University
+                  educ1d == 5 | /// Post Secondary
+                  educ1d == 4  //Secondary
+replace bi_education = 0 if educ1d == 3 | /// Basic Education
+                     educ1d == 2 | /// Read and Write
+                     educ1d == 1 // Illiterate
+lab def bi_education 1 "Educated" 0 "Non Educated", modify
+lab val bi_education bi_education
+lab var bi_education "Educated is from Secondary education until post graduate"
+
+
 ******WEIGHTS*******
 *expan_Hh 
 *expan_ref_hh
@@ -1010,6 +1227,7 @@ codebook hhid
 destring hhid, replace
 codebook indid
 destring indid, replace 
+
 
 *save "$data_final/06_IV_JLMPS_Regression.dta", replace
 save "$data_final/06_IV_JLMPS_Construct_Outcomes.dta", replace

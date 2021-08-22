@@ -1,21 +1,22 @@
 
-
+cap log close
 clear all
 set more off, permanently
 set mem 100m
-set matsize 11000
+
+log using "$out_JLMPS/03_Heterogenous_analysis.log", replace
+
+   ****************************************************************************
+   **                            DATA JLMPS                                  **
+   **              				   ROBUSTNESS ANALYSIS                             **  
+   ** ---------------------------------------------------------------------- **
+   ** Type Do  :  DATA JLMPS ROBUSTNESS ANALYSIS REGRESSION                  **
+   **                                                                        **
+   ** Authors  : Julie Bousquet                                              **
+   ****************************************************************************
 
 
-
-
-
-
-
-
-
-
-
-
+use "$data_final/06_IV_JLMPS_Construct_Outcomes.dta", clear
 
 
 
@@ -24,6 +25,7 @@ set matsize 11000
 ***********************************************************************************
 ***********************************************************************************
 
+/*
 sum distance_dis_camp year
 gen d2016=0
 replace d2016=1 if year==2016
@@ -36,7 +38,7 @@ xi: ivreg2 ln_wage i.year i.district_iid i.crsectrp i.educ1d i.fteducst i.mteduc
   if forced_migr==0 & usemp1 == 1 & nationality_cl == 1  [pweight = expan_indiv],  liml cluster(district_iid) ///
                       partial(i.district_iid  i.crsectrp) 
   
-  
+*/ 
 
 
 

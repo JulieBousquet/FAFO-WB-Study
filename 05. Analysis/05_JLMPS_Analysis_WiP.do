@@ -25,62 +25,6 @@ use "$data_final/06_IV_JLMPS_Construct_Outcomes.dta", clear
 *ssc inst ivreg2, replace
 
 
-*********************************************************************
-*********************************************************************
-
-                              ************
-                              *  GLOBALS *
-                              ************
-
-
-global    dep_var   agg_wp 
-*global    dep_var   share_wp_100
-*global    dep_var   agg_wp_orig
-
-global    outcome_var_empl ///
-              unemployed_3m /// From unempsr1m - mrk def, search req; 3m, empl or unemp, OLF is miss
-              unempdurmth  ///  Current unemployment duration (in months)
-              employed_3m  ///From uswrkstsr1 - mkt def, search req; 3m, 2 empl - 1 unemp - OLF miss
-
-global    outcome_var_job ///
-              job_stability_permanent_3m ///  From usstablp - Stability of employement (3m) - 1 permanent - 0 temp, seas, cas
-              informal  /// 1 Informal - 0 Formal - Informal if no contract (uscontrp=0) and no insurance (ussocinsp=0)
-              wp_industry_jlmps_3m  /// Industries with work permits for refugees - Economic Activity of prim. job 3m
-              member_union_3m /// Member of a syndicate/trade union (ref. 3-mnths)
-              skills_required_pjob //  Does primary job require any skill
-  
-global    outcome_var_wage ///
-              IHS_basic_rwage_3m  /// IHS Basic Wage (3-month) - CONDITIONAL - UNEMPLOYED & OLF: WAGE MISSING
-              IHS_total_rwage_3m  /// IHS Total Wage (3-month) - CONDITIONAL - UNEMPLOYED & OLF: WAGE MISSING
-              IHS_monthly_rwage /// IHS Monthly Wage (Prim.& Second. Jobs)
-              IHS_hourly_rwage  /// IHS Hourly Wage (Prim.& Second. Jobs)
-              IHS_daily_rwage_irregular // IHS Average Daily Wage (Irregular Workers)
-
-global    outcome_var_hours ///
-              work_hours_pday_3m_w  /// Winsorized - No. of Hours/Day (Ref. 3 mnths) Market Work
-              work_hours_pweek_3m_w  /// Winsorized - Usual No. of Hours/Week, Market Work, (Ref. 3-month)
-              work_days_pweek_3m  /// Avg. num. of wrk. days per week during 3 mnth.
-              work_hours_pm_informal_w  //  Winsorized - Average worked hour per month for irregular job
-  
-global    globals_list ///
-            outcome_var_job outcome_var_wage outcome_var_hours
-
-global controls ///
-          age  /// Age
-          age2 /// Age square
-          gender ///  Gender - 1 Male 0 Female
-          hhsize //  Total No. of Individuals in the Household
-     *     ln_distance_dis_camp //  LOG Distance (km) between JORD districts and ZAATARI CAMP in 2016
-
-/*SPECIAL TREATMENTS
-          ln_nb_refugees_bygov /// LOG Number of refugees out of camps by governorate in 2016
-          educ1d ///  Education Levels (1-digit)
-          fteducst ///  Father's Level of education attained
-          mteducst ///  Mother's Level of education attained
-          ftempst ///  Father's Employment Status (When Resp. 15)
-
-*/
-
 
 tab educ1d 
 tab fteducst 
@@ -97,33 +41,28 @@ tab hhsize //  Total o. of Individuals in the Household
 **DEFINING THE SAMPLE *************************************************
 ***********************************************************************
 
+
+
 **************
 * JORDANIANS *
 **************
 
-codebook nationality_cl
-lab list Lnationality_cl
-/*
-                        53,094         1  Jordanian
-                         3,003         2  Syrian
-                           623         3  Egyptian
-                         2,551         4  Other Arab
-                           132         5  Other
+tab nationality_cl year 
+drop if nationality_cl != 1
 
-*/
-
-keep if nationality_cl == 1 //Keep only the jordanians
-*keep if nationality_cl != 2 //Keep all but the syrians
 
 ***************
 * WORKING AGE *
 *************** 
 
 *Keep only working age pop? 15-64 ? As defined by the ERF
-tab age year 
-drop if age < 15 & year == 2016
 drop if age > 64 & year == 2016
-tab year 
+drop if age > 60 & year == 2010 //60 in 2010 so 64 in 2016
+
+drop if age < 15 & year == 2016 
+drop if age < 11 & year == 2010 //11 in 2010 so 15 in 2016
+
+*18744
 
 ***************
 * EMPLOYED *
@@ -137,44 +76,19 @@ unconditional on employment, rather than among the employed, changed our
 results; it did not lead to substantive changes (results available from authors on
 request).]*/
 
-tab employed_3m, m
-codebook employed_3m
-*keep if employed_3m == 2 //Analysis on the EMPLOYED
 
-gen flag = 1 if (employed_3m == 2 & year == 2016) //Analysis on the EMPLOYED
-drop if flag != 1 & year == 2016
-drop if mi(employed_3m) 
-drop flag
+*EMPLOYED ONLY (EITHER IN 2010 OR IN 2010)
+drop if miss_16_10 == 1
+drop if unemp_16_10 == 1
+drop if olf_16_10 == 1
+drop if emp_16_miss_10 == 1
+drop if emp_10_miss_16 == 1
+drop if unemp_16_miss_10 == 1
+drop if unemp_10_miss_16 == 1
+drop if olf_16_miss_10 == 1
+drop if olf_10_miss_16 == 1 
 
-**********************************
-* PEOPLE SURVEYED IN BOTH ROUNDS *
-**********************************
 
-*br indid indid_2010 indid_2016 year
-*SAMPLE: SAME INDIVIDUALS WERE SURVEYED IN 2010 AND 2016
-*BUT A FEW WERE NOT (ALL REFUGEE WEREN'T SURVEYED IN 2010)
-*AND A FEW JORDANIANS. I DECDIE TO KEEP ONLY THE PANEL STRUCTURE 
-*FOR FIXED EFFECT AT THE INDIV LEVEL 
-
-*Flag those who were surveyed in both rounds 
-gen surveyed_2_rounds = 1 if !mi(indid_2010) & !mi(indid_2016)
-*Keep only the surveyed in both round
-keep if surveyed_2_rounds == 1 
-
-*Common identifier
-sort indid_2010
-distinct indid_2010 //28316/2 = 14158 while we have 14306: there is an inbalance
-*Even if they have an ID for both few actually did not do one of the round 
-duplicates tag indid_2010, gen(dup)
-bys year: tab dup //(90 in 2010 and 206 in 2016)
-*Dropping those who actually did not the two rounds 
-drop if dup == 0 
-
-drop surveyed_2_rounds dup
-
-*28020 indiv surveyed twice in 2010 and 2020
-mdesc indid_2010
-destring indid_2010, replace 
 
                                   ************
                                   *   PANEL  *
@@ -184,6 +98,7 @@ destring indid_2010, replace
 xtset, clear 
 *xtset year
 xtset indid_2010 year 
+
 
 
                                   ************
@@ -211,7 +126,7 @@ foreach globals of global globals_list {
 
 
             ***********************************************************************
-              ***** M4: YEAR FE / DISTRICT FE / CONTROL NUMBER OF REFUGEE   *****
+              ***** M2: YEAR FE / DISTRICT FE / CONTROL NUMBER OF REFUGEE   *****
             ***********************************************************************
 
 **********************
@@ -262,7 +177,7 @@ foreach globals of global globals_list {
 }
 
 ******************************************************************************************
-  *****    M6:  YEAR FE / DISTRICT FE / SECOTRAL FE / CONTROL NUMBER OF REFUGEE   ******
+  *****    M3:  YEAR FE / DISTRICT FE / SECOTRAL FE / CONTROL NUMBER OF REFUGEE   ******
 ******************************************************************************************
 
 **********************
@@ -313,7 +228,7 @@ foreach globals of global globals_list {
 }
 
           ***********************************************************************
-            *****    M8:  YEAR FE / INDIV FE / CONTROL NUMBER OF REFUGEE    *****
+            *****    M4:  YEAR FE / INDIV FE / CONTROL NUMBER OF REFUGEE    *****
           ***********************************************************************
 
 **********************
@@ -367,7 +282,7 @@ foreach globals of global globals_list {
         qui gen smpl=0
         qui replace smpl=1 if e(sample)==1
         * Then I partial out all variables
-        foreach y in `outcome_l1' $controls $dep_var IHS_IV_SS educ1d fteducst mteducst ftempst ln_nb_refugees_bygov {
+        foreach y in `outcome_l1' $controls $dep_var district_iid IHS_IV_SS educ1d fteducst mteducst ftempst ln_nb_refugees_bygov {
           qui reghdfe `y' [pw=expan_indiv] if smpl==1, absorb(year indid_2010) residuals(`y'_c2wr)
           qui rename `y' o_`y'
           qui rename `y'_c2wr `y'
@@ -377,7 +292,7 @@ foreach globals of global globals_list {
                ($dep_var = IHS_IV_SS) ///
                [pweight = expan_indiv], ///
                cluster(district_iid) robust ///
-               first
+               first 
         estimates table, k($dep_var)  star(.05 .01 .001) 
         qui drop `outcome_l1' $dep_var IHS_IV_SS $controls educ1d fteducst mteducst ftempst smpl ln_nb_refugees_bygov
         foreach y in `outcome_l1' $controls  $dep_var IHS_IV_SS educ1d fteducst mteducst ftempst ln_nb_refugees_bygov  {
@@ -394,42 +309,27 @@ restore
 ************************************************
 
             ***********************************************************************
-              ***** M4: YEAR FE / DISTRICT FE / CONTROL NUMBER OF REFUGEE   *****
+              ***** M2: YEAR FE / DISTRICT FE / CONTROL NUMBER OF REFUGEE   *****
             ***********************************************************************
 
 use "$data_final/06_IV_JLMPS_Construct_Outcomes.dta", clear
 
-keep if nationality_cl == 1
-drop if age < 15 & year == 2016
+tab nationality_cl year 
+drop if nationality_cl != 1
+
 drop if age > 64 & year == 2016
+drop if age > 60 & year == 2010 //60 in 2010 so 64 in 2016
 
-codebook employed_3cat_3m
-drop if employed_3cat_3m == 0 & year == 2016
-drop if mi(employed_3cat_3m)
-tab employed_3cat_3m year, m
-*Flag those who were surveyed in both rounds 
-gen surveyed_2_rounds = 1 if !mi(indid_2010) & !mi(indid_2016)
-*Keep only the surveyed in both round
-keep if surveyed_2_rounds == 1 
+drop if age < 15 & year == 2016 
+drop if age < 11 & year == 2010 //11 in 2010 so 15 in 2016
 
-*Common identifier
-sort indid_2010
-distinct indid_2010 //28316/2 = 14158 while we have 14306: there is an inbalance
-*Even if they have an ID for both few actually did not do one of the round 
-duplicates tag indid_2010, gen(dup)
-bys year: tab dup //(90 in 2010 and 206 in 2016)
-*Dropping those who actually did not the two rounds 
-drop if dup == 0 
-drop surveyed_2_rounds dup
-
-mdesc indid_2010
-destring indid_2010, replace 
-
-* SET THE PANEL STRUCTURE
-xtset, clear 
-*xtset year
-xtset indid_2010 year 
-
+drop if miss_16_10 == 1
+drop if emp_16_miss_10 == 1
+drop if emp_10_miss_16 == 1
+drop if unemp_16_miss_10 == 1
+drop if unemp_10_miss_16 == 1
+drop if olf_16_miss_10 == 1
+drop if olf_10_miss_16 == 1 
 
 **********************
 ********* IV *********
@@ -462,3 +362,96 @@ xtset indid_2010 year
 
 
 log close
+
+************************************************
+//  SUMMARY STATISTICS
+************************************************
+
+use "$data_final/06_IV_JLMPS_Construct_Outcomes.dta", clear
+
+
+preserve
+
+bys year: su work_permit
+bys year: su agg_wp 
+bys year: su IHS_IV_SS
+
+drop if nationality_cl != 1
+drop if age > 64 & year == 2016
+drop if age > 60 & year == 2010 //60 in 2010 so 64 in 2016
+drop if age < 15 & year == 2016 
+drop if age < 11 & year == 2010 //11 in 2010 so 15 in 2016
+
+drop if miss_16_10 == 1
+drop if emp_16_miss_10 == 1
+drop if emp_10_miss_16 == 1
+drop if unemp_16_miss_10 == 1
+drop if unemp_10_miss_16 == 1
+drop if olf_16_miss_10 == 1
+drop if olf_10_miss_16 == 1 
+
+
+
+bys year: su unemployed_3m // From unempsr1m - mrk def, search req; 3m, empl or unemp, OLF is miss
+bys year: su unempdurmth  // Current unemployment duration (in months)
+bys year: su employed_3m  // From uswrkstsr1 - mkt def, search req; 3m, 2 empl - 1 unemp - OLF miss
+
+drop if unemp_16_10 == 1
+drop if olf_16_10 == 1
+
+
+bys year: su job_stability_permanent_3m //  From usstablp - Stability of employement (3m) - 1 permanent - 0 temp, seas, cas
+bys year: su informal  // 1 Informal - 0 Formal - Informal if no contract (uscontrp=0) and no insurance (ussocinsp=0)
+bys year: su wp_industry_jlmps_3m  // Industries with work permits for refugees - Economic Activity of prim. job 3m
+bys year: su member_union_3m // Member of a syndicate/trade union (ref. 3-mnths)
+bys year: su skills_required_pjob //  Does primary job require any skill
+  
+bys year: su real_basic_wage_3m  // IHS Basic Wage (3-month) - CONDITIONAL - UNEMPLOYED & OLF: WAGE MISSING
+bys year: su real_total_wage_3m  // IHS Total Wage (3-month) - CONDITIONAL - UNEMPLOYED & OLF: WAGE MISSING
+bys year: su real_monthly_wage // IHS Monthly Wage (Prim.& Second. Jobs)
+bys year: su real_hourly_wage  // IHS Hourly Wage (Prim.& Second. Jobs)
+
+bys year: su work_hours_pday_3m_w  // Winsorized - No. of Hours/Day (Ref. 3 mnths) Market Work
+bys year: su work_hours_pweek_3m_w  // Winsorized - Usual No. of Hours/Week, Market Work, (Ref. 3-month)
+bys year: su work_days_pweek_3m  // Avg. num. of wrk. days per week during 3 mnth.
+  
+bys year: su age 
+bys year: su gender
+bys year: su hhsize 
+bys year: su distance_dis_camp //  LOG Distance (km) between JORD districts and ZAATARI CAMP in 2016
+bys year: su nb_refugees_bygov // LOG Number of refugees out of camps by governorate in 2016
+bys year: su educ1d //  Education Levels (1-digit)
+bys year: su fteducst //  Father's Level of education attained
+bys year: su mteducst //  Mother's Level of education attained
+bys year: su ftempst //  Father's Employment Status (When Resp. 15)
+
+
+restore
+
+preserve
+
+
+tab nationality_cl year 
+drop if nationality_cl != 1
+drop if age > 64 & year == 2016
+drop if age > 60 & year == 2010 //60 in 2010 so 64 in 2016
+drop if age < 15 & year == 2016 
+drop if age < 11 & year == 2010 //11 in 2010 so 15 in 2016
+drop if miss_16_10 == 1
+drop if emp_16_miss_10 == 1
+drop if emp_10_miss_16 == 1
+drop if unemp_16_miss_10 == 1
+drop if unemp_10_miss_16 == 1
+drop if olf_16_miss_10 == 1
+drop if olf_10_miss_16 == 1 
+
+restore
+
+
+
+
+
+
+
+
+
