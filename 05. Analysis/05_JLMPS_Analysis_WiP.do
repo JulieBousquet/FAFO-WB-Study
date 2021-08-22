@@ -79,8 +79,8 @@ request).]*/
 
 *EMPLOYED ONLY (EITHER IN 2010 OR IN 2010)
 drop if miss_16_10 == 1
-drop if unemp_16_10 == 1
-drop if olf_16_10 == 1
+*drop if unemp_16_10 == 1
+*drop if olf_16_10 == 1
 drop if emp_16_miss_10 == 1
 drop if emp_10_miss_16 == 1
 drop if unemp_16_miss_10 == 1
@@ -120,7 +120,8 @@ foreach globals of global globals_list {
             [pweight = expan_indiv],  ///
             cluster(district_iid) robust 
     codebook `outcome', c
-    estimates table, k($dep_var) star(.05 .01 .001)
+    estimates table, k($dep_var) star(.05 .01 .001) b(%7.4f) 
+    estimates table, b(%7.4f) se(%7.4f) stats(N r2_a) k($dep_var) 
   }
 }
 
@@ -141,7 +142,9 @@ foreach globals of global globals_list {
             [pweight = expan_indiv],  ///
             cluster(district_iid) robust 
     codebook `outcome', c
-    estimates table, k($dep_var) star(.05 .01 .001)
+    estimates table, k($dep_var) star(.05 .01 .001) b(%7.4f) 
+    estimates table, b(%7.4f) se(%7.4f) stats(N r2_a) k($dep_var) 
+
   }
 }
 
@@ -160,7 +163,8 @@ foreach globals of global globals_list {
                 partial(i.district_iid) ///
                 first
     codebook `outcome', c
-    estimates table,  k($dep_var) star(.05 .01 .001) 
+    estimates table, k($dep_var) star(.05 .01 .001) b(%7.4f) 
+    estimates table, b(%7.4f) se(%7.4f) stats(N r2_a) k($dep_var) 
 
     * With equivalent first-stage
     gen smpl=0
@@ -211,7 +215,8 @@ foreach globals of global globals_list {
                 partial(i.district_iid i.crsectrp) ///
                 first
     codebook `outcome', c
-    estimates table, k($dep_var)  star(.05 .01 .001) 
+    estimates table, k($dep_var) star(.05 .01 .001) b(%7.4f) 
+    estimates table, b(%7.4f) se(%7.4f) stats(N r2_a) k($dep_var) 
 
     * With equivalent first-stage
     gen smpl=0
@@ -282,7 +287,7 @@ foreach globals of global globals_list {
         qui gen smpl=0
         qui replace smpl=1 if e(sample)==1
         * Then I partial out all variables
-        foreach y in `outcome_l1' $controls $dep_var district_iid IHS_IV_SS educ1d fteducst mteducst ftempst ln_nb_refugees_bygov {
+        foreach y in `outcome_l1' $controls $dep_var IHS_IV_SS educ1d fteducst mteducst ftempst ln_nb_refugees_bygov {
           qui reghdfe `y' [pw=expan_indiv] if smpl==1, absorb(year indid_2010) residuals(`y'_c2wr)
           qui rename `y' o_`y'
           qui rename `y'_c2wr `y'
@@ -293,7 +298,8 @@ foreach globals of global globals_list {
                [pweight = expan_indiv], ///
                cluster(district_iid) robust ///
                first 
-        estimates table, k($dep_var)  star(.05 .01 .001) 
+      estimates table, k($dep_var) star(.05 .01 .001) b(%7.4f) 
+      estimates table, b(%7.4f) se(%7.4f) stats(N r2_a) k($dep_var) 
         qui drop `outcome_l1' $dep_var IHS_IV_SS $controls educ1d fteducst mteducst ftempst smpl ln_nb_refugees_bygov
         foreach y in `outcome_l1' $controls  $dep_var IHS_IV_SS educ1d fteducst mteducst ftempst ln_nb_refugees_bygov  {
           qui rename o_`y' `y' 
@@ -301,6 +307,24 @@ foreach globals of global globals_list {
     }
   }
 restore                
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -324,12 +348,52 @@ drop if age < 15 & year == 2016
 drop if age < 11 & year == 2010 //11 in 2010 so 15 in 2016
 
 drop if miss_16_10 == 1
-drop if emp_16_miss_10 == 1
-drop if emp_10_miss_16 == 1
-drop if unemp_16_miss_10 == 1
-drop if unemp_10_miss_16 == 1
-drop if olf_16_miss_10 == 1
-drop if olf_10_miss_16 == 1 
+*drop if emp_16_miss_10 == 1
+*drop if emp_10_miss_16 == 1
+*drop if unemp_16_miss_10 == 1
+*drop if unemp_10_miss_16 == 1
+*drop if olf_16_miss_10 == 1
+*drop if olf_10_miss_16 == 1 
+
+
+              ***************************************************
+                *****         M1: SIMPLE OLS:           *******
+              ***************************************************
+
+**********************
+********* OLS ********
+**********************
+
+  foreach outcome of global outcome_var_empl {
+    qui xi: reg `outcome' $dep_var ///
+             $controls i.educ1d i.fteducst i.mteducst i.ftempst ln_nb_refugees_bygov ///
+            [pweight = expan_indiv],  ///
+            cluster(district_iid) robust 
+    codebook `outcome', c
+    estimates table, k($dep_var) star(.05 .01 .001) b(%7.4f) 
+    estimates table, b(%7.4f) se(%7.4f) stats(N r2_a) k($dep_var) 
+  }
+
+
+            ***********************************************************************
+              ***** M2: YEAR FE / DISTRICT FE / CONTROL NUMBER OF REFUGEE   *****
+            ***********************************************************************
+
+**********************
+********* OLS ********
+**********************
+
+  foreach outcome of global outcome_var_empl {
+    qui xi: reg `outcome' $dep_var ///
+            i.district_iid i.year ///
+             $controls i.educ1d i.fteducst i.mteducst i.ftempst ln_nb_refugees_bygov ///
+            [pweight = expan_indiv],  ///
+            cluster(district_iid) robust 
+    codebook `outcome', c
+    estimates table, k($dep_var) star(.05 .01 .001) b(%7.4f) 
+    estimates table, b(%7.4f) se(%7.4f) stats(N r2_a) k($dep_var) 
+
+  }
 
 **********************
 ********* IV *********
@@ -345,7 +409,8 @@ drop if olf_10_miss_16 == 1
                 partial(i.district_iid) ///
                 first
     codebook `outcome', c
-    estimates table,  k($dep_var) star(.05 .01 .001) 
+    estimates table, k($dep_var) star(.05 .01 .001) b(%7.4f) 
+    estimates table, b(%7.4f) se(%7.4f) stats(N r2_a) k($dep_var) 
 
     * With equivalent first-stage
     gen smpl=0
@@ -359,6 +424,83 @@ drop if olf_10_miss_16 == 1
     estimates table, k(IHS_IV_SS) star(.05 .01 .001)           
     drop smpl 
   }
+
+
+******************************************************************************************
+  *****    M3:  YEAR FE / DISTRICT FE / SECOTRAL FE / CONTROL NUMBER OF REFUGEE   ******
+******************************************************************************************
+
+**********************
+********* IV *********
+**********************
+
+  foreach outcome of global outcome_var_empl {
+    qui xi: ivreg2  `outcome' ///
+                i.year i.district_iid i.crsectrp ///
+                $controls i.educ1d i.fteducst i.mteducst i.ftempst ln_nb_refugees_bygov ///
+                ($dep_var = IHS_IV_SS) ///
+                [pweight = expan_indiv], ///
+                cluster(district_iid) ///
+                partial(i.district_iid i.crsectrp) ///
+                first
+    codebook `outcome', c
+    estimates table, k($dep_var) star(.05 .01 .001) b(%7.4f) 
+    estimates table, b(%7.4f) se(%7.4f) stats(N r2_a) k($dep_var) 
+
+    * With equivalent first-stage
+    gen smpl=0
+    replace smpl=1 if e(sample)==1
+
+    qui xi: reg $dep_var IHS_IV_SS ///
+            i.year i.district_iid i.crsectrp ///
+            $controls i.educ1d i.fteducst i.mteducst i.ftempst ln_nb_refugees_bygov ///
+            if smpl == 1 [pweight = expan_indiv], ///
+            cluster(district_iid) robust
+    estimates table,  k(IHS_IV_SS) star(.05 .01 .001)           
+    drop smpl 
+  }
+
+          ***********************************************************************
+            *****    M4:  YEAR FE / INDIV FE / CONTROL NUMBER OF REFUGEE    *****
+          ***********************************************************************
+
+**********************
+********* IV *********
+**********************
+
+preserve
+  foreach outcome_l1 of global outcome_var_empl  {     
+      codebook `outcome_l1', c
+      qui xi: ivreg2 `outcome_l1' ///
+                    i.year i.district_iid ///
+                    $controls i.educ1d i.fteducst i.mteducst i.ftempst ln_nb_refugees_bygov ///
+                    ($dep_var = IHS_IV_SS) ///
+                    [pweight = expan_indiv], ///
+                    cluster(district_iid) robust ///
+                    partial(i.district_iid) 
+
+        qui gen smpl=0
+        qui replace smpl=1 if e(sample)==1
+        * Then I partial out all variables
+        foreach y in `outcome_l1' $controls $dep_var IHS_IV_SS educ1d fteducst mteducst ftempst ln_nb_refugees_bygov {
+          qui reghdfe `y' [pw=expan_indiv] if smpl==1, absorb(year indid_2010) residuals(`y'_c2wr)
+          qui rename `y' o_`y'
+          qui rename `y'_c2wr `y'
+        }
+        qui ivreg2 `outcome_l1' ///
+               $controls educ1d fteducst mteducst ftempst ln_nb_refugees_bygov ///
+               ($dep_var = IHS_IV_SS) ///
+               [pweight = expan_indiv], ///
+               cluster(district_iid) robust ///
+               first 
+      estimates table, k($dep_var) star(.05 .01 .001) b(%7.4f) 
+      estimates table, b(%7.4f) se(%7.4f) stats(N r2_a) k($dep_var) 
+        qui drop `outcome_l1' $dep_var IHS_IV_SS $controls educ1d fteducst mteducst ftempst smpl ln_nb_refugees_bygov
+        foreach y in `outcome_l1' $controls  $dep_var IHS_IV_SS educ1d fteducst mteducst ftempst ln_nb_refugees_bygov  {
+          qui rename o_`y' `y' 
+        }
+    }
+restore                
 
 
 log close
@@ -383,14 +525,12 @@ drop if age < 15 & year == 2016
 drop if age < 11 & year == 2010 //11 in 2010 so 15 in 2016
 
 drop if miss_16_10 == 1
-drop if emp_16_miss_10 == 1
-drop if emp_10_miss_16 == 1
-drop if unemp_16_miss_10 == 1
-drop if unemp_10_miss_16 == 1
-drop if olf_16_miss_10 == 1
-drop if olf_10_miss_16 == 1 
-
-
+*drop if emp_16_miss_10 == 1
+*drop if emp_10_miss_16 == 1
+*drop if unemp_16_miss_10 == 1
+*drop if unemp_10_miss_16 == 1
+*drop if olf_16_miss_10 == 1
+*drop if olf_10_miss_16 == 1 
 
 bys year: su unemployed_3m // From unempsr1m - mrk def, search req; 3m, empl or unemp, OLF is miss
 bys year: su unempdurmth  // Current unemployment duration (in months)

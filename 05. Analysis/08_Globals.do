@@ -23,9 +23,6 @@ set mem 100m
                               *  GLOBALS *
                               ************
 
-      lab var IHS_basic_rwage_uncond_unolf "UNCONDITIONAL - UNEMPLOYED & OLF: WAGE 0 - IHS - Basic Wage (3-month)"
-      lab var IHS_basic_rwage_uncond_unemp "UNCONDITIONAL - UNEMPLOYED WAGE 0 / OLF WAGE MISSING - IHS Basic (3m)"
-
 global    dep_var   agg_wp 
 *global    dep_var   share_wp_100
 *global    dep_var   agg_wp_orig

@@ -300,7 +300,7 @@ keep age indid_2010 year
 reshape wide age, i(indid_2010) j(year)
 format indid_2010 %12.0g
 
-br indid_2010 age2016 age2010
+*br indid_2010 age2016 age2010
 
 sort indid_2010
 mdesc age2016 
@@ -386,7 +386,11 @@ tab distance_dis_camp, m
 lab var distance_dis_camp "[CTRL] Distance (km) between JORD districts and ZAATARI CAMP in 2016"
 replace distance_dis_camp = 0 if year == 2010
 
-gen ln_distance_dis_camp = log(1 + distance_dis_camp) 
+gen inv_dist_camp = 1/distance_dis_camp
+replace inv_dist_camp = 0 if year == 2010
+gen ln_distance_dis_camp = log(1 + inv_dist_camp) 
+
+*gen ln_distance_dis_camp = log(1 + distance_dis_camp) 
 *if year == 2016
 *replace ln_distance_dis_camp = 0 if year == 2010
 lab var ln_distance_dis_camp "[CTRL] LOG Distance (km) between JORD districts and ZAATARI CAMP in 2016"
@@ -718,7 +722,7 @@ reshape wide employed_3m, i(indid_2010) j(year)
 format indid_2010 %12.0g
 
 
-br indid_2010 employed_3m2016 employed_3m2010
+*br indid_2010 employed_3m2016 employed_3m2010
 
 *MISS 2016 - MISS 2010
 gen miss_16_10 = 1 if mi(employed_3m2016) & mi(employed_3m2010)
@@ -1016,6 +1020,12 @@ ren basicwg3 basic_wage_3m
       tab IHS_basic_rwage_uncond_unemp
       lab var IHS_basic_rwage_uncond_unemp "UNCONDITIONAL - UNEMPLOYED WAGE 0 / OLF WAGE MISSING - IHS Basic (3m)"
 
+tab IHS_basic_rwage_uncond_unemp employed_3cat_3m, m 
+tab IHS_basic_rwage_uncond_unolf employed_3cat_3m, m 
+
+su IHS_basic_rwage_uncond_unemp  
+su IHS_basic_rwage_uncond_unolf 
+
 *Bonuses and incentives (3-month)
 tab bonuses3, m 
 *Overtime Wage (3-month)
@@ -1045,13 +1055,13 @@ tab total_wage_3m
       lab var IHS_total_rwage_3m "IHS Total Wage (3-month) - CONDITIONAL - UNEMPLOYED & OLF: WAGE MISSING"
 
       *Unconditional wage: IF UNEMPLOYED & OLF: WAGE IS 0
-      gen IHS_total_rwage_uncond_unolf = IHS_basic_rwage_3m if employed_3cat_3m == 2
+      gen IHS_total_rwage_uncond_unolf = IHS_total_rwage_3m if employed_3cat_3m == 2
       replace IHS_total_rwage_uncond_unolf = 0 if employed_3cat_3m  == 1 | employed_3cat_3m  == 0 
       tab IHS_total_rwage_uncond_unolf
       lab var IHS_total_rwage_uncond_unolf "UNCONDITIONAL - UNEMPLOYED & OLF: WAGE 0 - IHS - Total Wage (3-month)"
 
       *Unconditional wage: IF UNEMPLOYED : WAGE IS 0 / IF OLF: WAGE IS MISSING
-      gen IHS_total_rwage_uncond_unemp = IHS_basic_rwage_3m if employed_3cat_3m == 2
+      gen IHS_total_rwage_uncond_unemp = IHS_total_rwage_3m if employed_3cat_3m == 2
       replace IHS_total_rwage_uncond_unemp = 0 if employed_3cat_3m == 1 //UNEMP
       replace IHS_total_rwage_uncond_unemp = . if employed_3cat_3m == 0 //OLF
       tab IHS_total_rwage_uncond_unemp
