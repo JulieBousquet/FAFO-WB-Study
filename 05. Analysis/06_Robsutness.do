@@ -117,37 +117,39 @@ xi: ivreg2 ln_wage i.year i.district_iid i.crsectrp i.educ1d i.fteducst i.mteduc
 ********* IV *********
 **********************
 
+
+
 foreach globals of global globals_list {
   foreach outcome of global `globals' {
     qui xi: ivreg2  `outcome' ///
                 i.year i.district_iid ///
                 $controls i.educ1d i.fteducst i.mteducst i.ftempst  ///
-                ($dep_var ln_nb_refugees_bygov = IHS_IV_SS ln_distance_dis_camp) ///
+                ($dep_var IHS_nb_refugees_bygov = IHS_IV_SS IHS_IV_SS_ref_inflow) ///
                 [pweight = expan_indiv], ///
                 cluster(district_iid) robust ///
                 partial(i.district_iid) ///
                 first
     codebook `outcome', c
-    estimates table, k($dep_var ln_nb_refugees_bygov) star(.05 .01 .001) b(%7.4f) 
-    estimates table, b(%7.4f) se(%7.4f) stats(N r2_a) k($dep_var ln_nb_refugees_bygov) 
+    estimates table, k($dep_var IHS_nb_refugees_bygov) star(.1 .05 .01) b(%7.4f) 
+    estimates table, b(%7.4f) se(%7.4f) stats(N r2_a) k($dep_var IHS_nb_refugees_bygov) 
 
     * With equivalent first-stage
     gen smpl=0
     replace smpl=1 if e(sample)==1
 
     qui xi: reg $dep_var IHS_IV_SS ///
-            i.year i.district_iid i.crsectrp ///
+            i.year i.district_iid  ///
             $controls i.educ1d i.fteducst i.mteducst i.ftempst  ///
             if smpl == 1 [pweight = expan_indiv], ///
             cluster(district_iid) robust
-    estimates table,  k(IHS_IV_SS ) star(.05 .01 .001)   
+    estimates table,  k(IHS_IV_SS ) star(.1 .05 .01)  
 
-    qui xi: reg ln_nb_refugees_bygov ln_distance_dis_camp ///
-            i.year i.district_iid i.crsectrp ///
+    qui xi: reg IHS_nb_refugees_bygov IHS_IV_SS_ref_inflow ///
+            i.year i.district_iid  ///
             $controls i.educ1d i.fteducst i.mteducst i.ftempst  ///
             if smpl == 1 [pweight = expan_indiv], ///
             cluster(district_iid) robust
-    estimates table,  k(ln_distance_dis_camp) star(.05 .01 .001)           
+    estimates table,  k(IHS_IV_SS_ref_inflow) star(.1 .05 .01)           
     drop smpl 
 
 	}
@@ -164,34 +166,34 @@ foreach globals of global globals_list {
 foreach globals of global globals_list {
   foreach outcome of global `globals' {
     qui xi: ivreg2  `outcome' ///
-                i.year i.district_iid i.crsectrp ///
+                i.year i.district_iid i.sector_3m ///
                 $controls i.educ1d i.fteducst i.mteducst i.ftempst  ///
-                ($dep_var ln_nb_refugees_bygov = IHS_IV_SS ln_distance_dis_camp) ///
+                ($dep_var IHS_nb_refugees_bygov = IHS_IV_SS IHS_IV_SS_ref_inflow) ///
                 [pweight = expan_indiv], ///
                 cluster(district_iid) ///
-                partial(i.district_iid i.crsectrp) ///
+                partial(i.district_iid i.sector_3m) ///
                 first
     codebook `outcome', c
-    estimates table, k($dep_var ln_nb_refugees_bygov) star(.05 .01 .001) b(%7.4f) 
-    estimates table, b(%7.4f) se(%7.4f) stats(N r2_a) k($dep_var ln_nb_refugees_bygov)
+    estimates table, k($dep_var IHS_nb_refugees_bygov) star(.05 .01 .001) b(%7.4f) 
+    estimates table, b(%7.4f) se(%7.4f) stats(N r2_a) k($dep_var IHS_nb_refugees_bygov)
     
     * With equivalent first-stage
     gen smpl=0
     replace smpl=1 if e(sample)==1
 
     qui xi: reg $dep_var IHS_IV_SS ///
-            i.year i.district_iid i.crsectrp ///
+            i.year i.district_iid i.sector_3m ///
             $controls i.educ1d i.fteducst i.mteducst i.ftempst ///
             if smpl == 1 [pweight = expan_indiv], ///
             cluster(district_iid) robust
-    estimates table,  k(IHS_IV_SS) star(.05 .01 .001)     
+    estimates table,  k(IHS_IV_SS) star(.1 .05 .01) 
 
-    qui xi: reg ln_nb_refugees_bygov ln_distance_dis_camp ///
-            i.year i.district_iid i.crsectrp ///
+    qui xi: reg IHS_nb_refugees_bygov IHS_IV_SS_ref_inflow ///
+            i.year i.district_iid i.sector_3m ///
             $controls i.educ1d i.fteducst i.mteducst i.ftempst ///
             if smpl == 1 [pweight = expan_indiv], ///
             cluster(district_iid) robust
-    estimates table,  k(ln_distance_dis_camp) star(.05 .01 .001)     
+    estimates table,  k(IHS_IV_SS_ref_inflow) star(.1 .05 .01)     
 
     drop smpl 
     } 
@@ -212,7 +214,7 @@ foreach globals of global globals_list {
       qui xi: ivreg2 `outcome_l1' ///
                     i.year i.district_iid ///
                     $controls i.educ1d i.fteducst i.mteducst i.ftempst  ///
-                	($dep_var ln_nb_refugees_bygov = IHS_IV_SS ln_distance_dis_camp) ///
+                	($dep_var IHS_nb_refugees_bygov = IHS_IV_SS IHS_IV_SS_ref_inflow) ///
                     [pweight = expan_indiv], ///
                     cluster(district_iid) robust ///
                     partial(i.district_iid) 
@@ -220,21 +222,21 @@ foreach globals of global globals_list {
         qui gen smpl=0
         qui replace smpl=1 if e(sample)==1
         * Then I partial out all variables
-        foreach y in `outcome_l1' $controls $dep_var IHS_IV_SS educ1d fteducst mteducst ftempst ln_nb_refugees_bygov ln_distance_dis_camp {
+        foreach y in `outcome_l1' $controls $dep_var IHS_IV_SS educ1d fteducst mteducst ftempst IHS_nb_refugees_bygov IHS_IV_SS_ref_inflow {
           qui reghdfe `y' [pw=expan_indiv] if smpl==1, absorb(year indid_2010) residuals(`y'_c2wr)
           qui rename `y' o_`y'
           qui rename `y'_c2wr `y'
         }
         qui ivreg2 `outcome_l1' ///
                $controls educ1d fteducst mteducst ftempst ///
-               ($dep_var ln_nb_refugees_bygov = IHS_IV_SS ln_distance_dis_camp) ///
+               ($dep_var IHS_nb_refugees_bygov = IHS_IV_SS IHS_IV_SS_ref_inflow) ///
                [pweight = expan_indiv], ///
                cluster(district_iid) robust ///
                first 
-      estimates table, k($dep_var) star(.05 .01 .001) b(%7.4f) 
+      estimates table, k($dep_var) star(.1 .05 .01) b(%7.4f) 
       estimates table, b(%7.4f) se(%7.4f) stats(N r2_a) k($dep_var) 
-        qui drop `outcome_l1' $dep_var IHS_IV_SS $controls educ1d fteducst mteducst ftempst smpl ln_nb_refugees_bygov ln_distance_dis_camp
-        foreach y in `outcome_l1' $controls  $dep_var IHS_IV_SS educ1d fteducst mteducst ftempst ln_nb_refugees_bygov ln_distance_dis_camp {
+        qui drop `outcome_l1' $dep_var IHS_IV_SS $controls educ1d fteducst mteducst ftempst smpl IHS_nb_refugees_bygov IHS_IV_SS_ref_inflow
+        foreach y in `outcome_l1' $controls  $dep_var IHS_IV_SS educ1d fteducst mteducst ftempst IHS_nb_refugees_bygov IHS_IV_SS_ref_inflow {
           qui rename o_`y' `y' 
         }
     }

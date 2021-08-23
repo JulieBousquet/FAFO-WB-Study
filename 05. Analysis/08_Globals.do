@@ -37,7 +37,7 @@ global    outcome_var_empl ///
               IHS_total_rwage_uncond_unemp //UNCONDITIONAL - UNEMPLOYED WAGE 0 / OLF WAGE MISSING - IHS Total (3m)
 
 global    outcome_var_job ///
-              job_stability_permanent_3m ///  From usstablp - Stability of employement (3m) - 1 permanent - 0 temp, seas, cas
+              job_stable_3m ///  From usstablp - Stability of employement (3m) - 1 permanent - 0 temp, seas, cas
               informal  /// 1 Informal - 0 Formal - Informal if no contract (uscontrp=0) and no insurance (ussocinsp=0)
               wp_industry_jlmps_3m  /// Industries with work permits for refugees - Economic Activity of prim. job 3m
               member_union_3m /// Member of a syndicate/trade union (ref. 3-mnths)

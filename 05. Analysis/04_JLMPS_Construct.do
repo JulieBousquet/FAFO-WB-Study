@@ -395,6 +395,27 @@ gen ln_distance_dis_camp = log(1 + inv_dist_camp)
 *replace ln_distance_dis_camp = 0 if year == 2010
 lab var ln_distance_dis_camp "[CTRL] LOG Distance (km) between JORD districts and ZAATARI CAMP in 2016"
 
+gen tot_nb_ref_2016 = 514274 if year == 2016
+lab var tot_nb_ref_2016 "Number of Syrian refugee in Jordan in 2016"
+
+
+gen IV_SS_ref_inflow = nb_refugees_bygov*inv_dist_camp
+replace IV_SS_ref_inflow = 0 if mi(IV_SS_ref_inflow)
+lab var IV_SS_ref_inflow "SSIV for refugee inflow: tot_nb_ref_2016 x inv_dist_camp"
+
+*THE INSTRUMENT 
+tab IV_SS_ref_inflow, m 
+
+*THE INSTRUMENT + TRANSFORMATION
+gen log_IV_SS_ref_inflow = log(1 + IV_SS_ref_inflow)
+lab var log_IV_SS_ref_inflow "LOG - SSIV for refugee inflow: tot_nb_ref_2016 x inv_dist_camp"
+
+gen IHS_IV_SS_ref_inflow = log(IV_SS_ref_inflow + ((IV_SS_ref_inflow^2 + 1)^0.5))
+lab var IHS_IV_SS_ref_inflow "IHS - SSIV for refugee inflow: tot_nb_ref_2016 x inv_dist_camp"
+
+gen IHS_nb_refugees_bygov = log(nb_refugees_bygov + ((nb_refugees_bygov^2 + 1)^0.5))
+lab var IHS_nb_refugees_bygov "IHS - Number of refugees out of camps by governorate in 2016"
+
 ************
 ** GENDER **
 ************
@@ -597,10 +618,10 @@ lab var employed_olf_3m "From uswrkstsr1 - mkt def, search req; 3m, 2 empl - 1 u
 *Job stability in prim. job (ref. 3-mnths)
 tab usstablp, m 
 codebook usstablp
-gen job_stability_permanent_3m = 1 if usstablp == 1 
-replace job_stability_permanent_3m = 0 if usstablp != 1 & !mi(usstablp)
-lab var job_stability_permanent_3m "From usstablp - Stability of employement (3m) - 1 permanent - 0 temp, seas, cas"
-tab job_stability_permanent_3m, m
+gen job_stable_3m = 1 if usstablp == 1 
+replace job_stable_3m = 0 if usstablp != 1 & !mi(usstablp)
+lab var job_stable_3m "From usstablp - Stability of employement (3m) - 1 permanent - 0 temp, seas, cas"
+tab job_stable_3m, m
 
 
 
@@ -673,6 +694,23 @@ tab crinstsec, m
 tab usempstp, m 
 *Economic sector of prim. job (ref. 3-mnths)
 tab ussectrp, m 
+
+codebook ussectrp
+gen sector_3m = 1 if ussectrp == 1 | ///Government
+                     ussectrp == 2 //Public
+replace sector_3m = 2 if   ussectrp == 3 | ///Private
+                           ussectrp == 5 //International
+tab job1_05 if ussectrp == 4
+replace sector_3m = 1 if ussectrp == 4 & job1_05 == 1 //Other => Gov
+replace sector_3m = 2 if ussectrp == 4 & job1_05 == 3 //Other => Private
+lab def sector_3m 1 "Public" 2 "Private", modify
+lab val sector_3m sector_3m
+lab var sector_3m "Economic Sector of Primary Job 3m - 1 Public 2 Private"
+
+tab usecac2d if ussectrp == 4
+codebook usecac2d
+
+
 
 *Wrk in establish. in primary job (ref. 3-mnths)
 tab usestblp, m 

@@ -127,7 +127,7 @@ foreach globals of global globals_list {
        partial(i.district_iid) ///
        first
     codebook `outcome', c
-    estimates table,  k(wp_industry_jlmps_3m#c.$dep_var) star(.05 .01 .001) b(%7.4f)
+    estimates table,  k(wp_industry_jlmps_3m#c.$dep_var) star(.1 .05 .01) b(%7.4f)
     estimates table, b(%7.4f) se(%7.4f) stats(N r2_a) k(wp_industry_jlmps_3m#c.$dep_var) 
     drop cons
   } 
@@ -163,7 +163,7 @@ drop if miss_16_10 == 1
        partial(i.district_iid) ///
        first
     codebook `outcome', c
-    estimates table,  k(wp_industry_jlmps_3m#c.$dep_var) star(.05 .01 .001) b(%7.4f)
+    estimates table,  k(wp_industry_jlmps_3m#c.$dep_var) star(.1 .05 .01) b(%7.4f)
     estimates table, b(%7.4f) se(%7.4f) stats(N r2_a) k(wp_industry_jlmps_3m#c.$dep_var) 
     drop cons
   } 
@@ -193,7 +193,7 @@ foreach globals of global globals_list {
        partial(i.district_iid) ///
        first
     codebook `outcome', c
-    estimates table,  k(gender#c.$dep_var) star(.05 .01 .001) b(%7.4f)
+    estimates table,  k(gender#c.$dep_var) star(.1 .05 .01) b(%7.4f)
     estimates table, b(%7.4f) se(%7.4f) stats(N r2_a) k(gender#c.$dep_var) 
     drop cons
   } 
@@ -230,7 +230,7 @@ drop if miss_16_10 == 1
        partial(i.district_iid) ///
        first
     codebook `outcome', c
-    estimates table,  k(gender#c.$dep_var) star(.05 .01 .001) b(%7.4f)
+    estimates table,  k(gender#c.$dep_var) star(.1 .05 .01) b(%7.4f)
     estimates table, b(%7.4f) se(%7.4f) stats(N r2_a) k(gender#c.$dep_var) 
     drop cons
   } 
@@ -261,7 +261,7 @@ foreach globals of global globals_list {
        partial(i.district_iid) ///
        first
     codebook `outcome', c
-    estimates table,  k(bi_education#c.$dep_var) star(.05 .01 .001) b(%7.4f)
+    estimates table,  k(bi_education#c.$dep_var) star(.1 .05 .01) b(%7.4f)
     estimates table, b(%7.4f) se(%7.4f) stats(N r2_a) k(bi_education#c.$dep_var) 
     drop cons
   } 
@@ -298,7 +298,7 @@ drop if miss_16_10 == 1
        partial(i.district_iid) ///
        first
     codebook `outcome', c
-    estimates table,  k(bi_education#c.$dep_var) star(.05 .01 .001) b(%7.4f)
+    estimates table,  k(bi_education#c.$dep_var) star(.1 .05 .01) b(%7.4f)
     estimates table, b(%7.4f) se(%7.4f) stats(N r2_a) k(bi_education#c.$dep_var) 
     drop cons
   } 

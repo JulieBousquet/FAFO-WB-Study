@@ -79,8 +79,8 @@ request).]*/
 
 *EMPLOYED ONLY (EITHER IN 2010 OR IN 2010)
 drop if miss_16_10 == 1
-*drop if unemp_16_10 == 1
-*drop if olf_16_10 == 1
+drop if unemp_16_10 == 1
+drop if olf_16_10 == 1
 drop if emp_16_miss_10 == 1
 drop if emp_10_miss_16 == 1
 drop if unemp_16_miss_10 == 1
@@ -109,6 +109,9 @@ xtset indid_2010 year
                 *****         M1: SIMPLE OLS:           *******
               ***************************************************
 
+codebook agg_wp
+lab var agg_wp "Work Permits"
+
 **********************
 ********* OLS ********
 **********************
@@ -120,10 +123,55 @@ foreach globals of global globals_list {
             [pweight = expan_indiv],  ///
             cluster(district_iid) robust 
     codebook `outcome', c
-    estimates table, k($dep_var) star(.05 .01 .001) b(%7.4f) 
+    estimates table, k($dep_var) star(.1 .05 .01) b(%7.4f) 
     estimates table, b(%7.4f) se(%7.4f) stats(N r2_a) k($dep_var) 
+    estimates store m_`outcome', title(Model `outcome')
   }
 }
+
+ereturn list
+mat list e(b)
+estout m_job_stable_3m m_informal m_wp_industry_jlmps_3m ///
+      m_member_union_3m m_skills_required_pjob  ///
+      m_IHS_total_rwage_3m  m_IHS_hourly_rwage ///
+       m_work_hours_pweek_3m_w m_work_days_pweek_3m /// 
+      , cells(b(star fmt(3)) se(par fmt(2))) ///
+        drop(age age2 gender hhsize _Ieduc1d_2 _Ieduc1d_3 _Ieduc1d_4 _Ieduc1d_5 ///
+        _Ieduc1d_6 _Ieduc1d_7 _Ifteducst_2 ///
+        _Ifteducst_3 _Ifteducst_4 _Ifteducst_5 _Ifteducst_6 ///
+        _Imteducst_2 _Imteducst_3 _Imteducst_4 _Imteducst_5 ///
+        _Imteducst_6 _Iftempst_2 _Iftempst_3 _Iftempst_4 _Iftempst_5 ///
+        _Iftempst_6 ln_nb_refugees_bygov _cons $controls)   ///
+   legend label varlabels(_cons constant) starlevels(* 0.1 ** 0.05 *** 0.01)  ///
+   stats(r2 df_r bic, fmt(3 0 1) label(R-sqr dfres BIC))
+
+*** (**) [*] indicates significance at the 99%
+*(95%) [90%] level. Based
+
+*erase "$out/reg_infra_access.tex"
+esttab m_job_stable_3m m_informal m_wp_industry_jlmps_3m ///
+      m_member_union_3m m_skills_required_pjob  ///
+      m_IHS_total_rwage_3m  m_IHS_hourly_rwage ///
+      m_work_hours_pweek_3m_w  m_work_days_pweek_3m /// 
+       using "$out_JLMPS/reg_01_OLS.tex", se label replace booktabs ///
+mtitles("Stable" "Informal" "Industry" "Union" "Skills" "Total W" "Hourly W" "WH pweek" "WD pweek") ///
+        drop(age age2 gender hhsize _Ieduc1d_2 _Ieduc1d_3 _Ieduc1d_4 _Ieduc1d_5 ///
+        _Ieduc1d_6 _Ieduc1d_7 _Ifteducst_2 ///
+        _Ifteducst_3 _Ifteducst_4 _Ifteducst_5 _Ifteducst_6 ///
+        _Imteducst_2 _Imteducst_3 _Imteducst_4 _Imteducst_5 ///
+        _Imteducst_6 _Iftempst_2 _Iftempst_3 _Iftempst_4 _Iftempst_5 ///
+        _Iftempst_6 ln_nb_refugees_bygov _cons $controls)   ///
+starlevels(* 0.1 ** 0.05 *** 0.01) ///
+   title("Results OLS Regression"\label{tab1}) nofloat ///
+   stats(N r2_a ctrl_mean, labels("Obs" "Adj. R-Squared" "Control Mean")) ///
+    nonotes ///
+    addnotes("Standard errors clustered at the district level. Significance levels: *p $<$ 0.1, ** p $<$ 0.05, *** p $<$ 0.01") 
+
+estimates drop m_job_stable_3m m_informal m_wp_industry_jlmps_3m ///
+      m_member_union_3m m_skills_required_pjob  ///
+      m_IHS_total_rwage_3m  m_IHS_hourly_rwage ///
+       m_work_hours_pweek_3m_w m_work_days_pweek_3m 
+
 
 
             ***********************************************************************
@@ -142,11 +190,84 @@ foreach globals of global globals_list {
             [pweight = expan_indiv],  ///
             cluster(district_iid) robust 
     codebook `outcome', c
-    estimates table, k($dep_var) star(.05 .01 .001) b(%7.4f) 
+    estimates table, k($dep_var) star(.1 .05 .01) b(%7.4f) 
     estimates table, b(%7.4f) se(%7.4f) stats(N r2_a) k($dep_var) 
-
+    estimates store m_`outcome', title(Model `outcome')
   }
 }
+
+
+ereturn list
+mat list e(b)
+estout m_job_stable_3m m_informal m_wp_industry_jlmps_3m ///
+      m_member_union_3m m_skills_required_pjob  ///
+      m_IHS_total_rwage_3m  m_IHS_hourly_rwage ///
+       m_work_hours_pweek_3m_w m_work_days_pweek_3m /// 
+      , cells(b(star fmt(3)) se(par fmt(2))) ///
+        drop(age age2 gender hhsize _Ieduc1d_2 _Ieduc1d_3 _Ieduc1d_4 _Ieduc1d_5 ///
+        _Ieduc1d_6 _Ieduc1d_7 _Ifteducst_2 ///
+        _Ifteducst_3 _Ifteducst_4 _Ifteducst_5 _Ifteducst_6 ///
+        _Imteducst_2 _Imteducst_3 _Imteducst_4 _Imteducst_5 ///
+        _Imteducst_6 _Iftempst_2 _Iftempst_3 _Iftempst_4 _Iftempst_5 ///
+        _Iftempst_6 ln_nb_refugees_bygov _Iyear_2016 ///
+        _Idistrict__2 _Idistrict__3 ///
+        _Idistrict__4 _Idistrict__5 _Idistrict__6 _Idistrict__7 ///
+        _Idistrict__8 _Idistrict__9 _Idistrict__10 _Idistrict__11 ///
+        _Idistrict__12 _Idistrict__13 _Idistrict__14 _Idistrict__15 ///
+        _Idistrict__16 _Idistrict__17 _Idistrict__18 _Idistrict__19 ///
+        _Idistrict__20 _Idistrict__21 _Idistrict__22 _Idistrict__23 ///
+        _Idistrict__24  _Idistrict__26 _Idistrict__27 ///
+        _Idistrict__28 _Idistrict__29 _Idistrict__30 _Idistrict__31 ///
+        _Idistrict__32 _Idistrict__33 _Idistrict__34 _Idistrict__35 ///
+        _Idistrict__36 _Idistrict__37 _Idistrict__38 _Idistrict__39 ///
+        _Idistrict__40 _Idistrict__41 _Idistrict__42 _Idistrict__43 ///
+        _Idistrict__44 _Idistrict__45 _Idistrict__46 _Idistrict__47 ///
+        _Idistrict__48 _Idistrict__49 _Idistrict__50 _Idistrict__51 ///
+        _cons $controls)   ///
+   legend label varlabels(_cons constant) starlevels(* 0.1 ** 0.05 *** 0.01)  ///
+   stats(r2 df_r bic, fmt(3 0 1) label(R-sqr dfres BIC))
+
+*** (**) [*] indicates significance at the 99%
+*(95%) [90%] level. Based
+
+*erase "$out/reg_infra_access.tex"
+esttab m_job_stable_3m m_informal m_wp_industry_jlmps_3m ///
+      m_member_union_3m m_skills_required_pjob  ///
+      m_IHS_total_rwage_3m  m_IHS_hourly_rwage ///
+      m_work_hours_pweek_3m_w  m_work_days_pweek_3m /// 
+       using "$out_JLMPS/reg_02_OLS_FE_district_year.tex", se label replace booktabs ///
+mtitles("Stable" "Informal" "Industry" "Union" "Skills" "Total W"  "Hourly W" "WH pday" "WD pweek") ///
+        drop(age age2 gender hhsize _Ieduc1d_2 _Ieduc1d_3 _Ieduc1d_4 _Ieduc1d_5 ///
+        _Ieduc1d_6 _Ieduc1d_7 _Ifteducst_2 ///
+        _Ifteducst_3 _Ifteducst_4 _Ifteducst_5 _Ifteducst_6 ///
+        _Imteducst_2 _Imteducst_3 _Imteducst_4 _Imteducst_5 ///
+        _Imteducst_6 _Iftempst_2 _Iftempst_3 _Iftempst_4 _Iftempst_5 ///
+        _Iftempst_6 ln_nb_refugees_bygov _Iyear_2016 ///
+        _Idistrict__2 _Idistrict__3 ///
+        _Idistrict__4 _Idistrict__5 _Idistrict__6 _Idistrict__7 ///
+        _Idistrict__8 _Idistrict__9 _Idistrict__10 _Idistrict__11 ///
+        _Idistrict__12 _Idistrict__13 _Idistrict__14 _Idistrict__15 ///
+        _Idistrict__16 _Idistrict__17 _Idistrict__18 _Idistrict__19 ///
+        _Idistrict__20 _Idistrict__21 _Idistrict__22 _Idistrict__23 ///
+        _Idistrict__24  _Idistrict__26 _Idistrict__27 ///
+        _Idistrict__28 _Idistrict__29 _Idistrict__30 _Idistrict__31 ///
+        _Idistrict__32 _Idistrict__33 _Idistrict__34 _Idistrict__35 ///
+        _Idistrict__36 _Idistrict__37 _Idistrict__38 _Idistrict__39 ///
+        _Idistrict__40 _Idistrict__41 _Idistrict__42 _Idistrict__43 ///
+        _Idistrict__44 _Idistrict__45 _Idistrict__46 _Idistrict__47 ///
+        _Idistrict__48 _Idistrict__49 _Idistrict__50 _Idistrict__51 ///
+        _cons $controls)   ///
+starlevels(* 0.1 ** 0.05 *** 0.01) ///
+   title("Results OLS Regression with time and district FE"\label{tab1}) nofloat ///
+   stats(N r2_a ctrl_mean, labels("Obs" "Adj. R-Squared" "Control Mean")) ///
+    nonotes ///
+    addnotes("Standard errors clustered at the district level. Significance levels: *p $<$ 0.1, ** p $<$ 0.05, *** p $<$ 0.01") 
+
+estimates drop m_job_stable_3m m_informal m_wp_industry_jlmps_3m ///
+      m_member_union_3m m_skills_required_pjob  ///
+      m_IHS_total_rwage_3m  m_IHS_hourly_rwage ///
+       m_work_hours_pweek_3m_w m_work_days_pweek_3m 
+
 
 **********************
 ********* IV *********
@@ -163,7 +284,7 @@ foreach globals of global globals_list {
                 partial(i.district_iid) ///
                 first
     codebook `outcome', c
-    estimates table, k($dep_var) star(.05 .01 .001) b(%7.4f) 
+    estimates table, k($dep_var) star(.1 .05 .01) b(%7.4f) 
     estimates table, b(%7.4f) se(%7.4f) stats(N r2_a) k($dep_var) 
 
     * With equivalent first-stage
@@ -175,7 +296,7 @@ foreach globals of global globals_list {
              $controls i.educ1d i.fteducst i.mteducst i.ftempst ln_nb_refugees_bygov ///
             if smpl == 1 [pweight = expan_indiv], ///
             cluster(district_iid) robust
-    estimates table, k(IHS_IV_SS) star(.05 .01 .001)           
+    estimates table, k(IHS_IV_SS) star(.1 .05 .01)        
     drop smpl 
   }
 }
@@ -191,12 +312,12 @@ foreach globals of global globals_list {
 foreach globals of global globals_list {
   foreach outcome of global `globals' {
     qui xi: reg `outcome' $dep_var ///
-            i.district_iid i.year i.crsectrp ///
+            i.district_iid i.year i.sector_3m ///
              $controls i.educ1d i.fteducst i.mteducst i.ftempst ln_nb_refugees_bygov ///
             [pweight = expan_indiv],  ///
             cluster(district_iid) robust 
     codebook `outcome', c
-    estimates table, k($dep_var) star(.05 .01 .001)
+    estimates table, k($dep_var) star(.1 .05 .01)
   }
 }
 
@@ -207,15 +328,15 @@ foreach globals of global globals_list {
 foreach globals of global globals_list {
   foreach outcome of global `globals' {
     qui xi: ivreg2  `outcome' ///
-                i.year i.district_iid i.crsectrp ///
+                i.year i.district_iid i.sector_3m ///
                 $controls i.educ1d i.fteducst i.mteducst i.ftempst ln_nb_refugees_bygov ///
                 ($dep_var = IHS_IV_SS) ///
                 [pweight = expan_indiv], ///
                 cluster(district_iid) ///
-                partial(i.district_iid i.crsectrp) ///
+                partial(i.district_iid i.sector_3m) ///
                 first
     codebook `outcome', c
-    estimates table, k($dep_var) star(.05 .01 .001) b(%7.4f) 
+    estimates table, k($dep_var) star(.1 .05 .01) b(%7.4f) 
     estimates table, b(%7.4f) se(%7.4f) stats(N r2_a) k($dep_var) 
 
     * With equivalent first-stage
@@ -223,11 +344,11 @@ foreach globals of global globals_list {
     replace smpl=1 if e(sample)==1
 
     qui xi: reg $dep_var IHS_IV_SS ///
-            i.year i.district_iid i.crsectrp ///
+            i.year i.district_iid i.sector_3m ///
             $controls i.educ1d i.fteducst i.mteducst i.ftempst ln_nb_refugees_bygov ///
             if smpl == 1 [pweight = expan_indiv], ///
             cluster(district_iid) robust
-    estimates table,  k(IHS_IV_SS) star(.05 .01 .001)           
+    estimates table,  k(IHS_IV_SS) star(.1 .05 .01)          
     drop smpl 
   }
 }
@@ -262,7 +383,7 @@ foreach globals of global globals_list {
       } 
       qui reg `outcome_l1' $dep_var $controls i.educ1d i.fteducst i.mteducst i.ftempst ln_nb_refugees_bygov [pw=expan_indiv], cluster(district_iid) robust
       codebook `outcome_l1', c
-      estimates table,  k($dep_var) star(.05 .01 .001)           
+      estimates table,  k($dep_var) star(.1 .05 .01)           
     }
   }
 restore
@@ -298,7 +419,7 @@ foreach globals of global globals_list {
                [pweight = expan_indiv], ///
                cluster(district_iid) robust ///
                first 
-      estimates table, k($dep_var) star(.05 .01 .001) b(%7.4f) 
+      estimates table, k($dep_var) star(.1 .05 .01) b(%7.4f) 
       estimates table, b(%7.4f) se(%7.4f) stats(N r2_a) k($dep_var) 
         qui drop `outcome_l1' $dep_var IHS_IV_SS $controls educ1d fteducst mteducst ftempst smpl ln_nb_refugees_bygov
         foreach y in `outcome_l1' $controls  $dep_var IHS_IV_SS educ1d fteducst mteducst ftempst ln_nb_refugees_bygov  {
@@ -370,7 +491,7 @@ drop if miss_16_10 == 1
             [pweight = expan_indiv],  ///
             cluster(district_iid) robust 
     codebook `outcome', c
-    estimates table, k($dep_var) star(.05 .01 .001) b(%7.4f) 
+    estimates table, k($dep_var) star(.1 .05 .01) b(%7.4f) 
     estimates table, b(%7.4f) se(%7.4f) stats(N r2_a) k($dep_var) 
   }
 
@@ -390,7 +511,7 @@ drop if miss_16_10 == 1
             [pweight = expan_indiv],  ///
             cluster(district_iid) robust 
     codebook `outcome', c
-    estimates table, k($dep_var) star(.05 .01 .001) b(%7.4f) 
+    estimates table, k($dep_var) star(.1 .05 .01) b(%7.4f) 
     estimates table, b(%7.4f) se(%7.4f) stats(N r2_a) k($dep_var) 
 
   }
@@ -409,7 +530,7 @@ drop if miss_16_10 == 1
                 partial(i.district_iid) ///
                 first
     codebook `outcome', c
-    estimates table, k($dep_var) star(.05 .01 .001) b(%7.4f) 
+    estimates table, k($dep_var) star(.1 .05 .01) b(%7.4f) 
     estimates table, b(%7.4f) se(%7.4f) stats(N r2_a) k($dep_var) 
 
     * With equivalent first-stage
@@ -421,7 +542,7 @@ drop if miss_16_10 == 1
              $controls i.educ1d i.fteducst i.mteducst i.ftempst ln_nb_refugees_bygov ///
             if smpl == 1 [pweight = expan_indiv], ///
             cluster(district_iid) robust
-    estimates table, k(IHS_IV_SS) star(.05 .01 .001)           
+    estimates table, k(IHS_IV_SS) star(.1 .05 .01)           
     drop smpl 
   }
 
@@ -436,15 +557,15 @@ drop if miss_16_10 == 1
 
   foreach outcome of global outcome_var_empl {
     qui xi: ivreg2  `outcome' ///
-                i.year i.district_iid i.crsectrp ///
+                i.year i.district_iid i.sector_3m ///
                 $controls i.educ1d i.fteducst i.mteducst i.ftempst ln_nb_refugees_bygov ///
                 ($dep_var = IHS_IV_SS) ///
                 [pweight = expan_indiv], ///
                 cluster(district_iid) ///
-                partial(i.district_iid i.crsectrp) ///
+                partial(i.district_iid i.sector_3m) ///
                 first
     codebook `outcome', c
-    estimates table, k($dep_var) star(.05 .01 .001) b(%7.4f) 
+    estimates table, k($dep_var) star(.1 .05 .01) b(%7.4f) 
     estimates table, b(%7.4f) se(%7.4f) stats(N r2_a) k($dep_var) 
 
     * With equivalent first-stage
@@ -452,11 +573,11 @@ drop if miss_16_10 == 1
     replace smpl=1 if e(sample)==1
 
     qui xi: reg $dep_var IHS_IV_SS ///
-            i.year i.district_iid i.crsectrp ///
+            i.year i.district_iid i.sector_3m ///
             $controls i.educ1d i.fteducst i.mteducst i.ftempst ln_nb_refugees_bygov ///
             if smpl == 1 [pweight = expan_indiv], ///
             cluster(district_iid) robust
-    estimates table,  k(IHS_IV_SS) star(.05 .01 .001)           
+    estimates table,  k(IHS_IV_SS) star(.1 .05 .01)           
     drop smpl 
   }
 
@@ -493,7 +614,7 @@ preserve
                [pweight = expan_indiv], ///
                cluster(district_iid) robust ///
                first 
-      estimates table, k($dep_var) star(.05 .01 .001) b(%7.4f) 
+      estimates table, k($dep_var) star(.1 .05 .01) b(%7.4f) 
       estimates table, b(%7.4f) se(%7.4f) stats(N r2_a) k($dep_var) 
         qui drop `outcome_l1' $dep_var IHS_IV_SS $controls educ1d fteducst mteducst ftempst smpl ln_nb_refugees_bygov
         foreach y in `outcome_l1' $controls  $dep_var IHS_IV_SS educ1d fteducst mteducst ftempst ln_nb_refugees_bygov  {
@@ -512,9 +633,14 @@ log close
 use "$data_final/06_IV_JLMPS_Construct_Outcomes.dta", clear
 
 
+
+preserve 
+
+*bys year: su work_permit
+
+restore 
 preserve
 
-bys year: su work_permit
 bys year: su agg_wp 
 bys year: su IHS_IV_SS
 
@@ -539,8 +665,14 @@ bys year: su employed_3m  // From uswrkstsr1 - mkt def, search req; 3m, 2 empl -
 drop if unemp_16_10 == 1
 drop if olf_16_10 == 1
 
+drop if emp_16_miss_10 == 1
+drop if emp_10_miss_16 == 1
+drop if unemp_16_miss_10 == 1
+drop if unemp_10_miss_16 == 1
+drop if olf_16_miss_10 == 1
+drop if olf_10_miss_16 == 1 
 
-bys year: su job_stability_permanent_3m //  From usstablp - Stability of employement (3m) - 1 permanent - 0 temp, seas, cas
+bys year: su job_stable_3m //  From usstablp - Stability of employement (3m) - 1 permanent - 0 temp, seas, cas
 bys year: su informal  // 1 Informal - 0 Formal - Informal if no contract (uscontrp=0) and no insurance (ussocinsp=0)
 bys year: su wp_industry_jlmps_3m  // Industries with work permits for refugees - Economic Activity of prim. job 3m
 bys year: su member_union_3m // Member of a syndicate/trade union (ref. 3-mnths)
