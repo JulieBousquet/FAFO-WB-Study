@@ -4,6 +4,7 @@ clear all
 set more off, permanently
 set mem 100m
 
+log using "$out_analysis/04_JLMPS_Construct.log", replace
 
    ****************************************************************************
    **                            DATA JLMPS                                  **
@@ -1297,3 +1298,5 @@ distinguishing unemployment and out of labor force).
 (5) They are then asked if they had a subsequent job, and if so, the
 start dates and characteristics.
 */
+
+log close

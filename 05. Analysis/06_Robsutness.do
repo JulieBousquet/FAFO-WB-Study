@@ -4,7 +4,7 @@ clear all
 set more off, permanently
 set mem 100m
 
-log using "$out_JLMPS/04_Robustness_analysis.log", replace
+log using "$out_analysis/06_Robsutness.log", replace
 
    ****************************************************************************
    **                            DATA JLMPS                                  **
@@ -248,6 +248,7 @@ restore
 
 
 
+log close
 
 
 
@@ -257,9 +258,8 @@ restore
 
 
 
-
-
-
+***********************************
+** WORK IN PROGRESS **
 
 
 
@@ -270,6 +270,8 @@ restore
 
 
 /*
+*************
+
 import excel "$data_UNHCR_base\Datasets_WP_RegisteredSyrians.xlsx", sheet("WP - byIndustry") firstrow clear
 
 keep year_2016 year_2020 Activity
@@ -324,6 +326,10 @@ list industry_id industry_en
 save "$data_2020_temp/UNHCR_shift_byOccup_16-20.dta", replace 
 */
 
+
+
+****************************
+/*
 use "$data_temp/04_IV_geo_empl_Syria", clear 
 
 *use "$data_2020_final/Jordan2020_geo_Syria.dta", clear 
@@ -614,5 +620,8 @@ foreach var of varlist `ind_stub'* {
 	local gamma_`ind' = _b[`temp'] // save reduced-form beta coefficients
 	drop `temp'
 	}
+
+*/
+
 
 */

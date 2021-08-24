@@ -4,7 +4,7 @@ clear all
 set more off, permanently
 set mem 100m
 
-*log using "$analysis_do/01_Data_Cleaning_EL1.log", replace
+log using "$out_analysis/03_IV.log", replace
 
 	****************************************************************************
 	**                            DATA IV CREATION                            **  
@@ -725,5 +725,5 @@ egen district_iid = group(district_en)
 
 save "$data_final/03_ShiftShare_IV", replace 
 
-use "$data_final/03_ShiftShare_IV", clear 
+log close
 

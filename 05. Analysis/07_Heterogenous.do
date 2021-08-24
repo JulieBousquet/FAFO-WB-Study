@@ -5,7 +5,7 @@ clear all
 set more off, permanently
 set mem 100m
 
-log using "$out_JLMPS/03_Heterogenous_analysis.log", replace
+log using "$out_analysis/07_Heterogenous.log", replace
 
    ****************************************************************************
    **                            DATA JLMPS                                  **
@@ -304,3 +304,5 @@ drop if miss_16_10 == 1
   } 
 
 restore
+
+log close

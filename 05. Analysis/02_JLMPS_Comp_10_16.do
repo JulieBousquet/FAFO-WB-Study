@@ -5,7 +5,7 @@ clear all
 set more off, permanently
 set mem 100m
 
-*log using "$analysis_do/01_Data_Cleaning_EL1.log", replace
+log using "$out_analysis/02_JLMPS_Comp_10_16.log", replace
 
    ****************************************************************************
    **                            DATA JLMPS                                  **
@@ -464,27 +464,7 @@ save "$data_final/02_JLMPS_10_16.dta", replace
 
 
 
-
-
-
-
-
-
-
-use "$data_JLMPS_final/02_JLMPS_10_16_rep_xs_clear.dta", clear
-
-
-
-
-
-
-
-
-
-
-
-
-
+log close
 
 
 

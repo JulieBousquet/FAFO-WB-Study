@@ -5,7 +5,7 @@ clear all
 set more off, permanently
 set mem 100m
 
-log using "$out_JLMPS/02_Analysis_select_models.log", replace
+log using "$out_analysis/05_JLMPS_Analysis_WiP.log", replace
 
    ****************************************************************************
    **                            DATA JLMPS                                  **
@@ -153,7 +153,7 @@ esttab m_job_stable_3m m_informal m_wp_industry_jlmps_3m ///
       m_member_union_3m m_skills_required_pjob  ///
       m_IHS_total_rwage_3m  m_IHS_hourly_rwage ///
       m_work_hours_pweek_3m_w  m_work_days_pweek_3m /// 
-       using "$out_JLMPS/reg_01_OLS.tex", se label replace booktabs ///
+       using "$out_analysis/reg_01_OLS.tex", se label replace booktabs ///
 mtitles("Stable" "Informal" "Industry" "Union" "Skills" "Total W" "Hourly W" "WH pweek" "WD pweek") ///
         drop(age age2 gender hhsize _Ieduc1d_2 _Ieduc1d_3 _Ieduc1d_4 _Ieduc1d_5 ///
         _Ieduc1d_6 _Ieduc1d_7 _Ifteducst_2 ///
@@ -235,7 +235,7 @@ esttab m_job_stable_3m m_informal m_wp_industry_jlmps_3m ///
       m_member_union_3m m_skills_required_pjob  ///
       m_IHS_total_rwage_3m  m_IHS_hourly_rwage ///
       m_work_hours_pweek_3m_w  m_work_days_pweek_3m /// 
-       using "$out_JLMPS/reg_02_OLS_FE_district_year.tex", se label replace booktabs ///
+       using "$out_analysis/reg_02_OLS_FE_district_year.tex", se label replace booktabs ///
 mtitles("Stable" "Informal" "Industry" "Union" "Skills" "Total W"  "Hourly W" "WH pday" "WD pweek") ///
         drop(age age2 gender hhsize _Ieduc1d_2 _Ieduc1d_3 _Ieduc1d_4 _Ieduc1d_5 ///
         _Ieduc1d_6 _Ieduc1d_7 _Ifteducst_2 ///
@@ -589,6 +589,7 @@ drop if miss_16_10 == 1
 ********* IV *********
 **********************
 
+/*
 preserve
   foreach outcome_l1 of global outcome_var_empl  {     
       codebook `outcome_l1', c
@@ -622,9 +623,8 @@ preserve
         }
     }
 restore                
+*/
 
-
-log close
 
 ************************************************
 //  SUMMARY STATISTICS
@@ -700,30 +700,7 @@ bys year: su ftempst //  Father's Employment Status (When Resp. 15)
 
 restore
 
-preserve
 
-
-tab nationality_cl year 
-drop if nationality_cl != 1
-drop if age > 64 & year == 2016
-drop if age > 60 & year == 2010 //60 in 2010 so 64 in 2016
-drop if age < 15 & year == 2016 
-drop if age < 11 & year == 2010 //11 in 2010 so 15 in 2016
-drop if miss_16_10 == 1
-drop if emp_16_miss_10 == 1
-drop if emp_10_miss_16 == 1
-drop if unemp_16_miss_10 == 1
-drop if unemp_10_miss_16 == 1
-drop if olf_16_miss_10 == 1
-drop if olf_10_miss_16 == 1 
-
-restore
-
-
-
-
-
-
-
+log close
 
 
