@@ -33,6 +33,7 @@ if inlist(c(username), "u0131185", "julie") == 1 {
 
 	global do_master 	"$github/01. Master Data/Dofiles/"
 
+
 	****************************
 	**        FAFO            **
 	****************************
@@ -124,7 +125,7 @@ if inlist(c(username), "u0131185", "julie") == 1 {
 			global data_base 		"$data_analysis/01. Base"
 			global data_temp 		"$data_analysis/02. Temp"
 			global data_final 		"$data_analysis/03. Final"
-		global out  			"$folder_analysis/02. Output/"
+		global out_analysis	"$folder_analysis/02. Output/"
 	global do_analysis 	"$github/05. Analysis"
 		
 
