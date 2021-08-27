@@ -1204,6 +1204,10 @@ tab informal, m
 lab var informal "1 Informal - 0 Formal - Informal if no contract (uscontrp=0) and no insurance (ussocinsp=0)"
 tab informal usemp1
 
+lab def informal 1 "Informal" 0 "Formal", modify
+lab val informal informal
+tab informal, m 
+
 *Usual main job(ref. 3-month) is irregular
 tab usirreg, m 
 codebook  usirreg
@@ -1362,7 +1366,7 @@ replace work_hours_pweek_3m = crnumhrs1 if work_hours_pweek_3m == 0
 
 tab work_hours_pweek_3m
 su work_hours_pweek_3m, d
-winsor2 work_hours_pweek_3m, s(_w) c(0 98)
+winsor2 work_hours_pweek_3m, s(_w) c(0 99)
 su work_hours_pweek_3m_w
 
 *Usual No. of Hours/Week, Market & Subsistence Work, (Ref. 3-month)
@@ -1420,8 +1424,22 @@ tab mnthwgAllJob
 keep if mi(basicwg3)
 keep if !mi(mnthwgAllJob)
 */
+
+
+tab mnthwgAllJob
+tab hrwgAllJob
+sort mnthwgAllJob
+*br mnthwgAllJob
+winsor2 mnthwgAllJob, replace cuts(0.03 99.94)
+tab mnthwgAllJob, m 
+winsor2 hrwgAllJob, replace cuts(0 99.95)
 replace basicwg3 = mnthwgAllJob * 3 if mi(basicwg3)
 replace ttmonwg3 = mnthwgAllJob * 3 if mi(ttmonwg3)
+
+tab basicwg3
+winsor2 basicwg3, replace cuts(0.3 99.98)
+tab ttmonwg3
+winsor2 ttmonwg3, replace cuts(0.3 99.98)
 
 /*and for wage workers, we examine both hourly wages
 and monthly wages. Around 86% of employed Jordanians were wage workers in 2016. Given the
@@ -1542,9 +1560,9 @@ lab var hourly_wage "Hourly Wage (Prim.& Second. Jobs)"
 
 tab hourly_wage
 su hourly_wage
-su hourly_wage if hourly_wage < `r(max)'
-return list
-replace hourly_wage = `r(mean)' if hourly_wage > `r(max)' & !mi(hourly_wage)
+*su hourly_wage if hourly_wage < `r(max)'
+*return list
+*replace hourly_wage = `r(mean)' if hourly_wage > `r(max)' & !mi(hourly_wage)
 
       *Corrected from inflation
       gen real_hourly_wage = hourly_wage / CPIin17
@@ -1566,9 +1584,9 @@ lab var monthly_wage "Monthly Wage (Prim.& Second. Jobs)"
 
 tab monthly_wage
 su monthly_wage
-su monthly_wage if monthly_wage < `r(max)'
-return list
-replace monthly_wage = `r(mean)' if monthly_wage > `r(max)' & !mi(monthly_wage)
+*su monthly_wage if monthly_wage < `r(max)'
+*return list
+*replace monthly_wage = `r(mean)' if monthly_wage > `r(max)' & !mi(monthly_wage)
 
       *Corrected from inflation
       gen real_monthly_wage = monthly_wage / CPIin17

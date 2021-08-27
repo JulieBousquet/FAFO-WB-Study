@@ -307,4 +307,73 @@ drop if miss_16_10 == 1
 
 restore
 
+
+*********************
+* EDUCATION *
+*************
+
+tab informal, m 
+
+
+preserve 
+
+codebook informal
+
+foreach globals of global globals_list {
+  foreach outcome of global `globals'  {  
+    gen cons=1
+    qui xi: ivreg2  `outcome'  ///
+       i.year i.district_iid ///
+       $controls  i.fteducst i.mteducst i.ftempst ln_nb_refugees_bygov ///
+       (c.$dep_var#i.informal = c.IHS_IV_SS#i.informal) ///
+       c.cons#i.informal ///       
+       [pweight = expan_indiv], ///
+       cluster(district_iid) robust ///
+       partial(i.district_iid) ///
+       first
+    codebook `outcome', c
+    estimates table,  k(informal#c.$dep_var) star(.1 .05 .01) b(%7.4f)
+    estimates table, b(%7.4f) se(%7.4f) stats(N r2_a) k(informal#c.$dep_var) 
+    drop cons
+  } 
+}
+
+restore
+
+*EMPLOYMENT 
+
+preserve 
+
+use "$data_final/06_IV_JLMPS_Construct_Outcomes.dta", clear
+
+tab nationality_cl year 
+drop if nationality_cl != 1
+
+drop if age > 64 & year == 2016
+drop if age > 60 & year == 2010 //60 in 2010 so 64 in 2016
+
+drop if age < 15 & year == 2016 
+drop if age < 11 & year == 2010 //11 in 2010 so 15 in 2016
+
+drop if miss_16_10 == 1
+
+  foreach outcome of global outcome_var_empl {  
+    gen cons=1
+    qui xi: ivreg2  `outcome'  ///
+       i.year i.district_iid ///
+       $controls  i.fteducst i.mteducst i.ftempst ln_nb_refugees_bygov ///
+       (c.$dep_var#i.informal = c.IHS_IV_SS#i.informal) ///
+       c.cons#i.informal ///       
+       [pweight = expan_indiv], ///
+       cluster(district_iid) robust ///
+       partial(i.district_iid) ///
+       first
+    codebook `outcome', c
+    estimates table,  k(informal#c.$dep_var) star(.1 .05 .01) b(%7.4f)
+    estimates table, b(%7.4f) se(%7.4f) stats(N r2_a) k(informal#c.$dep_var) 
+    drop cons
+  } 
+
+restore
+
 log close
