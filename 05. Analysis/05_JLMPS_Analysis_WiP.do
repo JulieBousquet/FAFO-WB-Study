@@ -77,7 +77,7 @@ results; it did not lead to substantive changes (results available from authors 
 request).]*/
 
 
-*EMPLOYED ONLY (EITHER IN 2010 OR IN 2010)
+*EMPLOYED ONLY (EITHER IN 2010 OR IN 2016
 drop if miss_16_10 == 1
 drop if unemp_16_10 == 1
 drop if olf_16_10 == 1
@@ -87,8 +87,14 @@ drop if unemp_16_miss_10 == 1
 drop if unemp_10_miss_16 == 1
 drop if olf_16_miss_10 == 1
 drop if olf_10_miss_16 == 1 
+drop if emp_10_olf_16  == 1 
+drop if emp_16_olf_10  == 1 
+drop if unemp_10_emp_16  == 1 
+drop if unemp_16_emp_10  == 1 
+drop if olf_10_unemp_16 == 1 
+drop if olf_16_unemp_10  == 1 
 
-
+*keep if emp_16_10 == 1 
 
                                   ************
                                   *   PANEL  *

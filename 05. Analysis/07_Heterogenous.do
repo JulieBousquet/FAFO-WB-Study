@@ -65,6 +65,7 @@ request).]*/
 
 
 *EMPLOYED ONLY (EITHER IN 2010 OR IN 2010)
+/*
 drop if miss_16_10 == 1
 drop if unemp_16_10 == 1
 drop if olf_16_10 == 1
@@ -74,7 +75,8 @@ drop if unemp_16_miss_10 == 1
 drop if unemp_10_miss_16 == 1
 drop if olf_16_miss_10 == 1
 drop if olf_10_miss_16 == 1 
-
+*/
+keep if emp_16_10 == 1 
 
 tab educ1d 
 tab fteducst 
