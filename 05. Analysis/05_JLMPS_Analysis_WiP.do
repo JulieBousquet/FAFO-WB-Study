@@ -140,8 +140,8 @@ mat list e(b)
 estout m_job_stable_3m m_informal m_wp_industry_jlmps_3m ///
       m_member_union_3m m_skills_required_pjob  ///
       m_IHS_total_rwage_3m  m_IHS_hourly_rwage ///
-       m_work_hours_pweek_3m_w m_work_days_pweek_3m /// 
-      , cells(b(star fmt(3)) se(par fmt(2))) ///
+      m_work_hours_pweek_3m_w m_work_days_pweek_3m /// 
+      , cells(b(star fmt(%9.3f)) se(par fmt(%9.3f))) ///
         drop(age age2 gender hhsize _Ieduc1d_2 _Ieduc1d_3 _Ieduc1d_4 _Ieduc1d_5 ///
         _Ieduc1d_6 _Ieduc1d_7 _Ifteducst_2 ///
         _Ifteducst_3 _Ifteducst_4 _Ifteducst_5 _Ifteducst_6 ///
@@ -159,7 +159,8 @@ esttab m_job_stable_3m m_informal m_wp_industry_jlmps_3m ///
       m_member_union_3m m_skills_required_pjob  ///
       m_IHS_total_rwage_3m  m_IHS_hourly_rwage ///
       m_work_hours_pweek_3m_w  m_work_days_pweek_3m /// 
-       using "$out_analysis/reg_01_OLS.tex", se label replace booktabs ///
+      using "$out_analysis/reg_01_OLS.tex", se label replace booktabs ///
+      cells(b(star fmt(%9.3f)) se(par fmt(%9.3f))) ///
 mtitles("Stable" "Informal" "Industry" "Union" "Skills" "Total W" "Hourly W" "WH pweek" "WD pweek") ///
         drop(age age2 gender hhsize _Ieduc1d_2 _Ieduc1d_3 _Ieduc1d_4 _Ieduc1d_5 ///
         _Ieduc1d_6 _Ieduc1d_7 _Ifteducst_2 ///
@@ -209,7 +210,7 @@ estout m_job_stable_3m m_informal m_wp_industry_jlmps_3m ///
       m_member_union_3m m_skills_required_pjob  ///
       m_IHS_total_rwage_3m  m_IHS_hourly_rwage ///
        m_work_hours_pweek_3m_w m_work_days_pweek_3m /// 
-      , cells(b(star fmt(3)) se(par fmt(2))) ///
+      , cells(b(star fmt(%9.3f)) se(par fmt(%9.3f))) ///
         drop(age age2 gender hhsize _Ieduc1d_2 _Ieduc1d_3 _Ieduc1d_4 _Ieduc1d_5 ///
         _Ieduc1d_6 _Ieduc1d_7 _Ifteducst_2 ///
         _Ifteducst_3 _Ifteducst_4 _Ifteducst_5 _Ifteducst_6 ///
@@ -241,7 +242,8 @@ esttab m_job_stable_3m m_informal m_wp_industry_jlmps_3m ///
       m_member_union_3m m_skills_required_pjob  ///
       m_IHS_total_rwage_3m  m_IHS_hourly_rwage ///
       m_work_hours_pweek_3m_w  m_work_days_pweek_3m /// 
-       using "$out_analysis/reg_02_OLS_FE_district_year.tex", se label replace booktabs ///
+      using "$out_analysis/reg_02_OLS_FE_district_year.tex", se label replace booktabs ///
+      cells(b(star fmt(%9.3f)) se(par fmt(%9.3f))) ///
 mtitles("Stable" "Informal" "Industry" "Union" "Skills" "Total W"  "Hourly W" "WH pday" "WD pweek") ///
         drop(age age2 gender hhsize _Ieduc1d_2 _Ieduc1d_3 _Ieduc1d_4 _Ieduc1d_5 ///
         _Ieduc1d_6 _Ieduc1d_7 _Ifteducst_2 ///
@@ -317,8 +319,8 @@ mat list e(b)
 estout m_job_stable_3m m_informal m_wp_industry_jlmps_3m ///
       m_member_union_3m m_skills_required_pjob  ///
       m_IHS_total_rwage_3m  m_IHS_hourly_rwage ///
-       m_work_hours_pweek_3m_w m_work_days_pweek_3m ///
-        , cells(b(star fmt(3)) se(par fmt(2))) ///
+      m_work_hours_pweek_3m_w m_work_days_pweek_3m ///
+      , cells(b(star fmt(%9.3f)) se(par fmt(%9.3f))) ///
   drop(age age2 gender hhsize _Ieduc1d_2 _Ieduc1d_3 _Ieduc1d_4 _Ieduc1d_5 ///
         _Ieduc1d_6 _Ieduc1d_7 _Ifteducst_2 ///
         _Ifteducst_3 _Ifteducst_4 _Ifteducst_5 _Ifteducst_6 ///
@@ -336,8 +338,9 @@ estout m_job_stable_3m m_informal m_wp_industry_jlmps_3m ///
 esttab m_job_stable_3m m_informal m_wp_industry_jlmps_3m ///
       m_member_union_3m m_skills_required_pjob  ///
       m_IHS_total_rwage_3m  m_IHS_hourly_rwage ///
-       m_work_hours_pweek_3m_w m_work_days_pweek_3m /// 
-        using "$out_analysis/reg_03_IV_FE_district_year.tex", se label replace booktabs ///
+      m_work_hours_pweek_3m_w m_work_days_pweek_3m /// 
+      using "$out_analysis/reg_03_IV_FE_district_year.tex", se label replace booktabs ///
+      cells(b(star fmt(%9.3f)) se(par fmt(%9.3f))) ///
 mtitles("Stable" "Informal" "Industry" "Union" "Skills" "Total W"  "Hourly W" "WH pday" "WD pweek") ///
   drop(age age2 gender hhsize _Ieduc1d_2 _Ieduc1d_3 _Ieduc1d_4 _Ieduc1d_5 ///
         _Ieduc1d_6 _Ieduc1d_7 _Ifteducst_2 ///
@@ -363,7 +366,7 @@ estout mIV_job_stable_3m mIV_informal mIV_wp_industry_jlmps_3m ///
       mIV_member_union_3m mIV_skills_required_pjob  ///
       mIV_IHS_total_rwage_3m  mIV_IHS_hourly_rwage ///
        mIV_work_hours_pweek_3m_w mIV_work_days_pweek_3m /// 
-       , cells(b(star fmt(3)) se(par fmt(2))) ///
+       , cells(b(star fmt(%9.1f)) se(par fmt(%9.1f))) ///
   drop(age age2 gender hhsize _Ieduc1d_2 _Ieduc1d_3 _Ieduc1d_4 _Ieduc1d_5 ///
         _Ieduc1d_6 _Ieduc1d_7 _Ifteducst_2 ///
         _Ifteducst_3 _Ifteducst_4 _Ifteducst_5 _Ifteducst_6 ///
@@ -394,8 +397,9 @@ estout mIV_job_stable_3m mIV_informal mIV_wp_industry_jlmps_3m ///
 esttab mIV_job_stable_3m mIV_informal mIV_wp_industry_jlmps_3m ///
       mIV_member_union_3m mIV_skills_required_pjob  ///
       mIV_IHS_total_rwage_3m  mIV_IHS_hourly_rwage ///
-       mIV_work_hours_pweek_3m_w mIV_work_days_pweek_3m /// 
-        using "$out_analysis/reg_03_IV_FE_district_year_stage1.tex", se label replace booktabs ///
+      mIV_work_hours_pweek_3m_w mIV_work_days_pweek_3m /// 
+      using "$out_analysis/reg_03_IV_FE_district_year_stage1.tex", se label replace booktabs ///
+      cells(b(star fmt(%9.1f)) se(par fmt(%9.1f))) ///
 mtitles("Stable" "Informal" "Industry" "Union" "Skills" "Total W"  "Hourly W" "WH pday" "WD pweek") ///
   drop(age age2 gender hhsize _Ieduc1d_2 _Ieduc1d_3 _Ieduc1d_4 _Ieduc1d_5 ///
         _Ieduc1d_6 _Ieduc1d_7 _Ifteducst_2 ///
@@ -487,8 +491,8 @@ mat list e(b)
 estout m_job_stable_3m m_informal m_wp_industry_jlmps_3m ///
       m_member_union_3m m_skills_required_pjob  ///
       m_IHS_total_rwage_3m  m_IHS_hourly_rwage ///
-       m_work_hours_pweek_3m_w m_work_days_pweek_3m ///
-        , cells(b(star fmt(3)) se(par fmt(2))) ///
+      m_work_hours_pweek_3m_w m_work_days_pweek_3m ///
+      , cells(b(star fmt(%9.3f)) se(par fmt(%9.3f))) ///
   drop(age age2 gender hhsize _Ieduc1d_2 _Ieduc1d_3 _Ieduc1d_4 _Ieduc1d_5 ///
         _Ieduc1d_6 _Ieduc1d_7 _Ifteducst_2 ///
         _Ifteducst_3 _Ifteducst_4 _Ifteducst_5 _Ifteducst_6 ///
@@ -506,8 +510,9 @@ estout m_job_stable_3m m_informal m_wp_industry_jlmps_3m ///
 esttab m_job_stable_3m m_informal m_wp_industry_jlmps_3m ///
       m_member_union_3m m_skills_required_pjob  ///
       m_IHS_total_rwage_3m  m_IHS_hourly_rwage ///
-       m_work_hours_pweek_3m_w m_work_days_pweek_3m /// 
-        using "$out_analysis/reg_04_IV_FE_district_year_sector.tex", se label replace booktabs ///
+      m_work_hours_pweek_3m_w m_work_days_pweek_3m /// 
+      using "$out_analysis/reg_04_IV_FE_district_year_sector.tex", se label replace booktabs ///
+      cells(b(star fmt(%9.3f)) se(par fmt(%9.3f))) ///
 mtitles("Stable" "Informal" "Industry" "Union" "Skills" "Total W"  "Hourly W" "WH pday" "WD pweek") ///
   drop(age age2 gender hhsize _Ieduc1d_2 _Ieduc1d_3 _Ieduc1d_4 _Ieduc1d_5 ///
         _Ieduc1d_6 _Ieduc1d_7 _Ifteducst_2 ///
@@ -612,8 +617,8 @@ mat list e(b)
 estout m_job_stable_3m m_informal m_wp_industry_jlmps_3m ///
       m_member_union_3m m_skills_required_pjob  ///
       m_IHS_total_rwage_3m  m_IHS_hourly_rwage ///
-       m_work_hours_pweek_3m_w m_work_days_pweek_3m  ///
-       , cells(b(star fmt(3)) se(par fmt(2))) ///
+      m_work_hours_pweek_3m_w m_work_days_pweek_3m  ///
+      , cells(b(star fmt(%9.3f)) se(par fmt(%9.3f))) ///
   drop(age age2 gender hhsize educ1d fteducst mteducst ftempst _cons ///
        ln_nb_refugees_bygov  $controls)   ///
    legend label varlabels(_cons constant) starlevels(* 0.1 ** 0.05 *** 0.01)           ///
@@ -625,8 +630,9 @@ estout m_job_stable_3m m_informal m_wp_industry_jlmps_3m ///
 esttab m_job_stable_3m m_informal m_wp_industry_jlmps_3m ///
       m_member_union_3m m_skills_required_pjob  ///
       m_IHS_total_rwage_3m  m_IHS_hourly_rwage ///
-       m_work_hours_pweek_3m_w m_work_days_pweek_3m  ///
-        using "$out_analysis/reg_05_IV_FE_year_indiv.tex", se label replace booktabs ///
+      m_work_hours_pweek_3m_w m_work_days_pweek_3m  ///
+      using "$out_analysis/reg_05_IV_FE_year_indiv.tex", se label replace booktabs ///
+      cells(b(star fmt(%9.3f)) se(par fmt(%9.3f))) ///
 mtitles("Stable" "Informal" "Industry" "Union" "Skills" "Total W"  "Hourly W" "WH pday" "WD pweek") ///
  drop(age age2 gender hhsize  educ1d fteducst mteducst ftempst ///
       ln_nb_refugees_bygov _cons ///
