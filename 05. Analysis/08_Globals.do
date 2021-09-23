@@ -27,14 +27,15 @@ global    dep_var   agg_wp
 *global    dep_var   share_wp_100
 *global    dep_var   agg_wp_orig
 
+
 global    outcome_var_empl ///
               unemployed_3m /// From unempsr1m - mrk def, search req; 3m, empl or unemp, OLF is miss
               unempdurmth  ///  Current unemployment duration (in months)
               employed_3m  ///From uswrkstsr1 - mkt def, search req; 3m, 2 empl - 1 unemp - OLF miss
-              IHS_basic_rwage_uncond_unolf ///UNCONDITIONAL - UNEMPLOYED & OLF: WAGE 0 - IHS - Basic Wage (3-month)
-              IHS_basic_rwage_uncond_unemp ///UNCONDITIONAL - UNEMPLOYED WAGE 0 / OLF WAGE MISSING - IHS Basic (3m)
-              IHS_total_rwage_uncond_unolf ///UNCONDITIONAL - UNEMPLOYED & OLF: WAGE 0 - IHS - Total Wage (3-month)
-              IHS_total_rwage_uncond_unemp //UNCONDITIONAL - UNEMPLOYED WAGE 0 / OLF WAGE MISSING - IHS Total (3m)
+              IHS_b_rwage_unolf ///UNCONDITIONAL - UNEMPLOYED & OLF: WAGE 0 - IHS - Basic Wage (3-month)
+              IHS_b_rwage_unemp ///UNCONDITIONAL - UNEMPLOYED WAGE 0 / OLF WAGE MISSING - IHS Basic (3m)
+              IHS_t_rwage_unolf ///UNCONDITIONAL - UNEMPLOYED & OLF: WAGE 0 - IHS - Total Wage (3-month)
+              IHS_t_rwage_unemp //UNCONDITIONAL - UNEMPLOYED WAGE 0 / OLF WAGE MISSING - IHS Total (3m)
 
 global    outcome_var_job ///
               job_stable_3m ///  From usstablp - Stability of employement (3m) - 1 permanent - 0 temp, seas, cas
@@ -66,7 +67,7 @@ global controls ///
           age2 /// Age square
           gender ///  Gender - 1 Male 0 Female
           hhsize //  Total No. of Individuals in the Household
-     *     ln_distance_dis_camp //  LOG Distance (km) between JORD districts and ZAATARI CAMP in 2016
+     *     ln_invdistance_dis_camp //  LOG Distance (km) between JORD districts and ZAATARI CAMP in 2016
 
 /*SPECIAL TREATMENTS
           ln_nb_refugees_bygov /// LOG Number of refugees out of camps by governorate in 2016

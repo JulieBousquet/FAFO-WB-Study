@@ -116,6 +116,38 @@ xi: ivreg2 ln_wage i.year i.district_iid i.crsectrp i.educ1d i.fteducst i.mteduc
 */ 
 
 
+
+
+* The REFUGEE INFLOW ONLY 
+    xi: ivreg2 informal agg_wp ///
+                i.year i.district_iid ///
+                $controls i.educ1d i.fteducst i.mteducst i.ftempst  ///
+                (IHS_nb_refugees_bygov = IHS_IV_SS_ref_inflow) ///
+                [pweight = expan_indiv], ///
+                cluster(district_iid) robust ///
+                partial(i.district_iid) ///
+                first
+    codebook informal, c
+    estimates table, k(nb_refugees_bygov) star(.1 .05 .01) b(%7.4f) 
+    estimates table, b(%7.4f) se(%7.4f) stats(N r2_a) k(nb_refugees_bygov) 
+
+    * With equivalent first-stage
+    gen smpl=0
+    replace smpl=1 if e(sample)==1
+
+    xi: reg nb_refugees_bygov IHS_IV_SS_ref_inflow ///
+            i.year i.district_iid  ///
+            $controls i.educ1d i.fteducst i.mteducst i.ftempst  ///
+            if smpl == 1 [pweight = expan_indiv], ///
+            cluster(district_iid) robust
+    estimates table,  k(IHS_IV_SS_ref_inflow) star(.1 .05 .01)           
+    drop smpl 
+
+corr IHS_nb_refugees_bygov IHS_IV_SS_ref_inflow
+
+
+
+
                                   ************
                                   *REGRESSION*
                                   ************
@@ -132,6 +164,9 @@ xi: ivreg2 ln_wage i.year i.district_iid i.crsectrp i.educ1d i.fteducst i.mteduc
 lab var IHS_nb_refugees_bygov "IHS Nb Refugees"
 lab var agg_wp "Work Permits"
 lab var IHS_IV_SS_ref_inflow "IHS IV Nb Refugees"
+
+tab IHS_nb_refugees_bygov
+tab IHS_IV_SS_ref_inflow
 
 foreach globals of global globals_list {
   foreach outcome of global `globals' {

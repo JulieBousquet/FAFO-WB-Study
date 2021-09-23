@@ -50,7 +50,8 @@ use "$data_final/05_IV_JLMPS_MergingIV.dta", clear
 
 preserve
 codebook  nationality_cl
-drop if forced_migr != 1
+*drop if forced_migr != 1
+drop if nationality_cl != 2
 gen sample_pop = 1 
 collapse (sum) sample_pop if year == 2016, by(district_iid)
 bys district_iid: tab sample_pop
@@ -61,9 +62,12 @@ restore
 
 
 preserve
-tab forced_migr
-codebook forced_migr
-drop if forced_migr != 1
+codebook  nationality_cl
+*drop if forced_migr != 1
+drop if nationality_cl != 2
+*tab forced_migr
+*codebook forced_migr
+*drop if forced_migr != 1
 distinct district_iid
 tab work_permit, m
 collapse (sum) work_permit if year == 2016, by(district_iid)
@@ -182,237 +186,10 @@ bys year: tab district_en
 
 
 
-/*
+
 ***********************************************************************
 **PREPARING THE SAMPLE ************************************************
 ***********************************************************************
-
-**********************************
-* PEOPLE SURVEYED IN BOTH ROUNDS *
-**********************************
-
-*br indid indid_2010 indid_2016 year
-*SAMPLE: SAME INDIVIDUALS WERE SURVEYED IN 2010 AND 2016
-*BUT A FEW WERE NOT (ALL REFUGEE WEREN'T SURVEYED IN 2010)
-*AND A FEW JORDANIANS. I DECDIE TO KEEP ONLY THE PANEL STRUCTURE 
-*FOR FIXED EFFECT AT THE INDIV LEVEL 
-
-*Flag those who were surveyed in both rounds 
-gen surveyed_2_rounds = 1 if !mi(indid_2010) & !mi(indid_2016)
-*Keep only the surveyed in both round
-keep if surveyed_2_rounds == 1 
-
-*Common identifier
-sort indid_2010
-distinct indid_2010 //28316/2 = 14158 while we have 14306: there is an inbalance
-*Even if they have an ID for both few actually did not do one of the round 
-duplicates tag indid_2010, gen(dup)
-bys year: tab dup //(90 in 2010 and 206 in 2016)
-*Dropping those who actually did not the two rounds 
-drop if dup == 0 
-
-drop surveyed_2_rounds dup
-
-*28020 indiv surveyed twice in 2010 and 2020
-mdesc indid_2010
-destring indid_2010, replace 
-
-
-**************
-* JORDANIANS *
-**************
-
-preserve 
-codebook nationality_cl
-lab list Lnationality_cl
-/*
-                        53,094         1  Jordanian
-                         3,003         2  Syrian
-                           623         3  Egyptian
-                         2,551         4  Other Arab
-                           132         5  Other
-
-*/
-
-*keep if nationality_cl == 1 //Keep only the jordanians
-*keep if nationality_cl != 2 //Keep all but the syrians
-tab nationality_cl year
-
-keep nationality_cl indid_2010 year
-reshape wide nationality_cl, i(indid_2010) j(year)
-
-*Correction #1
-gen flag = 1 if nationality_cl2010 != nationality_cl2016 
-list nationality_cl2016 nationality_cl2010 if flag == 1 
-*If Declare JORDANIAN in 2016 but different in 2010
-*then JORDANIAN
-replace nationality_cl2010 = nationality_cl2016 if flag == 1 & nationality_cl2016 == 1
-drop flag 
-
-*Correction #2
-gen flag = 1 if nationality_cl2010 != nationality_cl2016 
-list nationality_cl2016 nationality_cl2010 if flag == 1 
-*If Declare JORDANIAN in 2010 but different in 2016
-*then JORDANIAN
-replace nationality_cl2016 = nationality_cl2010 if flag == 1 & nationality_cl2010 == 1
-drop flag 
-
-*Corection #3
-gen flag = 1 if nationality_cl2010 != nationality_cl2016 
-list nationality_cl2016 nationality_cl2010 if flag == 1 
-*IF Declare OTHER ARAB in 2010 but differnt in 2016
-replace nationality_cl2010 = nationality_cl2016 if flag == 1 & nationality_cl2016 == 4
-drop flag 
-
-*Corection #4
-gen flag = 1 if nationality_cl2010 != nationality_cl2016 
-list nationality_cl2016 nationality_cl2010 if flag == 1 
-*IF Declare OTHER ARAB in 2016 but differnt in 2010
-replace nationality_cl2016 = nationality_cl2010 if flag == 1 & nationality_cl2010 == 4
-drop flag 
-
-*br nationality_cl2016 nationality_cl2010 
-/*
-1  Jordanian
-2  Syrian
-3  Egyptian
-4  Other Arab
-5  Other
-*/
-
-reshape long nationality_cl, i(indid_2010) j(year)
-format indid_2010 %12.0g
-
-tempfile data_nat
-save `data_nat'
-restore 
-
-drop nationality_cl 
-merge 1:1 indid_2010 year using  `data_nat'
-drop _merge 
-
-***************
-* WORKING AGE *
-*************** 
-
-preserve 
-
-keep age indid_2010 year
-reshape wide age, i(indid_2010) j(year)
-format indid_2010 %12.0g
-
-*br indid_2010 age2016 age2010
-
-sort indid_2010
-mdesc age2016 
-
-*There are a lot of discrepencies.
-gen age_diff = age2016 - age2010
-
-/*
-gen flag = age_diff if age_diff > 6 | age_diff < 0
-
-sort flag
-list indid_2010 age2010 age2016 age_diff if !mi(flag) & flag >= 40
-list indid_2010 age2010 age2016 age_diff if !mi(flag) & flag > 7 & (age2010 == 58) 
-list indid_2010 age2010 age2016 age_diff if !mi(flag) & flag > 7 & (age2016 == 64) 
-list indid_2010 age2010 age2016 age_diff if !mi(flag) & flag > 7 & (age2010 == 10) 
-list indid_2010 age2010 age2016 age_diff if !mi(flag) & flag > 7 & (age2016 == 22) 
-list indid_2010 age2010 age2016 age_diff if !mi(flag) & flag < 0 
-
-gen check = 1 if !mi(flag) & flag >= 20
-replace check = 1 if !mi(flag) & flag > 7 & (age2010 == 58)
-replace check = 1 if !mi(flag) & flag > 7 & (age2016 == 64)
-replace check = 1 if !mi(flag) & flag > 7 & (age2010 == 10) 
-replace check = 1 if !mi(flag) & flag > 7 & (age2016 == 22)
-replace check = 1 if !mi(flag) & flag < 0
-replace check = 1 if !mi(flag) & age_diff== 0
-
-list indid_2010 age2010 age2016 age_diff if check == 1 
-
-sort age_diff
-list indid_2010 age2010 age2016 age_diff if check != 1 
-list indid_2010 age2010 age2016 age_diff if  age2010<64 & age2010>16 & age2016>16 & age2016<64
-
-tempfile age_flag 
-save `age_flag'
-
-drop age_diff check flag
-*/
-*drop age2016 age_diff
-drop age_diff  
-
-*I decide to recreate the age 2016 so that 
-*it matches what was declared in 2010
-*gen age2016 = age2010 + 6 
-*tab age2016, m
-*lab var age2016 "Age 2016"
-
-list if age2010 == 0 
-list if age2016 == 0 
-
-tab age2016, m
-tab age2010, m
-
-reshape long age, i(indid_2010) j(year)
-format indid_2010 %12.0g
-
-tempfile data_age
-save `data_age'
-restore 
-
-drop age 
-
-merge 1:1 indid_2010 year using  `data_age'
-drop _merge
-*/
-/*
-merge m:1 indid_2010 using  `age_flag', keepusing(age_diff check)
-
-
-*keep indid_2010 age age_diff check 
-sort indid_2010
-format indid_2010 %12.0g
-keep if check == 1 
-
-tab brthyr
-mdesc brthyr
-gen age2016 = 2016 - brthyr if year == 2016
-gen age2010 = 2010 - brthyr if year == 2010
-
-br indid_2010 brthyr age2016 age2010 age age_diff check yrschl
-*/
-
-
-
-
-
-
-
-
-
-
-**********************************
-**********************************
-**********************************
-**********************************
-**********************************
-      * V2 OF PREVIOUS CODE *
-**********************************
-**********************************
-**********************************
-**********************************
-
-
-
-
-
-
-
-
-
-
-
 
 **********************************
 * PEOPLE SURVEYED IN BOTH ROUNDS *
@@ -435,7 +212,6 @@ drop surveyed_2_rounds dup
 mdesc indid_2010
 destring indid_2010, replace 
 format indid_2010 %12.0g
-
 
 
 **************
@@ -610,16 +386,6 @@ drop check age2016 age2010
 
 
 
-
-
-
-
-
-
-
-
-
-
 /*---------*********************************************************************-----------
 -----------*********************************************************************-----------
                                    VARIABLES CLEANING 
@@ -639,6 +405,7 @@ tab NbRefbyGovoutcamp, m
 ren NbRefbyGovoutcamp nb_refugees_bygov
 replace nb_refugees_bygov = 0 if year == 2010
 lab var nb_refugees_bygov "[CTRL] Number of refugees out of camps by governorate in 2016"
+tab nb_refugees_bygov
 
 gen ln_nb_refugees_bygov = ln(1 + nb_refugees_bygov) 
 *if year == 2016
@@ -646,6 +413,11 @@ gen ln_nb_refugees_bygov = ln(1 + nb_refugees_bygov)
 
 lab var ln_nb_refugees_bygov "[CTRL] LOG Number of refugees out of camps by governorate in 2016"
 *ln_ref, as of now, does not include refugees in 2010, only in 2016
+
+****** Other
+gen IHS_nb_refugees_bygov = log(nb_refugees_bygov + ((nb_refugees_bygov^2 + 1)^0.5))
+lab var IHS_nb_refugees_bygov "IHS - Number of refugees out of camps by governorate in 2016"
+
 
 *********
 ** AGE **
@@ -672,33 +444,36 @@ replace distance_dis_camp = 0 if year == 2010
 
 gen inv_dist_camp = 1/distance_dis_camp
 replace inv_dist_camp = 0 if year == 2010
-gen ln_distance_dis_camp = log(1 + inv_dist_camp) 
+gen ln_invdistance_dis_camp = log(1 + inv_dist_camp) 
 
 *gen ln_distance_dis_camp = log(1 + distance_dis_camp) 
 *if year == 2016
 *replace ln_distance_dis_camp = 0 if year == 2010
-lab var ln_distance_dis_camp "[CTRL] LOG Distance (km) between JORD districts and ZAATARI CAMP in 2016"
+lab var ln_invdistance_dis_camp "[CTRL] LOG Inverse Distance (km) between JORD districts and ZAATARI CAMP in 2016"
 
-gen tot_nb_ref_2016 = 514274 if year == 2016
+tab nb_refugees_bygov
+gen tot_nb_ref_2016 = 513032 if year == 2016
 lab var tot_nb_ref_2016 "Number of Syrian refugee in Jordan in 2016"
 
-
-gen IV_SS_ref_inflow = nb_refugees_bygov*inv_dist_camp
+*THE INSTRUMENT 
+gen IV_SS_ref_inflow = tot_nb_ref_2016*inv_dist_camp
 replace IV_SS_ref_inflow = 0 if mi(IV_SS_ref_inflow)
 lab var IV_SS_ref_inflow "SSIV for refugee inflow: tot_nb_ref_2016 x inv_dist_camp"
 
 *THE INSTRUMENT 
 tab IV_SS_ref_inflow, m 
+bys district_iid: tab IV_SS_ref_inflow
+
+distinct IV_SS_ref_inflow
 
 *THE INSTRUMENT + TRANSFORMATION
 gen log_IV_SS_ref_inflow = log(1 + IV_SS_ref_inflow)
 lab var log_IV_SS_ref_inflow "LOG - SSIV for refugee inflow: tot_nb_ref_2016 x inv_dist_camp"
+replace log_IV_SS_ref_inflow = 0 if year == 2010
 
 gen IHS_IV_SS_ref_inflow = log(IV_SS_ref_inflow + ((IV_SS_ref_inflow^2 + 1)^0.5))
 lab var IHS_IV_SS_ref_inflow "IHS - SSIV for refugee inflow: tot_nb_ref_2016 x inv_dist_camp"
-
-gen IHS_nb_refugees_bygov = log(nb_refugees_bygov + ((nb_refugees_bygov^2 + 1)^0.5))
-lab var IHS_nb_refugees_bygov "IHS - Number of refugees out of camps by governorate in 2016"
+replace IHS_IV_SS_ref_inflow = 0 if year == 2010
 
 ************
 ** GENDER **
@@ -1475,24 +1250,25 @@ ren basicwg3 basic_wage_3m
       gen IHS_basic_rwage_3m = log(real_basic_wage_3m+((real_basic_wage_3m^2+1)^0.5))
       lab var IHS_basic_rwage_3m "IHS Basic Wage (3-month) - CONDITIONAL - UNEMPLOYED & OLF: WAGE MISSING"
 
+
       *Unconditional wage: IF UNEMPLOYED & OLF: WAGE IS 0
-      gen IHS_basic_rwage_uncond_unolf = IHS_basic_rwage_3m if employed_3cat_3m == 2
-      replace IHS_basic_rwage_uncond_unolf = 0 if employed_3cat_3m  == 1 | employed_3cat_3m  == 0 
-      tab IHS_basic_rwage_uncond_unolf
-      lab var IHS_basic_rwage_uncond_unolf "UNCONDITIONAL - UNEMPLOYED & OLF: WAGE 0 - IHS - Basic Wage (3-month)"
+      gen IHS_b_rwage_unolf = IHS_basic_rwage_3m if employed_3cat_3m == 2
+      replace IHS_b_rwage_unolf = 0 if employed_3cat_3m  == 1 | employed_3cat_3m  == 0 
+      tab IHS_b_rwage_unolf
+      lab var IHS_b_rwage_unolf "UNCONDITIONAL - UNEMPLOYED & OLF: WAGE 0 - IHS - Basic Wage (3-month)"
 
       *Unconditional wage: IF UNEMPLOYED : WAGE IS 0 / IF OLF: WAGE IS MISSING
-      gen IHS_basic_rwage_uncond_unemp = IHS_basic_rwage_3m if employed_3cat_3m == 2
-      replace IHS_basic_rwage_uncond_unemp = 0 if employed_3cat_3m == 1 //UNEMP
-      replace IHS_basic_rwage_uncond_unemp = . if employed_3cat_3m == 0 //OLF
-      tab IHS_basic_rwage_uncond_unemp
-      lab var IHS_basic_rwage_uncond_unemp "UNCONDITIONAL - UNEMPLOYED WAGE 0 / OLF WAGE MISSING - IHS Basic (3m)"
+      gen IHS_b_rwage_unemp = IHS_basic_rwage_3m if employed_3cat_3m == 2
+      replace IHS_b_rwage_unemp = 0 if employed_3cat_3m == 1 //UNEMP
+      replace IHS_b_rwage_unemp = . if employed_3cat_3m == 0 //OLF
+      tab IHS_b_rwage_unemp
+      lab var IHS_b_rwage_unemp "UNCONDITIONAL - UNEMPLOYED WAGE 0 / OLF WAGE MISSING - IHS Basic (3m)"
 
-tab IHS_basic_rwage_uncond_unemp employed_3cat_3m, m 
-tab IHS_basic_rwage_uncond_unolf employed_3cat_3m, m 
+tab IHS_b_rwage_unemp employed_3cat_3m, m 
+tab IHS_b_rwage_unolf employed_3cat_3m, m 
 
-su IHS_basic_rwage_uncond_unemp  
-su IHS_basic_rwage_uncond_unolf 
+su IHS_b_rwage_unemp  
+su IHS_b_rwage_unolf 
 
 *Bonuses and incentives (3-month)
 tab bonuses3, m 
@@ -1523,17 +1299,17 @@ tab total_wage_3m
       lab var IHS_total_rwage_3m "IHS Total Wage (3-month) - CONDITIONAL - UNEMPLOYED & OLF: WAGE MISSING"
 
       *Unconditional wage: IF UNEMPLOYED & OLF: WAGE IS 0
-      gen IHS_total_rwage_uncond_unolf = IHS_total_rwage_3m if employed_3cat_3m == 2
-      replace IHS_total_rwage_uncond_unolf = 0 if employed_3cat_3m  == 1 | employed_3cat_3m  == 0 
-      tab IHS_total_rwage_uncond_unolf
-      lab var IHS_total_rwage_uncond_unolf "UNCONDITIONAL - UNEMPLOYED & OLF: WAGE 0 - IHS - Total Wage (3-month)"
+      gen IHS_t_rwage_unolf = IHS_total_rwage_3m if employed_3cat_3m == 2
+      replace IHS_t_rwage_unolf = 0 if employed_3cat_3m  == 1 | employed_3cat_3m  == 0 
+      tab IHS_t_rwage_unolf
+      lab var IHS_t_rwage_unolf "UNCONDITIONAL - UNEMPLOYED & OLF: WAGE 0 - IHS - Total Wage (3-month)"
 
       *Unconditional wage: IF UNEMPLOYED : WAGE IS 0 / IF OLF: WAGE IS MISSING
-      gen IHS_total_rwage_uncond_unemp = IHS_total_rwage_3m if employed_3cat_3m == 2
-      replace IHS_total_rwage_uncond_unemp = 0 if employed_3cat_3m == 1 //UNEMP
-      replace IHS_total_rwage_uncond_unemp = . if employed_3cat_3m == 0 //OLF
-      tab IHS_total_rwage_uncond_unemp
-      lab var IHS_total_rwage_uncond_unemp "UNCONDITIONAL - UNEMPLOYED WAGE 0 / OLF WAGE MISSING - IHS Total (3m)"
+      gen IHS_t_rwage_unemp = IHS_total_rwage_3m if employed_3cat_3m == 2
+      replace IHS_t_rwage_unemp = 0 if employed_3cat_3m == 1 //UNEMP
+      replace IHS_t_rwage_unemp = . if employed_3cat_3m == 0 //OLF
+      tab IHS_t_rwage_unemp
+      lab var IHS_t_rwage_unemp "UNCONDITIONAL - UNEMPLOYED WAGE 0 / OLF WAGE MISSING - IHS Total (3m)"
 
 
          *** PRIMARY ***
