@@ -32,7 +32,7 @@ tab ftempst
 tab ln_nb_refugees_bygov 
 tab age  // Age
 tab age2 // Age square
-tab ln_distance_dis_camp //  LOG Distance (km) between JORD districts and ZAATARI CAMP in 2016
+*tab ln_distance_dis_camp //  LOG Distance (km) between JORD districts and ZAATARI CAMP in 2016
 tab gender //  Gender - 1 Male 0 Female
 tab hhsize //  Total o. of Individuals in the Household
 
@@ -145,7 +145,7 @@ xi: ivprobit bi_employed_olf_3m i.year i.district_iid ///
          $controls i.educ1d i.fteducst i.mteducst i.ftempst ln_nb_refugees_bygov ///
          ($dep_var = IHS_IV_SS) ///
          [pweight = expan_indiv], ///
-         vce(cl district_iid) 
+         vce(cl locality_iid) 
 codebook bi_employed_olf_3m, c
 estimates table, k($dep_var) star(.1 .05 .01) b(%7.4f) 
 estimates table, b(%7.4f) se(%7.4f) stats(N r2_a) k($dep_var) 
@@ -177,7 +177,7 @@ xi: ivregress 2sls bi_employed_olf_3m i.year i.district_iid ///
          i.ftempst ln_nb_refugees_bygov ///
           ($dep_var = IHS_IV_SS) ///
           [pweight = expan_indiv], ///
-         vce(cl district_iid)
+         vce(cl locality_iid)
 estimates table, k($dep_var) star(.1 .05 .01) b(%7.4f) 
 estimates table, b(%7.4f) se(%7.4f) stats(N r2_a) k($dep_var) 
 
@@ -189,7 +189,7 @@ xi: ivprobit bi_employed_3m i.year i.district_iid ///
          $controls i.educ1d i.fteducst i.mteducst i.ftempst ln_nb_refugees_bygov ///
          ($dep_var = IHS_IV_SS) ///
          [pweight = expan_indiv], ///
-         vce(cl district_iid) 
+         vce(cl locality_iid) 
 codebook bi_employed_3m, c
 estimates table, k($dep_var) star(.1 .05 .01) b(%7.4f) 
 estimates table, b(%7.4f) se(%7.4f) stats(N r2_a) k($dep_var) 
@@ -214,7 +214,7 @@ margins, dydx($dep_var) predict(pr)
             i.year i.district_iid ///
              $controls i.educ1d i.fteducst i.mteducst i.ftempst ln_nb_refugees_bygov ///
             if smpl == 1 [pweight = expan_indiv], ///
-            cluster(district_iid) robust
+            cluster(locality_iid) robust
     estimates table, k(IHS_IV_SS) star(.1 .05 .01)    
     estimates store mIV_`outcome', title(Model `outcome')
 
@@ -226,7 +226,7 @@ xi: ivregress 2sls bi_employed_3m i.year i.district_iid ///
          i.ftempst ln_nb_refugees_bygov ///
           ($dep_var = IHS_IV_SS) ///
           [pweight = expan_indiv], ///
-         vce(cl district_iid)
+         vce(cl locality_iid)
 estimates table, k($dep_var) star(.1 .05 .01) b(%7.4f) 
 estimates table, b(%7.4f) se(%7.4f) stats(N r2_a) k($dep_var) 
 
@@ -262,7 +262,7 @@ xi: ivprobit wp_industry_jlmps_3m i.year i.district_iid ///
          $controls i.educ1d i.fteducst i.mteducst i.ftempst ln_nb_refugees_bygov ///
          ($dep_var = IHS_IV_SS) ///
          [pweight = expan_indiv], ///
-         vce(cl district_iid) 
+         vce(cl locality_iid) 
 codebook wp_industry_jlmps_3m, c
 estimates table, k($dep_var) star(.1 .05 .01) b(%7.4f) 
 estimates table, b(%7.4f) se(%7.4f) stats(N r2_a) k($dep_var) 
@@ -286,7 +286,7 @@ xi: ivregress 2sls wp_industry_jlmps_3m i.year i.district_iid ///
          i.ftempst ln_nb_refugees_bygov ///
           ($dep_var = IHS_IV_SS) ///
           [pweight = expan_indiv], ///
-         vce(cl district_iid)
+         vce(cl locality_iid)
 estimates table, k($dep_var) star(.1 .05 .01) b(%7.4f) 
 estimates table, b(%7.4f) se(%7.4f) stats(N r2_a) k($dep_var) 
 
@@ -325,7 +325,7 @@ xi: ivprobit bi_formal i.year i.district_iid ///
          $controls i.educ1d i.fteducst i.mteducst i.ftempst ln_nb_refugees_bygov ///
          ($dep_var = IHS_IV_SS) ///
          [pweight = expan_indiv], ///
-         vce(cl district_iid)  
+         vce(cl locality_iid)  
 codebook bi_formal, c
 estimates table, k($dep_var) star(.1 .05 .01) b(%7.4f) 
 estimates table, b(%7.4f) se(%7.4f) stats(N r2_a) k($dep_var) 
@@ -349,7 +349,7 @@ xi: ivregress 2sls bi_formal i.year i.district_iid ///
          i.ftempst ln_nb_refugees_bygov ///
           ($dep_var = IHS_IV_SS) ///
           [pweight = expan_indiv], ///
-         vce(cl district_iid)
+         vce(cl locality_iid)
 estimates table, k($dep_var) star(.1 .05 .01) b(%7.4f) 
 estimates table, b(%7.4f) se(%7.4f) stats(N r2_a) k($dep_var) 
 
@@ -370,13 +370,13 @@ estimates table, b(%7.4f) se(%7.4f) stats(N r2_a) k($dep_var)
 *** 2SLS - Sep reg
 xi: reg $dep_var IHS_IV_SS i.year i.district_iid ///
 $controls i.educ1d i.fteducst i.mteducst ///
-[pweight = expan_indiv] , vce(cl district_iid)
+[pweight = expan_indiv] , vce(cl locality_iid)
 predict IV_hat, xb
 
 xi: probit wp_industry_jlmps_3m IV_hat i.year i.district_iid ///
 $controls i.educ1d i.fteducst i.mteducst ///
 [pweight = expan_indiv] ///
-, vce(cl district_iid)
+, vce(cl locality_iid)
 *IV_hat |  -.0024044   .0088933    -0.27   0.787    -.0198349    .0150262
 drop IV_hat
 
@@ -386,7 +386,7 @@ xi: ivprobit wp_industry_jlmps_3m  i.year ///
  i.district_iid $controls i.educ1d i.fteducst i.mteducst ///
  ($dep_var = IHS_IV_SS) ///
  [pweight = expan_indiv] /// 
- ,vce(cl district_iid)
+ ,vce(cl locality_iid)
 *agg_wp |  -.0029554    .008754    -0.34   0.736     -.020113    .0142022
 margins, dydx($dep_var) 
 
@@ -399,20 +399,20 @@ xi: ivregress 2sls wp_industry_jlmps_3m i.year i.district_iid ///
          i.ftempst ln_nb_refugees_bygov ///
           ($dep_var = IHS_IV_SS) ///
           [pweight = expan_indiv], ///
-         vce(cl district_iid)
+         vce(cl locality_iid)
 
 *** CGM Logit
 xi: reg $dep_var IHS_IV_SS i.year i.district_iid ///
          $controls i.educ1d i.fteducst i.mteducst ///
          i.ftempst ln_nb_refugees_bygov ///
          [pweight = expan_indiv], ///
-         vce(cl district_iid)
+         vce(cl locality_iid)
 predict IV_hat, xb
 
 xi: cgmlogit wp_industry_jlmps_3m IV_hat i.year i.district_iid ///
          $controls i.educ1d i.fteducst i.mteducst i.ftempst ln_nb_refugees_bygov ///
          [pweight = expan_indiv], ///
-         cluster(district_iid) 
+         cluster(locality_iid) 
 margins , dydx(*) 
 drop IV_hat
 

@@ -241,6 +241,8 @@ tab q5302_10, m //
 tab q5302_11, m //
 tab q5302_12, m //
 tab q5302_13, m //
+
+/*
 gen employed = 1 if q5101 == 1 | q5102 == 1 | q5301 == 1 
 replace employed = 0 if q5101 == 2 | q5102 == 2 | q5301 == 2 
 replace employed = .b if q5101 == 98 | q5102 == 98 | q5301 == 98 
@@ -248,6 +250,28 @@ tab employed, m
 lab def yesnodk 0 "No" 1 "Yes" .b "Don't know", modify
 lab val employed yesnodk
 tab employed, m
+*/
+*tab employed nationality_cl, m
+*tab employed_2 nationality_cl, m
+
+*tab employed_2
+*tab employed 
+tab usemp2 , m 
+tab usemp1 , m 
+tab cremp1 , m 
+tab cremp2 , m  
+
+gen employed = 0 if   usemp2 == 0 | usemp1 == 0 | ///
+                            cremp1 == 0 | cremp2 == 0 | ///
+                            q5101 == 2 | q5102 == 2 | q5301 == 2 
+
+replace employed = 1 if   usemp2 == 1 | usemp1 == 1 | ///
+                        cremp1 == 1 | cremp2 == 1 | ///
+                        q5101 == 1 | q5102 == 1 | q5301 == 1 
+*replace employed_2 = .b if q5101 == 98 | q5102 == 98 | q5301 == 98 
+
+*tab employed_2, m 
+*br if nationality_cl == 2 & mi(employed_2)
 
 *Industry
 /*
@@ -327,13 +351,31 @@ replace work_permit_orig = . if q11207 == 99 & employed == 0 & nationality_cl ==
 tab work_permit_orig
 lab var work_permit "From q11207. Do you have a permit to work in Jordan? - 1 Yes 0 No"
 
+
+*usinstsec
+
 *TRIAL: give 1 to refugees who said they have no WP but a legal contract
-tab q6145
+tab q6145  
 gen work_permit = work_permit_orig 
 *replace work_permit = 1 if q6145 == 1 & forced_migr == 1 //Forced Migrants
 replace work_permit = 1 if q6145 == 1 & nationality_cl == 2 //Syrians
 lab val work_permit yesnona
 lab var work_permit "From work_permit_orig + 1 to refugees who said they have no WP but a legal contract"
+
+
+*ADD THE PEOPLE WITH SOCIAL INSURANCE OR CONTRACTS
+tab crsocinsp, nol
+tab ussocinsp, m
+tab crcontrp, m 
+tab uscontrp, m 
+
+replace work_permit = 1 if (crsocinsp == 1 | ussocinsp == 1 | ///
+                            crcontrp == 1 | uscontrp == 1)  ///
+                            & nationality_cl == 2 
+
+
+
+tab work_permit, m 
 
 keep  indid district_iid governorate_iid work_permit work_permit_orig ///
     nationality_cl forced_migr ///

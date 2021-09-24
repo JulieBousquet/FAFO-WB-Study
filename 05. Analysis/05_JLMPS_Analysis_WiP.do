@@ -19,10 +19,10 @@ log using "$out_analysis/05_JLMPS_Analysis_WiP.log", replace
 
 use "$data_final/06_IV_JLMPS_Construct_Outcomes.dta", clear
 
-adoupdate, update
-findfile  ivreg2.ado
-adoupdate, update 
-ssc inst ivreg2, replace
+*adoupdate, update
+*findfile  ivreg2.ado
+*adoupdate, update 
+*ssc inst ivreg2, replace
 
 
 
@@ -127,7 +127,7 @@ foreach globals of global globals_list {
     qui xi: reg `outcome' $dep_var ///
              $controls i.educ1d i.fteducst i.mteducst i.ftempst ln_nb_refugees_bygov ///
             [pweight = expan_indiv],  ///
-            cluster(district_iid) robust 
+            cluster(locality_iid) robust 
     codebook `outcome', c
     estimates table, k($dep_var) star(.1 .05 .01) b(%7.4f) 
     estimates table, b(%7.4f) se(%7.4f) stats(N r2_a) k($dep_var) 
@@ -172,7 +172,7 @@ starlevels(* 0.1 ** 0.05 *** 0.01) ///
    title("Results OLS Regression"\label{tab1}) nofloat ///
    stats(N r2_a, labels("Obs" "Adj. R-Squared" "Control Mean")) ///
     nonotes ///
-    addnotes("Standard errors clustered at the district level. Significance levels: *p $<$ 0.1, ** p $<$ 0.05, *** p $<$ 0.01") 
+    addnotes("Standard errors clustered at the locality level. Significance levels: *p $<$ 0.1, ** p $<$ 0.05, *** p $<$ 0.01") 
 
 estimates drop m_job_stable_3m m_informal m_wp_industry_jlmps_3m ///
       m_member_union_3m m_skills_required_pjob  ///
@@ -195,7 +195,7 @@ foreach globals of global globals_list {
             i.district_iid i.year ///
              $controls i.educ1d i.fteducst i.mteducst i.ftempst ln_nb_refugees_bygov ///
             [pweight = expan_indiv],  ///
-            cluster(district_iid) robust 
+            cluster(locality_iid) robust 
     codebook `outcome', c
     estimates table, k($dep_var) star(.1 .05 .01) b(%7.4f) 
     estimates table, b(%7.4f) se(%7.4f) stats(N r2_a) k($dep_var) 
@@ -269,7 +269,7 @@ starlevels(* 0.1 ** 0.05 *** 0.01) ///
    title("Results OLS Regression with time and district FE"\label{tab1}) nofloat ///
    stats(N r2_a, labels("Obs" "Adj. R-Squared" "Control Mean")) ///
     nonotes ///
-    addnotes("Standard errors clustered at the district level. Significance levels: *p $<$ 0.1, ** p $<$ 0.05, *** p $<$ 0.01") 
+    addnotes("Standard errors clustered at the locality level. Significance levels: *p $<$ 0.1, ** p $<$ 0.05, *** p $<$ 0.01") 
 
 estimates drop m_job_stable_3m m_informal m_wp_industry_jlmps_3m ///
       m_member_union_3m m_skills_required_pjob  ///
@@ -291,12 +291,12 @@ ssc install ivreg2
 */
 foreach globals of global globals_list {
   foreach outcome of global `globals' {
-    qui xi: ivreg2  `outcome' ///
+    xi: ivreg2  `outcome' ///
                 i.year i.district_iid ///
                 $controls i.educ1d i.fteducst i.mteducst i.ftempst ln_nb_refugees_bygov ///
                 ($dep_var = IHS_IV_SS) ///
                 [pweight = expan_indiv], ///
-                cluster(district_iid) robust ///
+                cluster(locality_iid) robust ///
                 partial(i.district_iid) ///
                 first
     codebook `outcome', c
@@ -312,7 +312,7 @@ foreach globals of global globals_list {
             i.year i.district_iid ///
              $controls i.educ1d i.fteducst i.mteducst i.ftempst ln_nb_refugees_bygov ///
             if smpl == 1 [pweight = expan_indiv], ///
-            cluster(district_iid) robust
+            cluster(locality_iid) robust
     estimates table, k(IHS_IV_SS) star(.1 .05 .01)    
     estimates store mIV_`outcome', title(Model `outcome')
 
@@ -360,7 +360,7 @@ mtitles("Stable" "Informal" "Industry" "Union" "Skills" "Total W"  "Hourly W" "W
    title("Results IV Regression with District and Year FE"\label{tab1}) nofloat ///
    stats(N r2_a , labels("Obs" "Adj. R-Squared" "Control Mean")) ///
     nonotes ///
-    addnotes("Standard errors clustered at the district level. Significance levels: *p $<$ 0.1, ** p $<$ 0.05, *** p $<$ 0.01") 
+    addnotes("Standard errors clustered at the locality level. Significance levels: *p $<$ 0.1, ** p $<$ 0.05, *** p $<$ 0.01") 
 
 estimates drop m_job_stable_3m m_informal m_wp_industry_jlmps_3m ///
       m_member_union_3m m_skills_required_pjob  ///
@@ -432,7 +432,7 @@ mtitles("Stable" "Informal" "Industry" "Union" "Skills" "Total W"  "Hourly W" "W
    title("Results Stage 1 IV Regression with District and Year FE"\label{tab1}) nofloat ///
    stats(N r2_a , labels("Obs" "Adj. R-Squared" "Control Mean")) ///
     nonotes ///
-    addnotes("Standard errors clustered at the district level. Significance levels: *p $<$ 0.1, ** p $<$ 0.05, *** p $<$ 0.01") 
+    addnotes("Standard errors clustered at the locality level. Significance levels: *p $<$ 0.1, ** p $<$ 0.05, *** p $<$ 0.01") 
 
 estimates drop mIV_job_stable_3m mIV_informal mIV_wp_industry_jlmps_3m ///
       mIV_member_union_3m mIV_skills_required_pjob  ///
@@ -454,7 +454,7 @@ foreach globals of global globals_list {
             i.district_iid i.year i.sector_3m ///
              $controls i.educ1d i.fteducst i.mteducst i.ftempst ln_nb_refugees_bygov ///
             [pweight = expan_indiv],  ///
-            cluster(district_iid) robust 
+            cluster(locality) robust 
     codebook `outcome', c
     estimates table, k($dep_var) star(.1 .05 .01)
   }
@@ -471,7 +471,7 @@ foreach globals of global globals_list {
                 $controls i.educ1d i.fteducst i.mteducst i.ftempst ln_nb_refugees_bygov ///
                 ($dep_var = IHS_IV_SS) ///
                 [pweight = expan_indiv], ///
-                cluster(district_iid) ///
+                cluster(locality_iid) ///
                 partial(i.district_iid i.sector_3m) ///
                 first
     codebook `outcome', c
@@ -487,7 +487,7 @@ foreach globals of global globals_list {
             i.year i.district_iid i.sector_3m ///
             $controls i.educ1d i.fteducst i.mteducst i.ftempst ln_nb_refugees_bygov ///
             if smpl == 1 [pweight = expan_indiv], ///
-            cluster(district_iid) robust
+            cluster(locality_iid) robust
     estimates table,  k(IHS_IV_SS) star(.1 .05 .01)          
     drop smpl 
   }
@@ -532,7 +532,7 @@ mtitles("Stable" "Informal" "Industry" "Union" "Skills" "Total W"  "Hourly W" "W
    title("Results IV Regression with District, Year and Sector FE"\label{tab1}) nofloat ///
    stats(N r2_a , labels("Obs" "Adj. R-Squared" "Control Mean")) ///
     nonotes ///
-    addnotes("Standard errors clustered at the district level. Significance levels: *p $<$ 0.1, ** p $<$ 0.05, *** p $<$ 0.01") 
+    addnotes("Standard errors clustered at the locality level. Significance levels: *p $<$ 0.1, ** p $<$ 0.05, *** p $<$ 0.01") 
 
 estimates drop m_job_stable_3m m_informal m_wp_industry_jlmps_3m ///
       m_member_union_3m m_skills_required_pjob  ///
@@ -556,7 +556,7 @@ foreach globals of global globals_list {
                 $controls i.educ1d i.fteducst i.mteducst i.ftempst ln_nb_refugees_bygov ///
                 [pw=expan_indiv], ///
                 absorb(year indid_2010) ///
-                cluster(district_iid) 
+                cluster(locality_iid) 
       }
         * Then I partial out all variables
       foreach y in `outcome_l1' $dep_var $controls  educ1d fteducst mteducst ftempst ln_nb_refugees_bygov {
@@ -568,7 +568,7 @@ foreach globals of global globals_list {
       foreach y in `outcome_l1' $controls  educ1d fteducst mteducst ftempst ln_nb_refugees_bygov $dep_var  {
         rename o_`y' `y' 
       } 
-      qui reg `outcome_l1' $dep_var $controls i.educ1d i.fteducst i.mteducst i.ftempst ln_nb_refugees_bygov [pw=expan_indiv], cluster(district_iid) robust
+      qui reg `outcome_l1' $dep_var $controls i.educ1d i.fteducst i.mteducst i.ftempst ln_nb_refugees_bygov [pw=expan_indiv], cluster(locality_iid) robust
       codebook `outcome_l1', c
       estimates table,  k($dep_var) star(.1 .05 .01)           
     }
@@ -591,7 +591,7 @@ foreach globals of global globals_list {
                     $controls i.educ1d i.fteducst i.mteducst i.ftempst ln_nb_refugees_bygov ///
                     ($dep_var = IHS_IV_SS) ///
                     [pweight = expan_indiv], ///
-                    cluster(district_iid) robust ///
+                    cluster(locality_iid) robust ///
                     partial(i.district_iid) 
 
         qui gen smpl=0
@@ -606,7 +606,7 @@ foreach globals of global globals_list {
                $controls educ1d fteducst mteducst ftempst ln_nb_refugees_bygov ///
                ($dep_var = IHS_IV_SS) ///
                [pweight = expan_indiv], ///
-               cluster(district_iid) robust ///
+               cluster(locality_iid) robust ///
                first 
       estimates table, k($dep_var) star(.1 .05 .01) b(%7.4f) 
       estimates table, b(%7.4f) se(%7.4f) stats(N r2_a) k($dep_var) 
@@ -648,7 +648,7 @@ mtitles("Stable" "Informal" "Industry" "Union" "Skills" "Total W"  "Hourly W" "W
    title("Results IV Regression with Year and Individual FE"\label{tab1}) nofloat ///
    stats(N r2_a, labels("Obs" "Adj. R-Squared" "Control Mean")) ///
     nonotes ///
-    addnotes("Standard errors clustered at the district level. Significance levels: *p $<$ 0.1, ** p $<$ 0.05, *** p $<$ 0.01") 
+    addnotes("Standard errors clustered at the locality level. Significance levels: *p $<$ 0.1, ** p $<$ 0.05, *** p $<$ 0.01") 
 
 estimates drop m_job_stable_3m m_informal m_wp_industry_jlmps_3m ///
       m_member_union_3m m_skills_required_pjob  ///
@@ -715,7 +715,7 @@ drop if olf_16_unemp_10  == 1
                 $controls i.educ1d i.fteducst i.mteducst i.ftempst ln_nb_refugees_bygov ///
                 ($dep_var = IHS_IV_SS) ///
                 [pweight = expan_indiv], ///
-                cluster(district_iid) robust ///
+                cluster(locality_iid) robust ///
                 partial(i.district_iid) ///
                 first
     codebook `outcome', c
@@ -760,7 +760,7 @@ mtitles("Employed" "Unemployed" "Duration Unemp" "Basic W OLF" "Basic W" "Total 
    title("Results IV Regression with District and Year FE"\label{tab1}) nofloat ///
    stats(N r2_a , labels("Obs" "Adj. R-Squared" "Control Mean")) ///
     nonotes ///
-    addnotes("Standard errors clustered at the district level. Significance levels: *p $<$ 0.1, ** p $<$ 0.05, *** p $<$ 0.01") 
+    addnotes("Standard errors clustered at the locality level. Significance levels: *p $<$ 0.1, ** p $<$ 0.05, *** p $<$ 0.01") 
 
 estimates drop m_employed_3m m_unemployed_3m m_unempdurmth  ///
     m_IHS_b_rwage_unolf m_IHS_b_rwage_unemp m_IHS_t_rwage_unolf ///
@@ -779,7 +779,8 @@ use "$data_final/06_IV_JLMPS_Construct_Outcomes.dta", clear
 
 preserve 
 
-*bys year: su work_permit
+keep if nationality_cl == 2 
+bys year: su IHS_IV_SS
 
 restore 
 preserve

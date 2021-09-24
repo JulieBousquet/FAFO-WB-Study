@@ -107,13 +107,13 @@ lab var agg_wp "Agg WP"
 foreach globals of global globals_list {
   foreach outcome of global `globals'  {  
     gen cons=1
-    qui xi: ivreg2  `outcome'  ///
+     qui xi: ivreg2  `outcome'  ///
        i.year i.district_iid ///
        $controls i.educ1d i.fteducst i.mteducst i.ftempst ln_nb_refugees_bygov ///
        (c.$dep_var#i.wp_industry_jlmps_3m = c.IHS_IV_SS#i.wp_industry_jlmps_3m) ///
        c.cons#i.wp_industry_jlmps_3m ///       
        [pweight = expan_indiv], ///
-       cluster(district_iid) robust ///
+       cluster(locality_iid) robust ///
        partial(i.district_iid) ///
        first
     codebook `outcome', c
@@ -162,7 +162,7 @@ mtitles("Stable" "Informal" "Union" "Skills" "Total W"  "Hourly W" "WH pday" "WD
    title("Heterogenous INDUSTRY - IV Regression, District, Year FE"\label{tab1}) nofloat ///
    stats(N r2_a , labels("Obs" "Adj. R-Squared" "Control Mean")) ///
     nonotes ///
-    addnotes("Standard errors clustered at the district level. Significance levels: *p $<$ 0.1, ** p $<$ 0.05, *** p $<$ 0.01") 
+    addnotes("Standard errors clustered at the locality level. Significance levels: *p $<$ 0.1, ** p $<$ 0.05, *** p $<$ 0.01") 
 
 estimates drop m_job_stable_3m m_informal m_wp_industry_jlmps_3m ///
       m_member_union_3m m_skills_required_pjob  ///
@@ -188,7 +188,7 @@ foreach globals of global globals_list {
        (c.$dep_var#i.gender = c.IHS_IV_SS#i.gender) ///
        c.cons#i.gender ///       
        [pweight = expan_indiv], ///
-       cluster(district_iid) robust ///
+       cluster(locality_iid) robust ///
        partial(i.district_iid) ///
        first
     codebook `outcome', c
@@ -238,7 +238,7 @@ mtitles("Stable" "Informal" "Industry" "Union" "Skills" "Total W"  "Hourly W" "W
    title("Heterogenous GENDER - IV Regression, District, Year FE"\label{tab1}) nofloat ///
    stats(N r2_a , labels("Obs" "Adj. R-Squared" "Control Mean")) ///
     nonotes ///
-    addnotes("Standard errors clustered at the district level. Significance levels: *p $<$ 0.1, ** p $<$ 0.05, *** p $<$ 0.01") 
+    addnotes("Standard errors clustered at the locality level. Significance levels: *p $<$ 0.1, ** p $<$ 0.05, *** p $<$ 0.01") 
 
 estimates drop m_job_stable_3m m_informal m_wp_industry_jlmps_3m ///
       m_member_union_3m m_skills_required_pjob  ///
@@ -267,7 +267,7 @@ foreach globals of global globals_list {
        (c.$dep_var#i.bi_education = c.IHS_IV_SS#i.bi_education) ///
        c.cons#i.bi_education ///       
        [pweight = expan_indiv], ///
-       cluster(district_iid) robust ///
+       cluster(locality_iid) robust ///
        partial(i.district_iid) ///
        first
     codebook `outcome', c
@@ -314,7 +314,7 @@ mtitles("Stable" "Informal" "Industry" "Union" "Skills" "Total W"  "Hourly W" "W
    title("Heterogenous EDUCATION - IV Regression, District, Year FE"\label{tab1}) nofloat ///
    stats(N r2_a , labels("Obs" "Adj. R-Squared" "Control Mean")) ///
     nonotes ///
-    addnotes("Standard errors clustered at the district level. Significance levels: *p $<$ 0.1, ** p $<$ 0.05, *** p $<$ 0.01") 
+    addnotes("Standard errors clustered at the locality level. Significance levels: *p $<$ 0.1, ** p $<$ 0.05, *** p $<$ 0.01") 
 
 estimates drop m_job_stable_3m m_informal m_wp_industry_jlmps_3m ///
       m_member_union_3m m_skills_required_pjob  ///
@@ -341,7 +341,7 @@ foreach globals of global globals_list {
        (c.$dep_var#i.informal = c.IHS_IV_SS#i.informal) ///
        c.cons#i.informal ///       
        [pweight = expan_indiv], ///
-       cluster(district_iid) robust ///
+       cluster(locality_iid) robust ///
        partial(i.district_iid) ///
        first
     codebook `outcome', c
@@ -391,7 +391,7 @@ mtitles("Stable" "Industry" "Union" "Skills" "Total W"  "Hourly W" "WH pday" "WD
    title("Heterogenous INFORMAL - IV Regression, District, Year FE"\label{tab1}) nofloat ///
    stats(N r2_a , labels("Obs" "Adj. R-Squared" "Control Mean")) ///
     nonotes ///
-    addnotes("Standard errors clustered at the district level. Significance levels: *p $<$ 0.1, ** p $<$ 0.05, *** p $<$ 0.01") 
+    addnotes("Standard errors clustered at the locality level. Significance levels: *p $<$ 0.1, ** p $<$ 0.05, *** p $<$ 0.01") 
 
 
 

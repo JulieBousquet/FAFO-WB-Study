@@ -83,6 +83,11 @@ drop _merge
 gen agg_wp = agg_wp_2016
 replace agg_wp = 0 if year == 2010 //No WP in 2010
 replace agg_wp = 0 if mi(agg_wp) //No WP in District
+tab district_iid 
+
+*tab district_iid if nationality_cl == 2 
+*gen migr_in_district = 0 if mi(nationality_cl == 2) 
+*tab district_iid migr_in_district,m 
 *A few districts do not have indiv with WP: should I remove them?
 *drop if mi(agg_wp)
 lab var agg_wp "From work_permit: aggregated at the district level"
@@ -156,7 +161,8 @@ work_permit_orig + 1 to refugees who said they have no WP but a legal contract
 preserve
 tab forced_migr
 codebook forced_migr
-drop if forced_migr != 1
+*drop if forced_migr != 1
+drop if nationality_cl != 2
 distinct district_iid
 tab work_permit_orig, m
 collapse (sum) work_permit_orig if year == 2016, by(district_iid)
@@ -183,9 +189,6 @@ tab agg_wp_orig year, m
 bys year: distinct district_iid
 bys year: tab district_iid
 bys year: tab district_en
-
-
-
 
 ***********************************************************************
 **PREPARING THE SAMPLE ************************************************
@@ -290,6 +293,44 @@ drop _merge
 
 
 ***************
+* LOCALITY *
+*************** 
+
+
+preserve 
+codebook locality
+
+*keep if nationality_cl == 1 //Keep only the jordanians
+*keep if nationality_cl != 2 //Keep all but the syrians
+tab locality year, m 
+
+keep locality indid_2010 year
+reshape wide locality, i(indid_2010) j(year)
+
+replace locality2010 = locality2016 
+tab locality2010
+tab locality2016
+
+reshape long locality, i(indid_2010) j(year)
+format indid_2010 %12.0g
+
+tempfile data_nat
+save `data_nat'
+restore 
+
+drop locality 
+merge 1:1 indid_2010 year using  `data_nat'
+drop _merge 
+
+tab locality, m 
+egen locality_iid = concat(district_iid locality)
+tab locality_iid, m 
+tab  locality_iid year
+distinct locality_iid
+bys district_iid: tab locality_iid
+
+
+***************
 * WORKING AGE *
 *************** 
 
@@ -381,9 +422,6 @@ replace age = age2016 if check == 1 & year == 2016
 replace age = age2010 if check == 1 & year == 2010
 
 drop check age2016 age2010 
-
-
-
 
 
 /*---------*********************************************************************-----------
