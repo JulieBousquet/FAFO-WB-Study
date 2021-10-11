@@ -55,6 +55,7 @@ And then we compare the EMPLOYED and UNEMP/OLF
 and see whether having a WP has been a determinant
 in being employed (=remaining employed)
 */
+
 use "$data_final/06_IV_JLMPS_Construct_Outcomes.dta", clear
 
 **************
@@ -110,8 +111,7 @@ drop if age < 11 & year == 2010
 
 keep if unemp_10_emp_16 == 1 | unemp_16_10 == 1 
 
-***********        
-****
+***************
 *** TRANSFO ***
 ***************
 bys year: tab employed_3cat_3m 
@@ -133,6 +133,7 @@ estimates table, k($dep_var) star(.1 .05 .01) b(%7.4f)
 estimates table, b(%7.4f) se(%7.4f) stats(N r2_a) k($dep_var) 
 
 margins, dydx($dep_var) 
+
 
 *PROBABILITY OF BEING EMPLOYED INTERACTED BY EDUCATION LEVEL
 tab bi_education, m 
@@ -392,8 +393,9 @@ lab val wp_industry_jlmps_3m wp_industry_jlmps_3m
 *****************
 *** IV PROBIT ***
 *****************
+*drop if year == 2010 
 
-xi: ivprobit wp_industry_jlmps_3m i.year i.district_iid ///
+ivprobit wp_industry_jlmps_3m i.year i.district_iid ///
          $controls i.educ1d i.fteducst i.mteducst i.ftempst ln_nb_refugees_bygov ///
          ($dep_var = IHS_IV_SS) ///
          [pweight = expan_indiv], ///
@@ -455,8 +457,16 @@ drop if age > 64 & year == 2016
 drop if age > 60 & year == 2010 
 drop if age < 15 & year == 2016 
 drop if age < 11 & year == 2010 
+
+egen indiv_2y = count(indid_2010), by(indid_2010)
+tab indiv_2y
+drop if indiv_2y == 1
 keep if emp_16_10 == 1 
 
+*keep formally empl 2010 
+*gen flag  = 1 if bi_formal == 1 & year == 2010
+
+*multinomial analysis with empl formal, informal, unemp
 * SET THE PANEL STRUCTURE
 xtset, clear 
 xtset indid_2010 year 
@@ -464,17 +474,18 @@ xtset indid_2010 year
 ***************
 *** TRANSFO ***
 ***************
-bys year: tab informal , nol
-recode informal (1=0) (0=1), gen(bi_formal)
-lab def bi_formal 1 "Formal" 0 "Informal", modify
-lab val bi_formal bi_formal
-lab var bi_formal "Formal Employment - 1 Formal 0 Informal"
-bys year: tab bi_formal , nol
+tab empl_form_10_info_16, m
+tab empl_form_16_info_10, m
+tab empl_form_10_16, m
+tab empl_info_10_16, m
+tab empl_form_10_unemp_16, m
+tab empl_info_10_unemp_16, m
 
 *****************
 *** IV PROBIT ***
 *****************
-xi: ivprobit bi_formal i.year i.district_iid ///
+drop if year == 2010 
+ivprobit bi_formal i.district_iid ///
          $controls i.educ1d i.fteducst i.mteducst i.ftempst ln_nb_refugees_bygov ///
          ($dep_var = IHS_IV_SS) ///
          [pweight = expan_indiv], ///

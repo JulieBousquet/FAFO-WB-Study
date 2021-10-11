@@ -169,7 +169,7 @@ tab IHS_IV_SS_ref_inflow
 
 foreach globals of global globals_list {
   foreach outcome of global `globals' {
-    qui xi: ivreg2  `outcome' ///
+     xi: ivreg2  `outcome' ///
                 i.year i.district_iid ///
                 $controls i.educ1d i.fteducst i.mteducst i.ftempst  ///
                 ($dep_var IHS_nb_refugees_bygov = IHS_IV_SS IHS_IV_SS_ref_inflow) ///
@@ -343,7 +343,7 @@ tab IHS_IV_SS_ref_inflow
 
 foreach globals of global globals_list {
   foreach outcome of global `globals' {
-    qui xi: ivreg2  `outcome' ///
+    xi: ivreg2  `outcome' ///
                 i.year i.district_iid ///
                 $controls i.educ1d i.fteducst i.mteducst i.ftempst  ///
                 (IHS_nb_refugees_bygov = IHS_IV_SS_ref_inflow) ///
@@ -458,7 +458,7 @@ esttab mIV_job_stable_3m mIV_informal mIV_wp_industry_jlmps_3m ///
       mIV_member_union_3m mIV_skills_required_pjob  ///
       mIV_IHS_total_rwage_3m  mIV_IHS_hourly_rwage ///
       mIV_work_hours_pweek_3m_w mIV_work_days_pweek_3m /// 
-      using "$out_analysis/reg_robust_m3__IVRef_stage1.tex", se label replace booktabs ///
+      using "$out_analysis/reg_robust_m3_IVRef_stage1.tex", se label replace booktabs ///
       cells(b(star fmt(%9.1f)) se(par fmt(%9.1f))) ///
 mtitles("Stable" "Informal" "Industry" "Union" "Skills" "Total W"  "Hourly W" "WH pday" "WD pweek") ///
   drop(age age2 gender hhsize _Ieduc1d_2 _Ieduc1d_3 _Ieduc1d_4 _Ieduc1d_5 ///

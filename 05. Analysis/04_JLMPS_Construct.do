@@ -859,11 +859,45 @@ codebook employed_3cat_3m
 4,809         2  Employed (no subs)
 2,942         .  
 */
+
+
+                                 *******************************
+                                 ****       INFORMAL        ****
+                                 *******************************
+
+/* whether individuals have formal work (with a contract or social
+insurance) or informal work (neither a contract nor social insurance).
+*/
+
+*Informal if NO WORK CONTRACT and NO INSURANCE
+
+tab ussocinsp
+tab uscontrp
+gen informal = 1 if ussocinsp == 0 
+replace informal = 1 if uscontrp == 0 
+replace informal = 0 if ussocinsp == 1
+replace informal = 0 if uscontrp == 1
+tab informal, m
+lab var informal "1 Informal - 0 Formal - Informal if no contract (uscontrp=0) and no insurance (ussocinsp=0)"
+tab informal usemp1
+
+lab def informal 1 "Informal" 0 "Formal", modify
+lab val informal informal
+tab informal, m 
+
+
+bys year: tab informal , nol
+recode informal (1=0) (0=1), gen(bi_formal)
+lab def bi_formal 1 "Formal" 0 "Informal", modify
+lab val bi_formal bi_formal
+lab var bi_formal "Formal Employment - 1 Formal 0 Informal"
+bys year: tab bi_formal , nol
+
 preserve 
 
 
-keep employed_3cat_3m indid_2010 year job1_y dstcrj
-reshape wide employed_3cat_3m job1_y dstcrj  , i(indid_2010) j(year)
+keep employed_3cat_3m indid_2010 year job1_y dstcrj bi_formal
+reshape wide employed_3cat_3m job1_y dstcrj bi_formal, i(indid_2010) j(year)
 format indid_2010 %12.0g
 
 replace employed_3cat_3m2010 = 2 if mi(employed_3cat_3m2010) & dstcrj2016 <2010
@@ -920,6 +954,21 @@ gen olf_10_unemp_16 = 1 if employed_3cat_3m2010 == 0 & employed_3cat_3m2016 == 1
 
 *UNEMP 2016 - EMP 2010
 gen olf_16_unemp_10 = 1 if employed_3cat_3m2016 == 0 & employed_3cat_3m2010 == 1
+
+codebook employed_3cat_3m2010
+codebook bi_formal2010
+gen empl_form_10_info_16 = 1 if  bi_formal2010 == 1 & ///
+                                 bi_formal2016 == 0
+gen empl_form_16_info_10 = 1 if  bi_formal2010 == 0 & ///
+                                 bi_formal2016 == 1
+gen empl_form_10_16 = 1 if  bi_formal2010 == 1 & ///
+                            bi_formal2016 == 1
+gen empl_info_10_16 = 1 if  bi_formal2010 == 0 & ///
+                            bi_formal2016 == 0
+gen empl_form_10_unemp_16 = 1 if  bi_formal2010 == 1 & ///
+                                  employed_3cat_3m2010 == 1 
+gen empl_info_10_unemp_16 = 1 if  bi_formal2010 == 0 & ///
+                                  employed_3cat_3m2010 == 1 
 
 /*
 gen flag = 1 if   mi(miss_16_10) & ///
@@ -983,16 +1032,22 @@ tab unemp_10_emp_16, m
 tab unemp_16_emp_10, m 
 tab olf_10_unemp_16, m 
 tab olf_16_unemp_10, m 
+tab empl_form_10_info_16, m
+tab empl_form_16_info_10, m
+tab empl_form_10_16, m
+tab empl_info_10_16, m
+tab empl_form_10_unemp_16, m
+tab empl_info_10_unemp_16, m
 
 
-reshape long employed_3cat_3m, i(indid_2010) j(year)
+reshape long employed_3cat_3m bi_formal, i(indid_2010) j(year)
 format indid_2010 %12.0g
 
 tempfile data_empl
 save `data_empl'
 restore 
 
-drop employed_3cat_3m 
+drop employed_3cat_3m bi_formal
 merge 1:1 indid_2010 year using  `data_empl'
 drop _merge
 
@@ -1006,6 +1061,7 @@ insurance) or informal work (neither a contract nor social insurance).
 */
 
 *Informal if NO WORK CONTRACT and NO INSURANCE
+/*
 
 tab ussocinsp
 tab uscontrp
@@ -1020,7 +1076,7 @@ tab informal usemp1
 lab def informal 1 "Informal" 0 "Formal", modify
 lab val informal informal
 tab informal, m 
-
+*/ 
 *Usual main job(ref. 3-month) is irregular
 tab usirreg, m 
 codebook  usirreg

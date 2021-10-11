@@ -289,6 +289,8 @@ adoupdate ivreg2, update
 ado uninstall ivreg2
 ssc install ivreg2
 */
+
+
 foreach globals of global globals_list {
   foreach outcome of global `globals' {
     xi: ivreg2  `outcome' ///

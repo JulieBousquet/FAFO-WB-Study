@@ -17,8 +17,8 @@ Creation Date:    18 September 2020
 	*Change the data path 
 if inlist(c(username), "u0131185", "julie") == 1 {
    
-	*global github 	`"/users/`c(username)'/Documents/GitHub/FAFO-WB-Study-Jordan/"'
-	global github 	`"/users/`c(username)'/OneDrive/Documents/GitHub/FAFO-WB-Study-Jordan/"'
+	global github 	`"/users/`c(username)'/Documents/GitHub/FAFO-WB-Study-Jordan/"'
+	*global github 	`"/users/`c(username)'/OneDrive/Documents/GitHub/FAFO-WB-Study-Jordan/"'
 	global dropbox	`"/users/`c(username)'/Dropbox/Fafo-WB Study/Jordan/06. DataWork/"'
    
    }
@@ -135,6 +135,12 @@ if inlist(c(username), "u0131185", "julie") == 1 {
 	**     RUN THE GLOBALS     **
 	*****************************
 	qui do "$do_analysis/08_Globals.do"
+
+	qui do "$do_analysis/05_JLMPS_Analysis_WiP.do"
+	qui do "$do_analysis/06_Robsutness.do"
+	qui do "$do_analysis/07_Heterogenous.do"
+	qui do "$do_analysis/10_JLMPS_Analysis_EM.do"
+	*qui do "$do_analysis/.do"
 
 
 
