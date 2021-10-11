@@ -484,8 +484,8 @@ tab empl_info_10_unemp_16, m
 *****************
 *** IV PROBIT ***
 *****************
-drop if year == 2010 
-ivprobit bi_formal i.district_iid ///
+*drop if year == 2010 
+ivprobit bi_formal i.year i.district_iid ///
          $controls i.educ1d i.fteducst i.mteducst i.ftempst ln_nb_refugees_bygov ///
          ($dep_var = IHS_IV_SS) ///
          [pweight = expan_indiv], ///

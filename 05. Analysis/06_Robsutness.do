@@ -100,7 +100,7 @@ xtset indid_2010 year
          ****************************************************************************
          ***** Controlling for c.distance_dis_camp##i.year or usig it as an IV ******
          ****************************************************************************
-/*
+
 sum distance_dis_camp year
 gen d2016=0
 replace d2016=1 if year==2016
@@ -109,11 +109,30 @@ gen inter_dist=ldistance_dis_camp*d2016
 
 sum $controls 
 
-xi: ivreg2 ln_wage i.year i.district_iid i.crsectrp i.educ1d i.fteducst i.mteducst age age2 sex hhsize (agg_wp ln_ref= log_IV_SS inter_dist) ///
-  if forced_migr==0 & usemp1 == 1 & nationality_cl == 1  [pweight = expan_indiv],  liml cluster(locality_iid) ///
-                      partial(i.district_iid  i.crsectrp) 
-  
-*/ 
+*with the distance to the border $\times$ sector dummy 
+xi: ivreg2 IHS_basic_rwage_3m ///
+    i.year i.district_iid i.crsectrp i.educ1d ///
+    i.fteducst i.mteducst age age2 sex hhsize ///
+    (agg_wp ln_nb_refugees_bygov= IHS_IV_SS inter_dist) ///
+    [pweight = expan_indiv], ///
+     liml cluster(locality_iid) ///
+     partial(i.district_iid  i.crsectrp) 
+    estimates table, k($dep_var) star(.1 .05 .01) b(%7.4f) 
+    estimates table, b(%7.4f) se(%7.4f) stats(N r2_a) k($dep_var) 
+
+*the border $\times$ time dummy
+gen interact =  inter_dist*crsectrp
+xi: ivreg2 IHS_basic_rwage_3m ///
+    i.year i.district_iid i.crsectrp i.educ1d ///
+    i.fteducst i.mteducst age age2 sex hhsize i.inter_dist i.interact ///
+    (agg_wp = IHS_IV_SS) ///
+    [pweight = expan_indiv], ///
+     liml cluster(locality_iid) ///
+     partial(i.district_iid  i.crsectrp) 
+    estimates table, k($dep_var) star(.1 .05 .01) b(%7.4f) 
+    estimates table, b(%7.4f) se(%7.4f) stats(N r2_a) k($dep_var) 
+    estimates store m_`outcome', title(Model `outcome')
+
 
 
 *$dep_var IHS_nb_refugees_bygov = IHS_IV_SS IHS_IV_SS_ref_inflow)
@@ -345,7 +364,7 @@ foreach globals of global globals_list {
   foreach outcome of global `globals' {
     xi: ivreg2  `outcome' ///
                 i.year i.district_iid ///
-                $controls i.educ1d i.fteducst i.mteducst i.ftempst  ///
+                $controls i.educ1d i.fteducst i.mteducst i.ftempst agg_wp ///
                 (IHS_nb_refugees_bygov = IHS_IV_SS_ref_inflow) ///
                 [pweight = expan_indiv], ///
                 cluster(locality_iid) robust ///

@@ -775,17 +775,17 @@ estimates drop m_employed_3m m_unemployed_3m m_unempdurmth  ///
 //  SUMMARY STATISTICS
 ************************************************
 
-use "$data_final/06_IV_JLMPS_Construct_Outcomes.dta", clear
 
 
 
-preserve 
+use "$data_final/05_IV_JLMPS_MergingIV.dta", clear
 
 keep if nationality_cl == 2 
-bys year: su IHS_IV_SS
+bys year: su IV_SS
 
-restore 
-preserve
+
+use "$data_final/06_IV_JLMPS_Construct_Outcomes.dta", clear
+
 
 bys year: su agg_wp 
 bys year: su IHS_IV_SS
@@ -808,6 +808,7 @@ bys year: su unemployed_3m // From unempsr1m - mrk def, search req; 3m, empl or 
 bys year: su unempdurmth  // Current unemployment duration (in months)
 bys year: su employed_3m  // From uswrkstsr1 - mkt def, search req; 3m, 2 empl - 1 unemp - OLF miss
 
+/*
 drop if unemp_16_10 == 1
 drop if olf_16_10 == 1
 
@@ -817,6 +818,10 @@ drop if unemp_16_miss_10 == 1
 drop if unemp_10_miss_16 == 1
 drop if olf_16_miss_10 == 1
 drop if olf_10_miss_16 == 1 
+*/
+
+keep if emp_16_10 == 1 
+
 
 bys year: su job_stable_3m //  From usstablp - Stability of employement (3m) - 1 permanent - 0 temp, seas, cas
 bys year: su informal  // 1 Informal - 0 Formal - Informal if no contract (uscontrp=0) and no insurance (ussocinsp=0)
