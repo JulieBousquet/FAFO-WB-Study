@@ -360,11 +360,13 @@ lab var IHS_IV_SS_ref_inflow "IHS IV Nb Refugees"
 tab IHS_nb_refugees_bygov
 tab IHS_IV_SS_ref_inflow
 
+*control AGG_WP  
+
 foreach globals of global globals_list {
   foreach outcome of global `globals' {
     xi: ivreg2  `outcome' ///
                 i.year i.district_iid ///
-                $controls i.educ1d i.fteducst i.mteducst i.ftempst agg_wp ///
+                $controls i.educ1d i.fteducst i.mteducst i.ftempst  ///
                 (IHS_nb_refugees_bygov = IHS_IV_SS_ref_inflow) ///
                 [pweight = expan_indiv], ///
                 cluster(locality_iid) robust ///

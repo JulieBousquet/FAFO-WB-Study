@@ -103,11 +103,33 @@ lab val wp_industry_jlmps_3m wp_industry_jlmps_3m
 codebook agg_wp
 lab var agg_wp "Agg WP"
 
+********************** CORRECT VERSION FROM JF 14/10/21 *********
+gen open = 0 
+replace open = 1 if wp_industry_jlmps_3m == 1 
+
+gen inter_open = open*agg_wp 
+gen inter_open_IV = open*IHS_IV_SS 
+
+     xi: ivreg2  job_stable_3m   ///
+       i.year i.district_iid ///
+       $controls i.educ1d i.fteducst i.mteducst i.ftempst ln_nb_refugees_bygov ///
+       (agg_wp inter_open = IHS_IV_SS inter_open_IV) ///
+       i.open ///       
+       [pweight = expan_indiv], ///
+       cluster(locality_iid) robust ///
+       partial(i.district_iid) 
+    codebook `outcome', c
+    estimates table,  k(wp_industry_jlmps_3m#c.$dep_var) star(.1 .05 .01) b(%7.4f)
+    estimates table, b(%7.4f) se(%7.4f) stats(N r2_a) k(wp_industry_jlmps_3m#c.$dep_var) 
+    estimates store m_`outcome', title(Model `outcome')
+    drop cons
+
+********************************************************
 
 foreach globals of global globals_list {
   foreach outcome of global `globals'  {  
     gen cons=1
-     qui xi: ivreg2  `outcome'  ///
+     xi: ivreg2  `outcome'  ///
        i.year i.district_iid ///
        $controls i.educ1d i.fteducst i.mteducst i.ftempst ln_nb_refugees_bygov ///
        (c.$dep_var#i.wp_industry_jlmps_3m = c.IHS_IV_SS#i.wp_industry_jlmps_3m) ///
