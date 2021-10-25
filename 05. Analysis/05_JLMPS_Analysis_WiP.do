@@ -804,8 +804,14 @@ drop if miss_16_10 == 1
 *drop if olf_16_miss_10 == 1
 *drop if olf_10_miss_16 == 1 
 
-bys year: su unemployed_3m // From unempsr1m - mrk def, search req; 3m, empl or unemp, OLF is miss
 bys year: su unempdurmth  // Current unemployment duration (in months)
+bys year: tab unempdurmth  // Current unemployment duration (in months)
+
+codebook employed_3m
+recode employed_3m (1=0) (2=1)
+lab def employed_3m 0 "Unemployed" 1 "Employed", modify
+lab val employed_3m employed_3m
+tab employed_3m
 bys year: su employed_3m  // From uswrkstsr1 - mkt def, search req; 3m, 2 empl - 1 unemp - OLF miss
 
 /*

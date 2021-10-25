@@ -24,32 +24,170 @@ log using "$out_analysis/02_JLMPS_Comp_10_16.log", replace
 .a Non applicable (99)
 .b Don't know (98)
 */
+/* ORIGINAL CODE 
+*Dictiornnary of geo unit Jordan as of 2015
+import excel "$data_JLMPS_base/Location Codes Arabic 2015 revised 1.19.16 (for 2016).xlsx", firstrow clear
+*drop SubDistrict SubDistrictID Localities LocalitiesID
+duplicates drop district_en, force 
+destring governorate district_id, replace 
+
+list governorate_en district_id district_en
+egen district_iid = concat(governorate district_id)
+tab district_en 
+*destring governorate district_id, replace 
+sort governorate district_id
+save "$data_JLMPS_temp/JLMPS_GeoUnits_Dico.dta", replace
+*/
+
+
+
+/*
+import excel "$data_JLMPS_base/Location Codes Arabic 2015 revised 1.19.16 (for 2016).xlsx", firstrow clear
+*keep governorate district_id Localities LocalitiesID SubDistrictID
+destring governorate district_id LocalitiesID SubDistrictID, replace 
+duplicates drop Localities, force 
+egen locality_iid = concat(governorate district_id LocalitiesID SubDistrictID)
+distinct locality_iid
+list governorate_en district_id Localities LocalitiesID
+
+destring governorate district_id, replace 
+sort governorate district_id
+save "$data_JLMPS_temp/JLMPS_GeoUnits_Dico_Locality.dta", replace
+
+*/
 
 *Dictiornnary of geo unit Jordan as of 2015
 import excel "$data_JLMPS_base/Location Codes Arabic 2015 revised 1.19.16 (for 2016).xlsx", firstrow clear
-drop SubDistrict SubDistrictID Localities LocalitiesID
-duplicates drop district_en, force 
-tab district_en 
-destring governorate district_id, replace 
-sort governorate district_id
+
+ren governorate governorate_iid 
+ren SubDistrict subdistrict_ar
+ren SubDistrictID subdistrict_id
+ren Localities locality_ar
+ren LocalitiesID locality_id
+
+destring governorate_iid district_id subdistrict_id locality_id, replace 
+
+distinct governorate_iid //12
+
+bys governorate_iid : distinct district_id
+egen district_iid = concat(governorate_iid district_id)
+distinct district_iid //51
+distinct district_en //51
+
+distinct district_iid 
+bys district_iid : distinct subdistrict_id
+egen subdistrict_iid = concat(governorate_iid district_id subdistrict_id)
+distinct subdistrict_iid //89
+distinct subdistrict_ar //89
+
+distinct locality_id 
+egen locality_iid = concat(governorate_iid district_id subdistrict_id locality_id)
+duplicates drop locality_iid, force 
+distinct locality_iid //983
+destring district_iid subdistrict_iid locality_iid, replace 
+
+drop district_lat district_long
+
+save "$data_JLMPS_temp/JLMPS_GeoUnits_Dico_updated2016.dta", replace
+
+
+
+import excel "$data_JLMPS_base/Geographic Codes (Arabic-English).xlsx", firstrow sheet("LOC + GPS") clear
+*duplicates drop districtlabelEN, force 
+ren govcode governorate_iid
+ren govlabelAR governorate_ar
+ren govlabelEN governorate_en
+ren districtcode district_id 
+ren districtlabelAR district_ar
+ren districtlabelEN district_en
+ren subdiscode subdistrict_id
+ren subdislabelAR subdistrict_ar
+ren subdislabelEN subdistrict_en 
+ren localitycode locality_id 
+ren localitylabelAR locality_ar 
+ren localitylabelEN locality_en 
+ren zonecode zone_id 
+ren zonelabelAR zone_ar 
+ren neighborhoodcode neighborhood_id
+
+distinct governorate_iid 
+bys governorate_iid : distinct district_id
+egen district_iid = concat(governorate_iid district_id)
+distinct district_iid //51
+distinct district_en //51
+
+distinct district_iid 
+bys district_iid : distinct subdistrict_id
+egen subdistrict_iid = concat(governorate_iid district_id subdistrict_id)
+distinct subdistrict_iid //89
+distinct subdistrict_en //89
+
+distinct locality_id 
+egen locality_iid = concat(governorate_iid district_id subdistrict_id locality_id)
+duplicates drop locality_iid, force 
+
+destring district_iid subdistrict_iid locality_iid, replace 
+
+distinct locality_iid //1043
+
+merge 1:1 locality_iid using  "$data_JLMPS_temp/JLMPS_GeoUnits_Dico_updated2016.dta"
+drop _merge 
+
 save "$data_JLMPS_temp/JLMPS_GeoUnits_Dico.dta", replace
+
+
+
+
 
 
 *DATA 2016 ONLY to extract the WORK PERMIT VARIABLE AT THE INDIV LEVEL
 use "$data_JLMPS_base/JLMPS 2016 xs v1.1.dta", clear 
 
-tab gov 
-codebook gov
+
+ren gov governorate_iid 
+ren district district_id
+ren subdistrict subdistrict_id 
+ren locality locality_id 
+
 lab list Lgov
 
-bys gov: tab district, m 
+/*
+          11 Amman
+          12 Balqa
+          13 Zarqa
+          14 Madaba
+          21 Irbid
+          22 Mafraq
+          23 Jarash
+          24 Ajloun
+          31 Karak
+          32 Tafileh
+          33 Ma'an
+          34 Aqaba
+          97 Other
+          98 Don't Know
+*/
 
-ren gov governorate
-ren district district_id
-sort governorate district_id
+distinct governorate_iid //12
 
-merge m:1 governorate district_id using "$data_JLMPS_temp/JLMPS_GeoUnits_Dico.dta"
-drop _merge 
+egen district_iid = concat(governorate_iid district_id)
+distinct district_iid //51
+
+egen subdistrict_iid = concat(governorate_iid district_id subdistrict_id)
+distinct subdistrict_iid //87
+
+egen locality_iid = concat(governorate_iid district_id subdistrict_id locality_id)
+distinct locality_iid //334
+destring district_iid subdistrict_iid locality_iid, replace 
+
+merge m:1 locality_iid using "$data_JLMPS_temp/JLMPS_GeoUnits_Dico.dta"
+
+drop if _merge == 2 //Not merged from initial list 
+distinct district_iid
+
+***************
+* WORK PERMIT *
+***************
 
 tab q11207
 
@@ -65,24 +203,13 @@ Not Applicable |        472       26.18      100.00
 ---------------+-----------------------------------
          Total |      1,803      100.00
 */
-bys forced_migr: tab  q11207
 
-/*
-q11207. Do you |
- have a permit |
-    to work in |
-       Jordan? |      Freq.     Percent        Cum.
----------------+-----------------------------------
-           Yes |        134        9.36        9.36
-            No |        880       61.45       70.81
-Not Applicable |        418       29.19      100.00
----------------+-----------------------------------
-         Total |      1,432      100.00
-*/
 
 bys nationality_cl: tab  q11207
 
 /*
+-> nationality_cl = Syrian
+
 q11207. Do you |
  have a permit |
     to work in |
@@ -93,17 +220,9 @@ q11207. Do you |
 Not Applicable |        400       30.58      100.00
 ---------------+-----------------------------------
          Total |      1,308      100.00
+
 */
 
-
-
-tab  district_en
-sort district_en
-egen district_iid = group(district_en) 
-
-tab governorate_en
-sort governorate_en
-egen governorate_iid = group(governorate_en)
 
 gen year = round 
 tab year
@@ -120,6 +239,28 @@ tab year
 save "$data_JLMPS_final/01_JLMPS_16_xs_clear.dta", replace
 
 
+use "$data_JLMPS_base/JLMPS 2016 panel v1.1.dta", clear 
+
+tab locality_16, m 
+br gov_16 gov_10
+codebook gov_16 gov_10
+lab list Lgov 
+lab list governorate 
+
+br district_16 district_10
+codebook district_16 district_10
+
+br subdistrict_16 subdistrict_10
+codebook subdistrict_16 subdistrict_10
+
+tab locality_16
+
+
+egen locality_iid = concat(governorate_iid district_id subdistrict_id locality_id) if !mi(locality_id)
+distinct locality_iid //505
+
+merge m:1 locality_iid using "$data_JLMPS_temp/JLMPS_GeoUnits_Dico.dta"
+
 
 *USE LSMS 2016 & LSMS 2010: CROSS SECTIONAL AND THE TWO years
 *BUT REMOVED NON HARMNONIZED VARIABLES: WHICH MEANS THAT THE VARIABLES
@@ -127,27 +268,45 @@ save "$data_JLMPS_final/01_JLMPS_16_xs_clear.dta", replace
 *I WILL JUST MERGE BY INDIV ID LATER
 use "$data_JLMPS_base/JLMPS 2016 rep xs v1.1.dta", clear 
 
+merge m:1 Findid using "$data_JLMPS_base/JLMPS 2016 panel v1.1.dta", keepusing(Findid panel_wt_10_16 locality_16)
+drop _merge
 
-tab gov 
-codebook gov
-lab list Lgov
+tab locality_16 if round == 2010
+tab locality_16, m 
+tab locality, m 
+replace locality = locality_16 if mi(locality)
+drop locality_16 
+tab locality, m 
 
-bys gov: tab district, m 
+isid indid
 
-ren gov governorate
+ren gov governorate_iid 
 ren district district_id
-sort governorate district_id
+ren subdistrict subdistrict_id 
+ren locality locality_id 
 
-merge m:1 governorate district_id using "$data_JLMPS_temp/JLMPS_GeoUnits_Dico.dta"
-drop _merge 
+distinct governorate_iid //12
 
-tab  district_en
-sort district_en
-egen district_iid = group(district_en) 
+mdesc governorate_iid district_id subdistrict_id locality_id
+egen district_iid = concat(governorate_iid district_id) 
+distinct district_iid //51
 
-tab governorate_en
-sort governorate_en
-egen governorate_iid = group(governorate_en)
+egen subdistrict_iid = concat(governorate_iid district_id subdistrict_id)
+distinct subdistrict_iid //87
+
+egen locality_iid = concat(governorate_iid district_id subdistrict_id locality_id) if !mi(locality_id)
+distinct locality_iid //505
+mdesc locality_iid 
+
+duplicates drop locality_iid, force
+
+destring governorate_iid district_iid subdistrict_iid locality_iid, replace 
+merge m:1 locality_iid using "$data_JLMPS_temp/JLMPS_GeoUnits_Dico.dta"
+
+drop if _merge == 2 
+tab _merge 
+**11,451 missing from orig dico - 69 locality id not found in any of the dictionnary
+**694 missing in master = not surveyed
 
 gen year = round 
 tab year 
