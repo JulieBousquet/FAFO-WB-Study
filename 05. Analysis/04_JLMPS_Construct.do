@@ -38,6 +38,7 @@ tab nationality q11203
 tab q11203
 tab nationality_cl
 tab year 
+*drop if flag_dist_ref != 1 
 
 *save "$data_final/05_IV_JLMPS_Analysis.dta", replace
 save "$data_final/05_IV_JLMPS_MergingIV.dta", replace
@@ -296,22 +297,23 @@ drop _merge
 * LOCALITY *
 *************** 
 
+drop locality_iid
 
 preserve 
-codebook locality
+*codebook locality
 
 *keep if nationality_cl == 1 //Keep only the jordanians
 *keep if nationality_cl != 2 //Keep all but the syrians
-tab locality year, m 
+tab locality_id year, m 
 
-keep locality indid_2010 year
-reshape wide locality, i(indid_2010) j(year)
+keep locality_id indid_2010 year
+reshape wide locality_id, i(indid_2010) j(year)
 
-replace locality2010 = locality2016 
-tab locality2010
-tab locality2016
+replace locality_id2010 = locality_id2016 
+tab locality_id2010
+tab locality_id2016
 
-reshape long locality, i(indid_2010) j(year)
+reshape long locality_id, i(indid_2010) j(year)
 format indid_2010 %12.0g
 
 tempfile data_nat
@@ -322,7 +324,7 @@ drop locality
 merge 1:1 indid_2010 year using  `data_nat'
 drop _merge 
 
-tab locality, m 
+tab locality_id, m 
 egen locality_iid = concat(district_iid locality)
 tab locality_iid, m 
 tab  locality_iid year
