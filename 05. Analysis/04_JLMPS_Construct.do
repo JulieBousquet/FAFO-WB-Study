@@ -309,7 +309,7 @@ tab locality_id year, m
 keep locality_id indid_2010 year
 reshape wide locality_id, i(indid_2010) j(year)
 
-replace locality_id2010 = locality_id2016 
+replace locality_id2010 = locality_id2016 if mi(locality_id2010)
 tab locality_id2010
 tab locality_id2016
 
@@ -320,12 +320,24 @@ tempfile data_nat
 save `data_nat'
 restore 
 
-drop locality 
+*ORIGINAL CODE ORIGINAL CODE 
+*drop locality 
+*NEW CODE NEW CODE 
+drop locality_id 
+*END LOCALITY LOCALITY 
+
 merge 1:1 indid_2010 year using  `data_nat'
 drop _merge 
 
 tab locality_id, m 
-egen locality_iid = concat(district_iid locality)
+
+*ORIGINAL CODE ORIGINAL CODE 
+*egen locality_iid = concat(district_iid locality)
+
+*NEW CODE NEW CODE 
+egen locality_iid = group(district_iid locality_id)
+*END NEW CODE END NEW CODE 
+
 tab locality_iid, m 
 tab  locality_iid year
 distinct locality_iid
@@ -507,9 +519,9 @@ bys district_iid: tab IV_SS_ref_inflow
 distinct IV_SS_ref_inflow
 
 *THE INSTRUMENT + TRANSFORMATION
-gen log_IV_SS_ref_inflow = log(1 + IV_SS_ref_inflow)
-lab var log_IV_SS_ref_inflow "LOG - SSIV for refugee inflow: tot_nb_ref_2016 x inv_dist_camp"
-replace log_IV_SS_ref_inflow = 0 if year == 2010
+gen ln_IV_SS_ref_inflow = log(1 + IV_SS_ref_inflow)
+lab var ln_IV_SS_ref_inflow "LOG - SSIV for refugee inflow: tot_nb_ref_2016 x inv_dist_camp"
+replace ln_IV_SS_ref_inflow = 0 if year == 2010
 
 gen IHS_IV_SS_ref_inflow = log(IV_SS_ref_inflow + ((IV_SS_ref_inflow^2 + 1)^0.5))
 lab var IHS_IV_SS_ref_inflow "IHS - SSIV for refugee inflow: tot_nb_ref_2016 x inv_dist_camp"
@@ -598,7 +610,7 @@ case some invariant controls drop out of the models).
 tab IV_SS, m 
 
 *THE INSTRUMENT + TRANSFORMATION
-gen log_IV_SS = log(1 + IV_SS)
+gen ln_IV_SS = log(1 + IV_SS)
 gen IHS_IV_SS = log(IV_SS + ((IV_SS^2 + 1)^0.5))
 
 *THE ASKED QUESTION IN QUEST (binary)
@@ -1353,12 +1365,26 @@ ren basicwg3 basic_wage_3m
       tab IHS_b_rwage_unolf
       lab var IHS_b_rwage_unolf "UNCONDITIONAL - UNEMPLOYED & OLF: WAGE 0 - IHS - Basic Wage (3-month)"
 
+      *Unconditional wage: IF UNEMPLOYED & OLF: WAGE IS 0
+      gen ln_b_rwage_unolf = ln_basic_rwage_3m if employed_3cat_3m == 2
+      replace ln_b_rwage_unolf = 0 if employed_3cat_3m  == 1 | employed_3cat_3m  == 0 
+      tab ln_b_rwage_unolf
+      lab var ln_b_rwage_unolf "UNCONDITIONAL - UNEMPLOYED & OLF: WAGE 0 - LOG - Basic Wage (3-month)"
+
       *Unconditional wage: IF UNEMPLOYED : WAGE IS 0 / IF OLF: WAGE IS MISSING
       gen IHS_b_rwage_unemp = IHS_basic_rwage_3m if employed_3cat_3m == 2
       replace IHS_b_rwage_unemp = 0 if employed_3cat_3m == 1 //UNEMP
       replace IHS_b_rwage_unemp = . if employed_3cat_3m == 0 //OLF
       tab IHS_b_rwage_unemp
       lab var IHS_b_rwage_unemp "UNCONDITIONAL - UNEMPLOYED WAGE 0 / OLF WAGE MISSING - IHS Basic (3m)"
+
+     *Unconditional wage: IF UNEMPLOYED : WAGE IS 0 / IF OLF: WAGE IS MISSING
+      gen ln_b_rwage_unemp = ln_basic_rwage_3m if employed_3cat_3m == 2
+      replace ln_b_rwage_unemp = 0 if employed_3cat_3m == 1 //UNEMP
+      replace ln_b_rwage_unemp = . if employed_3cat_3m == 0 //OLF
+      tab ln_b_rwage_unemp
+      lab var ln_b_rwage_unemp "UNCONDITIONAL - UNEMPLOYED WAGE 0 / OLF WAGE MISSING - LOG Basic (3m)"
+
 
 tab IHS_b_rwage_unemp employed_3cat_3m, m 
 tab IHS_b_rwage_unolf employed_3cat_3m, m 
@@ -1400,6 +1426,12 @@ tab total_wage_3m
       tab IHS_t_rwage_unolf
       lab var IHS_t_rwage_unolf "UNCONDITIONAL - UNEMPLOYED & OLF: WAGE 0 - IHS - Total Wage (3-month)"
 
+     *Unconditional wage: IF UNEMPLOYED & OLF: WAGE IS 0
+      gen ln_t_rwage_unolf = ln_total_rwage_3m if employed_3cat_3m == 2
+      replace ln_t_rwage_unolf = 0 if employed_3cat_3m  == 1 | employed_3cat_3m  == 0 
+      tab ln_t_rwage_unolf
+      lab var ln_t_rwage_unolf "UNCONDITIONAL - UNEMPLOYED & OLF: WAGE 0 - LOG - Total Wage (3-month)"
+
       *Unconditional wage: IF UNEMPLOYED : WAGE IS 0 / IF OLF: WAGE IS MISSING
       gen IHS_t_rwage_unemp = IHS_total_rwage_3m if employed_3cat_3m == 2
       replace IHS_t_rwage_unemp = 0 if employed_3cat_3m == 1 //UNEMP
@@ -1407,6 +1439,12 @@ tab total_wage_3m
       tab IHS_t_rwage_unemp
       lab var IHS_t_rwage_unemp "UNCONDITIONAL - UNEMPLOYED WAGE 0 / OLF WAGE MISSING - IHS Total (3m)"
 
+      *Unconditional wage: IF UNEMPLOYED : WAGE IS 0 / IF OLF: WAGE IS MISSING
+      gen ln_t_rwage_unemp = ln_total_rwage_3m if employed_3cat_3m == 2
+      replace ln_t_rwage_unemp = 0 if employed_3cat_3m == 1 //UNEMP
+      replace ln_t_rwage_unemp = . if employed_3cat_3m == 0 //OLF
+      tab ln_t_rwage_unemp
+      lab var ln_t_rwage_unemp "UNCONDITIONAL - UNEMPLOYED WAGE 0 / OLF WAGE MISSING - LOG Total (3m)"
 
          *** PRIMARY ***
 

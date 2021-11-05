@@ -84,8 +84,7 @@ drop if year == 2010
 
 ivprobit bi_employed_olf_3m ///
          $controls i.educ1d i.fteducst i.mteducst i.ftempst ///
-         ln_nb_refugees_bygov ///
-         ($dep_var = IHS_IV_SS) ///
+         ($dep_var = ln_IV_SS) ///
          [pweight = expan_indiv], ///
          vce(cl locality_iid) 
 codebook bi_employed_olf_3m, c
@@ -124,8 +123,7 @@ drop if year == 2010
 
 ivprobit bi_employed_olf_3m ///
          $controls i.educ1d i.fteducst i.mteducst i.ftempst ///
-         ln_nb_refugees_bygov ///
-         ($dep_var = IHS_IV_SS) ///
+         ($dep_var = ln_IV_SS) ///
          [pweight = expan_indiv], ///
          vce(cl locality_iid) 
 codebook bi_employed_olf_3m, c
@@ -171,8 +169,7 @@ xi: ivprobit bi_employed_olf_3m ///
          bi_education ///
          i.year i.district_iid ///
          $controls i.fteducst i.mteducst i.ftempst ///
-         ln_nb_refugees_bygov ///
-         (agg_wp aggwp_educ = IHS_IV_SS c.IHS_IV_SS#bi_education) ///
+         (agg_wp aggwp_educ = ln_IV_SS c.ln_IV_SS#bi_education) ///
          [pweight = expan_indiv], ///
          vce(cl locality_iid) 
 codebook bi_employed_olf_3m, c
@@ -245,8 +242,7 @@ lab val bi_employed_olf_3m bi_employed_olf_3m
 xi: ivprobit bi_employed_olf_3m ///
          i.year i.district_iid ///
          $controls i.educ1d i.fteducst i.mteducst i.ftempst ///
-         ln_nb_refugees_bygov ///
-         ($dep_var = IHS_IV_SS) ///
+         ($dep_var = ln_IV_SS) ///
          [pweight = expan_indiv], ///
          vce(cl locality_iid) 
 codebook bi_employed_olf_3m, c
@@ -273,8 +269,8 @@ marginsplot, yline(0)
 *LPM predicted probabilities are NOT restricted to lie between zero and one
 xi: ivregress 2sls bi_employed_olf_3m i.year i.district_iid ///
          $controls i.educ1d i.fteducst i.mteducst ///
-         i.ftempst ln_nb_refugees_bygov ///
-          ($dep_var = IHS_IV_SS) ///
+         i.ftempst  ///
+          ($dep_var = ln_IV_SS) ///
           [pweight = expan_indiv], ///
          vce(cl locality_iid)
 estimates table, k($dep_var) star(.1 .05 .01) b(%7.4f) 
@@ -315,8 +311,8 @@ lab val bi_employed_3m bi_employed_3m
 *** IV PROBIT ***
 *****************
 xi: ivprobit bi_employed_3m i.year i.district_iid ///
-         $controls i.educ1d i.fteducst i.mteducst i.ftempst ln_nb_refugees_bygov ///
-         ($dep_var = IHS_IV_SS) ///
+         $controls i.educ1d i.fteducst i.mteducst i.ftempst  ///
+         ($dep_var = ln_IV_SS) ///
          [pweight = expan_indiv], ///
          vce(cl locality_iid) 
 codebook bi_employed_3m, c
@@ -340,8 +336,8 @@ margins, dydx($dep_var)
 *LPM predicted probabilities are NOT restricted to lie between zero and one
 xi: ivregress 2sls bi_employed_3m i.year i.district_iid ///
          $controls i.educ1d i.fteducst i.mteducst ///
-         i.ftempst ln_nb_refugees_bygov ///
-          ($dep_var = IHS_IV_SS) ///
+         i.ftempst  ///
+          ($dep_var = ln_IV_SS) ///
           [pweight = expan_indiv], ///
          vce(cl locality_iid)
 estimates table, k($dep_var) star(.1 .05 .01) b(%7.4f) 
@@ -396,8 +392,8 @@ lab val wp_industry_jlmps_3m wp_industry_jlmps_3m
 *drop if year == 2010 
 
 ivprobit wp_industry_jlmps_3m i.year i.district_iid ///
-         $controls i.educ1d i.fteducst i.mteducst i.ftempst ln_nb_refugees_bygov ///
-         ($dep_var = IHS_IV_SS) ///
+         $controls i.educ1d i.fteducst i.mteducst i.ftempst  ///
+         ($dep_var = ln_IV_SS) ///
          [pweight = expan_indiv], ///
          vce(cl locality_iid) 
 codebook wp_industry_jlmps_3m, c
@@ -422,8 +418,8 @@ margins , dydx($dep_var)
 *LPM predicted probabilities are NOT restricted to lie between zero and one
 xi: ivregress 2sls wp_industry_jlmps_3m i.year i.district_iid ///
          $controls i.educ1d i.fteducst i.mteducst ///
-         i.ftempst ln_nb_refugees_bygov ///
-          ($dep_var = IHS_IV_SS) ///
+         i.ftempst  ///
+          ($dep_var = ln_IV_SS) ///
           [pweight = expan_indiv], ///
          vce(cl locality_iid)
 estimates table, k($dep_var) star(.1 .05 .01) b(%7.4f) 
@@ -486,8 +482,8 @@ tab empl_info_10_unemp_16, m
 *****************
 *drop if year == 2010 
 ivprobit bi_formal i.year i.district_iid ///
-         $controls i.educ1d i.fteducst i.mteducst i.ftempst ln_nb_refugees_bygov ///
-         ($dep_var = IHS_IV_SS) ///
+         $controls i.educ1d i.fteducst i.mteducst i.ftempst  ///
+         ($dep_var = ln_IV_SS) ///
          [pweight = expan_indiv], ///
          vce(cl locality_iid)  
 codebook bi_formal, c
@@ -512,8 +508,8 @@ margins, dydx($dep_var)
 *LPM predicted probabilities are NOT restricted to lie between zero and one
 xi: ivregress 2sls bi_formal i.year i.district_iid ///
          $controls i.educ1d i.fteducst i.mteducst ///
-         i.ftempst ln_nb_refugees_bygov ///
-          ($dep_var = IHS_IV_SS) ///
+         i.ftempst  ///
+          ($dep_var = ln_IV_SS) ///
           [pweight = expan_indiv], ///
          vce(cl locality_iid)
 estimates table, k($dep_var) star(.1 .05 .01) b(%7.4f) 
@@ -548,7 +544,7 @@ estimates table, b(%7.4f) se(%7.4f) stats(N r2_a) k($dep_var)
     *******************************************
 
 *** 2SLS - Sep reg
-xi: reg $dep_var IHS_IV_SS i.year i.district_iid ///
+xi: reg $dep_var ln_IV_SS i.year i.district_iid ///
 $controls i.educ1d i.fteducst i.mteducst ///
 [pweight = expan_indiv] , vce(cl locality_iid)
 predict IV_hat, xb
@@ -564,7 +560,7 @@ drop IV_hat
 *IV Probit predicted probabilities are restricted to lie between zero and one
 xi: ivprobit wp_industry_jlmps_3m  i.year ///
  i.district_iid $controls i.educ1d i.fteducst i.mteducst ///
- ($dep_var = IHS_IV_SS) ///
+ ($dep_var = ln_IV_SS) ///
  [pweight = expan_indiv] /// 
  ,vce(cl locality_iid)
 *agg_wp |  -.0029554    .008754    -0.34   0.736     -.020113    .0142022
@@ -576,21 +572,21 @@ margins, dydx($dep_var)
 *LPM predicted probabilities are NOT restricted to lie between zero and one
 xi: ivregress 2sls wp_industry_jlmps_3m i.year i.district_iid ///
          $controls i.educ1d i.fteducst i.mteducst ///
-         i.ftempst ln_nb_refugees_bygov ///
-          ($dep_var = IHS_IV_SS) ///
+         i.ftempst  ///
+          ($dep_var = ln_IV_SS) ///
           [pweight = expan_indiv], ///
          vce(cl locality_iid)
 
 *** CGM Logit
-xi: reg $dep_var IHS_IV_SS i.year i.district_iid ///
+xi: reg $dep_var ln_IV_SS i.year i.district_iid ///
          $controls i.educ1d i.fteducst i.mteducst ///
-         i.ftempst ln_nb_refugees_bygov ///
+         i.ftempst  ///
          [pweight = expan_indiv], ///
          vce(cl locality_iid)
 predict IV_hat, xb
 
 xi: cgmlogit wp_industry_jlmps_3m IV_hat i.year i.district_iid ///
-         $controls i.educ1d i.fteducst i.mteducst i.ftempst ln_nb_refugees_bygov ///
+         $controls i.educ1d i.fteducst i.mteducst i.ftempst  ///
          [pweight = expan_indiv], ///
          cluster(locality_iid) 
 margins , dydx(*) 

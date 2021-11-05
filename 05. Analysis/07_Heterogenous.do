@@ -108,15 +108,15 @@ lab val wp_industry_jlmps_3m wp_industry_jlmps_3m
 lab var wp_industry_jlmps_3m "Open"
 
 gen inter_open = wp_industry_jlmps_3m*agg_wp 
-gen inter_open_IV = wp_industry_jlmps_3m*IHS_IV_SS 
+gen inter_open_IV = wp_industry_jlmps_3m*ln_IV_SS 
 lab var inter_open "Agg WP x Open"
 
 foreach globals of global globals_list {
   foreach outcome of global `globals'  {  
      xi: ivreg2  `outcome'  ///
        i.year i.district_iid ///
-       $controls i.educ1d i.fteducst i.mteducst i.ftempst ln_nb_refugees_bygov ///
-       (c.$dep_var inter_open = c.IHS_IV_SS inter_open_IV) ///
+       $controls i.educ1d i.fteducst i.mteducst i.ftempst  ///
+       (c.$dep_var inter_open = c.ln_IV_SS inter_open_IV) ///
        wp_industry_jlmps_3m ///       
        [pweight = expan_indiv], ///
        cluster(locality_iid) robust ///
@@ -133,7 +133,7 @@ ereturn list
 mat list e(b)
 estout m_job_stable_3m m_informal ///
       m_member_union_3m m_skills_required_pjob  ///
-      m_IHS_total_rwage_3m  m_IHS_hourly_rwage ///
+      m_ln_total_rwage_3m  m_ln_hourly_rwage ///
       m_work_hours_pweek_3m_w m_work_days_pweek_3m ///
       , cells(b(star fmt(%9.3f)) se(par fmt(%9.3f))) ///
   drop(age age2 gender hhsize _Ieduc1d_2 _Ieduc1d_3 _Ieduc1d_4 _Ieduc1d_5 ///
@@ -141,7 +141,7 @@ estout m_job_stable_3m m_informal ///
         _Ifteducst_3 _Ifteducst_4 _Ifteducst_5 _Ifteducst_6 ///
         _Imteducst_2 _Imteducst_3 _Imteducst_4 _Imteducst_5 ///
         _Imteducst_6 _Iftempst_2 _Iftempst_3 _Iftempst_4 _Iftempst_5 ///
-        _Iftempst_6 ln_nb_refugees_bygov _Iyear_2016  ///
+        _Iftempst_6  _Iyear_2016  ///
          $controls )   ///
    legend label varlabels(_cons constant) starlevels(* 0.1 ** 0.05 *** 0.01)           ///
    stats(r2 df_r bic, fmt(3 0 1) label(R-sqr dfres BIC))
@@ -152,7 +152,7 @@ estout m_job_stable_3m m_informal ///
 *erase "$out/reg_infra_access.tex"
 esttab m_job_stable_3m m_informal ///
       m_member_union_3m m_skills_required_pjob  ///
-      m_IHS_total_rwage_3m  m_IHS_hourly_rwage ///
+      m_ln_total_rwage_3m  m_ln_hourly_rwage ///
       m_work_hours_pweek_3m_w m_work_days_pweek_3m /// 
       using "$out_analysis/reg_hetero_open_close.tex", se label replace booktabs ///
       cells(b(star fmt(%9.3f)) se(par fmt(%9.3f))) ///
@@ -162,7 +162,7 @@ mtitles("Stable" "Informal" "Union" "Skills" "Total W"  "Hourly W" "WH pday" "WD
         _Ifteducst_3 _Ifteducst_4 _Ifteducst_5 _Ifteducst_6 ///
         _Imteducst_2 _Imteducst_3 _Imteducst_4 _Imteducst_5 ///
         _Imteducst_6 _Iftempst_2 _Iftempst_3 _Iftempst_4 _Iftempst_5 ///
-        _Iftempst_6 ln_nb_refugees_bygov _Iyear_2016  ///
+        _Iftempst_6  _Iyear_2016  ///
          $controls) starlevels(* 0.1 ** 0.05 *** 0.01) ///
    title("Heterogenous INDUSTRY - IV Regression, District, Year FE"\label{tab1}) nofloat ///
    stats(N r2_a , labels("Obs" "Adj. R-Squared" "Control Mean")) ///
@@ -171,7 +171,7 @@ mtitles("Stable" "Informal" "Union" "Skills" "Total W"  "Hourly W" "WH pday" "WD
 
 estimates drop m_job_stable_3m m_informal  ///
       m_member_union_3m m_skills_required_pjob  ///
-      m_IHS_total_rwage_3m  m_IHS_hourly_rwage ///
+      m_ln_total_rwage_3m  m_ln_hourly_rwage ///
        m_work_hours_pweek_3m_w m_work_days_pweek_3m 
 *m2 m3 m4 m5 
 
@@ -186,7 +186,7 @@ codebook gender
 lab var gender "Male"
 
 gen inter_gender = gender*agg_wp 
-gen inter_gender_IV = gender*IHS_IV_SS 
+gen inter_gender_IV = gender*ln_IV_SS 
 lab var inter_gender "Agg WP x Male"
 
 
@@ -194,8 +194,8 @@ foreach globals of global globals_list {
   foreach outcome of global `globals'  {  
     qui xi: ivreg2  `outcome'  ///
        i.year i.district_iid ///
-       age age2 hhsize i.educ1d i.fteducst i.mteducst i.ftempst ln_nb_refugees_bygov ///
-       (c.$dep_var inter_gender = c.IHS_IV_SS inter_gender_IV) ///
+       age age2 hhsize i.educ1d i.fteducst i.mteducst i.ftempst  ///
+       (c.$dep_var inter_gender = c.ln_IV_SS inter_gender_IV) ///
        gender ///       
        [pweight = expan_indiv], ///
        cluster(locality_iid) robust ///
@@ -213,7 +213,7 @@ ereturn list
 mat list e(b)
 estout m_job_stable_3m m_informal m_wp_industry_jlmps_3m ///
       m_member_union_3m m_skills_required_pjob  ///
-      m_IHS_total_rwage_3m  m_IHS_hourly_rwage ///
+      m_ln_total_rwage_3m  m_ln_hourly_rwage ///
       m_work_hours_pweek_3m_w m_work_days_pweek_3m ///
       , cells(b(star fmt(%9.3f)) se(par fmt(%9.3f)))  ///
   drop(age age2 hhsize _Ieduc1d_2 _Ieduc1d_3 _Ieduc1d_4 _Ieduc1d_5 ///
@@ -221,7 +221,7 @@ estout m_job_stable_3m m_informal m_wp_industry_jlmps_3m ///
         _Ifteducst_3 _Ifteducst_4 _Ifteducst_5 _Ifteducst_6 ///
         _Imteducst_2 _Imteducst_3 _Imteducst_4 _Imteducst_5 ///
         _Imteducst_6 _Iftempst_2 _Iftempst_3 _Iftempst_4 _Iftempst_5 ///
-        _Iftempst_6 ln_nb_refugees_bygov _Iyear_2016 ///
+        _Iftempst_6  _Iyear_2016 ///
         age age2 hhsize)   ///
    legend label varlabels(_cons constant) starlevels(* 0.1 ** 0.05 *** 0.01)           ///
    stats(r2 df_r bic, fmt(3 0 1) label(R-sqr dfres BIC))
@@ -232,7 +232,7 @@ estout m_job_stable_3m m_informal m_wp_industry_jlmps_3m ///
 *erase "$out/reg_infra_access.tex"
 esttab m_job_stable_3m m_informal m_wp_industry_jlmps_3m ///
       m_member_union_3m m_skills_required_pjob  ///
-      m_IHS_total_rwage_3m  m_IHS_hourly_rwage ///
+      m_ln_total_rwage_3m  m_ln_hourly_rwage ///
       m_work_hours_pweek_3m_w m_work_days_pweek_3m /// 
       using "$out_analysis/reg_hetero_gender.tex", se label replace booktabs ///
       cells(b(star fmt(%9.3f)) se(par fmt(%9.3f))) ///
@@ -242,7 +242,7 @@ mtitles("Stable" "Informal" "Industry" "Union" "Skills" "Total W"  "Hourly W" "W
         _Ifteducst_3 _Ifteducst_4 _Ifteducst_5 _Ifteducst_6 ///
         _Imteducst_2 _Imteducst_3 _Imteducst_4 _Imteducst_5 ///
         _Imteducst_6 _Iftempst_2 _Iftempst_3 _Iftempst_4 _Iftempst_5 ///
-        _Iftempst_6 ln_nb_refugees_bygov _Iyear_2016 ///
+        _Iftempst_6  _Iyear_2016 ///
          age age2 hhsize) starlevels(* 0.1 ** 0.05 *** 0.01) ///
    title("Heterogenous GENDER - IV Regression, District, Year FE"\label{tab1}) nofloat ///
    stats(N r2_a , labels("Obs" "Adj. R-Squared" "Control Mean")) ///
@@ -251,7 +251,7 @@ mtitles("Stable" "Informal" "Industry" "Union" "Skills" "Total W"  "Hourly W" "W
 
 estimates drop m_job_stable_3m m_informal m_wp_industry_jlmps_3m ///
       m_member_union_3m m_skills_required_pjob  ///
-      m_IHS_total_rwage_3m  m_IHS_hourly_rwage ///
+      m_ln_total_rwage_3m  m_ln_hourly_rwage ///
        m_work_hours_pweek_3m_w m_work_days_pweek_3m 
 *m2 m3 m4 m5 
 
@@ -268,7 +268,7 @@ lab var bi_education "High Education"
 
 
 gen inter_bi_education = bi_education*agg_wp 
-gen inter_bi_education_IV = bi_education*IHS_IV_SS 
+gen inter_bi_education_IV = bi_education*ln_IV_SS 
 lab var inter_bi_education "Agg WP x High Education"
 
 
@@ -276,8 +276,8 @@ foreach globals of global globals_list {
   foreach outcome of global `globals'  {  
     qui xi: ivreg2  `outcome'  ///
        i.year i.district_iid ///
-       $controls i.fteducst i.mteducst i.ftempst  ln_nb_refugees_bygov ///
-       (c.$dep_var inter_bi_education = c.IHS_IV_SS inter_bi_education_IV) ///
+       $controls i.fteducst i.mteducst i.ftempst   ///
+       (c.$dep_var inter_bi_education = c.ln_IV_SS inter_bi_education_IV) ///
        bi_education ///       
        [pweight = expan_indiv], ///
        cluster(locality_iid) robust ///
@@ -294,14 +294,14 @@ ereturn list
 mat list e(b)
 estout m_job_stable_3m m_informal m_wp_industry_jlmps_3m ///
       m_member_union_3m m_skills_required_pjob  ///
-      m_IHS_total_rwage_3m  m_IHS_hourly_rwage ///
+      m_ln_total_rwage_3m  m_ln_hourly_rwage ///
       m_work_hours_pweek_3m_w m_work_days_pweek_3m ///
       , cells(b(star fmt(%9.3f)) se(par fmt(%9.3f))) ///
   drop(age age2 gender hhsize _Ifteducst_2 ///
         _Ifteducst_3 _Ifteducst_4 _Ifteducst_5 _Ifteducst_6 ///
         _Imteducst_2 _Imteducst_3 _Imteducst_4 _Imteducst_5 ///
         _Imteducst_6 _Iftempst_2 _Iftempst_3 _Iftempst_4 _Iftempst_5 ///
-        _Iftempst_6 ln_nb_refugees_bygov _Iyear_2016 ///
+        _Iftempst_6  _Iyear_2016 ///
          $controls)   ///
    legend label varlabels(_cons constant) starlevels(* 0.1 ** 0.05 *** 0.01)           ///
    stats(r2 df_r bic, fmt(3 0 1) label(R-sqr dfres BIC))
@@ -312,7 +312,7 @@ estout m_job_stable_3m m_informal m_wp_industry_jlmps_3m ///
 *erase "$out/reg_infra_access.tex"
 esttab m_job_stable_3m m_informal m_wp_industry_jlmps_3m ///
       m_member_union_3m m_skills_required_pjob  ///
-      m_IHS_total_rwage_3m  m_IHS_hourly_rwage ///
+      m_ln_total_rwage_3m  m_ln_hourly_rwage ///
       m_work_hours_pweek_3m_w m_work_days_pweek_3m /// 
       using "$out_analysis/reg_hetero_educ.tex", se label replace booktabs ///
       cells(b(star fmt(%9.3f)) se(par fmt(%9.3f))) ///
@@ -321,7 +321,7 @@ mtitles("Stable" "Informal" "Industry" "Union" "Skills" "Total W"  "Hourly W" "W
         _Ifteducst_3 _Ifteducst_4 _Ifteducst_5 _Ifteducst_6 ///
         _Imteducst_2 _Imteducst_3 _Imteducst_4 _Imteducst_5 ///
         _Imteducst_6 _Iftempst_2 _Iftempst_3 _Iftempst_4 _Iftempst_5 ///
-        _Iftempst_6 ln_nb_refugees_bygov _Iyear_2016 ///
+        _Iftempst_6  _Iyear_2016 ///
          $controls) starlevels(* 0.1 ** 0.05 *** 0.01) ///
    title("Heterogenous EDUCATION - IV Regression, District, Year FE"\label{tab1}) nofloat ///
    stats(N r2_a , labels("Obs" "Adj. R-Squared" "Control Mean")) ///
@@ -330,7 +330,7 @@ mtitles("Stable" "Informal" "Industry" "Union" "Skills" "Total W"  "Hourly W" "W
 
 estimates drop m_job_stable_3m m_informal m_wp_industry_jlmps_3m ///
       m_member_union_3m m_skills_required_pjob  ///
-      m_IHS_total_rwage_3m  m_IHS_hourly_rwage ///
+      m_ln_total_rwage_3m  m_ln_hourly_rwage ///
        m_work_hours_pweek_3m_w m_work_days_pweek_3m 
 *m2 m3 m4 m5 
 
@@ -345,15 +345,15 @@ tab bi_formal
 lab var bi_formal "Formal"
 
 gen inter_bi_formal = bi_formal*agg_wp 
-gen inter_bi_formal_IV = bi_formal*IHS_IV_SS 
+gen inter_bi_formal_IV = bi_formal*ln_IV_SS 
 lab var inter_bi_formal "Agg WP x Formal"
 
 foreach globals of global globals_list {
   foreach outcome of global `globals'  {  
     qui xi: ivreg2  `outcome'  ///
        i.year i.district_iid ///
-       $controls i.educ1d i.fteducst i.mteducst i.ftempst ln_nb_refugees_bygov ///
-       (c.$dep_var inter_bi_formal = c.IHS_IV_SS inter_bi_formal_IV) ///
+       $controls i.educ1d i.fteducst i.mteducst i.ftempst  ///
+       (c.$dep_var inter_bi_formal = c.ln_IV_SS inter_bi_formal_IV) ///
        bi_formal ///       
        [pweight = expan_indiv], ///
        cluster(locality_iid) robust ///
@@ -371,7 +371,7 @@ ereturn list
 mat list e(b)
 estout m_job_stable_3m m_wp_industry_jlmps_3m ///
       m_member_union_3m m_skills_required_pjob  ///
-      m_IHS_total_rwage_3m  m_IHS_hourly_rwage ///
+      m_ln_total_rwage_3m  m_ln_hourly_rwage ///
        m_work_hours_pweek_3m_w m_work_days_pweek_3m ///
       , cells(b(star fmt(%9.2f)) se(par fmt(%9.2f))) ///
   drop(age age2 gender hhsize  _Ieduc1d_2 _Ieduc1d_3 _Ieduc1d_4 _Ieduc1d_5 ///
@@ -379,7 +379,7 @@ estout m_job_stable_3m m_wp_industry_jlmps_3m ///
         _Ifteducst_3 _Ifteducst_4 _Ifteducst_5 _Ifteducst_6 ///
         _Imteducst_2 _Imteducst_3 _Imteducst_4 _Imteducst_5 ///
         _Imteducst_6 _Iftempst_2 _Iftempst_3 _Iftempst_4 _Iftempst_5 ///
-        _Iftempst_6 ln_nb_refugees_bygov _Iyear_2016 ///
+        _Iftempst_6  _Iyear_2016 ///
          $controls)   ///
    legend label varlabels(_cons constant) starlevels(* 0.1 ** 0.05 *** 0.01)           ///
    stats(r2 df_r bic, fmt(3 0 1) label(R-sqr dfres BIC))
@@ -390,7 +390,7 @@ estout m_job_stable_3m m_wp_industry_jlmps_3m ///
 *erase "$out/reg_infra_access.tex"
 esttab m_job_stable_3m m_wp_industry_jlmps_3m ///
       m_member_union_3m m_skills_required_pjob  ///
-      m_IHS_total_rwage_3m  m_IHS_hourly_rwage ///
+      m_ln_total_rwage_3m  m_ln_hourly_rwage ///
       m_work_hours_pweek_3m_w m_work_days_pweek_3m /// 
       using "$out_analysis/reg_hetero_informal.tex", se label replace booktabs ///
       cells(b(star fmt(%9.3f)) se(par fmt(%9.3f))) ///
@@ -400,21 +400,16 @@ mtitles("Stable" "Industry" "Union" "Skills" "Total W"  "Hourly W" "WH pday" "WD
         _Ifteducst_3 _Ifteducst_4 _Ifteducst_5 _Ifteducst_6 ///
         _Imteducst_2 _Imteducst_3 _Imteducst_4 _Imteducst_5 ///
         _Imteducst_6 _Iftempst_2 _Iftempst_3 _Iftempst_4 _Iftempst_5 ///
-        _Iftempst_6 ln_nb_refugees_bygov _Iyear_2016 ///
+        _Iftempst_6  _Iyear_2016 ///
          $controls) starlevels(* 0.1 ** 0.05 *** 0.01) ///
    title("Heterogenous INFORMAL - IV Regression, District, Year FE"\label{tab1}) nofloat ///
    stats(N r2_a , labels("Obs" "Adj. R-Squared" "Control Mean")) ///
     nonotes ///
     addnotes("Standard errors clustered at the locality level. Significance levels: *p $<$ 0.1, ** p $<$ 0.05, *** p $<$ 0.01") 
 
-
-
-
-
-
 estimates drop m_job_stable_3m m_informal m_wp_industry_jlmps_3m ///
       m_member_union_3m m_skills_required_pjob  ///
-      m_IHS_total_rwage_3m  m_IHS_hourly_rwage ///
+      m_ln_total_rwage_3m  m_ln_hourly_rwage ///
        m_work_hours_pweek_3m_w m_work_days_pweek_3m 
 *m2 m3 m4 m5 
 

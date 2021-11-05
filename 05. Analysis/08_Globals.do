@@ -27,7 +27,7 @@ global    dep_var   agg_wp
 *global    dep_var   share_wp_100
 *global    dep_var   agg_wp_orig
 
-
+/*
 global    outcome_var_empl ///
               unemployed_3m /// From unempsr1m - mrk def, search req; 3m, empl or unemp, OLF is miss
               unempdurmth  ///  Current unemployment duration (in months)
@@ -36,6 +36,15 @@ global    outcome_var_empl ///
               IHS_b_rwage_unemp ///UNCONDITIONAL - UNEMPLOYED WAGE 0 / OLF WAGE MISSING - IHS Basic (3m)
               IHS_t_rwage_unolf ///UNCONDITIONAL - UNEMPLOYED & OLF: WAGE 0 - IHS - Total Wage (3-month)
               IHS_t_rwage_unemp //UNCONDITIONAL - UNEMPLOYED WAGE 0 / OLF WAGE MISSING - IHS Total (3m)
+*/
+global    outcome_var_empl ///
+              unemployed_3m /// From unempsr1m - mrk def, search req; 3m, empl or unemp, OLF is miss
+              unempdurmth  ///  Current unemployment duration (in months)
+              employed_3m  ///From uswrkstsr1 - mkt def, search req; 3m, 2 empl - 1 unemp - OLF miss
+              ln_b_rwage_unolf ///UNCONDITIONAL - UNEMPLOYED & OLF: WAGE 0 - LOG - Basic Wage (3-month)
+              ln_b_rwage_unemp ///UNCONDITIONAL - UNEMPLOYED WAGE 0 / OLF WAGE MISSING - LOG Basic (3m)
+              ln_t_rwage_unolf ///UNCONDITIONAL - UNEMPLOYED & OLF: WAGE 0 - LOG - Total Wage (3-month)
+              ln_t_rwage_unemp // UNCONDITIONAL - UNEMPLOYED WAGE 0 / OLF WAGE MISSING - LOG Total (3m)
 
 global    outcome_var_job ///
               job_stable_3m ///  From usstablp - Stability of employement (3m) - 1 permanent - 0 temp, seas, cas
@@ -44,12 +53,20 @@ global    outcome_var_job ///
               member_union_3m /// Member of a syndicate/trade union (ref. 3-mnths)
               skills_required_pjob //  Does primary job require any skill
   
+/*
 global    outcome_var_wage ///
               IHS_basic_rwage_3m  /// IHS Basic Wage (3-month) - CONDITIONAL - UNEMPLOYED & OLF: WAGE MISSING
               IHS_total_rwage_3m  /// IHS Total Wage (3-month) - CONDITIONAL - UNEMPLOYED & OLF: WAGE MISSING
               IHS_monthly_rwage /// IHS Monthly Wage (Prim.& Second. Jobs)
-              IHS_hourly_rwage  //IHS Hourly Wage (Prim.& Second. Jobs)
-            
+              IHS_hourly_rwage  // IHS Hourly Wage (Prim.& Second. Jobs)
+*/
+
+global    outcome_var_wage ///
+              ln_basic_rwage_3m  /// LOG Basic Wage (3-month) - CONDITIONAL - UNEMPLOYED & OLF: WAGE MISSING
+              ln_total_rwage_3m  /// LOG Total Wage (3-month) - CONDITIONAL - UNEMPLOYED & OLF: WAGE MISSING
+              ln_monthly_rwage  /// LOG Monthly Wage (Prim.& Second. Jobs)
+              ln_hourly_rwage  // LOG Hourly Wage (Prim.& Second. Jobs)
+
 *IHS_daily_rwage_irregular // IHS Average Daily Wage (Irregular Workers)
 
 global    outcome_var_hours ///

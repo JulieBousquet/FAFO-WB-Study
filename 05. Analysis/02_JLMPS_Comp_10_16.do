@@ -24,7 +24,10 @@ log using "$out_analysis/02_JLMPS_Comp_10_16.log", replace
 .a Non applicable (99)
 .b Don't know (98)
 */
-*ORIGINAL CODE 
+
+
+/*
+*ORIGINAL CODE ORIGINAL CODE  
 *Dictiornnary of geo unit Jordan as of 2015
 import excel "$data_JLMPS_base/Location Codes Arabic 2015 revised 1.19.16 (for 2016).xlsx", firstrow clear
 *drop SubDistrict SubDistrictID Localities LocalitiesID
@@ -37,25 +40,11 @@ tab district_en
 *destring governorate district_id, replace 
 sort governorate district_id
 save "$data_JLMPS_temp/JLMPS_GeoUnits_Dico.dta", replace
-
-
-
-
-/*
-import excel "$data_JLMPS_base/Location Codes Arabic 2015 revised 1.19.16 (for 2016).xlsx", firstrow clear
-*keep governorate district_id Localities LocalitiesID SubDistrictID
-destring governorate district_id LocalitiesID SubDistrictID, replace 
-duplicates drop Localities, force 
-egen locality_iid = concat(governorate district_id LocalitiesID SubDistrictID)
-distinct locality_iid
-list governorate_en district_id Localities LocalitiesID
-
-destring governorate district_id, replace 
-sort governorate district_id
-save "$data_JLMPS_temp/JLMPS_GeoUnits_Dico_Locality.dta", replace
-
 */
-/*
+
+
+*START NEW CODE START NEW CODE 
+*With more accurate GPSs / LOCALITY Information
 *Dictiornnary of geo unit Jordan as of 2015
 import excel "$data_JLMPS_base/Location Codes Arabic 2015 revised 1.19.16 (for 2016).xlsx", firstrow clear
 
@@ -90,9 +79,9 @@ drop district_lat district_long
 
 save "$data_JLMPS_temp/JLMPS_GeoUnits_Dico_updated2016.dta", replace
 
-*/
 
-/*
+
+
 
 import excel "$data_JLMPS_base/Geographic Codes (Arabic-English).xlsx", firstrow sheet("LOC + GPS") clear
 *duplicates drop districtlabelEN, force 
@@ -108,9 +97,6 @@ ren subdislabelEN subdistrict_en
 ren localitycode locality_id 
 ren localitylabelAR locality_ar 
 ren localitylabelEN locality_en 
-ren zonecode zone_id 
-ren zonelabelAR zone_ar 
-ren neighborhoodcode neighborhood_id
 
 distinct governorate_iid 
 bys governorate_iid : distinct district_id
@@ -126,20 +112,37 @@ distinct subdistrict_en //89
 
 distinct locality_id 
 egen locality_iid = concat(governorate_iid district_id subdistrict_id locality_id)
-duplicates drop locality_iid, force 
 
-destring district_iid subdistrict_iid locality_iid, replace 
+destring governorate_iid district_iid subdistrict_iid locality_iid, replace 
 
-distinct locality_iid //1043
+destring *, replace 
 
-merge 1:1 locality_iid using  "$data_JLMPS_temp/JLMPS_GeoUnits_Dico_updated2016.dta"
-drop _merge 
+distinct locality_iid //1046
 
-keep if _merge == 3 
+drop zonecode zonelabelAR neighborhoodcode
 
 save "$data_JLMPS_temp/JLMPS_GeoUnits_Dico.dta", replace
 
-*/
+preserve 
+keep locality_ar locality_en locality_iid
+duplicates drop locality_iid, force 
+save "$data_JLMPS_temp/JLMPS_GeoUnits_Dico_loc.dta", replace
+restore
+
+preserve
+keep subdistrict_ar subdistrict_en subdistrict_iid
+duplicates drop subdistrict_iid, force 
+save "$data_JLMPS_temp/JLMPS_GeoUnits_Dico_subdis.dta", replace
+restore
+
+preserve
+keep district_en district_ar district_lat district_long district_iid
+duplicates drop district_iid, force 
+save "$data_JLMPS_temp/JLMPS_GeoUnits_Dico_dis.dta", replace
+restore
+*END NEW CODE END NEW CODE 
+
+
 
 
 
@@ -150,8 +153,11 @@ use "$data_JLMPS_base/JLMPS 2016 xs v1.1.dta", clear
 
 ren gov governorate_iid 
 ren district district_id
-*ren subdistrict subdistrict_id 
-*ren locality locality_id 
+
+*NEW CODE NEW CODE
+ren subdistrict subdistrict_id 
+ren locality locality_id 
+*END NEW CODE END NEW CODE
 
 lab list Lgov
 
@@ -177,16 +183,27 @@ distinct governorate_iid //12
 egen district_iid = concat(governorate_iid district_id)
 distinct district_iid //51
 
-*egen subdistrict_iid = concat(governorate_iid district_id subdistrict_id)
-*distinct subdistrict_iid //87
+*START NEW CODE START NEW CODE 
+egen subdistrict_iid = concat(governorate_iid district_id subdistrict_id)
+distinct subdistrict_iid //87
 
-*egen locality_iid = concat(governorate_iid district_id subdistrict_id locality_id)
-*distinct locality_iid //334
-*destring district_iid subdistrict_iid locality_iid, replace 
+egen locality_iid = concat(governorate_iid district_id subdistrict_id locality_id)
+distinct locality_iid //334
+destring district_iid subdistrict_iid locality_iid, replace 
+*END NEW CODE END NEW CODE 
 
+/*
+*ORIGINAL CODE ORIGINAL CODE  
 merge m:1 district_iid using "$data_JLMPS_temp/JLMPS_GeoUnits_Dico.dta"
+*/
 
-*drop if _merge == 2 //Not merged from initial list 
+*START NEW CODE START NEW CODE 
+merge m:1  locality_iid using "$data_JLMPS_temp/JLMPS_GeoUnits_Dico_loc.dta"
+
+drop if _merge == 2 //Not merged from initial list 
+*END NEW CODE END NEW CODE 
+
+
 drop _merge
 distinct district_iid
 
@@ -243,29 +260,6 @@ tab year
 
 save "$data_JLMPS_final/01_JLMPS_16_xs_clear.dta", replace
 
-/*
-use "$data_JLMPS_base/JLMPS 2016 panel v1.1.dta", clear 
-
-tab locality_16, m 
-br gov_16 gov_10
-codebook gov_16 gov_10
-lab list Lgov 
-lab list governorate 
-
-br district_16 district_10
-codebook district_16 district_10
-
-br subdistrict_16 subdistrict_10
-codebook subdistrict_16 subdistrict_10
-
-tab locality_16
-
-
-egen locality_iid = concat(governorate_iid district_id subdistrict_id locality_id) if !mi(locality_id)
-distinct locality_iid //505
-
-merge m:1 locality_iid using "$data_JLMPS_temp/JLMPS_GeoUnits_Dico.dta"
-*/
 
 *USE LSMS 2016 & LSMS 2010: CROSS SECTIONAL AND THE TWO years
 *BUT REMOVED NON HARMNONIZED VARIABLES: WHICH MEANS THAT THE VARIABLES
@@ -305,14 +299,47 @@ mdesc locality_iid
 
 *duplicates drop locality_iid, force
 
-*destring governorate_iid district_iid subdistrict_iid locality_iid, replace 
+*START NEW CODE START NEW CODE 
+destring governorate_iid district_iid subdistrict_iid locality_iid, replace 
+
+
+merge m:1 district_iid  using "$data_JLMPS_temp/JLMPS_GeoUnits_Dico_dis.dta"
+drop if _merge == 2 
+drop _merge 
+distinct district_iid
+
+merge m:1  subdistrict_iid  using "$data_JLMPS_temp/JLMPS_GeoUnits_Dico_subdis.dta"
+drop if _merge == 2 
+drop _merge 
+distinct district_iid
+
+merge m:1 locality_iid using "$data_JLMPS_temp/JLMPS_GeoUnits_Dico_loc.dta"
+drop if _merge == 2  //Non matched from initial list
+
+//69 non found locality in 2010. Will 
+distinct locality_iid if _merge == 1
+sort governorate_iid district_iid subdistrict_iid locality_iid 
+list governorate_iid district_id subdistrict_id locality_id if _merge == 1
+*i will correct them after - the code is wrong based on the 2010 diccionary
+
+tab _merge 
+drop _merge
+**11,451 missing from orig dico - 69 locality id not found in any of the dictionnary
+**694 missing in master = not surveyed
+*END NEW CODE END NEW CODE 
+
+
+/*
+*ORIGINAL CODE ORIGINAL CODE
 merge m:1 district_iid using "$data_JLMPS_temp/JLMPS_GeoUnits_Dico.dta"
 
 drop if _merge == 2 
 tab _merge 
 drop _merge
+
 **11,451 missing from orig dico - 69 locality id not found in any of the dictionnary
 **694 missing in master = not surveyed
+*/
 
 gen year = round 
 tab year 
@@ -484,6 +511,29 @@ replace industry_en = "banking" if industry_id == 6
 *Harmonize the industries based on the classification for the IV
 *Aggregate several categories
 gen agg_ind_agri     = "Agriculture"   if ind_agri == "Agriculture" | ///
+                                          ind_livestock == "Rasing Livestock" | ///
+                                          ind_prod_milk == "Produce Milk-Based Products" | ///
+                                          ind_prod_food == "Produce Food Products" 
+
+gen agg_ind_industry    = "Industry"      if  ind_prod_textile == "Produce Textile" | ///
+                                              ind_coll_fuel == "Collect Fuel"  
+
+gen agg_ind_construction = "Construction" if ind_construction == "Construction" 
+
+gen agg_ind_services = "Services"      if ind_services == "Services" | ///
+                                          ind_home == "Work From Home (IT, etc)"  | ///
+                                          ind_sew == "Sewing" | ///
+                                          ind_sales == "Sales and Marketing" | ///
+                                          ind_trainee == "Trainee"
+
+gen agg_ind_food     = "Food"       if ind_street_seller == "Work From Home (IT, etc)"
+
+
+
+
+/*ORIG : ERRROR ?
+*Aggregate several categories
+gen agg_ind_agri     = "Agriculture"   if ind_agri == "Agriculture" | ///
                                     ind_livestock == "Rasing Livestock" | ///
                                     ind_prod_milk == "Produce Milk-Based Products" | ///
                                     ind_prod_food == "Produce Food Products" 
@@ -496,7 +546,7 @@ gen agg_ind_services = "Services"      if ind_services == "Construction" | ///
                                     ind_sales == "Sales and Marketing" | ///
                                     ind_trainee == "Trainee"
 gen agg_ind_food     = "Food"       if ind_street_seller == "Work From Home (IT, etc)"
-
+*/
 
 *DECISION : 
 tab employed, m //YES = 1 
@@ -655,7 +705,7 @@ bys work_permit: distinct district_iid
 *WP are only in 27 distircts. That may be a problem once 
 *we aggregate
 
-bys year: tab governorate_en, m
+*bys year: tab governorate_en, m
 bys year: tab district_en, m
 
 *Employed
@@ -670,12 +720,19 @@ sort district_en
 drop district_iid
 egen district_iid = group(district_en) 
 
+/*ORIGINAL CODE ORIGINAL CODE
 sort governorate_en
 drop governorate_iid
 egen governorate_iid = group(governorate_en)
 
 tab governorate_iid
+*/
 
+*NEW CODE NEW CODE
+ren governorate_iid gov
+egen governorate_iid = group(gov)
+tab governorate_iid
+*END NEW CODE END NEW CODE 
 
 gen flag_dist_ref = 1 if  district_iid == 1 | ///
                           district_iid == 4  | ///

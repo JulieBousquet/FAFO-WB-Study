@@ -138,6 +138,11 @@ forvalues x = 1(1)51 {
 
 use "$data_JLMPS_temp/JLMPS_GeoUnits_Dico.dta", clear
 
+
+*NEW CODE NEW CODE 
+*With more accurate GPSs / LOCALITY Information
+duplicates drop district_en, force
+
 tab district_en, m 
 tab district_lat, m
 tab district_long, m
@@ -585,12 +590,14 @@ replace industry_en = "industry" if industry_orig == "Manufacturing "
 replace industry_en = "industry" if industry_orig == "Electricity, gas, steam and air conditioning "
 replace industry_en = "industry" if industry_orig == "Water supply, sewage, waste management activities "
 replace industry_en = "construction" if industry_orig == "Construction "
-replace industry_en = "industry" if industry_orig == "Wholesale and retail trade; repair of motor vehicles "
+*CHANGE: replace industry_en = "industry" if industry_orig == "Wholesale and retail trade; repair of motor vehicles "
+replace industry_en = "services" if industry_orig == "Wholesale and retail trade; repair of motor vehicles "
 replace industry_en = "transportation" if industry_orig == "Transportation and storage "
 replace industry_en = "food" if industry_orig == "Hospitality and food service activities "
-replace industry_en = "services" if industry_orig == "Information and communication "
-replace industry_en = "banking" if industry_orig == "Financial and insurance activities "
-replace industry_en = "banking" if industry_orig == "Real estate activities "
+*CHANGE: replace industry_en = "services" if industry_orig == "Information and communication "
+replace industry_en = "industry" if industry_orig == "Information and communication "
+*CHANGE: replace industry_en = "banking" if industry_orig == "Real estate activities "
+replace industry_en = "services" if industry_orig == "Real estate activities "
 replace industry_en = "services" if industry_orig == "Professional, scientific and technical activities "
 replace industry_en = "services" if industry_orig == "Administrative and support service activities "
 replace industry_en = "services" if industry_orig == "Public administration and defense; compulsory social "
