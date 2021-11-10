@@ -721,6 +721,10 @@ merge m:1 id_gov_syria using "$data_temp/06_IV_Share_GovOrig_Refugee.dta", keepu
 ****************
 ****************
 
+*gen distance_dis_gov_2 = distance_dis_gov^2
+*gen IV_SS = (wp_2016*share_empl_syr*nb_ref_syr_bygov_2016)/distance_dis_gov_2 
+
+
 gen IV_SS = (wp_2016*share_empl_syr*nb_ref_syr_bygov_2016)/distance_dis_gov 
 collapse (sum) IV_SS, by(district_en)
 lab var IV_SS "IV: Shift Share"
@@ -733,4 +737,6 @@ egen district_iid = group(district_en)
 save "$data_final/03_ShiftShare_IV", replace 
 
 log close
+
+*use "$data_final/03_ShiftShare_IV", clear 
 

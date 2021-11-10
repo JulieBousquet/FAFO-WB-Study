@@ -793,11 +793,51 @@ replace wp_industry_jlmps_3m = 1 if usecac1d == 0 | ///
                                  usecac1d == 16 
 tab wp_industry_jlmps_3m, m 
 lab var wp_industry_jlmps_3m "Industries with work permits for refugees - Economic Activity of prim. job 3m"
-lab def wp_industry_jlmps_3m 1 "Industries with WP" 0 "Industries without WP", modify
+lab def wp_industry_jlmps_3m 0 "Close sector" 1 "Open Sector", modify
 lab val wp_industry_jlmps_3m wp_industry_jlmps_3m
 
 *Where are the OLF/UNEMPL ?
 tab wp_industry_jlmps_3m uswrkstsr2, m
+
+
+
+
+
+
+
+
+
+preserve 
+
+keep wp_industry_jlmps_3m indid_2010 year 
+reshape wide wp_industry_jlmps_3m, i(indid_2010) j(year)
+format indid_2010 %12.0g
+
+*br indid_2010 employed_3m2016 employed_3m2010
+
+*MISS 2016 - MISS 2010
+gen open_10_16 = 1 if  wp_industry_jlmps_3m2010 == 1  & wp_industry_jlmps_3m2016 == 1
+gen close_10_16 = 1 if wp_industry_jlmps_3m2010 == 0 & wp_industry_jlmps_3m2016 == 0
+gen open_10_close_16 = 1 if  wp_industry_jlmps_3m2010 == 1  & wp_industry_jlmps_3m2016 == 0
+gen close_10_open_16 = 1 if wp_industry_jlmps_3m2010 == 0 & wp_industry_jlmps_3m2016 == 1
+
+tab open_10_16, m
+tab close_10_16, m
+tab open_10_close_16, m
+tab close_10_open_16, m
+
+reshape long wp_industry_jlmps_3m, i(indid_2010) j(year)
+format indid_2010 %12.0g
+
+tempfile data_empl
+save `data_empl'
+restore 
+
+drop wp_industry_jlmps_3m 
+merge 1:1 indid_2010 year using  `data_empl'
+drop _merge
+
+
 
 *Institutional Sector Crr. Job (ref 1-week)
 tab crinstsec, m 
@@ -908,7 +948,6 @@ lab var bi_formal "Formal Employment - 1 Formal 0 Informal"
 bys year: tab bi_formal , nol
 
 preserve 
-
 
 keep employed_3cat_3m indid_2010 year job1_y dstcrj bi_formal
 reshape wide employed_3cat_3m job1_y dstcrj bi_formal, i(indid_2010) j(year)
