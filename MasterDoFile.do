@@ -117,6 +117,13 @@ if inlist(c(username), "u0131185", "julie") == 1 {
 			global data_RW_final 	"$data_RW/03. Final"
 
 
+	***********************************
+	**    SECONDARY DATA: DOS     **
+	***********************************
+	*Master to locate the folder
+	global data_sec_DOS "$dropbox/04. Secondary Data/02. Data Jordan_MSc/DoS/"
+
+
 	**********************
 	**     ANALYSIS     **
 	**********************

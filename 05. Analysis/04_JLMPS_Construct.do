@@ -19,13 +19,51 @@ log using "$out_analysis/04_JLMPS_Construct.log", replace
 *Merge JLMPS and SHIFT SHARE
 use "$data_final/02_JLMPS_10_16.dta", clear
 
+drop if district_en == "Husseiniyyeh District"
+distinct district_iid
 
 merge m:1 district_iid using "$data_final/03_ShiftShare_IV.dta" 
+tab district_iid if _merge == 2
 drop _merge 
 
 merge m:1 governorate_iid using "$data_temp/07_Ctrl_Nb_Refugee_byGov.dta"
 drop _merge
 
+/*
+*Those are the districts in which we surveyed refugees
+*the other ones, we had no refugees
+keep if  district_iid == 1 | ///
+                          district_iid == 4  | ///
+                          district_iid == 6 | ///
+                          district_iid == 7 | ///
+                          district_iid == 8 | ///
+                          district_iid == 9 | ///
+                          district_iid == 11 | ///
+                          district_iid == 15 | ///
+                          district_iid == 18 | ///
+                          district_iid == 19 | ///
+                          district_iid == 22 | ///
+                          district_iid == 23 | ///
+                          district_iid == 24 | ///
+                          district_iid == 25 | ///
+                          district_iid == 28 | ///
+                          district_iid == 29 | ///
+                          district_iid == 30 | ///
+                          district_iid == 31 | ///
+                          district_iid == 32 | ///
+                          district_iid == 33 | ///
+                          district_iid == 35 | ///
+                          district_iid == 36 | ///
+                          district_iid == 37 | ///
+                          district_iid == 38 | ///
+                          district_iid == 39 | ///
+                          district_iid == 43 | ///
+                          district_iid == 44 | ///
+                          district_iid == 45 | ///
+                          district_iid == 46 | ///
+                          district_iid == 50 | ///
+                          district_iid == 51 
+*/
 tab work_permit, m //more accurate version 
 tab work_permit_orig, m
 tab IV_SS, m
@@ -33,6 +71,8 @@ tab IV_SS, m
 replace IV_SS = 0 if year == 2010
 tab IV_SS , m
 
+replace IV_SS_OP = 0 if year == 2010
+tab IV_SS_OP , m
 
 tab nationality q11203
 tab q11203
@@ -613,6 +653,9 @@ tab IV_SS, m
 gen ln_IV_SS = log(1 + IV_SS)
 gen IHS_IV_SS = log(IV_SS + ((IV_SS^2 + 1)^0.5))
 
+gen ln_IV_SS_OP = log(1 + IV_SS_OP)
+gen IHS_IV_SS_OP = log(IV_SS_OP + ((IV_SS_OP^2 + 1)^0.5))
+
 *THE ASKED QUESTION IN QUEST (binary)
 tab work_permit, m
 
@@ -886,6 +929,12 @@ tab usecac3d, m
 *Institutional Sector Prim. Job (ref 3-month)
 tab usinstsec, m 
 
+
+br usocp1d usocp2d usecac1d usecac2d
+
+
+tab usoccupp usocp1d usocp2d usocp3d 
+tab usecactp usecac1d usecac2d usecac3d
 
 ***********************************************************************
 **PREPARING THE SAMPLE ************************************************
@@ -1656,8 +1705,199 @@ codebook indid
 destring indid, replace 
 
 
+
+/*
+*TRYYYYYYYYYYY
+
+drop IV_SS_OP ln_IV_SS_OP IHS_IV_SS_OP 
+drop share_emp_open_bydis _merge
+*total_empl 
+*total_empl_op
+drop share_emplOpen share_emplClose
+
+preserve 
+
+keep if year == 2010
+distinct district_iid 
+
+tab employed_3m, nol
+gen bi_emplyed_3m = 0 if employed_3m == 1 
+replace bi_emplyed_3m = 1 if employed_3m == 2 
+lab def bi_emplyed_3m 0 "Unemployed (&subs)" 1 "Employed (no subs)", modify 
+lab val bi_emplyed_3m bi_emplyed_3m
+tab bi_emplyed_3m
+
+bys district_iid: egen total_empl = sum(bi_emplyed_3m) if year == 2010 
+tab total_empl, m    
+
+tab wp_industry_jlmps_3m, nol
+bys district_iid: egen total_empl_op = sum(wp_industry_jlmps_3m) if year == 2010 
+tab total_empl_op, m 
+
+bys district_iid : gen share_emp_open_bydis = total_empl_op / total_empl
+tab share_emp_open_bydis, m 
+
+duplicates drop district_iid, force
+
+keep share_emp_open_bydis district_iid 
+tempfile new_iv
+save `new_iv'
+
+restore 
+
+merge m:1 district_iid using `new_iv'
+
+*Missing 17 because that disrict was probably not surveyed in 2010
+replace share_emp_open_bydis = 0 if district_iid == 17
+
+gen IV_SS_OP = IV_SS * share_emp_open_bydis if share_emp_open_bydis != 0
+replace IV_SS_OP = IV_SS if share_emp_open_bydis == 0 
+
+*THE INSTRUMENT + TRANSFORMATION
+gen ln_IV_SS_OP = log(1 + IV_SS_OP)
+gen IHS_IV_SS_OP = log(IV_SS_OP + ((IV_SS_OP^2 + 1)^0.5))
+
+*THE ASKED QUESTION IN QUEST (binary)
+tab work_permit, m
+
+*AGGREGATED MEASURE OF WP BASED ON work_permit
+tab agg_wp, m
+tab agg_wp_orig, m //Adding another more accurate measure
+
+*CORRELATIONS
+corr IV_SS_OP agg_wp  //0.64
+corr IV_SS_OP agg_wp_orig //0.59
+corr IV_SS_OP share_wp //0.55
+*/
+*save "$data_final/06_IV_JLMPS_Regression.dta", replace
+
+
+*CORRELATIONS
+corr IV_SS agg_wp  //0.64
+corr IV_SS agg_wp_orig //0.59
+corr IV_SS share_wp //0.55
+
+save "$data_final/06_IV_JLMPS_Construct_Outcomes.dta", replace
+
+use "$data_final/06_IV_JLMPS_Construct_Outcomes.dta", clear
+
+/*
+import excel "$data_sec_DOS\Table 5.4 - Jord 15+ by Gov, Sex and Main Current Economic Activity (Percent) - 2010.xlsx", sheet("ForStata") firstrow clear
+*br
+
+bys Sector: egen tot_empl_1 = sum(Amman) if Sector != "n.a" 
+bys Sector: egen tot_empl_2 = sum(Balqa) if Sector != "n.a" 
+bys Sector: egen tot_empl_3 = sum(Zarqa) if Sector != "n.a" 
+bys Sector: egen tot_empl_4 = sum(Madaba) if Sector != "n.a" 
+bys Sector: egen tot_empl_5 = sum(Irbid) if Sector != "n.a" 
+bys Sector: egen tot_empl_6 = sum(Mafraq) if Sector != "n.a" 
+bys Sector: egen tot_empl_7 = sum(Jerash) if Sector != "n.a" 
+bys Sector: egen tot_empl_8 = sum(Ajloun) if Sector != "n.a" 
+bys Sector: egen tot_empl_9 = sum(Karak) if Sector != "n.a" 
+bys Sector: egen tot_empl_10 = sum(Tafielah) if Sector != "n.a" 
+bys Sector: egen tot_empl_11 = sum(Maan) if Sector != "n.a" 
+bys Sector: egen tot_empl_12 = sum(Aqaba) if Sector != "n.a" 
+
+replace tot_empl_1 = Amman if Sector == "n.a"
+replace tot_empl_2 = Balqa if Sector == "n.a"
+replace tot_empl_3 = Zarqa if Sector == "n.a"
+replace tot_empl_4 = Madaba if Sector == "n.a"
+replace tot_empl_5 = Irbid if Sector == "n.a"
+replace tot_empl_6 = Mafraq if Sector == "n.a"
+replace tot_empl_7 = Jerash if Sector == "n.a"
+replace tot_empl_8 = Ajloun if Sector == "n.a"
+replace tot_empl_9 = Karak if Sector == "n.a"
+replace tot_empl_10 = Tafielah if Sector == "n.a"
+replace tot_empl_11 = Maan if Sector == "n.a"
+replace tot_empl_12 = Aqaba if Sector == "n.a"
+
+keep tot_empl_* Sector 
+duplicates drop
+replace Sector = "Total" if Sector == "n.a"
+
+reshape long tot_empl_, i(Sector) j(gov)
+
+replace gov = 13 if gov == 3 
+replace gov = 14 if gov == 4
+replace gov = 21 if gov == 5 
+replace gov = 22 if gov == 6
+replace gov = 23 if gov == 7
+replace gov = 24 if gov == 8 
+replace gov = 31 if gov == 9 
+replace gov = 32 if gov == 10 
+replace gov = 33 if gov == 11 
+replace gov = 34 if gov == 12
+replace gov = 11 if gov == 1 
+replace gov = 12 if gov == 2 
+
+lab def gov 11 "Amman" ///
+            12 "Balqa" ///
+            13 "Zarqa" ///
+            14 "Madaba" ///
+            21 "Irbid" ///
+            22 "Mafraq" ///
+            23 "Jarash" ///
+            24 "Ajloun" ///
+            31 "Karak" ///
+            32 "Tafileh" ///
+            33 "Ma'an"  ///
+            34 "Aqaba", ///
+            modify
+
+lab val gov gov
+
+preserve 
+keep if Sector == "Total"
+ren tot_empl_ tot_empl
+tempfile total_empl_db 
+save `total_empl_db'
+restore 
+
+ren tot_empl_ empl_bysector
+
+drop if Sector == "Total"
+merge m:1 gov using `total_empl_db'
+drop _merge 
+gen share_empl = empl_bysector / tot_empl
+
+drop empl_bysector tot_empl
+reshape wide share_empl , i(gov) j(Sector) string
+
+merge 1:m gov using  "$data_final/06_IV_JLMPS_Construct_Outcomes.dta"
+drop _merge
+ 
+gen IV_SS_OP = IV_SS * share_emplOpen 
+
+*THE INSTRUMENT + TRANSFORMATION
+gen ln_IV_SS_OP = log(1 + IV_SS_OP)
+gen IHS_IV_SS_OP = log(IV_SS_OP + ((IV_SS_OP^2 + 1)^0.5))
+
+*THE ASKED QUESTION IN QUEST (binary)
+tab work_permit, m
+
+*AGGREGATED MEASURE OF WP BASED ON work_permit
+tab agg_wp, m
+tab agg_wp_orig, m //Adding another more accurate measure
+
+*CORRELATIONS
+corr IV_SS_OP agg_wp  //0.64
+corr IV_SS_OP agg_wp_orig //0.59
+corr IV_SS_OP share_wp //0.55
+
 *save "$data_final/06_IV_JLMPS_Regression.dta", replace
 save "$data_final/06_IV_JLMPS_Construct_Outcomes.dta", replace
+*/
+
+
+
+
+
+
+
+
+
+
+
 
 /*
 tab job1_y

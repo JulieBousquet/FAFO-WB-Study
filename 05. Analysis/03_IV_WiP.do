@@ -60,7 +60,14 @@ gen share_transportation = transportation / total
 gen share_banking = banking / total
 gen share_services = services / total
 
-ren total total_empl_syr
+/*
+egen tot_open = rsum(agriculture construction services)
+gen share_open = tot_open/total 
+ren total total_empl_syr 
+
+reshape long share_ , i(id_gov_syria) j(industry_id)
+*/
+ren total total_empl_syr 
 
 drop agriculture factory construction trade transportation banking services 
 drop total_empl_syr
@@ -597,6 +604,7 @@ replace industry_en = "transportation" if industry_orig == "Transportation and s
 replace industry_en = "food" if industry_orig == "Hospitality and food service activities "
 *CHANGE: replace industry_en = "services" if industry_orig == "Information and communication "
 replace industry_en = "industry" if industry_orig == "Information and communication "
+replace industry_en = "banking"  if industry_orig == "Financial and insurance activities "
 *CHANGE: replace industry_en = "banking" if industry_orig == "Real estate activities "
 replace industry_en = "services" if industry_orig == "Real estate activities "
 replace industry_en = "services" if industry_orig == "Professional, scientific and technical activities "
@@ -658,7 +666,93 @@ egen governorate_iid = group(governorate_en)
 
 keep year governorate_en governorate_iid NbRefbyGovoutcamp NbWP
 *save "$data_UNHCR_final/UNHCR_NbRef_byGov.dta", replace
+
 save "$data_temp/07_Ctrl_Nb_Refugee_byGov.dta", replace
+
+
+
+use "$data_final/02_JLMPS_10_16.dta", clear 
+
+
+keep district_iid governorate_iid district_lat district_long
+duplicates drop district_iid, force
+
+merge m:1 governorate_iid using "$data_temp/07_Ctrl_Nb_Refugee_byGov.dta"
+drop _merge
+*******************
+** DISTANCE CAMP **
+*******************
+
+*Distance between zaatari camp and districts jordan
+gen dist_zaatari_lat = 32.30888675674741
+gen dist_zaatari_long = 36.31329385051756
+geodist district_lat district_long dist_zaatari_lat dist_zaatari_long, gen(distance_dis_camp)
+tab distance_dis_camp, m
+lab var distance_dis_camp "[CTRL] Distance (km) between JORD districts and ZAATARI CAMP in 2016"
+replace distance_dis_camp = 0 if year == 2010
+
+gen inv_dist_camp = 1/distance_dis_camp
+replace inv_dist_camp = 0 if year == 2010
+gen ln_invdistance_dis_camp = log(1 + inv_dist_camp) 
+
+*gen ln_distance_dis_camp = log(1 + distance_dis_camp) 
+*if year == 2016
+*replace ln_distance_dis_camp = 0 if year == 2010
+lab var ln_invdistance_dis_camp "[CTRL] LOG Inverse Distance (km) between JORD districts and ZAATARI CAMP in 2016"
+
+
+*********************
+** NUMBER REFUGEES **
+*********************
+
+tab NbRefbyGovoutcamp, m
+ren NbRefbyGovoutcamp nb_refugees_bygov
+replace nb_refugees_bygov = 0 if year == 2010
+lab var nb_refugees_bygov "[CTRL] Number of refugees out of camps by governorate in 2016"
+tab nb_refugees_bygov
+
+gen ln_nb_refugees_bygov = ln(1 + nb_refugees_bygov) 
+*if year == 2016
+*replace ln_nb_refugees_bygov = 0 if year == 2010
+
+lab var ln_nb_refugees_bygov "[CTRL] LOG Number of refugees out of camps by governorate in 2016"
+*ln_ref, as of now, does not include refugees in 2010, only in 2016
+
+****** Other
+gen IHS_nb_refugees_bygov = log(nb_refugees_bygov + ((nb_refugees_bygov^2 + 1)^0.5))
+lab var IHS_nb_refugees_bygov "IHS - Number of refugees out of camps by governorate in 2016"
+
+
+
+tab nb_refugees_bygov
+gen tot_nb_ref_2016 = 513032 if year == 2016
+lab var tot_nb_ref_2016 "Number of Syrian refugee in Jordan in 2016"
+
+*THE INSTRUMENT 
+gen IV_SS_ref_inflow = tot_nb_ref_2016*inv_dist_camp
+replace IV_SS_ref_inflow = 0 if mi(IV_SS_ref_inflow)
+lab var IV_SS_ref_inflow "SSIV for refugee inflow: tot_nb_ref_2016 x inv_dist_camp"
+
+*THE INSTRUMENT 
+tab IV_SS_ref_inflow, m 
+bys district_iid: tab IV_SS_ref_inflow
+
+distinct IV_SS_ref_inflow
+
+*THE INSTRUMENT + TRANSFORMATION
+gen ln_IV_SS_ref_inflow = log(1 + IV_SS_ref_inflow)
+lab var ln_IV_SS_ref_inflow "LOG - SSIV for refugee inflow: tot_nb_ref_2016 x inv_dist_camp"
+replace ln_IV_SS_ref_inflow = 0 if year == 2010
+
+gen IHS_IV_SS_ref_inflow = log(IV_SS_ref_inflow + ((IV_SS_ref_inflow^2 + 1)^0.5))
+lab var IHS_IV_SS_ref_inflow "IHS - SSIV for refugee inflow: tot_nb_ref_2016 x inv_dist_camp"
+replace IHS_IV_SS_ref_inflow = 0 if year == 2010
+
+
+
+save "$data_final/10_JLMPS_Distance_Zaatari.dta", replace 
+
+
 
 
 
@@ -750,11 +844,174 @@ reshape wide share_empl , i(gov) j(Sector) string
 save "$data_temp/08_Share_empl_open_byGov.dta", replace
 
 
+
+
+
+
+*************************************
+* SHARE EMPL JORD DISTRICT BY INDUS *
+*************************************
+
+use "$data_final/02_JLMPS_10_16.dta", clear
+
+*** OLF AS MISSING ***
+gen employed_3m = 2 if uswrkstsr1 == 1 & (usempstp != 3 | usempstp != 4) //EMPLOYED BUT NO SUBS WORK
+replace employed_3m = 1 if uswrkstsr1 == 2 // UNEMP
+replace employed_3m = 1 if uswrkstsr1 == 1 & (usempstp == 3 | usempstp == 4) //EMPLOYED IN SUBS WORK
+replace employed_3m = . if uswrkstsr1 == 3 //OLF MISS
+tab employed_3m, m 
+lab def employed_3m 2 "Employed (no subs)" 1 "Unemployed (&subs)", modify 
+lab val employed_3m employed_3m
+lab var employed_3m "From uswrkstsr1 - mkt def, search req; 3m, 2 empl - 1 unemp - OLF miss"
+
+keep if year == 2010
+distinct district_iid 
+
+tab employed_3m, nol
+gen bi_emplyed_3m = 0 if employed_3m == 1 
+replace bi_emplyed_3m = 1 if employed_3m == 2 
+lab def bi_emplyed_3m 0 "Unemployed (&subs)" 1 "Employed (no subs)", modify 
+lab val bi_emplyed_3m bi_emplyed_3m
+tab bi_emplyed_3m
+
+keep district_iid bi_emplyed_3m usecac1d
+drop if bi_emplyed_3m == .
+drop if bi_emplyed_3m == 0 
+bys district_iid: egen total_empl = sum(bi_emplyed_3m) 
+tab total_empl, m    
+
+*Economic activity of prim. job (Sections(1digit), based on ISIC4, ref. 3-mnths)
+tab usecac1d,m 
+
+codebook usecac1d
+lab list ecac1d
+
+gen empl_byindus = "agriculture" if usecac1d == 0
+replace empl_byindus = "industry" if usecac1d == 1
+replace empl_byindus = "industry" if usecac1d == 2
+replace empl_byindus = "industry" if usecac1d == 3
+replace empl_byindus = "industry" if usecac1d == 4
+replace empl_byindus = "construction" if usecac1d == 5
+replace empl_byindus = "services" if usecac1d == 6
+replace empl_byindus = "transportation" if usecac1d == 7
+replace empl_byindus = "food" if usecac1d == 8
+replace empl_byindus = "industry" if usecac1d == 9
+replace empl_byindus = "banking" if usecac1d == 10
+replace empl_byindus = "services" if usecac1d == 11
+replace empl_byindus = "services" if usecac1d == 12
+replace empl_byindus = "services" if usecac1d == 13
+replace empl_byindus = "services" if usecac1d == 14
+replace empl_byindus = "services" if usecac1d == 15
+replace empl_byindus = "services" if usecac1d == 16
+replace empl_byindus = "services" if usecac1d == 17
+replace empl_byindus = "services" if usecac1d == 18
+
+tab empl_byindus, m 
+
+
+sort empl_byindus 
+egen industry_id = group(empl_byindus)
+list industry_id empl_byindus 
+
+/*    +---------------------------+
+     | indust~d      industry_en |
+     |---------------------------|
+  1. |        1      agriculture |
+  2. |        2          banking |
+  3. |        3     construction |
+  4. |        4             food |
+  5. |        5         industry |
+     |---------------------------|
+  6. |        6         services |
+  7. |        7   transportation |
+     +---------------------------+
+*/
+
+drop if mi(industry_id) 
+
+bys district_iid: egen total_empl_indus = count(empl_byindus)
+
+bys district_iid: egen total_empl_services = count(empl_byindus) if empl_byindus == "services"
+gen share_empl_services = 0
+bys district_iid: replace share_empl_services = total_empl_services/total_empl_indus
+tab share_empl_services
+
+bys district_iid: egen total_empl_agriculture = count(empl_byindus) if empl_byindus == "agriculture"
+gen share_empl_agriculture = 0
+bys district_iid: replace share_empl_agriculture = total_empl_agriculture/total_empl_indus
+tab share_empl_agriculture
+
+bys district_iid: egen total_empl_industry = count(empl_byindus) if empl_byindus == "industry"
+gen share_empl_industry = 0
+bys district_iid: replace share_empl_industry = total_empl_industry/total_empl_indus
+tab share_empl_industry
+
+bys district_iid: egen total_empl_construction = count(empl_byindus) if empl_byindus == "construction"
+gen share_empl_construction = 0
+bys district_iid: replace share_empl_construction = total_empl_construction/total_empl_indus
+tab share_empl_construction
+
+bys district_iid: egen total_empl_transportation = count(empl_byindus) if empl_byindus == "transportation"
+gen share_empl_transportation = 0
+bys district_iid: replace share_empl_transportation = total_empl_transportation/total_empl_indus
+tab share_empl_transportation
+
+bys district_iid: egen total_empl_banking = count(empl_byindus) if empl_byindus == "banking"
+gen share_empl_banking = 0
+bys district_iid: replace share_empl_banking = total_empl_banking/total_empl_indus
+tab share_empl_banking
+
+bys district_iid: egen total_empl_food = count(empl_byindus) if empl_byindus == "food"
+gen share_empl_food = 0
+bys district_iid: replace share_empl_food = total_empl_food/total_empl_indus
+tab share_empl_food
+
+keep district_iid industry_id total_empl empl_byindus total_empl_indus ///
+        share_empl_services share_empl_agriculture share_empl_industry ///
+        share_empl_construction share_empl_transportation share_empl_banking ///
+        share_empl_food
+
+egen share_empl_byindus = rsum(share_empl_services share_empl_agriculture ///
+        share_empl_industry ///
+        share_empl_construction share_empl_transportation share_empl_banking ///
+        share_empl_food)
+
+keep district_iid industry_id total_empl empl_byindus total_empl_indus ///
+        share_empl_byindus
+
+duplicates drop district_iid empl_byindus, force
+drop if mi(empl_byindus)
+distinct district_iid
+
+save "$data_temp/09_Share_empl_byDist_byIndus.dta", replace
+
+*Missing 17 because that disrict was probably not surveyed in 2010
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 /**************
 THE INSTRUMENT 
 **************/
 
 use "$data_temp/04_IV_Share_Empl_Syria", clear 
+
+*sort district_en
+*egen district_iid = group(district_en) 
 
 ***********************************************
 * SHARE 3 : DISTANCE FROM SYR GOV TO DIST JOR *
@@ -771,7 +1028,7 @@ drop district_long district_lat gov_syria_long gov_syria_lat
 sort district_en governorate_syria 
 
 drop id_district_jordan 
-egen id_district_jordan = group(district_en) 
+egen district_iid = group(district_en) 
 
 list id_gov_syria governorate_syria
 sort district_en governorate_syria industry_id
@@ -782,17 +1039,25 @@ egen industry_id = group(industry_en)
 
 *merge m:1 industry_id using  "$data_UNHCR_temp/UNHCR_shift_byOccup.dta"
 merge m:1 industry_id using  "$data_temp/05_IV_shift_byIndus.dta"
-
 drop _merge 
-
 ren share share_empl_syr 
 
-order id_gov_syria governorate_syria id_district_jordan ///
+merge m:m industry_id district_iid using "$data_temp/09_Share_empl_byDist_byIndus.dta",
+drop _merge 
+
+*drop if district_iid == 17 
+replace share_empl_byindus = 0.00001 if mi(share_empl_byindus) &  district_iid != 17
+tab share_empl_byindus, m 
+
+gen diff_share = (share_empl_syr - share_empl_byindus)^0.5 * share_empl_byindus
+tab diff_share, m 
+
+order id_gov_syria governorate_syria district_iid ///
 		district_en industry_id industry_en share_empl_syr wp_2016
 
 lab var id_gov_syria "ID Governorate Syria"
 lab var governorate_syria "Name Governorate Syria"
-lab var id_district_jordan "ID District Jordan"
+lab var district_iid "ID District Jordan"
 lab var district_en "Name District Jordan"
 lab var industry_id "ID Industry"
 lab var industry_en "Name Industry"
@@ -808,19 +1073,29 @@ drop _merge
 
 merge m:1 gov using "$data_temp/08_Share_empl_open_byGov.dta"
 drop _merge
+
+merge m:1 district_iid using "$data_final/10_JLMPS_Distance_Zaatari.dta", keepusing(distance_dis_camp) 
+
+
 ****************
 ****************
   *  SS IV  *
 ****************
 ****************
 
-*gen distance_dis_gov_2 = distance_dis_gov^2
-*gen IV_SS = (wp_2016*share_empl_syr*nb_ref_syr_bygov_2016)/distance_dis_gov_2 
+*WORKING MODELS
+gen IV_SS_1 = (wp_2016 * nb_ref_syr_bygov_2016                              ) / (distance_dis_camp)  
+gen IV_SS_2 = (wp_2016 * nb_ref_syr_bygov_2016 * diff_share * share_emplOpen) / (distance_dis_camp)  
+gen IV_SS_3 = (wp_2016 * nb_ref_syr_bygov_2016 * diff_share                 ) / (distance_dis_camp * distance_dis_gov) 
+gen IV_SS_4 = (wp_2016 * nb_ref_syr_bygov_2016 * diff_share * share_emplOpen) / (distance_dis_camp * distance_dis_gov)
 
 
-gen IV_SS = (wp_2016*share_empl_syr*share_emplOpen*nb_ref_syr_bygov_2016)/distance_dis_gov 
-collapse (sum) IV_SS, by(district_en)
+tab IV_SS, m 
+tab IV_SS_OP, m 
+
+collapse (sum) IV_SS IV_SS_OP , by(district_en)
 lab var IV_SS "IV: Shift Share"
+
 
 tab district_en
 sort district_en
@@ -828,6 +1103,13 @@ egen district_iid = group(district_en)
 
 
 save "$data_final/03_ShiftShare_IV", replace 
+
+
+
+
+
+
+
 
 log close
 

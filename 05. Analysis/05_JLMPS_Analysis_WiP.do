@@ -128,7 +128,7 @@ foreach globals of global globals_list {
   foreach outcome of global `globals' {
     qui xi: reg `outcome' $dep_var ///
              $controls i.educ1d i.fteducst i.mteducst i.ftempst  ///
-            [pweight = expan_indiv],  ///
+            [pweight = panel_wt_10_16],  ///
             cluster(locality_iid) robust 
     codebook `outcome', c
     estimates table, k($dep_var) star(.1 .05 .01) b(%7.4f) 
@@ -196,7 +196,7 @@ foreach globals of global globals_list {
     qui xi: reg `outcome' $dep_var ///
             i.district_iid i.year ///
              $controls i.educ1d i.fteducst i.mteducst i.ftempst  ///
-            [pweight = expan_indiv],  ///
+            [pweight = panel_wt_10_16],  ///
             cluster(locality_iid) robust 
     codebook `outcome', c
     estimates table, k($dep_var) star(.1 .05 .01) b(%7.4f) 
@@ -286,7 +286,7 @@ estimates drop m_job_stable_3m m_informal m_wp_industry_jlmps_3m ///
 /*
 which ivreg2, all
 adoupdate ivreg2, update
-adoupdate ivreg2, update
+adoupdate ranktest, update
 
 ado uninstall ivreg2
 ssc install ivreg2
@@ -296,32 +296,52 @@ ssc install ivreg2
 **********
 *REGRESSION*
 ************
+   
+    xi: ivreg2  ln_basic_rwage_3m ///
+                i.district_iid i.year ///
+                $controls i.educ1d i.fteducst i.mteducst i.ftempst  ///
+                (agg_wp_orig = IV_SS_OP) ///
+                [pweight = panel_wt_10_16], ///
+                cluster(district_iid) robust ///
+                partial(i.district_iid) ///
+                 liml first
+
+*gen inter_iv = IV_SS_OP * IV_SS
+    xi: ivreg2  ln_basic_rwage_3m ///
+                i.district_iid i.year ///
+                $controls i.educ1d i.fteducst i.mteducst i.ftempst  ///
+                (agg_wp_orig nb_refugees_bygov = IV_SS_OP IV_SS_ref_inflow) ///
+                [pweight = expan_indiv], ///
+                cluster(district_iid) robust ///
+                partial(i.district_iid) ///
+                 liml first
+ 
 
 foreach globals of global globals_list {
   foreach outcome of global `globals' {
     xi: ivreg2  `outcome' ///
                 i.district_iid i.year ///
                 $controls i.educ1d i.fteducst i.mteducst i.ftempst  ///
-                ($dep_var = ln_IV_SS) ///
-                [pweight = expan_indiv], ///
+                (agg_wp_orig = IV_SS_OP) ///
+                [pweight = panel_wt_10_16], ///
                 cluster(district_iid) robust ///
                 partial(i.district_iid) ///
                 first
     codebook `outcome', c
-    estimates table, k($dep_var) star(.1 .05 .01) b(%7.4f) 
-    estimates table, b(%7.4f) se(%7.4f) stats(N r2_a) k($dep_var) 
+    estimates table, k(agg_wp_orig) star(.1 .05 .01) b(%7.4f) 
+    estimates table, b(%7.4f) se(%7.4f) stats(N r2_a) k(agg_wp_orig) 
     estimates store m_`outcome', title(Model `outcome')
 
     * With equivalent first-stage
     gen smpl=0
     replace smpl=1 if e(sample)==1
 
-    qui xi: reg $dep_var ln_IV_SS ///
+    qui xi: reg agg_wp_orig IV_SS_OP ///
             i.year i.district_iid ///
              $controls i.educ1d i.fteducst i.mteducst i.ftempst  ///
-            if smpl == 1 [pweight = expan_indiv], ///
+            if smpl == 1 [pweight = panel_wt_10_16], ///
             cluster(district_iid) robust
-    estimates table, k(ln_IV_SS) star(.1 .05 .01)    
+    estimates table, k(IV_SS) star(.1 .05 .01)    
     estimates store mIV_`outcome', title(Model `outcome')
 
     drop smpl 
@@ -477,7 +497,7 @@ foreach globals of global globals_list {
     xi: ivreg2  `outcome' ///
                 i.year i.district_iid i.sector_3m ///
                 $controls i.educ1d i.fteducst i.mteducst i.ftempst  ///
-                ($dep_var = ln_IV_SS) ///
+                (agg_wp_orig = IV_SS) ///
                 [pweight = expan_indiv], ///
                 cluster(district_iid) ///
                 partial(i.district_iid i.sector_3m) ///
@@ -491,12 +511,12 @@ foreach globals of global globals_list {
     gen smpl=0
     replace smpl=1 if e(sample)==1
 
-    qui xi: reg $dep_var ln_IV_SS ///
+    qui xi: reg agg_wp_orig IV_SS ///
             i.year i.district_iid i.sector_3m ///
             $controls i.educ1d i.fteducst i.mteducst i.ftempst  ///
             if smpl == 1 [pweight = expan_indiv], ///
             cluster(district_iid) robust
-    estimates table,  k(ln_IV_SS) star(.1 .05 .01)          
+    estimates table,  k(IV_SS) star(.1 .05 .01)          
     drop smpl 
   }
 }

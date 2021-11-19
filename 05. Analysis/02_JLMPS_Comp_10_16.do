@@ -734,6 +734,8 @@ egen governorate_iid = group(gov)
 tab governorate_iid
 *END NEW CODE END NEW CODE 
 
+*Those are the districts in which we surveyed refugees
+*the other ones, we had no refugees
 gen flag_dist_ref = 1 if  district_iid == 1 | ///
                           district_iid == 4  | ///
                           district_iid == 6 | ///
@@ -766,7 +768,10 @@ gen flag_dist_ref = 1 if  district_iid == 1 | ///
                           district_iid == 50 | ///
                           district_iid == 51 
 
+*Only keep the relevant districts
+*keep if flag_dist_ref ==1
 *save "$data_JLMPS_final/JLMPS_2010-2016.dta", replace
+
 save "$data_final/02_JLMPS_10_16.dta", replace
 
 
