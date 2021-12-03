@@ -930,11 +930,11 @@ tab usecac3d, m
 tab usinstsec, m 
 
 
-br usocp1d usocp2d usecac1d usecac2d
+*br usocp1d usocp2d usecac1d usecac2d
 
 
-tab usoccupp usocp1d usocp2d usocp3d 
-tab usecactp usecac1d usecac2d usecac3d
+*tab usoccupp usocp1d usocp2d usocp3d 
+*tab usecactp usecac1d usecac2d usecac3d
 
 ***********************************************************************
 **PREPARING THE SAMPLE ************************************************

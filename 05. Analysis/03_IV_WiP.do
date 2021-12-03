@@ -1084,10 +1084,12 @@ merge m:1 district_iid using "$data_final/10_JLMPS_Distance_Zaatari.dta", keepus
 ****************
 
 *WORKING MODELS
-gen IV_SS_1 = (wp_2016 * nb_ref_syr_bygov_2016                              ) / (distance_dis_camp)  
-gen IV_SS_2 = (wp_2016 * nb_ref_syr_bygov_2016 * diff_share * share_emplOpen) / (distance_dis_camp)  
-gen IV_SS_3 = (wp_2016 * nb_ref_syr_bygov_2016 * diff_share                 ) / (distance_dis_camp * distance_dis_gov) 
-gen IV_SS_4 = (wp_2016 * nb_ref_syr_bygov_2016 * diff_share * share_emplOpen) / (distance_dis_camp * distance_dis_gov)
+gen IV_SS = (wp_2016                             ) / (distance_dis_camp)  
+
+gen IV_SS_OP = (wp_2016 * nb_ref_syr_bygov_2016                              ) / (distance_dis_camp)  
+*gen IV_SS_2 = (wp_2016 * nb_ref_syr_bygov_2016 * diff_share * share_emplOpen) / (distance_dis_camp)  
+*gen IV_SS_3 = (wp_2016 * nb_ref_syr_bygov_2016 * diff_share                 ) / (distance_dis_camp * distance_dis_gov) 
+*gen IV_SS_4 = (wp_2016 * nb_ref_syr_bygov_2016 * diff_share * share_emplOpen) / (distance_dis_camp * distance_dis_gov)
 
 
 tab IV_SS, m 
@@ -1096,6 +1098,7 @@ tab IV_SS_OP, m
 collapse (sum) IV_SS IV_SS_OP , by(district_en)
 lab var IV_SS "IV: Shift Share"
 
+*ren IV_SS IV_SS_OP
 
 tab district_en
 sort district_en
