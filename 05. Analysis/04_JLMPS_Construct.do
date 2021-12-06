@@ -22,12 +22,12 @@ use "$data_final/02_JLMPS_10_16.dta", clear
 drop if district_en == "Husseiniyyeh District"
 distinct district_iid
 
-merge m:1 district_iid using "$data_final/03_ShiftShare_IV.dta" 
-tab district_iid if _merge == 2
-drop _merge 
+*merge m:1 district_iid using "$data_final/03_ShiftShare_IV_1.dta" 
+*tab district_iid if _merge == 2
+*drop _merge 
 
-merge m:1 governorate_iid using "$data_temp/07_Ctrl_Nb_Refugee_byGov.dta"
-drop _merge
+*merge m:1 governorate_iid using "$data_temp/07_Ctrl_Nb_Refugee_byGov.dta"
+*drop _merge
 
 /*
 *Those are the districts in which we surveyed refugees
@@ -66,13 +66,6 @@ keep if  district_iid == 1 | ///
 */
 tab work_permit, m //more accurate version 
 tab work_permit_orig, m
-tab IV_SS, m
-*NO INSTRUMENT / NO WP IN 2010
-replace IV_SS = 0 if year == 2010
-tab IV_SS , m
-
-replace IV_SS_OP = 0 if year == 2010
-tab IV_SS_OP , m
 
 tab nationality q11203
 tab q11203
@@ -81,11 +74,11 @@ tab year
 *drop if flag_dist_ref != 1 
 
 *save "$data_final/05_IV_JLMPS_Analysis.dta", replace
-save "$data_final/05_IV_JLMPS_MergingIV.dta", replace
+*save "$data_final/05_IV_JLMPS_MergingIV.dta", replace
 
 
 
-use "$data_final/05_IV_JLMPS_MergingIV.dta", clear
+*use "$data_final/05_IV_JLMPS_MergingIV.dta", clear
 
 *AGGREGATED NUMBER OF WORK PERMIT
 
@@ -641,32 +634,6 @@ In some specifications we also control for geographic or individual fixed effect
 case some invariant controls drop out of the models).
 */
 
-
-                                       ************
-                                       *Instrument*
-                                       ************
-
-*THE INSTRUMENT 
-tab IV_SS, m 
-
-*THE INSTRUMENT + TRANSFORMATION
-gen ln_IV_SS = log(1 + IV_SS)
-gen IHS_IV_SS = log(IV_SS + ((IV_SS^2 + 1)^0.5))
-
-gen ln_IV_SS_OP = log(1 + IV_SS_OP)
-gen IHS_IV_SS_OP = log(IV_SS_OP + ((IV_SS_OP^2 + 1)^0.5))
-
-*THE ASKED QUESTION IN QUEST (binary)
-tab work_permit, m
-
-*AGGREGATED MEASURE OF WP BASED ON work_permit
-tab agg_wp, m
-tab agg_wp_orig, m //Adding another more accurate measure
-
-*CORRELATIONS
-corr IV_SS agg_wp  //0.64
-corr IV_SS agg_wp_orig //0.59
-corr IV_SS share_wp //0.55
 
 
                                           **********
@@ -1771,15 +1738,372 @@ corr IV_SS_OP share_wp //0.55
 */
 *save "$data_final/06_IV_JLMPS_Regression.dta", replace
 
+save "$data_final/06_IV_JLMPS_Construct_Outcomes_nowp.dta", replace
+
+
+
+
+/* IV 1 : Layman term: Expected demand for work P at destination
+IV1: 1/Dist_camp_d* Nbr WP_t
+Layman term: Expected demand for work P at destination
+
+Story : We start with the Fallah e al. IV augmented by the number of work permits allocated in Jordan 
+*/
+
+use "$data_final/06_IV_JLMPS_Construct_Outcomes_nowp.dta", clear
+
+merge m:1 district_iid using "$data_final/03_ShiftShare_IV_1.dta" 
+tab district_iid if _merge == 1
+drop _merge 
+
+*THE INSTRUMENT 
+tab IV_SS_1, m 
+
+*NO INSTRUMENT / NO WP IN 2010
+replace IV_SS_1 = 0 if year == 2010
+tab IV_SS_1 , m
+
+*THE INSTRUMENT + TRANSFORMATION
+gen ln_IV_SS_1 = log(1 + IV_SS_1)
+gen IHS_IV_SS_1 = log(IV_SS_1 + ((IV_SS_1^2 + 1)^0.5))
+
+*THE ASKED QUESTION IN QUEST (binary)
+tab work_permit, m
+*AGGREGATED MEASURE OF WP BASED ON work_permit
+tab agg_wp, m
+tab agg_wp_orig, m //Adding another more accurate measure
 
 *CORRELATIONS
-corr IV_SS agg_wp  //0.64
-corr IV_SS agg_wp_orig //0.59
-corr IV_SS share_wp //0.55
+corr IV_SS_1 agg_wp  //
+corr IV_SS_1 agg_wp_orig //
+corr IV_SS_1 share_wp //
+
+*save "$data_final/06_IV_JLMPS_Construct_Outcomes.dta", replace
+
+
+
+
+/* IV2: Nbr_refugees_t * 1/Dist_camp_d* Nbr WP_t
+Layman term: Expected demand for work P at destination
+
+Story: Augmented by the number of refugees since it will affect the demand for work permits
+*/
+
+
+*use "$data_final/06_IV_JLMPS_Construct_Outcomes_nowp.dta", clear
+
+merge m:1 district_iid using "$data_final/03_ShiftShare_IV_2.dta" 
+tab district_iid if _merge == 1
+drop _merge 
+
+*THE INSTRUMENT 
+tab IV_SS_2, m 
+
+*NO INSTRUMENT / NO WP IN 2010
+replace IV_SS_2 = 0 if year == 2010
+tab IV_SS_2 , m
+
+*THE INSTRUMENT + TRANSFORMATION
+gen ln_IV_SS_2 = log(1 + IV_SS_2)
+gen IHS_IV_SS_2 = log(IV_SS_2 + ((IV_SS_2^2 + 1)^0.5))
+
+*THE ASKED QUESTION IN QUEST (binary)
+tab work_permit, m
+*AGGREGATED MEASURE OF WP BASED ON work_permit
+tab agg_wp, m
+tab agg_wp_orig, m //Adding another more accurate measure
+
+*CORRELATIONS
+corr IV_SS_2 agg_wp  //
+corr IV_SS_2 agg_wp_orig //
+corr IV_SS_2 share_wp //
+
+
+
+
+
+
+/**************
+THE INSTRUMENT : IV3
+**************/
+
+/* IV3: [Nbr_refugees_ot* 1/dist_od] * [1/Dist_camp_d* Nbr WP_t]
+Layman term: Expected demand for work P at destination
+
+Story: Augmented by the number of refugees by destination district since it will affect the demand for work permits
+*/
+
+merge m:1 district_iid using "$data_final/03_ShiftShare_IV_3.dta" 
+tab district_iid if _merge == 1
+drop _merge 
+
+*THE INSTRUMENT 
+tab IV_SS_3, m 
+
+*NO INSTRUMENT / NO WP IN 2010
+replace IV_SS_3 = 0 if year == 2010
+tab IV_SS_3 , m
+
+*THE INSTRUMENT + TRANSFORMATION
+gen ln_IV_SS_3 = log(1 + IV_SS_3)
+gen IHS_IV_SS_3 = log(IV_SS_3 + ((IV_SS_3^2 + 1)^0.5))
+
+*THE ASKED QUESTION IN QUEST (binary)
+tab work_permit, m
+*AGGREGATED MEASURE OF WP BASED ON work_permit
+tab agg_wp, m
+tab agg_wp_orig, m //Adding another more accurate measure
+
+*CORRELATIONS
+corr IV_SS_3 agg_wp  //
+corr IV_SS_3 agg_wp_orig //
+corr IV_SS_3 share_wp //
+
+
+
+
+
+
+/**************
+THE INSTRUMENT : IV4
+**************/
+
+/*
+IV4: [Nbr_refugees_ot* 1/dist_od] * [1/Dist_camp_d* Nbr WP_t] * [Nbr WP_st * (Txemploi_s,d)]
+Story: Augmented by the number of refugees by destination district since it will affect the demand 
+for work permits and the sector composition at destination to approximate for expected supply of WP
+Advantage using Jordanian sector
+*/
+
+merge m:1 district_iid using "$data_final/03_ShiftShare_IV_4.dta" 
+tab district_iid if _merge == 1
+drop if _merge == 1
+drop _merge 
+
+*THE INSTRUMENT 
+tab IV_SS_4, m 
+
+*NO INSTRUMENT / NO WP IN 2010
+replace IV_SS_4 = 0 if year == 2010
+tab IV_SS_4 , m
+
+*THE INSTRUMENT + TRANSFORMATION
+gen ln_IV_SS_4 = log(1 + IV_SS_4)
+gen IHS_IV_SS_4 = log(IV_SS_4 + ((IV_SS_4^2 + 1)^0.5))
+
+*THE ASKED QUESTION IN QUEST (binary)
+tab work_permit, m
+*AGGREGATED MEASURE OF WP BASED ON work_permit
+tab agg_wp, m
+tab agg_wp_orig, m //Adding another more accurate measure
+
+*CORRELATIONS
+corr IV_SS_4 agg_wp  //
+corr IV_SS_4 agg_wp_orig //
+corr IV_SS_4 share_wp //
+
+
+
+
+
+
+
+/**************
+THE INSTRUMENT : IV5
+**************/
+
+/*
+IV5: [Nbr_refugees_ot* 1/dist_od] * [1/Dist_camp_d* Nbr WP_t] * 
+[Nbr WP_st * (Txemploi_s,o- Txemploi_s,d)^0.5]]
+
+Layman term: Expected demand for work augmented with expected skill matching between origin 
+and destination
+*/
+
+
+
+merge m:1 district_iid using "$data_final/03_ShiftShare_IV_5.dta" 
+tab district_iid if _merge == 1
+drop if _merge == 1
+drop _merge 
+
+*THE INSTRUMENT 
+tab IV_SS_5, m 
+
+*NO INSTRUMENT / NO WP IN 2010
+replace IV_SS_5 = 0 if year == 2010
+tab IV_SS_5 , m
+
+*THE INSTRUMENT + TRANSFORMATION
+gen ln_IV_SS_5 = log(1 + IV_SS_5)
+gen IHS_IV_SS_5 = log(IV_SS_5 + ((IV_SS_5^2 + 1)^0.5))
+
+*THE ASKED QUESTION IN QUEST (binary)
+tab work_permit, m
+*AGGREGATED MEASURE OF WP BASED ON work_permit
+tab agg_wp, m
+tab agg_wp_orig, m //Adding another more accurate measure
+
+*CORRELATIONS
+corr IV_SS_5 agg_wp  //
+corr IV_SS_5 agg_wp_orig //
+corr IV_SS_5 share_wp //
+
+
+
+
+
+
+
+
 
 save "$data_final/06_IV_JLMPS_Construct_Outcomes.dta", replace
 
+
+
+
+
+
+
 use "$data_final/06_IV_JLMPS_Construct_Outcomes.dta", clear
+
+
+xtset, clear 
+destring indid_2010 Findid, replace
+mdesc indid_2010
+xtset indid_2010 year 
+
+codebook agg_wp
+lab var agg_wp "Work Permits"
+   
+    xi: ivreg2  ln_basic_rwage_3m ///
+                i.district_iid i.year ///
+                $controls i.educ1d i.fteducst i.mteducst i.ftempst  ///
+                (agg_wp_orig = IV_SS_1) ///
+                [pweight = panel_wt_10_16], ///
+                cluster(district_iid) robust ///
+                partial(i.district_iid) ///
+                 liml first
+
+    xi: ivreg2  ln_basic_rwage_3m ///
+                i.district_iid i.year ///
+                $controls i.educ1d i.fteducst i.mteducst i.ftempst  ///
+                (agg_wp_orig = IV_SS_2) ///
+                [pweight = panel_wt_10_16], ///
+                cluster(district_iid) robust ///
+                partial(i.district_iid) ///
+                 liml first
+
+    xi: ivreg2  ln_basic_rwage_3m ///
+                i.district_iid i.year ///
+                $controls i.educ1d i.fteducst i.mteducst i.ftempst  ///
+                (agg_wp_orig = IV_SS_3) ///
+                [pweight = panel_wt_10_16], ///
+                cluster(district_iid) robust ///
+                partial(i.district_iid) ///
+                 liml first
+
+    xi: ivreg2  ln_basic_rwage_3m ///
+                i.district_iid i.year ///
+                $controls i.educ1d i.fteducst i.mteducst i.ftempst  ///
+                (agg_wp_orig = IV_SS_4) ///
+                [pweight = panel_wt_10_16], ///
+                cluster(district_iid) robust ///
+                partial(i.district_iid) ///
+                 liml first
+
+   xi: ivreg2  ln_basic_rwage_3m ///
+                i.district_iid i.year ///
+                $controls i.educ1d i.fteducst i.mteducst i.ftempst  ///
+                (agg_wp_orig = IV_SS_5) ///
+                [pweight = panel_wt_10_16], ///
+                cluster(district_iid) robust ///
+                partial(i.district_iid) ///
+                 liml first
+
+tab nationality_cl year , m 
+drop if nationality_cl != 1
+
+drop if age > 64 & year == 2016
+drop if age > 60 & year == 2010 //60 in 2010 so 64 in 2016
+
+drop if age < 15 & year == 2016 
+drop if age < 11 & year == 2010 //11 in 2010 so 15 in 2016
+
+drop if miss_16_10 == 1
+drop if unemp_16_10 == 1
+drop if olf_16_10 == 1
+drop if emp_16_miss_10 == 1
+drop if emp_10_miss_16 == 1
+drop if unemp_16_miss_10 == 1
+drop if unemp_10_miss_16 == 1
+drop if olf_16_miss_10 == 1
+drop if olf_10_miss_16 == 1 
+drop if emp_10_olf_16  == 1 
+drop if emp_16_olf_10  == 1 
+drop if unemp_10_emp_16  == 1 
+drop if unemp_16_emp_10  == 1 
+drop if olf_10_unemp_16 == 1 
+drop if olf_16_unemp_10  == 1 
+
+
+xtset, clear 
+destring indid_2010 Findid, replace
+mdesc indid_2010
+xtset indid_2010 year 
+
+codebook agg_wp
+lab var agg_wp "Work Permits"
+   
+    xi: ivreg2  ln_basic_rwage_3m ///
+                i.district_iid i.year ///
+                $controls i.educ1d i.fteducst i.mteducst i.ftempst  ///
+                (agg_wp_orig = IV_SS_1) ///
+                [pweight = panel_wt_10_16], ///
+                cluster(district_iid) robust ///
+                partial(i.district_iid) ///
+                 liml first
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+*use "$data_final/06_IV_JLMPS_Construct_Outcomes.dta", clear
 
 /*
 import excel "$data_sec_DOS\Table 5.4 - Jord 15+ by Gov, Sex and Main Current Economic Activity (Percent) - 2010.xlsx", sheet("ForStata") firstrow clear

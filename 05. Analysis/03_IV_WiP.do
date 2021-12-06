@@ -589,30 +589,48 @@ import excel "$data_UNHCR_base\Datasets_WP_RegisteredSyrians.xlsx", sheet("WP - 
 
 keep year_2016 Activity
 
+drop if  Activity == "Total "
+
+replace Activity = "Accomodation and food service activities " if Activity == "Hospitality and food service activities "
+drop if Activity == "Activities of extraterritorial organizations and bodies " 
+drop if Activity == "Activities of households as employers; undifferentiated goods and services-producing activities of households for own use. "
+
 ren year_2016 wp_2016
 ren Activity industry_orig
+
+sort industry_orig 
+gen industry_orig_id = _n 
+list industry_orig_id industry_orig 
+
+save "$data_temp/05_IV_shift_byIndus_ORIG.dta", replace 
+
+
 gen industry_en = ""
 replace industry_en = "agriculture" if industry_orig == "Agriculture, forestry, and fishing "
 replace industry_en = "industry" if industry_orig == "Mining and quarrying "
 replace industry_en = "industry" if industry_orig == "Manufacturing "
-replace industry_en = "industry" if industry_orig == "Electricity, gas, steam and air conditioning "
-replace industry_en = "industry" if industry_orig == "Water supply, sewage, waste management activities "
+*CHANGE: replace industry_en = "industry" if industry_orig == "Electricity, gas, steam and air conditioning "
+replace industry_en = "services" if industry_orig == "Electricity, gas, steam and air conditioning "
+*CHANGE: replace industry_en = "industry" if industry_orig == "Water supply, sewage, waste management activities "
+replace industry_en = "services" if industry_orig == "Water supply, sewage, waste management activities "
 replace industry_en = "construction" if industry_orig == "Construction "
 *CHANGE: replace industry_en = "industry" if industry_orig == "Wholesale and retail trade; repair of motor vehicles "
 replace industry_en = "services" if industry_orig == "Wholesale and retail trade; repair of motor vehicles "
 replace industry_en = "transportation" if industry_orig == "Transportation and storage "
-replace industry_en = "food" if industry_orig == "Hospitality and food service activities "
+replace industry_en = "food" if industry_orig == "Accomodation and food service activities "
 *CHANGE: replace industry_en = "services" if industry_orig == "Information and communication "
-replace industry_en = "industry" if industry_orig == "Information and communication "
+*replace industry_en = "industry" if industry_orig == "Information and communication "
+replace industry_en = "transportation" if industry_orig == "Information and communication "
 replace industry_en = "banking"  if industry_orig == "Financial and insurance activities "
-*CHANGE: replace industry_en = "banking" if industry_orig == "Real estate activities "
-replace industry_en = "services" if industry_orig == "Real estate activities "
+replace industry_en = "banking" if industry_orig == "Real estate activities "
+*CHANGE: replace industry_en = "services" if industry_orig == "Real estate activities "
 replace industry_en = "services" if industry_orig == "Professional, scientific and technical activities "
 replace industry_en = "services" if industry_orig == "Administrative and support service activities "
 replace industry_en = "services" if industry_orig == "Public administration and defense; compulsory social "
 replace industry_en = "services" if industry_orig == "Education "
 replace industry_en = "services" if industry_orig == "Human health and social work activities "
-replace industry_en = "services" if industry_orig == "Arts, entertainment and recreation "
+*replace industry_en = "services" if industry_orig == "Arts, entertainment and recreation "
+replace industry_en = "food" if industry_orig == "Arts, entertainment and recreation "
 replace industry_en = "services" if industry_orig == "Other service activities "
 
 drop if mi(industry_en)
@@ -674,7 +692,7 @@ save "$data_temp/07_Ctrl_Nb_Refugee_byGov.dta", replace
 use "$data_final/02_JLMPS_10_16.dta", clear 
 
 
-keep district_iid governorate_iid district_lat district_long
+keep district_iid governorate_iid district_lat district_long district_en
 duplicates drop district_iid, force
 
 merge m:1 governorate_iid using "$data_temp/07_Ctrl_Nb_Refugee_byGov.dta"
@@ -762,7 +780,185 @@ THE SHARE OF EMPLOYED IN OPEN  IN JORDAN
 
 import excel "$data_sec_DOS\Table 5.4 - Jord 15+ by Gov, Sex and Main Current Economic Activity (Percent) - 2010.xlsx", sheet("ForStata") firstrow clear
 *br
+drop Sector
+gen Sector = "Open" if Economicactivity == "Agriculture, forestry and fishing" | ///
+                        Economicactivity == "Manufacturing" | ///
+                        Economicactivity == "Construction" | ///
+                        Economicactivity == "Wholesale and retail trade; repair of motor vehicles and motorcycles" | ///
+                        Economicactivity == "Human health and social work activities" | ///
+                        Economicactivity == "Administrative and support service activities" | ///
+                        Economicactivity == "Public Administration and Defence, Compulsory Social Security" | ///
+                        Economicactivity == "Other service activities" 
+replace Sector = "Close" if mi(Sector)
+replace Sector = "n.a" if Economicactivity == "Total"
 
+ren Economicactivity industry_orig
+
+gen industry_en = ""
+replace industry_en = "agriculture" if industry_orig == "Agriculture, forestry and fishing"
+replace industry_en = "industry" if industry_orig == "Mining and quarrying"
+replace industry_en = "industry" if industry_orig == "Manufacturing"
+*CHANGE: replace industry_en = "industry" if industry_orig == "Electricity, gas, steam and air conditioning "
+replace industry_en = "services" if industry_orig == "Electricity, gas, steam and air conditioning supply"
+*CHANGE: replace industry_en = "industry" if industry_orig == "Water supply, sewage, waste management activities "
+replace industry_en = "services" if industry_orig == "Water supply, sewerage, waste management and remediation activities"
+replace industry_en = "construction" if industry_orig == "Construction"
+*CHANGE: replace industry_en = "industry" if industry_orig == "Wholesale and retail trade; repair of motor vehicles "
+replace industry_en = "services" if industry_orig == "Wholesale and retail trade; repair of motor vehicles and motorcycles"
+replace industry_en = "transportation" if industry_orig == "Transportation and storage"
+replace industry_en = "food" if industry_orig == "Accommodation and food service activities"
+*CHANGE: replace industry_en = "services" if industry_orig == "Information and communication "
+*replace industry_en = "industry" if industry_orig == "Information and communication "
+replace industry_en = "transportation" if industry_orig == "Information and communication"
+replace industry_en = "banking"  if industry_orig == "Financial and insurance activities"
+replace industry_en = "banking" if industry_orig == "Real estate activities"
+*CHANGE: replace industry_en = "services" if industry_orig == "Real estate activities "
+replace industry_en = "services" if industry_orig == "Professional, scientific and technical activities"
+replace industry_en = "services" if industry_orig == "Administrative and support service activities"
+replace industry_en = "services" if industry_orig == "Public Administration and Defence, Compulsory Social Security"
+replace industry_en = "services" if industry_orig == "Education"
+replace industry_en = "services" if industry_orig == "Human health and social work activities"
+*replace industry_en = "services" if industry_orig == "Arts, entertainment and recreation "
+replace industry_en = "food" if industry_orig == "Arts, entertainment and recreation"
+replace industry_en = "services" if industry_orig == "Other service activities"
+
+drop if industry_orig == "Activities of households as employers; undifferentiated goods and services-producing activities of households for own use"
+drop if industry_orig == "Activities of extraterritorial organizations and bodies"
+
+order industry_en Sector
+bys industry_en: egen tot_empl_1 = sum(Amman) if Sector != "n.a" 
+bys industry_en: egen tot_empl_2 = sum(Balqa) if Sector != "n.a" 
+bys industry_en: egen tot_empl_3 = sum(Zarqa) if Sector != "n.a" 
+bys industry_en: egen tot_empl_4 = sum(Madaba) if Sector != "n.a" 
+bys industry_en: egen tot_empl_5 = sum(Irbid) if Sector != "n.a" 
+bys industry_en: egen tot_empl_6 = sum(Mafraq) if Sector != "n.a" 
+bys industry_en: egen tot_empl_7 = sum(Jerash) if Sector != "n.a" 
+bys industry_en: egen tot_empl_8 = sum(Ajloun) if Sector != "n.a" 
+bys industry_en: egen tot_empl_9 = sum(Karak) if Sector != "n.a" 
+bys industry_en: egen tot_empl_10 = sum(Tafielah) if Sector != "n.a" 
+bys industry_en: egen tot_empl_11 = sum(Maan) if Sector != "n.a" 
+bys industry_en: egen tot_empl_12 = sum(Aqaba) if Sector != "n.a" 
+
+replace tot_empl_1 = Amman if Sector == "n.a"
+replace tot_empl_2 = Balqa if Sector == "n.a"
+replace tot_empl_3 = Zarqa if Sector == "n.a"
+replace tot_empl_4 = Madaba if Sector == "n.a"
+replace tot_empl_5 = Irbid if Sector == "n.a"
+replace tot_empl_6 = Mafraq if Sector == "n.a"
+replace tot_empl_7 = Jerash if Sector == "n.a"
+replace tot_empl_8 = Ajloun if Sector == "n.a"
+replace tot_empl_9 = Karak if Sector == "n.a"
+replace tot_empl_10 = Tafielah if Sector == "n.a"
+replace tot_empl_11 = Maan if Sector == "n.a"
+replace tot_empl_12 = Aqaba if Sector == "n.a"
+
+*keep tot_empl_* Sector industry_en
+duplicates drop industry_en, force
+replace industry_en = "Total" if Sector == "n.a"
+keep tot_empl_*  industry_en
+
+reshape long tot_empl_, i(industry_en) j(gov)
+
+replace gov = 13 if gov == 3 
+replace gov = 14 if gov == 4
+replace gov = 21 if gov == 5 
+replace gov = 22 if gov == 6
+replace gov = 23 if gov == 7
+replace gov = 24 if gov == 8 
+replace gov = 31 if gov == 9 
+replace gov = 32 if gov == 10 
+replace gov = 33 if gov == 11 
+replace gov = 34 if gov == 12
+replace gov = 11 if gov == 1 
+replace gov = 12 if gov == 2 
+
+lab def gov 11 "Amman" ///
+            12 "Balqa" ///
+            13 "Zarqa" ///
+            14 "Madaba" ///
+            21 "Irbid" ///
+            22 "Mafraq" ///
+            23 "Jarash" ///
+            24 "Ajloun" ///
+            31 "Karak" ///
+            32 "Tafileh" ///
+            33 "Ma'an"  ///
+            34 "Aqaba", ///
+            modify
+
+lab val gov gov
+
+preserve 
+keep if industry_en == "Total"
+ren tot_empl_ tot_empl
+tempfile total_empl_db 
+save `total_empl_db'
+restore 
+
+ren tot_empl_ empl_bysector
+
+drop if industry_en == "Total"
+merge m:1 gov using `total_empl_db'
+drop _merge 
+gen share_empl = empl_bysector / tot_empl
+
+drop empl_bysector tot_empl
+reshape wide share_empl , i(gov) j(industry_en) string
+
+/*
+
+egen industry_id = group(industry_en)
+list industry_id industry_en 
+
+/*    +---------------------------+
+     | indust~d      industry_en |
+     |---------------------------|
+  1. |        1      agriculture |
+  2. |        2          banking |
+  3. |        3     construction |
+  4. |        4             food |
+  5. |        5         industry |
+     |---------------------------|
+  6. |        6         services |
+  7. |        7   transportation |
+     +---------------------------+
+*/
+merge m:1 industry_id using  "$data_temp/05_IV_shift_byIndus.dta" 
+drop _merge
+
+*drop Economicactivity 
+*order gov industry_orig_id industry_orig wp_2016  share_empl
+
+gen inter_wp_empl = wp_2016 * share_empl
+
+collapse (sum) inter_wp_empl, by(gov)
+
+*/
+
+
+save "$data_temp/08_Share_empl_Jordan_byGov_byIndus.dta", replace
+
+
+
+/****************************************
+THE SHARE OF EMPLOYED IN OPEN  IN JORDAN 
+****************************************/
+
+import excel "$data_sec_DOS\Table 5.4 - Jord 15+ by Gov, Sex and Main Current Economic Activity (Percent) - 2010.xlsx", sheet("ForStata") firstrow clear
+*br
+drop Sector
+gen Sector = "Open" if Economicactivity == "Agriculture, forestry and fishing" | ///
+                        Economicactivity == "Manufacturing" | ///
+                        Economicactivity == "Construction" | ///
+                        Economicactivity == "Wholesale and retail trade; repair of motor vehicles and motorcycles" | ///
+                        Economicactivity == "Human health and social work activities" | ///
+                        Economicactivity == "Administrative and support service activities" | ///
+                        Economicactivity == "Public Administration and Defence, Compulsory Social Security" | ///
+                        Economicactivity == "Other service activities" 
+replace Sector = "Close" if mi(Sector)
+replace Sector = "n.a" if Economicactivity == "Total"
+
+order Economicactivity Sector
 bys Sector: egen tot_empl_1 = sum(Amman) if Sector != "n.a" 
 bys Sector: egen tot_empl_2 = sum(Balqa) if Sector != "n.a" 
 bys Sector: egen tot_empl_3 = sum(Zarqa) if Sector != "n.a" 
@@ -841,8 +1037,173 @@ gen share_empl = empl_bysector / tot_empl
 drop empl_bysector tot_empl
 reshape wide share_empl , i(gov) j(Sector) string
 
+
+
 save "$data_temp/08_Share_empl_open_byGov.dta", replace
 
+
+
+
+/****************************************
+THE SHARE OF EMPLOYED BY INDUSTRY IN JORDAN 
+****************************************/
+
+import excel "$data_sec_DOS\Table 5.4 - Jord 15+ by Gov, Sex and Main Current Economic Activity (Percent) - 2010.xlsx", sheet("ForStata") firstrow clear
+*br
+drop Sector
+gen Sector = "Open" if Economicactivity == "Agriculture, forestry and fishing" | ///
+                        Economicactivity == "Manufacturing" | ///
+                        Economicactivity == "Construction" | ///
+                        Economicactivity == "Wholesale and retail trade; repair of motor vehicles and motorcycles" | ///
+                        Economicactivity == "Human health and social work activities" | ///
+                        Economicactivity == "Administrative and support service activities" | ///
+                        Economicactivity == "Public Administration and Defence, Compulsory Social Security" | ///
+                        Economicactivity == "Other service activities" 
+replace Sector = "Close" if mi(Sector)
+replace Sector = "n.a" if Economicactivity == "Total"
+
+drop if Economicactivity == "Activities of households as employers; undifferentiated goods and services-producing activities of households for own use"
+drop if Economicactivity == "Activities of extraterritorial organizations and bodies"
+
+sort Economicactivity 
+
+gen     industry_orig_id = 1 if Economicactivity == "Accommodation and food service activities"
+replace industry_orig_id = 2 if Economicactivity == "Administrative and support service activities"
+replace industry_orig_id = 3 if Economicactivity == "Agriculture, forestry and fishing"
+replace industry_orig_id = 4 if Economicactivity == "Arts, entertainment and recreation" 
+replace industry_orig_id = 5 if Economicactivity == "Construction"
+replace industry_orig_id = 6 if Economicactivity == "Education"
+replace industry_orig_id = 7 if Economicactivity == "Electricity, gas, steam and air conditioning supply"
+replace industry_orig_id = 8 if Economicactivity == "Financial and insurance activities"
+replace industry_orig_id = 9 if Economicactivity == "Human health and social work activities"
+replace industry_orig_id = 10 if Economicactivity == "Information and communication"
+replace industry_orig_id = 11 if Economicactivity == "Manufacturing"
+replace industry_orig_id = 12 if Economicactivity == "Mining and quarrying"
+replace industry_orig_id = 13 if Economicactivity == "Other service activities"
+replace industry_orig_id = 14 if Economicactivity == "Professional, scientific and technical activities"
+replace industry_orig_id = 15 if Economicactivity == "Public Administration and Defence, Compulsory Social Security"
+replace industry_orig_id = 16 if Economicactivity == "Real estate activities"
+replace industry_orig_id = 17 if Economicactivity == "Transportation and storage"
+replace industry_orig_id = 18 if Economicactivity == "Water supply, sewerage, waste management and remediation activities"
+replace industry_orig_id = 19 if Economicactivity == "Wholesale and retail trade; repair of motor vehicles and motorcycles"
+
+order Economicactivity industry_orig_id
+
+
+replace Economicactivity = "Agriculture" if Economicactivity == "Agriculture, forestry and fishing"
+replace Economicactivity = "Mining" if Economicactivity == "Mining and quarrying"
+replace Economicactivity = "Manufacturing" if Economicactivity == "Manufacturing"
+replace Economicactivity = "Electricity" if Economicactivity == "Electricity, gas, steam and air conditioning supply"
+replace Economicactivity = "Water" if Economicactivity == "Water supply, sewerage, waste management and remediation activities"
+replace Economicactivity = "Construction" if Economicactivity == "Construction"
+replace Economicactivity = "Wholesale" if Economicactivity == "Wholesale and retail trade; repair of motor vehicles and motorcycles"
+replace Economicactivity = "Transportation" if Economicactivity == "Transportation and storage"
+replace Economicactivity = "Accommodation" if Economicactivity == "Accommodation and food service activities"
+replace Economicactivity = "Information" if Economicactivity == "Information and communication"
+replace Economicactivity = "Financial" if Economicactivity == "Financial and insurance activities"
+replace Economicactivity = "Real" if Economicactivity == "Real estate activities"
+replace Economicactivity = "Professional" if Economicactivity == "Professional, scientific and technical activities"
+replace Economicactivity = "Administrative" if Economicactivity == "Administrative and support service activities"
+replace Economicactivity = "Public" if Economicactivity == "Public Administration and Defence, Compulsory Social Security"
+replace Economicactivity = "Education" if Economicactivity == "Education"
+replace Economicactivity = "Human" if Economicactivity == "Human health and social work activities"
+replace Economicactivity = "Arts" if Economicactivity == "Arts, entertainment and recreation"
+replace Economicactivity = "Other" if Economicactivity == "Other service activities"
+
+
+order Economicactivity Sector
+bys Economicactivity: egen tot_empl_1 = sum(Amman) if Sector != "n.a" 
+bys Economicactivity: egen tot_empl_2 = sum(Balqa) if Sector != "n.a" 
+bys Economicactivity: egen tot_empl_3 = sum(Zarqa) if Sector != "n.a" 
+bys Economicactivity: egen tot_empl_4 = sum(Madaba) if Sector != "n.a" 
+bys Economicactivity: egen tot_empl_5 = sum(Irbid) if Sector != "n.a" 
+bys Economicactivity: egen tot_empl_6 = sum(Mafraq) if Sector != "n.a" 
+bys Economicactivity: egen tot_empl_7 = sum(Jerash) if Sector != "n.a" 
+bys Economicactivity: egen tot_empl_8 = sum(Ajloun) if Sector != "n.a" 
+bys Economicactivity: egen tot_empl_9 = sum(Karak) if Sector != "n.a" 
+bys Economicactivity: egen tot_empl_10 = sum(Tafielah) if Sector != "n.a" 
+bys Economicactivity: egen tot_empl_11 = sum(Maan) if Sector != "n.a" 
+bys Economicactivity: egen tot_empl_12 = sum(Aqaba) if Sector != "n.a" 
+
+replace tot_empl_1 = Amman if Sector == "n.a"
+replace tot_empl_2 = Balqa if Sector == "n.a"
+replace tot_empl_3 = Zarqa if Sector == "n.a"
+replace tot_empl_4 = Madaba if Sector == "n.a"
+replace tot_empl_5 = Irbid if Sector == "n.a"
+replace tot_empl_6 = Mafraq if Sector == "n.a"
+replace tot_empl_7 = Jerash if Sector == "n.a"
+replace tot_empl_8 = Ajloun if Sector == "n.a"
+replace tot_empl_9 = Karak if Sector == "n.a"
+replace tot_empl_10 = Tafielah if Sector == "n.a"
+replace tot_empl_11 = Maan if Sector == "n.a"
+replace tot_empl_12 = Aqaba if Sector == "n.a"
+
+replace Sector = "Total" if Sector == "n.a"
+keep tot_empl_* Economicactivity industry_orig_id
+*wp_2016 
+duplicates drop
+
+reshape long tot_empl_, i(Economicactivity) j(gov)
+
+replace gov = 13 if gov == 3 
+replace gov = 14 if gov == 4
+replace gov = 21 if gov == 5 
+replace gov = 22 if gov == 6
+replace gov = 23 if gov == 7
+replace gov = 24 if gov == 8 
+replace gov = 31 if gov == 9 
+replace gov = 32 if gov == 10 
+replace gov = 33 if gov == 11 
+replace gov = 34 if gov == 12
+replace gov = 11 if gov == 1 
+replace gov = 12 if gov == 2 
+
+lab def gov 11 "Amman" ///
+            12 "Balqa" ///
+            13 "Zarqa" ///
+            14 "Madaba" ///
+            21 "Irbid" ///
+            22 "Mafraq" ///
+            23 "Jarash" ///
+            24 "Ajloun" ///
+            31 "Karak" ///
+            32 "Tafileh" ///
+            33 "Ma'an"  ///
+            34 "Aqaba", ///
+            modify
+
+lab val gov gov
+
+preserve 
+keep if Economicactivity == "Total"
+ren tot_empl_ tot_empl
+tempfile total_empl_db 
+save `total_empl_db'
+restore 
+
+ren tot_empl_ empl_bysector
+
+drop if Economicactivity == "Total"
+merge m:1 gov using `total_empl_db'
+drop _merge 
+gen share_empl = empl_bysector / tot_empl
+
+drop empl_bysector tot_empl
+*reshape wide share_empl , i(industry_orig_id) j(gov) 
+
+
+
+merge m:1 industry_orig_id using  "$data_temp/05_IV_shift_byIndus_ORIG.dta" 
+drop _merge
+
+drop Economicactivity 
+order gov industry_orig_id industry_orig wp_2016  share_empl
+
+gen inter_wp_empl = wp_2016 * share_empl
+
+collapse (sum) inter_wp_empl, by(gov)
+
+save "$data_temp/08_Share_empl_byGov_byIndus_ORIG_WP.dta", replace
 
 
 
@@ -886,6 +1247,7 @@ tab usecac1d,m
 codebook usecac1d
 lab list ecac1d
 
+/*OLD VERSION 
 gen empl_byindus = "agriculture" if usecac1d == 0
 replace empl_byindus = "industry" if usecac1d == 1
 replace empl_byindus = "industry" if usecac1d == 2
@@ -905,11 +1267,32 @@ replace empl_byindus = "services" if usecac1d == 15
 replace empl_byindus = "services" if usecac1d == 16
 replace empl_byindus = "services" if usecac1d == 17
 replace empl_byindus = "services" if usecac1d == 18
+*/
+
+*CORRECT UPDATED VERSION
+gen empl_byindus = "agriculture" if usecac1d == 0
+replace empl_byindus = "industry" if usecac1d == 1
+replace empl_byindus = "industry" if usecac1d == 2
+replace empl_byindus = "services" if usecac1d == 3
+replace empl_byindus = "services" if usecac1d == 4
+replace empl_byindus = "construction" if usecac1d == 5
+replace empl_byindus = "services" if usecac1d == 6
+replace empl_byindus = "transportation" if usecac1d == 7
+replace empl_byindus = "food" if usecac1d == 8
+replace empl_byindus = "transportation" if usecac1d == 9
+replace empl_byindus = "banking" if usecac1d == 10
+replace empl_byindus = "banking" if usecac1d == 11
+replace empl_byindus = "services" if usecac1d == 12
+replace empl_byindus = "services" if usecac1d == 13
+replace empl_byindus = "services" if usecac1d == 14
+replace empl_byindus = "services" if usecac1d == 15
+replace empl_byindus = "services" if usecac1d == 16
+replace empl_byindus = "food" if usecac1d == 17
+replace empl_byindus = "services" if usecac1d == 18
 
 tab empl_byindus, m 
 
 
-sort empl_byindus 
 egen industry_id = group(empl_byindus)
 list industry_id empl_byindus 
 
@@ -966,24 +1349,179 @@ gen share_empl_food = 0
 bys district_iid: replace share_empl_food = total_empl_food/total_empl_indus
 tab share_empl_food
 
-keep district_iid industry_id total_empl empl_byindus total_empl_indus ///
+/*keep district_iid industry_id total_empl empl_byindus total_empl_indus ///
         share_empl_services share_empl_agriculture share_empl_industry ///
         share_empl_construction share_empl_transportation share_empl_banking ///
         share_empl_food
-
+*/
 egen share_empl_byindus = rsum(share_empl_services share_empl_agriculture ///
         share_empl_industry ///
         share_empl_construction share_empl_transportation share_empl_banking ///
         share_empl_food)
 
+
+drop if usecac1d == 19 | usecac1d == 20
+
+*CORRECT UPDATED VERSION
+gen empl_byindus_orig = "Agriculture, forestry and fishing" if usecac1d == 0
+replace empl_byindus_orig = "Mining and quarrying" if usecac1d == 1
+replace empl_byindus_orig = "Manufacturing" if usecac1d == 2
+replace empl_byindus_orig = "Electricity,gas,steam and air conditioning supply" if usecac1d == 3
+replace empl_byindus_orig = "Water supply;sewage,waste management and remediation activities" if usecac1d == 4
+replace empl_byindus_orig = "Construction" if usecac1d == 5
+replace empl_byindus_orig = "Wholesale and retail trade; repair of motor vehicles and motorcycles" if usecac1d == 6
+replace empl_byindus_orig = "Transportation and storage" if usecac1d == 7
+replace empl_byindus_orig = "Accomodation and food service activities" if usecac1d == 8
+replace empl_byindus_orig = "Information and communication" if usecac1d == 9
+replace empl_byindus_orig = "Financial and insurance activities" if usecac1d == 10
+replace empl_byindus_orig = "Real estate activities" if usecac1d == 11
+replace empl_byindus_orig = "Professional, scientific and technical activities" if usecac1d == 12
+replace empl_byindus_orig = "Administrative and support service activities" if usecac1d == 13
+replace empl_byindus_orig = "Public administration and defense; compulsory social security" if usecac1d == 14
+replace empl_byindus_orig = "Education" if usecac1d == 15
+replace empl_byindus_orig = "Human health and social work activities" if usecac1d == 16
+replace empl_byindus_orig = "Arts, entertainment and recreation" if usecac1d == 17
+replace empl_byindus_orig = "Other service activities" if usecac1d == 18
+
+tab empl_byindus_orig, m 
+
+sort empl_byindus_orig
+egen industry_orig_id = group(usecac1d)
+tab industry_orig_id
+
+bys district_iid: egen total_empl_indus_orig = count(empl_byindus_orig)
+
+bys district_iid: egen total_empl_orig_agri = count(empl_byindus_orig) if empl_byindus_orig == "Agriculture, forestry and fishing"
+gen share_empl_orig_agri = 0
+bys district_iid: replace share_empl_orig_agri = total_empl_orig_agri/total_empl_indus_orig
+tab share_empl_orig_agri
+
+bys district_iid: egen total_empl_orig_mine = count(empl_byindus_orig) if empl_byindus_orig == "Mining and quarrying"
+gen share_empl_orig_mine = 0
+bys district_iid: replace share_empl_orig_mine = total_empl_orig_mine/total_empl_indus_orig
+tab share_empl_orig_mine
+
+bys district_iid: egen total_empl_orig_manuf = count(empl_byindus_orig) if empl_byindus_orig == "Manufacturing"
+gen share_empl_orig_manuf = 0
+bys district_iid: replace share_empl_orig_manuf = total_empl_orig_manuf/total_empl_indus_orig
+tab share_empl_orig_manuf
+
+bys district_iid: egen total_empl_orig_elec = count(empl_byindus_orig) if empl_byindus_orig == "Electricity,gas,steam and air conditioning supply"
+gen share_empl_orig_elec = 0
+bys district_iid: replace share_empl_orig_elec = total_empl_orig_elec/total_empl_indus_orig
+tab share_empl_orig_elec
+
+bys district_iid: egen total_empl_orig_water = count(empl_byindus_orig) if empl_byindus_orig == "Water supply;sewage,waste management and remediation activities"
+gen share_empl_orig_water = 0
+bys district_iid: replace share_empl_orig_water = total_empl_orig_water/total_empl_indus_orig
+tab share_empl_orig_water
+
+bys district_iid: egen total_empl_orig_const = count(empl_byindus_orig) if empl_byindus_orig == "Construction"
+gen share_empl_orig_const = 0
+bys district_iid: replace share_empl_orig_const = total_empl_orig_const/total_empl_indus_orig
+tab share_empl_orig_const
+
+bys district_iid: egen total_empl_orig_whole = count(empl_byindus_orig) if empl_byindus_orig == "Wholesale and retail trade; repair of motor vehicles and motorcycles"
+gen share_empl_orig_whole = 0
+bys district_iid: replace share_empl_orig_whole = total_empl_orig_whole/total_empl_indus_orig
+tab share_empl_orig_whole
+
+bys district_iid: egen total_empl_orig_transp = count(empl_byindus_orig) if empl_byindus_orig == "Transportation and storage"
+gen share_empl_orig_transp = 0
+bys district_iid: replace share_empl_orig_transp = total_empl_orig_transp/total_empl_indus_orig
+tab share_empl_orig_transp
+
+bys district_iid: egen total_empl_orig_accom = count(empl_byindus_orig) if empl_byindus_orig == "Accomodation and food service activities"
+gen share_empl_orig_accom = 0
+bys district_iid: replace share_empl_orig_accom = total_empl_orig_accom/total_empl_indus_orig
+tab share_empl_orig_accom
+
+bys district_iid: egen total_empl_orig_info = count(empl_byindus_orig) if empl_byindus_orig == "Information and communication"
+gen share_empl_orig_info = 0
+bys district_iid: replace share_empl_orig_info = total_empl_orig_info/total_empl_indus_orig
+tab share_empl_orig_info
+
+bys district_iid: egen total_empl_orig_fi = count(empl_byindus_orig) if empl_byindus_orig == "Financial and insurance activities"
+gen share_empl_orig_fi = 0
+bys district_iid: replace share_empl_orig_fi = total_empl_orig_fi/total_empl_indus_orig
+tab share_empl_orig_fi
+
+bys district_iid: egen total_empl_orig_real = count(empl_byindus_orig) if empl_byindus_orig == "Real estate activities"
+gen share_empl_orig_real = 0
+bys district_iid: replace share_empl_orig_real = total_empl_orig_real/total_empl_indus_orig
+tab share_empl_orig_real
+
+bys district_iid: egen total_empl_orig_pro = count(empl_byindus_orig) if empl_byindus_orig == "Professional, scientific and technical activities"
+gen share_empl_orig_pro  = 0
+bys district_iid: replace share_empl_orig_pro  = total_empl_orig_pro /total_empl_indus_orig
+tab share_empl_orig_pro 
+
+bys district_iid: egen total_empl_orig_admin = count(empl_byindus_orig) if empl_byindus_orig == "Administrative and support service activities"
+gen share_empl_orig_admin = 0
+bys district_iid: replace share_empl_orig_admin = total_empl_orig_admin/total_empl_indus_orig
+tab share_empl_orig_admin
+
+bys district_iid: egen total_empl_orig_public = count(empl_byindus_orig) if empl_byindus_orig == "Public administration and defense; compulsory social security"
+gen share_empl_orig_public = 0
+bys district_iid: replace share_empl_orig_public = total_empl_orig_public/total_empl_indus_orig
+tab share_empl_orig_public
+
+bys district_iid: egen total_empl_orig_educ = count(empl_byindus_orig) if empl_byindus_orig == "Education"
+gen share_empl_orig_educ = 0
+bys district_iid: replace share_empl_orig_educ = total_empl_orig_educ/total_empl_indus_orig
+tab share_empl_orig_educ
+
+bys district_iid: egen total_empl_orig_hum = count(empl_byindus_orig) if empl_byindus_orig == "Human health and social work activities"
+gen share_empl_orig_hum = 0
+bys district_iid: replace share_empl_orig_hum = total_empl_orig_hum/total_empl_indus_orig
+tab share_empl_orig_hum
+
+bys district_iid: egen total_empl_orig_art = count(empl_byindus_orig) if empl_byindus_orig == "Arts, entertainment and recreation"
+gen share_empl_orig_art = 0
+bys district_iid: replace share_empl_orig_art = total_empl_orig_art/total_empl_indus_orig
+tab share_empl_orig_art
+
+bys district_iid: egen total_empl_orig_oth = count(empl_byindus_orig) if empl_byindus_orig == "other service activities"
+gen share_empl_orig_oth = 0
+bys district_iid: replace share_empl_orig_oth = total_empl_orig_oth/total_empl_indus_orig
+tab share_empl_orig_oth
+/*
+keep district_iid industry_id total_empl empl_byindus total_empl_indus ///
+        share_empl_services share_empl_agriculture share_empl_industry ///
+        share_empl_construction share_empl_transportation share_empl_banking ///
+        share_empl_food
+*/
+egen share_empl_byindus_orig = rsum(share_empl_orig_agri share_empl_orig_mine ///
+        share_empl_orig_manuf share_empl_orig_elec share_empl_orig_water ///
+        share_empl_orig_const share_empl_orig_whole share_empl_orig_transp ///
+        share_empl_orig_accom share_empl_orig_info share_empl_orig_fi ///
+        share_empl_orig_real share_empl_orig_pro share_empl_orig_admin ///
+        share_empl_orig_public share_empl_orig_educ share_empl_orig_hum ///
+        share_empl_orig_art share_empl_orig_oth)
+
+preserve
 keep district_iid industry_id total_empl empl_byindus total_empl_indus ///
         share_empl_byindus
 
 duplicates drop district_iid empl_byindus, force
+sort district_iid industry_id
 drop if mi(empl_byindus)
 distinct district_iid
 
 save "$data_temp/09_Share_empl_byDist_byIndus.dta", replace
+restore
+
+preserve 
+keep district_iid industry_orig_id total_empl empl_byindus_orig total_empl_indus_orig ///
+        share_empl_byindus_orig
+
+duplicates drop district_iid empl_byindus_orig, force
+drop if mi(empl_byindus_orig)
+distinct district_iid
+
+save "$data_temp/09_Share_empl_byDist_byIndus_ORIG.dta", replace
+
+restore
 
 *Missing 17 because that disrict was probably not surveyed in 2010
 
@@ -1004,9 +1542,11 @@ save "$data_temp/09_Share_empl_byDist_byIndus.dta", replace
 
 
 
+
 /**************
-THE INSTRUMENT 
+THE INSTRUMENT ORIGINAL
 **************/
+
 
 use "$data_temp/04_IV_Share_Empl_Syria", clear 
 
@@ -1083,9 +1623,10 @@ merge m:1 district_iid using "$data_final/10_JLMPS_Distance_Zaatari.dta", keepus
 ****************
 ****************
 
+ 
+
 *WORKING MODELS
 gen IV_SS = (wp_2016                             ) / (distance_dis_camp)  
-
 gen IV_SS_OP = (wp_2016 * nb_ref_syr_bygov_2016                              ) / (distance_dis_camp)  
 *gen IV_SS_2 = (wp_2016 * nb_ref_syr_bygov_2016 * diff_share * share_emplOpen) / (distance_dis_camp)  
 *gen IV_SS_3 = (wp_2016 * nb_ref_syr_bygov_2016 * diff_share                 ) / (distance_dis_camp * distance_dis_gov) 
@@ -1111,6 +1652,405 @@ save "$data_final/03_ShiftShare_IV", replace
 
 
 
+/**************
+THE INSTRUMENT : IV1
+**************/
+
+/* IV 1 : Layman term: Expected demand for work P at destination
+IV1: 1/Dist_camp_d* Nbr WP_t
+Layman term: Expected demand for work P at destination
+
+Story : We start with the Fallah e al. IV augmented by the number of work permits allocated in Jordan 
+*/
+
+use "$data_final/10_JLMPS_Distance_Zaatari.dta" , clear
+
+lab var district_iid "ID District Jordan"
+gen wp_2016 = 73580
+lab var wp_2016 "WP 2016 in Jordan by industry"
+
+sort district_iid
+
+*WORKING MODELS
+gen IV_SS_1 = (wp_2016) / (distance_dis_camp)  
+
+tab IV_SS_1, m 
+
+collapse (sum) IV_SS_1, by(district_en)
+lab var IV_SS_1 "IV: Shift Share"
+
+*ren IV_SS IV_SS_OP
+
+tab district_en
+sort district_en
+egen district_iid = group(district_en) 
+
+drop if district_en == "Husseiniyyeh District"
+distinct district_iid
+save "$data_final/03_ShiftShare_IV_1", replace 
+
+
+
+/**************
+THE INSTRUMENT : IV2
+**************/
+
+/* IV2: Nbr_refugees_t * 1/Dist_camp_d* Nbr WP_t
+Layman term: Expected demand for work P at destination
+
+Story: Augmented by the number of refugees since it will affect the demand for work permits
+*/
+
+use "$data_final/10_JLMPS_Distance_Zaatari.dta" , clear
+
+lab var district_iid "ID District Jordan"
+gen wp_2016 = 73580
+lab var wp_2016 "WP 2016 in Jordan by industry"
+
+sort district_iid
+
+*WORKING MODELS
+gen IV_SS_2 = (wp_2016*ln_nb_refugees_bygov) / (distance_dis_camp)  
+
+tab IV_SS_2, m 
+
+collapse (sum) IV_SS_2, by(district_en)
+lab var IV_SS_2 "IV: Shift Share"
+
+tab district_en
+sort district_en
+egen district_iid = group(district_en) 
+
+drop if district_en == "Husseiniyyeh District"
+distinct district_iid
+
+save "$data_final/03_ShiftShare_IV_2", replace 
+
+
+
+
+
+/**************
+THE INSTRUMENT : IV3
+**************/
+
+/* IV3: [Nbr_refugees_ot* 1/dist_od] * [1/Dist_camp_d* Nbr WP_t]
+Layman term: Expected demand for work P at destination
+
+Story: Augmented by the number of refugees by destination district since it will affect the demand for work permits
+*/
+
+use "$data_temp/04_IV_Share_Empl_Syria", clear 
+
+*Distance between governorates syria and districts jordan
+geodist district_lat district_long gov_syria_lat gov_syria_long, gen(distance_dis_gov)
+tab distance_dis_gov, m
+lab var distance_dis_gov "Distance (km) between JORD districts and SYR centroid governorates"
+
+unique distance_dis_gov //714
+
+drop district_long district_lat gov_syria_long gov_syria_lat
+sort district_en governorate_syria 
+
+drop id_district_jordan 
+egen district_iid = group(district_en) 
+
+list id_gov_syria governorate_syria
+sort district_en governorate_syria industry_id
+
+tab industry_en industry_id
+drop industry_id 
+egen industry_id = group(industry_en)
+
+
+merge m:1 district_iid using "$data_final/10_JLMPS_Distance_Zaatari.dta" 
+
+lab var district_iid "ID District Jordan"
+gen wp_2016 = 73580
+lab var wp_2016 "WP 2016 in Jordan by industry"
+
+sort district_iid
+
+*WORKING MODELS
+gen IV_SS_3 = (ln_nb_refugees_bygov/distance_dis_gov) * (wp_2016/distance_dis_camp)  
+
+tab IV_SS_3, m 
+
+collapse (sum) IV_SS_3, by(district_en)
+lab var IV_SS_3 "IV: Shift Share"
+
+tab district_en
+sort district_en
+egen district_iid = group(district_en) 
+
+drop if district_en == "Husseiniyyeh District"
+distinct district_iid
+
+save "$data_final/03_ShiftShare_IV_3", replace 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/**************
+THE INSTRUMENT : IV4
+**************/
+
+/*
+IV4: [Nbr_refugees_ot* 1/dist_od] * [1/Dist_camp_d* Nbr WP_t] * [Nbr WP_st * (Txemploi_s,d)]
+Story: Augmented by the number of refugees by destination district since it will affect the demand 
+for work permits and the sector composition at destination to approximate for expected supply of WP
+Advantage using Jordanian sector
+*/
+
+use "$data_temp/04_IV_Share_Empl_Syria", clear 
+
+*Distance between governorates syria and districts jordan
+geodist district_lat district_long gov_syria_lat gov_syria_long, gen(distance_dis_gov)
+tab distance_dis_gov, m
+lab var distance_dis_gov "Distance (km) between JORD districts and SYR centroid governorates"
+
+unique distance_dis_gov //714
+
+drop district_long district_lat gov_syria_long gov_syria_lat
+sort district_en governorate_syria 
+
+drop id_district_jordan 
+egen district_iid = group(district_en) 
+
+list id_gov_syria governorate_syria
+sort district_en governorate_syria industry_id
+keep if industry_id == 1 
+
+drop industry_en industry_id share
+
+merge m:1 gov using "$data_temp/08_Share_empl_byGov_byIndus_ORIG_WP.dta"
+drop _merge 
+
+
+merge m:1 district_iid using "$data_final/10_JLMPS_Distance_Zaatari.dta" 
+*drop if _merge == 2 
+drop _merge 
+
+lab var district_iid "ID District Jordan"
+gen wp_2016_total = 73580
+lab var wp_2016_total "WP 2016 in Jordan by industry"
+
+sort district_iid
+
+*WORKING MODELS
+gen IV_SS_4 = (ln_nb_refugees_bygov/distance_dis_gov) * (wp_2016_total/distance_dis_camp) * inter_wp_empl 
+
+tab IV_SS_4, m 
+
+collapse (sum) IV_SS_4, by(district_en)
+lab var IV_SS_4 "IV: Shift Share"
+
+tab district_en
+sort district_en
+egen district_iid = group(district_en) 
+
+drop if district_en == "Husseiniyyeh District"
+distinct district_iid
+
+save "$data_final/03_ShiftShare_IV_4", replace 
+
+
+
+
+
+
+
+
+/**************
+THE INSTRUMENT : IV5
+**************/
+
+/*
+IV5: [Nbr_refugees_ot* 1/dist_od] * [1/Dist_camp_d* Nbr WP_t] * 
+[Nbr WP_st * (Txemploi_s,o- Txemploi_s,d)^0.5]]
+
+Layman term: Expected demand for work augmented with expected skill matching between origin 
+and destination
+*/
+
+use "$data_temp/04_IV_Share_Empl_Syria", clear 
+
+*Distance between governorates syria and districts jordan
+geodist district_lat district_long gov_syria_lat gov_syria_long, gen(distance_dis_gov)
+tab distance_dis_gov, m
+lab var distance_dis_gov "Distance (km) between JORD districts and SYR centroid governorates"
+
+unique distance_dis_gov //714
+
+drop district_long district_lat gov_syria_long gov_syria_lat
+sort district_en governorate_syria 
+
+drop id_district_jordan 
+egen district_iid = group(district_en) 
+
+list id_gov_syria governorate_syria
+sort district_en governorate_syria industry_id
+
+tab industry_en industry_id
+drop industry_id 
+egen industry_id = group(industry_en)
+
+*merge m:1 industry_id using  "$data_UNHCR_temp/UNHCR_shift_byOccup.dta"
+merge m:1 industry_id using  "$data_temp/05_IV_shift_byIndus.dta"
+drop _merge 
+ren share share_empl_syr 
+
+*merge m:m industry_id district_iid using "$data_temp/09_Share_empl_byDist_byIndus.dta",
+*drop _merge 
+
+merge m:1 gov industry_id using "$data_temp/08_Share_empl_Jordan_byGov_byIndus"
+drop _merge 
+
+*drop if district_iid == 17 
+*replace share_empl_byindus = 0.00001 if mi(share_empl_byindus) &  district_iid != 17
+*tab share_empl_byindus, m 
+
+*gen diff = abs(share_empl_syr - share_empl_byindus)
+gen diff_share = (abs(share_empl_syr - share_empl)^0.5) * share_empl
+tab diff_share, m 
+
+order id_gov_syria governorate_syria district_iid ///
+    district_en industry_id industry_en share_empl_syr wp_2016
+
+lab var id_gov_syria "ID Governorate Syria"
+lab var governorate_syria "Name Governorate Syria"
+lab var district_iid "ID District Jordan"
+lab var district_en "Name District Jordan"
+lab var industry_id "ID Industry"
+lab var industry_en "Name Industry"
+lab var share_empl_syr "Share Employment over Governorates Syria"
+lab var wp_2016 "WP 2016 in Jordan by industry"
+lab var distance_dis_gov "Distance Districts Jordan to Governorates Syria"
+
+sort id_gov_syria district_en industry_id
+
+*merge m:1 id_gov_syria using "$data_RW_final/syr_ref_bygov.dta"
+merge m:1 id_gov_syria using "$data_temp/06_IV_Share_GovOrig_Refugee.dta", keepusing(nb_ref_syr_bygov_2016)
+drop _merge 
+
+merge m:1 district_iid using "$data_final/10_JLMPS_Distance_Zaatari.dta", keepusing(distance_dis_camp governorate_iid) 
+drop _merge
+
+merge m:1 governorate_iid using "$data_temp/07_Ctrl_Nb_Refugee_byGov.dta"
+drop _merge
+
+
+
+*********************
+** NUMBER REFUGEES **
+*********************
+
+tab NbRefbyGovoutcamp, m
+ren NbRefbyGovoutcamp nb_refugees_bygov
+replace nb_refugees_bygov = 0 if year == 2010
+lab var nb_refugees_bygov "[CTRL] Number of refugees out of camps by governorate in 2016"
+tab nb_refugees_bygov
+
+gen ln_nb_refugees_bygov = ln(1 + nb_refugees_bygov) 
+*if year == 2016
+*replace ln_nb_refugees_bygov = 0 if year == 2010
+
+lab var ln_nb_refugees_bygov "[CTRL] LOG Number of refugees out of camps by governorate in 2016"
+*ln_ref, as of now, does not include refugees in 2010, only in 2016
+
+****** Other
+gen IHS_nb_refugees_bygov = log(nb_refugees_bygov + ((nb_refugees_bygov^2 + 1)^0.5))
+lab var IHS_nb_refugees_bygov "IHS - Number of refugees out of camps by governorate in 2016"
+
+
+
+lab var district_iid "ID District Jordan"
+gen wp_2016_total = 73580
+lab var wp_2016_total "WP 2016 in Jordan by industry"
+
+sort district_iid
+
+*WORKING MODELS
+gen IV_SS_5 = (ln_nb_refugees_bygov/distance_dis_gov) * (wp_2016_total/distance_dis_camp) * diff_share 
+
+tab IV_SS_5, m 
+
+collapse (sum) IV_SS_5, by(district_en)
+lab var IV_SS_5 "IV: Shift Share"
+
+tab district_en
+sort district_en
+egen district_iid = group(district_en) 
+
+drop if district_en == "Husseiniyyeh District"
+distinct district_iid
+
+save "$data_final/03_ShiftShare_IV_5", replace 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+use "$data_final/10_JLMPS_Distance_Zaatari.dta" , clear
+
+lab var district_iid "ID District Jordan"
+gen wp_2016 = 73580
+lab var wp_2016 "WP 2016 in Jordan by industry"
+
+sort district_iid
+
+****************
+****************
+  *  SS IV  *
+****************
+****************
+
+merge m:1 governorate_iid using "$data_temp/07_Ctrl_Nb_Refugee_byGov.dta"
+drop _merge
+
+
+
+*********************
+** NUMBER REFUGEES **
+*********************
+
+tab NbRefbyGovoutcamp, m
+ren NbRefbyGovoutcamp nb_refugees_bygov
+replace nb_refugees_bygov = 0 if year == 2010
+lab var nb_refugees_bygov "[CTRL] Number of refugees out of camps by governorate in 2016"
+tab nb_refugees_bygov
+
+gen ln_nb_refugees_bygov = ln(1 + nb_refugees_bygov) 
+*if year == 2016
+*replace ln_nb_refugees_bygov = 0 if year == 2010
+
+lab var ln_nb_refugees_bygov "[CTRL] LOG Number of refugees out of camps by governorate in 2016"
+*ln_ref, as of now, does not include refugees in 2010, only in 2016
+
+****** Other
+gen IHS_nb_refugees_bygov = log(nb_refugees_bygov + ((nb_refugees_bygov^2 + 1)^0.5))
+lab var IHS_nb_refugees_bygov "IHS - Number of refugees out of camps by governorate in 2016"
 
 
 
