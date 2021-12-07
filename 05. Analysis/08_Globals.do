@@ -62,17 +62,17 @@ global    outcome_var_wage ///
 */
 
 global    outcome_var_wage ///
-              ln_basic_rwage_3m  /// LOG Basic Wage (3-month) - CONDITIONAL - UNEMPLOYED & OLF: WAGE MISSING
               ln_total_rwage_3m  /// LOG Total Wage (3-month) - CONDITIONAL - UNEMPLOYED & OLF: WAGE MISSING
-              ln_monthly_rwage  /// LOG Monthly Wage (Prim.& Second. Jobs)
               ln_hourly_rwage  // LOG Hourly Wage (Prim.& Second. Jobs)
+              *ln_monthly_rwage  /// LOG Monthly Wage (Prim.& Second. Jobs)
+              *ln_basic_rwage_3m  // LOG Basic Wage (3-month) - CONDITIONAL - UNEMPLOYED & OLF: WAGE MISSING
 
 *IHS_daily_rwage_irregular // IHS Average Daily Wage (Irregular Workers)
 
 global    outcome_var_hours ///
-              work_hours_pday_3m_w  /// Winsorized - No. of Hours/Day (Ref. 3 mnths) Market Work
               work_hours_pweek_3m_w  /// Winsorized - Usual No. of Hours/Week, Market Work, (Ref. 3-month)
-              work_days_pweek_3m  // Avg. num. of wrk. days per week during 3 mnth.
+              work_hours_pday_3m_w  // Winsorized - No. of Hours/Day (Ref. 3 mnths) Market Work
+              *work_days_pweek_3m  // Avg. num. of wrk. days per week during 3 mnth.
 
 *work_hours_pm_informal_w  //  Winsorized - Average worked hour per month for irregular job
   

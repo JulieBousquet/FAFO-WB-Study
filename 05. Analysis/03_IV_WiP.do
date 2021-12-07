@@ -15,9 +15,9 @@ log using "$out_analysis/03_IV.log", replace
 	****************************************************************************
 
 
-********************************
-**** SHARE 1: EMPLOYEMENT ******
-********************************
+*************************************************************************************
+**** SHARE 1: SHARE EMPLOYEMENT IN EACH INDUSTRY BY GOVERNORATES 2010 IN SYRIA ******
+*************************************************************************************
 
 /*
 *Number of syrians employed in Y industry in Syria pre crisis in each gov
@@ -41,21 +41,23 @@ list governorate_syria
 
 sort governorate_syria 
 gen id_gov_syria = _n
+
+
 list id_gov_syria governorate_syria
 
 ren Total total
 ren Agricultureandforestry agriculture 
-ren Industry factory 
+ren Industry industry 
 ren Buildingandconstruction construction 
-ren Hotelsandrestaurantstrade trade 
+ren Hotelsandrestaurantstrade food 
 ren Transportationstoragecommun transportation 
 ren Moneyinsuranceandrealestat banking 
 ren Services services 
 
 gen share_agriculture = agriculture / total
-gen share_factory = factory / total
+gen share_industry = industry / total
 gen share_construction = construction / total
-gen share_trade = trade / total
+gen share_food = food / total
 gen share_transportation = transportation / total
 gen share_banking = banking / total
 gen share_services = services / total
@@ -69,12 +71,12 @@ reshape long share_ , i(id_gov_syria) j(industry_id)
 */
 ren total total_empl_syr 
 
-drop agriculture factory construction trade transportation banking services 
+drop agriculture industry construction food transportation banking services 
 drop total_empl_syr
 ren share_agriculture share_1 
-ren share_factory share_2
+ren share_industry share_2
 ren share_construction share_3 
-ren share_trade share_4
+ren share_food share_4
 ren share_transportation share_5
 ren share_banking share_6 
 ren share_services share_7
@@ -90,9 +92,16 @@ replace industry_en = "banking" if industry_id == 6
 replace industry_en = "services" if industry_id == 7 
 ren share_ share 
 
+order id_gov_syria governorate_syria industry_id industry_en share
+
 *Sum by Syrian gov == 1 
 
 save "$data_LFS_final/LFS_Syr_Empl_Share_Indus.dta", replace
+
+
+*******************************************************************
+**** SHARE 2: DISTANCE GOVERNORATE SYRIA TO DISTRICTS JORDAN ******
+*******************************************************************
 
 /*
 Distance between Syrian governoarate (fronteer or centroid or largest city?) AND
@@ -119,9 +128,9 @@ replace governorate_syria = "Rural Damascus" if governorate_syria == "Rif Dimash
 replace governorate_syria = "Al Hasakah" if governorate_syria == "Al Ḥasakah"
 replace governorate_syria = "Tartous" if governorate_syria == "Tartus"
 
-list governorate_syria 
 
 sort governorate_syria
+list governorate_syria 
 
 
 *gen id_gov_syria = _n
@@ -640,21 +649,31 @@ collapse (sum) wp_2016, by(industry_en)
 *Harmonize based on Syrian classification of industries
 
 sort industry_en 
-gen industry_id = _n
+gen     industry_id = 1 if industry_en == "agriculture"
+replace industry_id = 2 if industry_en == "industry"
+replace industry_id = 3 if industry_en == "construction"
+replace industry_id = 4 if industry_en == "food"
+replace industry_id = 5 if industry_en == "transportation"
+replace industry_id = 6 if industry_en == "banking"
+replace industry_id = 7 if industry_en == "services"
+
+sort industry_id 
 list industry_id industry_en 
 
-/*    +---------------------------+
+/*      +---------------------------+
      | indust~d      industry_en |
      |---------------------------|
   1. |        1      agriculture |
-  2. |        2          banking |
+  2. |        6          banking |
   3. |        3     construction |
   4. |        4             food |
-  5. |        5         industry |
+  5. |        2         industry |
      |---------------------------|
-  6. |        6         services |
-  7. |        7   transportation |
+  6. |        7         services |
+  7. |        5   transportation |
      +---------------------------+
+
+
 */
 *save "$data_UNHCR_temp/UNHCR_shift_byOccup.dta", replace 
 save "$data_temp/05_IV_shift_byIndus.dta", replace 
@@ -685,18 +704,39 @@ egen governorate_iid = group(governorate_en)
 keep year governorate_en governorate_iid NbRefbyGovoutcamp NbWP
 *save "$data_UNHCR_final/UNHCR_NbRef_byGov.dta", replace
 
+drop governorate_iid
+gen governorate_iid = 11 if governorate_en == "Amman"
+replace governorate_iid = 12 if governorate_en == "Balqa"
+replace governorate_iid = 13 if governorate_en == "Zarqa"
+replace governorate_iid = 14 if governorate_en == "Madaba"
+replace governorate_iid = 21 if governorate_en == "Irbid"
+replace governorate_iid = 22 if governorate_en == "Mafraq"
+replace governorate_iid = 23 if governorate_en == "Jarash"
+replace governorate_iid = 24 if governorate_en == "Ajloun"
+replace governorate_iid = 31 if governorate_en == "Karak"
+replace governorate_iid = 32 if governorate_en == "Tafileh"
+replace governorate_iid = 33 if governorate_en == "Ma'an"
+replace governorate_iid = 34 if governorate_en == "Aqaba"
+
+
+
 save "$data_temp/07_Ctrl_Nb_Refugee_byGov.dta", replace
 
 
 
 use "$data_final/02_JLMPS_10_16.dta", clear 
 
+keep district_iid governorate_iid district_lat district_long district_en gov
 
-keep district_iid governorate_iid district_lat district_long district_en
+drop governorate_iid
+ren gov governorate_iid
+
+
 duplicates drop district_iid, force
 
 merge m:1 governorate_iid using "$data_temp/07_Ctrl_Nb_Refugee_byGov.dta"
 drop _merge
+
 *******************
 ** DISTANCE CAMP **
 *******************
@@ -775,7 +815,7 @@ save "$data_final/10_JLMPS_Distance_Zaatari.dta", replace
 
 
 /****************************************
-THE SHARE OF EMPLOYED IN OPEN  IN JORDAN 
+THE SHARE OF EMPLOYED IN JORDAN 
 ****************************************/
 
 import excel "$data_sec_DOS\Table 5.4 - Jord 15+ by Gov, Sex and Main Current Economic Activity (Percent) - 2010.xlsx", sheet("ForStata") firstrow clear
@@ -1540,7 +1580,7 @@ restore
 
 
 
-
+/*
 
 
 /**************
@@ -1648,7 +1688,7 @@ egen district_iid = group(district_en)
 
 save "$data_final/03_ShiftShare_IV", replace 
 
-
+*/
 
 
 
@@ -1669,7 +1709,7 @@ lab var district_iid "ID District Jordan"
 gen wp_2016 = 73580
 lab var wp_2016 "WP 2016 in Jordan by industry"
 
-sort district_iid
+sort district_iid governorate_iid
 
 *WORKING MODELS
 gen IV_SS_1 = (wp_2016) / (distance_dis_camp)  
@@ -1945,36 +1985,11 @@ sort id_gov_syria district_en industry_id
 merge m:1 id_gov_syria using "$data_temp/06_IV_Share_GovOrig_Refugee.dta", keepusing(nb_ref_syr_bygov_2016)
 drop _merge 
 
-merge m:1 district_iid using "$data_final/10_JLMPS_Distance_Zaatari.dta", keepusing(distance_dis_camp governorate_iid) 
+merge m:1 district_iid using "$data_final/10_JLMPS_Distance_Zaatari.dta",
 drop _merge
 
 merge m:1 governorate_iid using "$data_temp/07_Ctrl_Nb_Refugee_byGov.dta"
 drop _merge
-
-
-
-*********************
-** NUMBER REFUGEES **
-*********************
-
-tab NbRefbyGovoutcamp, m
-ren NbRefbyGovoutcamp nb_refugees_bygov
-replace nb_refugees_bygov = 0 if year == 2010
-lab var nb_refugees_bygov "[CTRL] Number of refugees out of camps by governorate in 2016"
-tab nb_refugees_bygov
-
-gen ln_nb_refugees_bygov = ln(1 + nb_refugees_bygov) 
-*if year == 2016
-*replace ln_nb_refugees_bygov = 0 if year == 2010
-
-lab var ln_nb_refugees_bygov "[CTRL] LOG Number of refugees out of camps by governorate in 2016"
-*ln_ref, as of now, does not include refugees in 2010, only in 2016
-
-****** Other
-gen IHS_nb_refugees_bygov = log(nb_refugees_bygov + ((nb_refugees_bygov^2 + 1)^0.5))
-lab var IHS_nb_refugees_bygov "IHS - Number of refugees out of camps by governorate in 2016"
-
-
 
 lab var district_iid "ID District Jordan"
 gen wp_2016_total = 73580
@@ -1983,7 +1998,7 @@ lab var wp_2016_total "WP 2016 in Jordan by industry"
 sort district_iid
 
 *WORKING MODELS
-gen IV_SS_5 = (ln_nb_refugees_bygov/distance_dis_gov) * (wp_2016_total/distance_dis_camp) * diff_share 
+gen IV_SS_5 = (ln_nb_refugees_bygov/distance_dis_gov) * (wp_2016_total/distance_dis_camp) * wp_2016 * diff_share 
 
 tab IV_SS_5, m 
 
@@ -1998,6 +2013,146 @@ drop if district_en == "Husseiniyyeh District"
 distinct district_iid
 
 save "$data_final/03_ShiftShare_IV_5", replace 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/**************
+THE INSTRUMENT : IV6
+**************/
+
+/*
+IV6: 
+[Nbr_refugees_ot* 1/dist_od] * [1/Dist_camp_d* Nbr WP_t] 
+AND
+[Nbr WP_st * (Txemploi_s,o- Txemploi_s,d)^0.5]]
+
+  Decomposition of IV5
+*/
+
+use "$data_temp/04_IV_Share_Empl_Syria", clear 
+
+*Distance between governorates syria and districts jordan
+geodist district_lat district_long gov_syria_lat gov_syria_long, gen(distance_dis_gov)
+tab distance_dis_gov, m
+lab var distance_dis_gov "Distance (km) between JORD districts and SYR centroid governorates"
+
+unique distance_dis_gov //714
+
+drop district_long district_lat gov_syria_long gov_syria_lat
+sort district_en governorate_syria 
+
+drop id_district_jordan 
+egen district_iid = group(district_en) 
+
+list id_gov_syria governorate_syria
+sort district_en governorate_syria industry_id
+
+tab industry_en industry_id
+drop industry_id 
+egen industry_id = group(industry_en)
+
+*merge m:1 industry_id using  "$data_UNHCR_temp/UNHCR_shift_byOccup.dta"
+merge m:1 industry_id using  "$data_temp/05_IV_shift_byIndus.dta"
+drop _merge 
+ren share share_empl_syr 
+
+*merge m:m industry_id district_iid using "$data_temp/09_Share_empl_byDist_byIndus.dta",
+*drop _merge 
+
+merge m:1 gov industry_id using "$data_temp/08_Share_empl_Jordan_byGov_byIndus"
+drop _merge 
+
+*drop if district_iid == 17 
+*replace share_empl_byindus = 0.00001 if mi(share_empl_byindus) &  district_iid != 17
+*tab share_empl_byindus, m 
+
+*gen diff = abs(share_empl_syr - share_empl_byindus)
+gen diff_share = (abs(share_empl_syr - share_empl)^0.5) * share_empl
+tab diff_share, m 
+
+order id_gov_syria governorate_syria district_iid ///
+    district_en industry_id industry_en share_empl_syr wp_2016
+
+lab var id_gov_syria "ID Governorate Syria"
+lab var governorate_syria "Name Governorate Syria"
+lab var district_iid "ID District Jordan"
+lab var district_en "Name District Jordan"
+lab var industry_id "ID Industry"
+lab var industry_en "Name Industry"
+lab var share_empl_syr "Share Employment over Governorates Syria"
+lab var wp_2016 "WP 2016 in Jordan by industry"
+lab var distance_dis_gov "Distance Districts Jordan to Governorates Syria"
+
+sort id_gov_syria district_en industry_id
+
+*merge m:1 id_gov_syria using "$data_RW_final/syr_ref_bygov.dta"
+merge m:1 id_gov_syria using "$data_temp/06_IV_Share_GovOrig_Refugee.dta", keepusing(nb_ref_syr_bygov_2016)
+drop _merge 
+
+merge m:1 district_iid using "$data_final/10_JLMPS_Distance_Zaatari.dta",
+drop _merge
+
+merge m:1 governorate_iid using "$data_temp/07_Ctrl_Nb_Refugee_byGov.dta"
+drop _merge
+
+lab var district_iid "ID District Jordan"
+gen wp_2016_total = 73580
+lab var wp_2016_total "WP 2016 in Jordan by industry"
+
+sort district_iid
+
+*WORKING MODELS
+gen IV_SS_6A = (ln_nb_refugees_bygov/distance_dis_gov) * (wp_2016_total/distance_dis_camp) 
+gen IV_SS_6B =  wp_2016 * diff_share 
+
+tab IV_SS_6A, m 
+tab IV_SS_6B, m 
+
+collapse (sum) IV_SS_6A IV_SS_6B, by(district_en)
+lab var IV_SS_6A "IVA: Shift Share"
+lab var IV_SS_6B "IVB: Shift Share"
+
+tab district_en
+sort district_en
+egen district_iid = group(district_en) 
+
+drop if district_en == "Husseiniyyeh District"
+distinct district_iid
+
+save "$data_final/03_ShiftShare_IV_6", replace 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

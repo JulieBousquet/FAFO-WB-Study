@@ -1954,6 +1954,63 @@ corr IV_SS_5 share_wp //
 
 
 
+/**************
+THE INSTRUMENT : IV6
+**************/
+
+/*
+IV6: 
+[Nbr_refugees_ot* 1/dist_od] * [1/Dist_camp_d* Nbr WP_t] 
+AND
+[Nbr WP_st * (Txemploi_s,o- Txemploi_s,d)^0.5]]
+
+  Decomposition of IV5
+*/
+
+
+
+merge m:1 district_iid using "$data_final/03_ShiftShare_IV_6.dta" 
+tab district_iid if _merge == 1
+drop if _merge == 1
+drop _merge 
+
+*THE INSTRUMENT 
+tab IV_SS_6A, m 
+tab IV_SS_6B, m 
+
+*NO INSTRUMENT / NO WP IN 2010
+replace IV_SS_6A = 0 if year == 2010
+tab IV_SS_6A , m
+
+*NO INSTRUMENT / NO WP IN 2010
+replace IV_SS_6B = 0 if year == 2010
+tab IV_SS_6B , m
+
+*THE INSTRUMENT + TRANSFORMATION
+gen ln_IV_SS_6A = log(1 + IV_SS_6A)
+gen IHS_IV_SS_6A = log(IV_SS_6A + ((IV_SS_6A^2 + 1)^0.5))
+
+*THE INSTRUMENT + TRANSFORMATION
+gen ln_IV_SS_6B = log(1 + IV_SS_6B)
+gen IHS_IV_SS_6B = log(IV_SS_6B + ((IV_SS_6B^2 + 1)^0.5))
+
+*THE ASKED QUESTION IN QUEST (binary)
+tab work_permit, m
+*AGGREGATED MEASURE OF WP BASED ON work_permit
+tab agg_wp, m
+tab agg_wp_orig, m //Adding another more accurate measure
+
+*CORRELATIONS
+corr IV_SS_6A agg_wp  //
+corr IV_SS_6A agg_wp_orig //
+corr IV_SS_6A share_wp //
+
+*CORRELATIONS
+corr IV_SS_6B agg_wp  //
+corr IV_SS_6B agg_wp_orig //
+corr IV_SS_6B share_wp //
+
+
 
 
 
@@ -1976,7 +2033,110 @@ xtset indid_2010 year
 codebook agg_wp
 lab var agg_wp "Work Permits"
    
-    xi: ivreg2  ln_basic_rwage_3m ///
+foreach globals of global globals_list {
+  foreach outcome of global `globals' {
+    qui xi: ivreg2  `outcome' ///
+                i.district_iid i.year ///
+                $controls i.educ1d i.fteducst i.mteducst i.ftempst  ///
+                (agg_wp_orig = IV_SS_1) ///
+                [pweight = panel_wt_10_16], ///
+                cluster(district_iid) robust ///
+                partial(i.district_iid) 
+    codebook `outcome', c
+    estimates table, k(agg_wp_orig) star(.1 .05 .01) b(%7.4f) 
+    *estimates table, b(%7.4f) se(%7.4f) stats(N r2_a) k(agg_wp_orig) 
+    estimates store m_`outcome', title(Model `outcome')
+  }
+}
+
+ 
+foreach globals of global globals_list {
+  foreach outcome of global `globals' {
+    qui xi: ivreg2  `outcome' ///
+                i.district_iid i.year ///
+                $controls i.educ1d i.fteducst i.mteducst i.ftempst  ///
+                (agg_wp_orig = IV_SS_2) ///
+                [pweight = panel_wt_10_16], ///
+                cluster(district_iid) robust ///
+                partial(i.district_iid) 
+    codebook `outcome', c
+    estimates table, k(agg_wp_orig) star(.1 .05 .01) b(%7.4f) 
+    *estimates table, b(%7.4f) se(%7.4f) stats(N r2_a) k(agg_wp_orig) 
+    estimates store m_`outcome', title(Model `outcome')
+  }
+}
+
+ 
+foreach globals of global globals_list {
+  foreach outcome of global `globals' {
+    qui xi: ivreg2  `outcome' ///
+                i.district_iid i.year ///
+                $controls i.educ1d i.fteducst i.mteducst i.ftempst  ///
+                (agg_wp_orig = IV_SS_3) ///
+                [pweight = panel_wt_10_16], ///
+                cluster(district_iid) robust ///
+                partial(i.district_iid) 
+    codebook `outcome', c
+    estimates table, k(agg_wp_orig) star(.1 .05 .01) b(%7.4f) 
+    *estimates table, b(%7.4f) se(%7.4f) stats(N r2_a) k(agg_wp_orig) 
+    estimates store m_`outcome', title(Model `outcome')
+  }
+}
+
+ 
+foreach globals of global globals_list {
+  foreach outcome of global `globals' {
+    qui xi: ivreg2  `outcome' ///
+                i.district_iid i.year ///
+                $controls i.educ1d i.fteducst i.mteducst i.ftempst  ///
+                (agg_wp_orig = IV_SS_4) ///
+                [pweight = panel_wt_10_16], ///
+                cluster(district_iid) robust ///
+                partial(i.district_iid) 
+    codebook `outcome', c
+    estimates table, k(agg_wp_orig) star(.1 .05 .01) b(%7.4f) 
+    *estimates table, b(%7.4f) se(%7.4f) stats(N r2_a) k(agg_wp_orig) 
+    estimates store m_`outcome', title(Model `outcome')
+  }
+}
+
+ 
+foreach globals of global globals_list {
+  foreach outcome of global `globals' {
+    qui xi: ivreg2  `outcome' ///
+                i.district_iid i.year ///
+                $controls i.educ1d i.fteducst i.mteducst i.ftempst  ///
+                (agg_wp_orig = IV_SS_5) ///
+                [pweight = panel_wt_10_16], ///
+                cluster(district_iid) robust ///
+                partial(i.district_iid)
+    codebook `outcome', c
+    estimates table, k(agg_wp_orig) star(.1 .05 .01) b(%7.4f) 
+    *estimates table, b(%7.4f) se(%7.4f) stats(N r2_a) k(agg_wp_orig) 
+    estimates store m_`outcome', title(Model `outcome')
+  }
+}
+
+ 
+foreach globals of global globals_list {
+  foreach outcome of global `globals' {
+    xi: ivreg2  `outcome' ///
+                i.district_iid i.year ///
+                $controls i.educ1d i.fteducst i.mteducst i.ftempst  ///
+                (agg_wp_orig = IV_SS_6A IV_SS_6B) ///
+                [pweight = panel_wt_10_16], ///
+                cluster(district_iid) robust ///
+                partial(i.district_iid) 
+    codebook `outcome', c
+    estimates table, k(agg_wp_orig) star(.1 .05 .01) b(%7.4f) 
+    *estimates table, b(%7.4f) se(%7.4f) stats(N r2_a) k(agg_wp_orig) 
+    estimates store m_`outcome', title(Model `outcome')
+  }
+}
+
+
+
+    xi: ivreg2  ln_total_rwage_3m ///
                 i.district_iid i.year ///
                 $controls i.educ1d i.fteducst i.mteducst i.ftempst  ///
                 (agg_wp_orig = IV_SS_1) ///
@@ -1985,7 +2145,7 @@ lab var agg_wp "Work Permits"
                 partial(i.district_iid) ///
                  liml first
 
-    xi: ivreg2  ln_basic_rwage_3m ///
+    xi: ivreg2  ln_total_rwage_3m ///
                 i.district_iid i.year ///
                 $controls i.educ1d i.fteducst i.mteducst i.ftempst  ///
                 (agg_wp_orig = IV_SS_2) ///
@@ -1994,7 +2154,7 @@ lab var agg_wp "Work Permits"
                 partial(i.district_iid) ///
                  liml first
 
-    xi: ivreg2  ln_basic_rwage_3m ///
+    xi: ivreg2  ln_total_rwage_3m ///
                 i.district_iid i.year ///
                 $controls i.educ1d i.fteducst i.mteducst i.ftempst  ///
                 (agg_wp_orig = IV_SS_3) ///
@@ -2003,7 +2163,7 @@ lab var agg_wp "Work Permits"
                 partial(i.district_iid) ///
                  liml first
 
-    xi: ivreg2  ln_basic_rwage_3m ///
+    xi: ivreg2  ln_total_rwage_3m ///
                 i.district_iid i.year ///
                 $controls i.educ1d i.fteducst i.mteducst i.ftempst  ///
                 (agg_wp_orig = IV_SS_4) ///
@@ -2012,7 +2172,7 @@ lab var agg_wp "Work Permits"
                 partial(i.district_iid) ///
                  liml first
 
-   xi: ivreg2  ln_basic_rwage_3m ///
+   xi: ivreg2  ln_total_rwage_3m ///
                 i.district_iid i.year ///
                 $controls i.educ1d i.fteducst i.mteducst i.ftempst  ///
                 (agg_wp_orig = IV_SS_5) ///
@@ -2021,8 +2181,17 @@ lab var agg_wp "Work Permits"
                 partial(i.district_iid) ///
                  liml first
 
+   xi: ivreg2  ln_basic_rwage_3m ///
+                i.district_iid i.year ///
+                $controls i.educ1d i.fteducst i.mteducst i.ftempst  ///
+                (agg_wp_orig = IV_SS_6A IV_SS_6B) ///
+                [pweight = panel_wt_10_16], ///
+                cluster(district_iid) robust ///
+                partial(i.district_iid) ///
+                 liml first                 
+
 tab nationality_cl year , m 
-drop if nationality_cl != 1
+*drop if nationality_cl != 1
 
 drop if age > 64 & year == 2016
 drop if age > 60 & year == 2010 //60 in 2010 so 64 in 2016
@@ -2030,15 +2199,20 @@ drop if age > 60 & year == 2010 //60 in 2010 so 64 in 2016
 drop if age < 15 & year == 2016 
 drop if age < 11 & year == 2010 //11 in 2010 so 15 in 2016
 
-drop if miss_16_10 == 1
 drop if unemp_16_10 == 1
 drop if olf_16_10 == 1
-drop if emp_16_miss_10 == 1
-drop if emp_10_miss_16 == 1
-drop if unemp_16_miss_10 == 1
-drop if unemp_10_miss_16 == 1
-drop if olf_16_miss_10 == 1
-drop if olf_10_miss_16 == 1 
+
+*IF MISS OBS: REG EXCL THEM
+*drop if miss_16_10 == 1
+*drop if emp_16_miss_10 == 1
+*drop if emp_10_miss_16 == 1
+*drop if unemp_16_miss_10 == 1
+*drop if unemp_10_miss_16 == 1
+*drop if olf_16_miss_10 == 1
+*drop if olf_10_miss_16 == 1 
+
+*CONDITIONAL: DROP 
+*UNCONDITIONAL: KEEP
 drop if emp_10_olf_16  == 1 
 drop if emp_16_olf_10  == 1 
 drop if unemp_10_emp_16  == 1 
