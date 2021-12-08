@@ -72,10 +72,10 @@ drop if unemp_16_miss_10 == 1
 drop if unemp_10_miss_16 == 1
 drop if olf_16_miss_10 == 1
 drop if olf_10_miss_16 == 1 
-*drop if emp_10_olf_16  == 1 
-*drop if emp_16_olf_10  == 1 
-*drop if unemp_10_emp_16  == 1 
-*drop if unemp_16_emp_10  == 1 
+drop if emp_10_olf_16  == 1 
+drop if emp_16_olf_10  == 1 
+drop if unemp_10_emp_16  == 1 
+drop if unemp_16_emp_10  == 1 
 drop if olf_10_unemp_16 == 1 
 drop if olf_16_unemp_10  == 1 
 
@@ -91,8 +91,8 @@ xtset, clear
 xtset indid_2010 year 
 
 
-
- 								                  ************
+/*
+ 								  ************
                                   *REGRESSION*
                                   ************
 
@@ -165,7 +165,9 @@ xi: ivreg2 ln_basic_rwage_3m ///
 
 corr ln_nb_refugees_bygov ln_IV_SS_ref_inflow
 
+*/
 
+/*
 
 
                                   ************
@@ -343,7 +345,7 @@ estimates drop mIV_job_stable_3m mIV_formal mIV_wp_industry_jlmps_3m ///
       mIV_ln_total_rwage_3m  mIV_ln_hourly_rwage ///
        mIV_work_hours_pweek_3m_w mIV_work_days_pweek_3m 
 
-
+*/
 
             ***********************************************************************
               ***** M2: YEAR FE / DISTRICT FE / CONTROL Nb of Refugee   *****

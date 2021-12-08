@@ -79,19 +79,19 @@ request).]*/
 
 *EMPLOYED ONLY (EITHER IN 2010 OR IN 2016
 
-*drop if miss_16_10 == 1
+drop if miss_16_10 == 1
 drop if unemp_16_10 == 1
 drop if olf_16_10 == 1
-*drop if emp_16_miss_10 == 1
-*drop if emp_10_miss_16 == 1
-*drop if unemp_16_miss_10 == 1
-*drop if unemp_10_miss_16 == 1
-*drop if olf_16_miss_10 == 1
-*drop if olf_10_miss_16 == 1 
-*drop if emp_10_olf_16  == 1 
-*drop if emp_16_olf_10  == 1 
-*drop if unemp_10_emp_16  == 1 
-*drop if unemp_16_emp_10  == 1 
+drop if emp_16_miss_10 == 1
+drop if emp_10_miss_16 == 1
+drop if unemp_16_miss_10 == 1
+drop if unemp_10_miss_16 == 1
+drop if olf_16_miss_10 == 1
+drop if olf_10_miss_16 == 1 
+drop if emp_10_olf_16  == 1 
+drop if emp_16_olf_10  == 1 
+drop if unemp_10_emp_16  == 1 
+drop if unemp_16_emp_10  == 1 
 drop if olf_10_unemp_16 == 1 
 drop if olf_16_unemp_10  == 1 
 */
@@ -886,8 +886,11 @@ global iv_check_cond    formal ln_total_rwage_3m ln_hourly_rwage ///
 global IVs IV_SS_1 IV_SS_2 IV_SS_3 IV_SS_4 IV_SS_5
 
 ***************
-* WORKING AGE *
+*   SAMPLE *
 *************** 
+
+tab nationality_cl year 
+*drop if nationality_cl != 1
 
 *Keep only working age pop? 15-64 ? As defined by the ERF
 drop if age > 64 & year == 2016
@@ -947,21 +950,21 @@ foreach IV of global IVs {
 ***************************
 
 *drop if miss_16_10 == 1
-drop if unemp_16_10 == 1
-drop if olf_16_10 == 1
+*drop if unemp_16_10 == 1
+*drop if olf_16_10 == 1
 *drop if emp_16_miss_10 == 1
 *drop if emp_10_miss_16 == 1
 *drop if unemp_16_miss_10 == 1
 *drop if unemp_10_miss_16 == 1
 *drop if olf_16_miss_10 == 1
 *drop if olf_10_miss_16 == 1 
-drop if olf_16_10  == 1 
-drop if olf_10_unemp_16 == 1 
-drop if olf_16_unemp_10  == 1 
+*drop if olf_16_10  == 1 
+*drop if olf_10_unemp_16 == 1 
+*drop if olf_16_unemp_10  == 1 
 
-*drop if emp_16_olf_10  == 1 //971
-*drop if unemp_10_emp_16  == 1 //246
-*drop if unemp_16_emp_10  == 1 //233
+drop if emp_16_olf_10  == 1 //971
+drop if unemp_10_emp_16  == 1 //246
+drop if unemp_16_emp_10  == 1 //233
 
 
 cls 

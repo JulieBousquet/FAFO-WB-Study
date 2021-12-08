@@ -64,10 +64,10 @@ drop if unemp_16_miss_10 == 1
 drop if unemp_10_miss_16 == 1
 drop if olf_16_miss_10 == 1
 drop if olf_10_miss_16 == 1 
-*drop if emp_10_olf_16  == 1 
-*drop if emp_16_olf_10  == 1 
-*drop if unemp_10_emp_16  == 1 
-*drop if unemp_16_emp_10  == 1 
+drop if emp_10_olf_16  == 1 
+drop if emp_16_olf_10  == 1 
+drop if unemp_10_emp_16  == 1 
+drop if unemp_16_emp_10  == 1 
 drop if olf_10_unemp_16 == 1 
 drop if olf_16_unemp_10  == 1 
 

@@ -69,7 +69,7 @@ use "$data_final/06_IV_JLMPS_Construct_Outcomes.dta", clear
 *** SAMPLE ***
 **************
 tab nationality_cl year 
-drop if nationality_cl != 1
+*drop if nationality_cl != 1
 
 drop if age > 64 & year == 2016
 drop if age > 60 & year == 2010 
@@ -127,7 +127,7 @@ use "$data_final/06_IV_JLMPS_Construct_Outcomes.dta", clear
 *** SAMPLE ***
 **************
 tab nationality_cl year 
-drop if nationality_cl != 1
+*drop if nationality_cl != 1
 
 drop if age > 64 & year == 2016
 drop if age > 60 & year == 2010 
@@ -224,7 +224,7 @@ use "$data_final/06_IV_JLMPS_Construct_Outcomes.dta", clear
 *** SAMPLE ***
 **************
 tab nationality_cl year 
-drop if nationality_cl != 1
+*drop if nationality_cl != 1
 
 drop if age > 64 & year == 2016
 drop if age > 60 & year == 2010 
@@ -270,7 +270,7 @@ use "$data_final/06_IV_JLMPS_Construct_Outcomes.dta", clear
 *** SAMPLE ***
 **************
 tab nationality_cl year 
-drop if nationality_cl != 1
+*drop if nationality_cl != 1
 
 drop if age > 64 & year == 2016
 drop if age > 60 & year == 2010 
@@ -317,7 +317,7 @@ use "$data_final/06_IV_JLMPS_Construct_Outcomes.dta", clear
 *** SAMPLE ***
 **************
 tab nationality_cl year 
-drop if nationality_cl != 1
+*drop if nationality_cl != 1
 
 drop if age > 64 & year == 2016
 drop if age > 60 & year == 2010 
@@ -364,7 +364,7 @@ use "$data_final/06_IV_JLMPS_Construct_Outcomes.dta", clear
 *** SAMPLE ***
 **************
 tab nationality_cl year 
-drop if nationality_cl != 1
+*drop if nationality_cl != 1
 
 drop if age > 64 & year == 2016
 drop if age > 60 & year == 2010 
@@ -409,7 +409,7 @@ use "$data_final/06_IV_JLMPS_Construct_Outcomes.dta", clear
 *** SAMPLE ***
 **************
 tab nationality_cl year 
-drop if nationality_cl != 1
+*drop if nationality_cl != 1
 
 drop if age > 64 & year == 2016
 drop if age > 60 & year == 2010 
@@ -456,7 +456,7 @@ use "$data_final/06_IV_JLMPS_Construct_Outcomes.dta", clear
 *** SAMPLE ***
 **************
 tab nationality_cl year 
-drop if nationality_cl != 1
+*drop if nationality_cl != 1
 
 drop if age > 64 & year == 2016
 drop if age > 60 & year == 2010 
