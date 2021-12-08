@@ -26,8 +26,13 @@ distinct district_iid
 *tab district_iid if _merge == 2
 *drop _merge 
 
-*merge m:1 governorate_iid using "$data_temp/07_Ctrl_Nb_Refugee_byGov.dta"
-*drop _merge
+drop governorate_iid
+ren gov governorate_iid 
+
+
+merge m:1 governorate_iid using "$data_temp/07_Ctrl_Nb_Refugee_byGov.dta"
+drop _merge
+*save "$data_final/10_JLMPS_Distance_Zaatari.dta", replace 
 
 /*
 *Those are the districts in which we surveyed refugees
@@ -744,7 +749,9 @@ replace job_stable_3m = 0 if usstablp != 1 & !mi(usstablp)
 lab var job_stable_3m "From usstablp - Stability of employement (3m) - 1 permanent - 0 temp, seas, cas"
 tab job_stable_3m, m
 
-
+*LABOR FORCE PARTICIPATION
+*The labor force participation rate indicates the percentage of all people of working age who 
+*are employed or are actively seeking work
 
 *CPIin17
 *crirreg
@@ -796,11 +803,21 @@ tab usecac1d, m
 codebook usecac1d
 lab list ecac1d
 gen wp_industry_jlmps_3m = 0 if !mi(usecac1d)
-replace wp_industry_jlmps_3m = 1 if usecac1d == 0 | ///
-                                 usecac1d == 2 | ///
-                                 usecac1d == 5 | ///
-                                 usecac1d == 8 | ///
-                                 usecac1d == 16 
+replace wp_industry_jlmps_3m = 1 if   usecac1d == 0 | /// Agriculture, forestry and fishing
+                                      usecac1d == 2 | /// Manufacturing
+                                      usecac1d == 5 | /// Construction
+                                      usecac1d == 6 | /// Wholesale and retail trade; repair of motor vehicles and motorcycles
+                                      usecac1d == 8 | /// Accomodation and food service activities
+                                      usecac1d == 13 | /// Administrative and support service activities
+                                      usecac1d == 14 | /// Public administration and defense; compulsory social security
+                                      usecac1d == 18 // Other service activities 
+/*       ORIGINAL                               
+replace wp_industry_jlmps_3m = 1 if   usecac1d == 0 | /// 
+                                      usecac1d == 2 | ///
+                                      usecac1d == 5 | ///
+                                      usecac1d == 8 | ///
+                                      usecac1d == 16 
+                                      */
 tab wp_industry_jlmps_3m, m 
 lab var wp_industry_jlmps_3m "Industries with work permits for refugees - Economic Activity of prim. job 3m"
 lab def wp_industry_jlmps_3m 0 "Close sector" 1 "Open Sector", modify
@@ -853,20 +870,22 @@ drop _merge
 tab crinstsec, m 
 *employment status in prim job (ref. 3 months)
 tab usempstp, m 
+gen lf_participation = usempstp
+
 *Economic sector of prim. job (ref. 3-mnths)
 tab ussectrp, m 
 
 codebook ussectrp
-gen sector_3m = 1 if ussectrp == 1 | ///Government
+gen private = 0 if ussectrp == 1 | ///Government
                      ussectrp == 2 //Public
-replace sector_3m = 2 if   ussectrp == 3 | ///Private
+replace private = 1 if   ussectrp == 3 | ///Private
                            ussectrp == 5 //International
 tab job1_05 if ussectrp == 4
-replace sector_3m = 1 if ussectrp == 4 & job1_05 == 1 //Other => Gov
-replace sector_3m = 2 if ussectrp == 4 & job1_05 == 3 //Other => Private
-lab def sector_3m 1 "Public" 2 "Private", modify
-lab val sector_3m sector_3m
-lab var sector_3m "Economic Sector of Primary Job 3m - 1 Public 2 Private"
+replace private = 0 if ussectrp == 4 & job1_05 == 1 //Other => Gov
+replace private = 1 if ussectrp == 4 & job1_05 == 3 //Other => Private
+lab def private 0 "Public" 1 "Private", modify
+lab val private private
+lab var private "Economic Sector of Primary Job 3m - 0 Public 1 Private"
 
 tab usecac2d if ussectrp == 4
 codebook usecac2d
@@ -941,8 +960,31 @@ insurance) or informal work (neither a contract nor social insurance).
 
 *Informal if NO WORK CONTRACT and NO INSURANCE
 
+* Incidence of wrk social insurance in prim. job (ref. 3-month)
 tab ussocinsp
+/*
+Yes = 1 : has a social insurance
+No = 0
+*/
+
+*  Incidence of wrk contract in prim. job (ref. 3-month) 
 tab uscontrp
+/*
+Yes = 1 : has a contract
+No = 0
+*/
+
+gen formal = 1 if ussocinsp == 1 | uscontrp == 1
+replace formal = 0 if uscontrp == 0 | uscontrp == 0 & !mi(formal)
+tab formal
+lab var formal "1 Formal - 0 Informal - Formal if contract (uscontrp=0) OR insurance (ussocinsp=0)"
+tab formal usemp1
+lab def formal 1 "Formal" 0 "Informal", modify
+lab val formal formal
+tab formal
+
+
+/*
 gen informal = 1 if ussocinsp == 0 
 replace informal = 1 if uscontrp == 0 
 replace informal = 0 if ussocinsp == 1
@@ -954,19 +996,19 @@ tab informal usemp1
 lab def informal 1 "Informal" 0 "Formal", modify
 lab val informal informal
 tab informal, m 
-
-
+*/
+/*
 bys year: tab informal , nol
 recode informal (1=0) (0=1), gen(bi_formal)
 lab def bi_formal 1 "Formal" 0 "Informal", modify
 lab val bi_formal bi_formal
 lab var bi_formal "Formal Employment - 1 Formal 0 Informal"
 bys year: tab bi_formal , nol
-
+*/
 preserve 
 
-keep employed_3cat_3m indid_2010 year job1_y dstcrj bi_formal
-reshape wide employed_3cat_3m job1_y dstcrj bi_formal, i(indid_2010) j(year)
+keep employed_3cat_3m indid_2010 year job1_y dstcrj formal
+reshape wide employed_3cat_3m job1_y dstcrj formal, i(indid_2010) j(year)
 format indid_2010 %12.0g
 
 replace employed_3cat_3m2010 = 2 if mi(employed_3cat_3m2010) & dstcrj2016 <2010
@@ -1025,18 +1067,18 @@ gen olf_10_unemp_16 = 1 if employed_3cat_3m2010 == 0 & employed_3cat_3m2016 == 1
 gen olf_16_unemp_10 = 1 if employed_3cat_3m2016 == 0 & employed_3cat_3m2010 == 1
 
 codebook employed_3cat_3m2010
-codebook bi_formal2010
-gen empl_form_10_info_16 = 1 if  bi_formal2010 == 1 & ///
-                                 bi_formal2016 == 0
-gen empl_form_16_info_10 = 1 if  bi_formal2010 == 0 & ///
-                                 bi_formal2016 == 1
-gen empl_form_10_16 = 1 if  bi_formal2010 == 1 & ///
-                            bi_formal2016 == 1
-gen empl_info_10_16 = 1 if  bi_formal2010 == 0 & ///
-                            bi_formal2016 == 0
-gen empl_form_10_unemp_16 = 1 if  bi_formal2010 == 1 & ///
+codebook formal2010
+gen empl_form_10_info_16 = 1 if  formal2010 == 1 & ///
+                                 formal2016 == 0
+gen empl_form_16_info_10 = 1 if  formal2010 == 0 & ///
+                                 formal2016 == 1
+gen empl_form_10_16 = 1 if  formal2010 == 1 & ///
+                            formal2016 == 1
+gen empl_info_10_16 = 1 if  formal2010 == 0 & ///
+                            formal2016 == 0
+gen empl_form_10_unemp_16 = 1 if  formal2010 == 1 & ///
                                   employed_3cat_3m2010 == 1 
-gen empl_info_10_unemp_16 = 1 if  bi_formal2010 == 0 & ///
+gen empl_info_10_unemp_16 = 1 if  formal2010 == 0 & ///
                                   employed_3cat_3m2010 == 1 
 
 /*
@@ -1109,14 +1151,14 @@ tab empl_form_10_unemp_16, m
 tab empl_info_10_unemp_16, m
 
 
-reshape long employed_3cat_3m bi_formal, i(indid_2010) j(year)
+reshape long employed_3cat_3m formal, i(indid_2010) j(year)
 format indid_2010 %12.0g
 
 tempfile data_empl
 save `data_empl'
 restore 
 
-drop employed_3cat_3m bi_formal
+drop employed_3cat_3m formal
 merge 1:1 indid_2010 year using  `data_empl'
 drop _merge
 
@@ -1191,6 +1233,22 @@ tab employed_3m, m
 tab unemp2m employed_3m, m
 *br * if  unemp2m == 1 & employed_3m  == 1 //Currently unemployed but employed in the last 3 months
 *br * if  unemp2m == . & employed_3m  == 1 //Currently out of the labor force but employed in the last 3 months
+
+tab uswrkstsr1, m 
+codebook uswrkstsr1
+/* 1  Employed
+ 2  Unemployed
+ 3  Out of Labor Force*/
+
+* Std. unemployed with mrk. def. (search required), with missing out of the labor 
+tab unempsr1m, m 
+gen unemployed_3cat_3m = 3 if unempsr1m == 1
+replace unemployed_3cat_3m = 2 if unempsr1m == 0
+replace unemployed_3cat_3m = 1 if uswrkstsr1 == 3
+lab def unemployed_3cat_3m 3 "Unemployed" 2 "Employed" 1 "OLF", modify
+lab val unemployed_3cat_3m unemployed_3cat_3m
+lab var unemployed_3cat_3m "From unempsr1m - mrk def, search req; 3m, 3 empl 2 unemp 1 OLF"
+tab unemployed_3cat_3m, m 
 
 * Std. unemployed with mrk. def. (search required), with missing out of the labor 
 tab unempsr1m, m 
@@ -1289,6 +1347,19 @@ su work_hours_pday_3m, d
 winsor2 work_hours_pday_3m, s(_w) c(0 98)
 su work_hours_pday_3m_w
 
+          *Unconditional hourly wage: IF UNEMPLOYED & OLF: WAGE IS 0
+            gen work_hours_pday_3m_w_unolf = work_hours_pday_3m_w if employed_3cat_3m == 2
+            replace work_hours_pday_3m_w_unolf = 0 if employed_3cat_3m  == 1 | employed_3cat_3m  == 0 
+            tab work_hours_pday_3m_w_unolf
+            lab var work_hours_pday_3m_w_unolf "UNCONDITIONAL - UNEMPLOYED & OLF: 0 - work hours (3-month)"
+
+            *Unconditional hourly wage: IF UNEMPLOYED : WAGE IS 0 / IF OLF: WAGE IS MISSING
+            gen work_hours_pday_3m_w_unemp = work_hours_pday_3m_w if employed_3cat_3m == 2
+            replace work_hours_pday_3m_w_unemp = 0 if employed_3cat_3m == 1 //UNEMP
+            replace work_hours_pday_3m_w_unemp = . if employed_3cat_3m == 0 //OLF
+            tab work_hours_pday_3m_w_unemp
+            lab var work_hours_pday_3m_w_unemp "UNCONDITIONAL - UNEMPLOYED work hours 0 / OLF work hours MISSING - work hours (3m)"
+
 *Crr. No. of Hours/Week, Market Work, (Ref. 1 Week).
 tab crnumhrs1, m 
 
@@ -1326,7 +1397,7 @@ winsor2 work_hours_pm_informal, s(_w) c(0 98)
 su work_hours_pm_informal_w
 
 
-tab work_hours_pm_informal informal , m
+tab work_hours_pm_informal formal , m
 tab work_hours_pm_informal uswrkst2 , m
 tab work_hours_pm_informal job_formal_3m , m
 
@@ -1537,6 +1608,19 @@ su hourly_wage
          gen ln_hourly_rwage = ln(1 + real_hourly_wage)
          lab var ln_hourly_rwage "LOG Hourly Wage (Prim.& Second. Jobs)"
 
+           *Unconditional hourly wage: IF UNEMPLOYED & OLF: WAGE IS 0
+            gen ln_hourly_rwage_unolf = ln_hourly_rwage if employed_3cat_3m == 2
+            replace ln_hourly_rwage_unolf = 0 if employed_3cat_3m  == 1 | employed_3cat_3m  == 0 
+            tab ln_hourly_rwage_unolf
+            lab var ln_hourly_rwage_unolf "UNCONDITIONAL - UNEMPLOYED & OLF: WAGE 0 - LOG - Hourly Wage (3-month)"
+
+            *Unconditional hourly wage: IF UNEMPLOYED : WAGE IS 0 / IF OLF: WAGE IS MISSING
+            gen ln_hourly_rwage_unemp = ln_hourly_rwage if employed_3cat_3m == 2
+            replace ln_hourly_rwage_unemp = 0 if employed_3cat_3m == 1 //UNEMP
+            replace ln_hourly_rwage_unemp = . if employed_3cat_3m == 0 //OLF
+            tab ln_hourly_rwage_unemp
+            lab var ln_hourly_rwage_unemp "UNCONDITIONAL - UNEMPLOYED WAGE 0 / OLF WAGE MISSING - LOG Hourly Wage (3m)"
+
          *IHS
          gen IHS_hourly_rwage = log(real_hourly_wage + ((real_hourly_wage^2 + 1)^0.5))
          lab var IHS_hourly_rwage "IHS Hourly Wage (Prim.& Second. Jobs)"
@@ -1560,6 +1644,19 @@ su monthly_wage
          *LOG
          gen ln_monthly_rwage = ln(1 + real_monthly_wage)
          lab var ln_monthly_rwage "LOG Monthly Wage (Prim.& Second. Jobs)"
+
+           *Unconditional hourly wage: IF UNEMPLOYED & OLF: WAGE IS 0
+            gen ln_monthly_rwage_unolf = ln_monthly_rwage if employed_3cat_3m == 2
+            replace ln_monthly_rwage_unolf = 0 if employed_3cat_3m  == 1 | employed_3cat_3m  == 0 
+            tab ln_monthly_rwage_unolf
+            lab var ln_monthly_rwage_unolf "UNCONDITIONAL - UNEMPLOYED & OLF: WAGE 0 - LOG - monthly Wage (3-month)"
+
+            *Unconditional hourly wage: IF UNEMPLOYED : WAGE IS 0 / IF OLF: WAGE IS MISSING
+            gen ln_monthly_rwage_unemp = ln_hourly_rwage if employed_3cat_3m == 2
+            replace ln_monthly_rwage_unemp = 0 if employed_3cat_3m == 1 //UNEMP
+            replace ln_monthly_rwage_unemp = . if employed_3cat_3m == 0 //OLF
+            tab ln_monthly_rwage_unemp
+            lab var ln_monthly_rwage_unemp "UNCONDITIONAL - UNEMPLOYED WAGE 0 / OLF WAGE MISSING - LOG monthly Wage (3m)"
 
          *IHS
          gen IHS_monthly_rwage = log(real_monthly_wage + ((real_monthly_wage^2 + 1)^0.5))
@@ -1952,7 +2049,7 @@ corr IV_SS_5 share_wp //
 
 
 
-
+/*
 
 /**************
 THE INSTRUMENT : IV6
@@ -2012,407 +2109,12 @@ corr IV_SS_6B share_wp //
 
 
 
-
+*/
 
 save "$data_final/06_IV_JLMPS_Construct_Outcomes.dta", replace
 
 
 
 
-
-
-
-use "$data_final/06_IV_JLMPS_Construct_Outcomes.dta", clear
-
-
-xtset, clear 
-destring indid_2010 Findid, replace
-mdesc indid_2010
-xtset indid_2010 year 
-
-codebook agg_wp
-lab var agg_wp "Work Permits"
-   
-foreach globals of global globals_list {
-  foreach outcome of global `globals' {
-    qui xi: ivreg2  `outcome' ///
-                i.district_iid i.year ///
-                $controls i.educ1d i.fteducst i.mteducst i.ftempst  ///
-                (agg_wp_orig = IV_SS_1) ///
-                [pweight = panel_wt_10_16], ///
-                cluster(district_iid) robust ///
-                partial(i.district_iid) 
-    codebook `outcome', c
-    estimates table, k(agg_wp_orig) star(.1 .05 .01) b(%7.4f) 
-    *estimates table, b(%7.4f) se(%7.4f) stats(N r2_a) k(agg_wp_orig) 
-    estimates store m_`outcome', title(Model `outcome')
-  }
-}
-
- 
-foreach globals of global globals_list {
-  foreach outcome of global `globals' {
-    qui xi: ivreg2  `outcome' ///
-                i.district_iid i.year ///
-                $controls i.educ1d i.fteducst i.mteducst i.ftempst  ///
-                (agg_wp_orig = IV_SS_2) ///
-                [pweight = panel_wt_10_16], ///
-                cluster(district_iid) robust ///
-                partial(i.district_iid) 
-    codebook `outcome', c
-    estimates table, k(agg_wp_orig) star(.1 .05 .01) b(%7.4f) 
-    *estimates table, b(%7.4f) se(%7.4f) stats(N r2_a) k(agg_wp_orig) 
-    estimates store m_`outcome', title(Model `outcome')
-  }
-}
-
- 
-foreach globals of global globals_list {
-  foreach outcome of global `globals' {
-    qui xi: ivreg2  `outcome' ///
-                i.district_iid i.year ///
-                $controls i.educ1d i.fteducst i.mteducst i.ftempst  ///
-                (agg_wp_orig = IV_SS_3) ///
-                [pweight = panel_wt_10_16], ///
-                cluster(district_iid) robust ///
-                partial(i.district_iid) 
-    codebook `outcome', c
-    estimates table, k(agg_wp_orig) star(.1 .05 .01) b(%7.4f) 
-    *estimates table, b(%7.4f) se(%7.4f) stats(N r2_a) k(agg_wp_orig) 
-    estimates store m_`outcome', title(Model `outcome')
-  }
-}
-
- 
-foreach globals of global globals_list {
-  foreach outcome of global `globals' {
-    qui xi: ivreg2  `outcome' ///
-                i.district_iid i.year ///
-                $controls i.educ1d i.fteducst i.mteducst i.ftempst  ///
-                (agg_wp_orig = IV_SS_4) ///
-                [pweight = panel_wt_10_16], ///
-                cluster(district_iid) robust ///
-                partial(i.district_iid) 
-    codebook `outcome', c
-    estimates table, k(agg_wp_orig) star(.1 .05 .01) b(%7.4f) 
-    *estimates table, b(%7.4f) se(%7.4f) stats(N r2_a) k(agg_wp_orig) 
-    estimates store m_`outcome', title(Model `outcome')
-  }
-}
-
- 
-foreach globals of global globals_list {
-  foreach outcome of global `globals' {
-    qui xi: ivreg2  `outcome' ///
-                i.district_iid i.year ///
-                $controls i.educ1d i.fteducst i.mteducst i.ftempst  ///
-                (agg_wp_orig = IV_SS_5) ///
-                [pweight = panel_wt_10_16], ///
-                cluster(district_iid) robust ///
-                partial(i.district_iid)
-    codebook `outcome', c
-    estimates table, k(agg_wp_orig) star(.1 .05 .01) b(%7.4f) 
-    *estimates table, b(%7.4f) se(%7.4f) stats(N r2_a) k(agg_wp_orig) 
-    estimates store m_`outcome', title(Model `outcome')
-  }
-}
-
- 
-foreach globals of global globals_list {
-  foreach outcome of global `globals' {
-    xi: ivreg2  `outcome' ///
-                i.district_iid i.year ///
-                $controls i.educ1d i.fteducst i.mteducst i.ftempst  ///
-                (agg_wp_orig = IV_SS_6A IV_SS_6B) ///
-                [pweight = panel_wt_10_16], ///
-                cluster(district_iid) robust ///
-                partial(i.district_iid) 
-    codebook `outcome', c
-    estimates table, k(agg_wp_orig) star(.1 .05 .01) b(%7.4f) 
-    *estimates table, b(%7.4f) se(%7.4f) stats(N r2_a) k(agg_wp_orig) 
-    estimates store m_`outcome', title(Model `outcome')
-  }
-}
-
-
-
-    xi: ivreg2  ln_total_rwage_3m ///
-                i.district_iid i.year ///
-                $controls i.educ1d i.fteducst i.mteducst i.ftempst  ///
-                (agg_wp_orig = IV_SS_1) ///
-                [pweight = panel_wt_10_16], ///
-                cluster(district_iid) robust ///
-                partial(i.district_iid) ///
-                 liml first
-
-    xi: ivreg2  ln_total_rwage_3m ///
-                i.district_iid i.year ///
-                $controls i.educ1d i.fteducst i.mteducst i.ftempst  ///
-                (agg_wp_orig = IV_SS_2) ///
-                [pweight = panel_wt_10_16], ///
-                cluster(district_iid) robust ///
-                partial(i.district_iid) ///
-                 liml first
-
-    xi: ivreg2  ln_total_rwage_3m ///
-                i.district_iid i.year ///
-                $controls i.educ1d i.fteducst i.mteducst i.ftempst  ///
-                (agg_wp_orig = IV_SS_3) ///
-                [pweight = panel_wt_10_16], ///
-                cluster(district_iid) robust ///
-                partial(i.district_iid) ///
-                 liml first
-
-    xi: ivreg2  ln_total_rwage_3m ///
-                i.district_iid i.year ///
-                $controls i.educ1d i.fteducst i.mteducst i.ftempst  ///
-                (agg_wp_orig = IV_SS_4) ///
-                [pweight = panel_wt_10_16], ///
-                cluster(district_iid) robust ///
-                partial(i.district_iid) ///
-                 liml first
-
-   xi: ivreg2  ln_total_rwage_3m ///
-                i.district_iid i.year ///
-                $controls i.educ1d i.fteducst i.mteducst i.ftempst  ///
-                (agg_wp_orig = IV_SS_5) ///
-                [pweight = panel_wt_10_16], ///
-                cluster(district_iid) robust ///
-                partial(i.district_iid) ///
-                 liml first
-
-   xi: ivreg2  ln_basic_rwage_3m ///
-                i.district_iid i.year ///
-                $controls i.educ1d i.fteducst i.mteducst i.ftempst  ///
-                (agg_wp_orig = IV_SS_6A IV_SS_6B) ///
-                [pweight = panel_wt_10_16], ///
-                cluster(district_iid) robust ///
-                partial(i.district_iid) ///
-                 liml first                 
-
-tab nationality_cl year , m 
-*drop if nationality_cl != 1
-
-drop if age > 64 & year == 2016
-drop if age > 60 & year == 2010 //60 in 2010 so 64 in 2016
-
-drop if age < 15 & year == 2016 
-drop if age < 11 & year == 2010 //11 in 2010 so 15 in 2016
-
-drop if unemp_16_10 == 1
-drop if olf_16_10 == 1
-
-*IF MISS OBS: REG EXCL THEM
-*drop if miss_16_10 == 1
-*drop if emp_16_miss_10 == 1
-*drop if emp_10_miss_16 == 1
-*drop if unemp_16_miss_10 == 1
-*drop if unemp_10_miss_16 == 1
-*drop if olf_16_miss_10 == 1
-*drop if olf_10_miss_16 == 1 
-
-*CONDITIONAL: DROP 
-*UNCONDITIONAL: KEEP
-drop if emp_10_olf_16  == 1 
-drop if emp_16_olf_10  == 1 
-drop if unemp_10_emp_16  == 1 
-drop if unemp_16_emp_10  == 1 
-drop if olf_10_unemp_16 == 1 
-drop if olf_16_unemp_10  == 1 
-
-
-xtset, clear 
-destring indid_2010 Findid, replace
-mdesc indid_2010
-xtset indid_2010 year 
-
-codebook agg_wp
-lab var agg_wp "Work Permits"
-   
-    xi: ivreg2  ln_basic_rwage_3m ///
-                i.district_iid i.year ///
-                $controls i.educ1d i.fteducst i.mteducst i.ftempst  ///
-                (agg_wp_orig = IV_SS_1) ///
-                [pweight = panel_wt_10_16], ///
-                cluster(district_iid) robust ///
-                partial(i.district_iid) ///
-                 liml first
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-*use "$data_final/06_IV_JLMPS_Construct_Outcomes.dta", clear
-
-/*
-import excel "$data_sec_DOS\Table 5.4 - Jord 15+ by Gov, Sex and Main Current Economic Activity (Percent) - 2010.xlsx", sheet("ForStata") firstrow clear
-*br
-
-bys Sector: egen tot_empl_1 = sum(Amman) if Sector != "n.a" 
-bys Sector: egen tot_empl_2 = sum(Balqa) if Sector != "n.a" 
-bys Sector: egen tot_empl_3 = sum(Zarqa) if Sector != "n.a" 
-bys Sector: egen tot_empl_4 = sum(Madaba) if Sector != "n.a" 
-bys Sector: egen tot_empl_5 = sum(Irbid) if Sector != "n.a" 
-bys Sector: egen tot_empl_6 = sum(Mafraq) if Sector != "n.a" 
-bys Sector: egen tot_empl_7 = sum(Jerash) if Sector != "n.a" 
-bys Sector: egen tot_empl_8 = sum(Ajloun) if Sector != "n.a" 
-bys Sector: egen tot_empl_9 = sum(Karak) if Sector != "n.a" 
-bys Sector: egen tot_empl_10 = sum(Tafielah) if Sector != "n.a" 
-bys Sector: egen tot_empl_11 = sum(Maan) if Sector != "n.a" 
-bys Sector: egen tot_empl_12 = sum(Aqaba) if Sector != "n.a" 
-
-replace tot_empl_1 = Amman if Sector == "n.a"
-replace tot_empl_2 = Balqa if Sector == "n.a"
-replace tot_empl_3 = Zarqa if Sector == "n.a"
-replace tot_empl_4 = Madaba if Sector == "n.a"
-replace tot_empl_5 = Irbid if Sector == "n.a"
-replace tot_empl_6 = Mafraq if Sector == "n.a"
-replace tot_empl_7 = Jerash if Sector == "n.a"
-replace tot_empl_8 = Ajloun if Sector == "n.a"
-replace tot_empl_9 = Karak if Sector == "n.a"
-replace tot_empl_10 = Tafielah if Sector == "n.a"
-replace tot_empl_11 = Maan if Sector == "n.a"
-replace tot_empl_12 = Aqaba if Sector == "n.a"
-
-keep tot_empl_* Sector 
-duplicates drop
-replace Sector = "Total" if Sector == "n.a"
-
-reshape long tot_empl_, i(Sector) j(gov)
-
-replace gov = 13 if gov == 3 
-replace gov = 14 if gov == 4
-replace gov = 21 if gov == 5 
-replace gov = 22 if gov == 6
-replace gov = 23 if gov == 7
-replace gov = 24 if gov == 8 
-replace gov = 31 if gov == 9 
-replace gov = 32 if gov == 10 
-replace gov = 33 if gov == 11 
-replace gov = 34 if gov == 12
-replace gov = 11 if gov == 1 
-replace gov = 12 if gov == 2 
-
-lab def gov 11 "Amman" ///
-            12 "Balqa" ///
-            13 "Zarqa" ///
-            14 "Madaba" ///
-            21 "Irbid" ///
-            22 "Mafraq" ///
-            23 "Jarash" ///
-            24 "Ajloun" ///
-            31 "Karak" ///
-            32 "Tafileh" ///
-            33 "Ma'an"  ///
-            34 "Aqaba", ///
-            modify
-
-lab val gov gov
-
-preserve 
-keep if Sector == "Total"
-ren tot_empl_ tot_empl
-tempfile total_empl_db 
-save `total_empl_db'
-restore 
-
-ren tot_empl_ empl_bysector
-
-drop if Sector == "Total"
-merge m:1 gov using `total_empl_db'
-drop _merge 
-gen share_empl = empl_bysector / tot_empl
-
-drop empl_bysector tot_empl
-reshape wide share_empl , i(gov) j(Sector) string
-
-merge 1:m gov using  "$data_final/06_IV_JLMPS_Construct_Outcomes.dta"
-drop _merge
- 
-gen IV_SS_OP = IV_SS * share_emplOpen 
-
-*THE INSTRUMENT + TRANSFORMATION
-gen ln_IV_SS_OP = log(1 + IV_SS_OP)
-gen IHS_IV_SS_OP = log(IV_SS_OP + ((IV_SS_OP^2 + 1)^0.5))
-
-*THE ASKED QUESTION IN QUEST (binary)
-tab work_permit, m
-
-*AGGREGATED MEASURE OF WP BASED ON work_permit
-tab agg_wp, m
-tab agg_wp_orig, m //Adding another more accurate measure
-
-*CORRELATIONS
-corr IV_SS_OP agg_wp  //0.64
-corr IV_SS_OP agg_wp_orig //0.59
-corr IV_SS_OP share_wp //0.55
-
-*save "$data_final/06_IV_JLMPS_Regression.dta", replace
-save "$data_final/06_IV_JLMPS_Construct_Outcomes.dta", replace
-*/
-
-
-
-
-
-
-
-
-
-
-
-
-/*
-tab job1_y
-tab job1_m
-tab job1_01 
-tab job1_17
-job1_m job2_m job2_y job1_y
-
-(1) The date of school exit
-(2) Any non-employment between school exit and first job (distinguishing
-between unemployment and out of the labor force).
-(3) First job start date and characteristics.
-(4) Respondents are then asked if they have left that job, and if so,
-when and whether they had a period of non-employment (again
-distinguishing unemployment and out of labor force).
-(5) They are then asked if they had a subsequent job, and if so, the
-start dates and characteristics.
-*/
 
 log close

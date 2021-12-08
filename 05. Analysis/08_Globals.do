@@ -23,61 +23,98 @@ set mem 100m
                               *  GLOBALS *
                               ************
 
-global    dep_var   agg_wp 
+*global    dep_var   agg_wp 
 *global    dep_var   share_wp_100
-*global    dep_var   agg_wp_orig
+global    dep_var   agg_wp_orig
+
+global    outcome_cond ///
+              job_stable_3m ///  From usstablp - Stability of employement (3m) - 1 permanent - 0 temp, seas, cas
+              formal  /// 0 Informal - 1 Formal - Informal if no contract (uscontrp=0) OR no insurance (ussocinsp=0)
+              wp_industry_jlmps_3m  /// Industries with work permits for refugees - Economic Activity of prim. job 3m
+              member_union_3m /// Member of a syndicate/trade union (ref. 3-mnths)
+              skills_required_pjob ///  Does primary job require any skill
+              ln_total_rwage_3m  /// LOG Total Wage (3-month) - CONDITIONAL - UNEMPLOYED & OLF: WAGE MISSING
+              ln_hourly_rwage  /// LOG Hourly Wage (Prim.& Second. Jobs)
+              work_hours_pday_3m_w  /// Winsorized - No. of Hours/Day (Ref. 3 mnths) Market Work
+              work_hours_pweek_3m_w  /// Winsorized - Usual No. of Hours/Week, Market Work, (Ref. 3-month)
+              work_days_pweek_3m  // Avg. num. of wrk. days per week during 3 mnth.
+
+/*              ln_monthly_rwage  /// LOG Monthly Wage (Prim.& Second. Jobs)
+              ln_basic_rwage_3m  /// LOG Basic Wage (3-month) - CONDITIONAL - UNEMPLOYED & OLF: WAGE MISSING
+              IHS_daily_rwage_irregular /// IHS Average Daily Wage (Irregular Workers)
+              daily_wage_irregular /// CORRECTED INFLATION - Average Daily Wage (Irregular Workers)
+              work_hours_pm_informal_w  ///  Winsorized - Average worked hour per month for irregular job
+              stability_main_job /// From job1_07 : Degree of stability - Job 01 - 1 Stable
+              permanent_contract /// From job1_08 : Type of work contract - Job 01 - 1 Permanent
+              work_days_pweek_3m  // Avg. num. of wrk. days per week during 3 mnth.
+*/
+
+global    outcome_uncond ///
+              ln_b_rwage_unolf ///UNCONDITIONAL - UNEMPLOYED & OLF: WAGE 0 - LOG - Basic Wage (3-month)
+              ln_b_rwage_unemp ///UNCONDITIONAL - UNEMPLOYED WAGE 0 / OLF WAGE MISSING - LOG Basic (3m)
+              ln_t_rwage_unolf ///UNCONDITIONAL - UNEMPLOYED & OLF: WAGE 0 - LOG - Total Wage (3-month)
+              ln_t_rwage_unemp /// UNCONDITIONAL - UNEMPLOYED WAGE 0 / OLF WAGE MISSING - LOG Total (3m)
+              ln_hourly_rwage_unolf /// UNCONDITIONAL - UNEMPLOYED & OLF: WAGE 0 - LOG - Hourly Wage (3-month)
+              ln_hourly_rwage_unemp /// UNCONDITIONAL - UNEMPLOYED WAGE 0 / OLF WAGE MISSING - LOG Hourly Wage (3m)
+              ln_monthly_rwage_unolf /// UNCONDITIONAL - UNEMPLOYED & OLF: WAGE 0 - LOG - monthly Wage (3-month)
+              ln_monthly_rwage_unemp /// UNCONDITIONAL - UNEMPLOYED WAGE 0 / OLF WAGE MISSING - LOG monthly Wage (3m)
+              work_hours_pday_3m_w_unolf /// UNCONDITIONAL - UNEMPLOYED & OLF: 0 - work hours (3-month)
+              work_hours_pday_3m_w_unemp /// UNCONDITIONAL - UNEMPLOYED work hours 0 / OLF work hours MISSING - work hours (3m)
+              unemployed_3cat_3m /// From unempsr1m - mrk def, search req; 3m, 3 empl 2 unemp 1 OLF
+              unemployed_3m /// From unempsr1m - mrk def, search req; 3m, empl or unemp, OLF is miss
+              unemployed_olf_3m /// From unempsr1 - mrk def, search req; 3m, empl&OLF or unemp
+              employed_3cat_3m /// From uswrkstsr1 - mkt def, search req; 3m, 2 empl - 1 unemp - 0 OLF
+              employed_3m /// From uswrkstsr1 - mkt def, search req; 3m, 2 empl - 1 unemp - OLF miss
+              employed_olf_3m /// From uswrkstsr1 - mkt def, search req; 3m, 2 empl - 1 unemp&OLF
+ 
+global    globals_list ///
+            outcome_cond outcome_uncond
 
 /*
 global    outcome_var_empl ///
+              unemployed_3cat_3m /// From unempsr1m - mrk def, search req; 3m, 3 empl 2 unemp 1 OLF
               unemployed_3m /// From unempsr1m - mrk def, search req; 3m, empl or unemp, OLF is miss
-              unempdurmth  ///  Current unemployment duration (in months)
-              employed_3m  ///From uswrkstsr1 - mkt def, search req; 3m, 2 empl - 1 unemp - OLF miss
-              IHS_b_rwage_unolf ///UNCONDITIONAL - UNEMPLOYED & OLF: WAGE 0 - IHS - Basic Wage (3-month)
-              IHS_b_rwage_unemp ///UNCONDITIONAL - UNEMPLOYED WAGE 0 / OLF WAGE MISSING - IHS Basic (3m)
-              IHS_t_rwage_unolf ///UNCONDITIONAL - UNEMPLOYED & OLF: WAGE 0 - IHS - Total Wage (3-month)
-              IHS_t_rwage_unemp //UNCONDITIONAL - UNEMPLOYED WAGE 0 / OLF WAGE MISSING - IHS Total (3m)
-*/
-global    outcome_var_empl ///
-              unemployed_3m /// From unempsr1m - mrk def, search req; 3m, empl or unemp, OLF is miss
-              unempdurmth  ///  Current unemployment duration (in months)
-              employed_3m  ///From uswrkstsr1 - mkt def, search req; 3m, 2 empl - 1 unemp - OLF miss
+              unemployed_olf_3m /// From unempsr1 - mrk def, search req; 3m, empl&OLF or unemp
+              employed_3cat_3m /// From uswrkstsr1 - mkt def, search req; 3m, 2 empl - 1 unemp - 0 OLF
+              employed_3m /// From uswrkstsr1 - mkt def, search req; 3m, 2 empl - 1 unemp - OLF miss
+              employed_olf_3m /// From uswrkstsr1 - mkt def, search req; 3m, 2 empl - 1 unemp&OLF
+              unempdurmth  //  Current unemployment duration (in months)
+
+global    outcome_var_job ///
+              job_stable_3m ///  From usstablp - Stability of employement (3m) - 1 permanent - 0 temp, seas, cas
+              formal  /// 0 Informal - 1 Formal - Informal if no contract (uscontrp=0) OR no insurance (ussocinsp=0)
+              wp_industry_jlmps_3m  /// Industries with work permits for refugees - Economic Activity of prim. job 3m
+              member_union_3m /// Member of a syndicate/trade union (ref. 3-mnths)
+              skills_required_pjob ///  Does primary job require any skill
+              permanent_contract /// From job1_08 : Type of work contract - Job 01 - 1 Permanent
+              stability_main_job // From job1_07 : Degree of stability - Job 01 - 1 Stable
+
+global    outcome_var_wage ///
+              ln_total_rwage_3m  /// LOG Total Wage (3-month) - CONDITIONAL - UNEMPLOYED & OLF: WAGE MISSING
+              ln_hourly_rwage  /// LOG Hourly Wage (Prim.& Second. Jobs)
+              ln_monthly_rwage  /// LOG Monthly Wage (Prim.& Second. Jobs)
+              ln_basic_rwage_3m  /// LOG Basic Wage (3-month) - CONDITIONAL - UNEMPLOYED & OLF: WAGE MISSING
               ln_b_rwage_unolf ///UNCONDITIONAL - UNEMPLOYED & OLF: WAGE 0 - LOG - Basic Wage (3-month)
               ln_b_rwage_unemp ///UNCONDITIONAL - UNEMPLOYED WAGE 0 / OLF WAGE MISSING - LOG Basic (3m)
               ln_t_rwage_unolf ///UNCONDITIONAL - UNEMPLOYED & OLF: WAGE 0 - LOG - Total Wage (3-month)
               ln_t_rwage_unemp // UNCONDITIONAL - UNEMPLOYED WAGE 0 / OLF WAGE MISSING - LOG Total (3m)
-
-global    outcome_var_job ///
-              job_stable_3m ///  From usstablp - Stability of employement (3m) - 1 permanent - 0 temp, seas, cas
-              informal  /// 1 Informal - 0 Formal - Informal if no contract (uscontrp=0) and no insurance (ussocinsp=0)
-              wp_industry_jlmps_3m  /// Industries with work permits for refugees - Economic Activity of prim. job 3m
-              member_union_3m /// Member of a syndicate/trade union (ref. 3-mnths)
-              skills_required_pjob //  Does primary job require any skill
-  
-/*
-global    outcome_var_wage ///
-              IHS_basic_rwage_3m  /// IHS Basic Wage (3-month) - CONDITIONAL - UNEMPLOYED & OLF: WAGE MISSING
-              IHS_total_rwage_3m  /// IHS Total Wage (3-month) - CONDITIONAL - UNEMPLOYED & OLF: WAGE MISSING
-              IHS_monthly_rwage /// IHS Monthly Wage (Prim.& Second. Jobs)
-              IHS_hourly_rwage  // IHS Hourly Wage (Prim.& Second. Jobs)
-*/
-
-global    outcome_var_wage ///
-              ln_total_rwage_3m  /// LOG Total Wage (3-month) - CONDITIONAL - UNEMPLOYED & OLF: WAGE MISSING
-              ln_hourly_rwage  // LOG Hourly Wage (Prim.& Second. Jobs)
-              *ln_monthly_rwage  /// LOG Monthly Wage (Prim.& Second. Jobs)
-              *ln_basic_rwage_3m  // LOG Basic Wage (3-month) - CONDITIONAL - UNEMPLOYED & OLF: WAGE MISSING
-
-*IHS_daily_rwage_irregular // IHS Average Daily Wage (Irregular Workers)
+              IHS_daily_rwage_irregular /// IHS Average Daily Wage (Irregular Workers)
+              ln_hourly_rwage_unolf /// UNCONDITIONAL - UNEMPLOYED & OLF: WAGE 0 - LOG - Hourly Wage (3-month)
+              ln_hourly_rwage_unemp /// UNCONDITIONAL - UNEMPLOYED WAGE 0 / OLF WAGE MISSING - LOG Hourly Wage (3m)
+              ln_monthly_rwage_unolf /// UNCONDITIONAL - UNEMPLOYED & OLF: WAGE 0 - LOG - monthly Wage (3-month)
+              ln_monthly_rwage_unemp /// UNCONDITIONAL - UNEMPLOYED WAGE 0 / OLF WAGE MISSING - LOG monthly Wage (3m)
+              daily_wage_irregular /// CORRECTED INFLATION - Average Daily Wage (Irregular Workers)
+              work_hours_pm_informal_w  //  Winsorized - Average worked hour per month for irregular job
 
 global    outcome_var_hours ///
               work_hours_pweek_3m_w  /// Winsorized - Usual No. of Hours/Week, Market Work, (Ref. 3-month)
-              work_hours_pday_3m_w  // Winsorized - No. of Hours/Day (Ref. 3 mnths) Market Work
-              *work_days_pweek_3m  // Avg. num. of wrk. days per week during 3 mnth.
+              work_hours_pday_3m_w  /// Winsorized - No. of Hours/Day (Ref. 3 mnths) Market Work
+              work_days_pweek_3m  // Avg. num. of wrk. days per week during 3 mnth.
 
-*work_hours_pm_informal_w  //  Winsorized - Average worked hour per month for irregular job
-  
 global    globals_list ///
             outcome_var_job outcome_var_wage outcome_var_hours
+
+*/
 
 global controls ///
           age  /// Age

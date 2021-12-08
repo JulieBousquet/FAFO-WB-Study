@@ -109,8 +109,8 @@ margins, dydx($dep_var)
 *LPM predicted probabilities are NOT restricted to lie between zero and one
 xi: ivregress 2sls bi_employed_olf_3m  ///
          $controls i.educ1d i.fteducst i.mteducst i.ftempst  ///
-          ($dep_var = ln_IV_SS) ///
-          [pweight = expan_indiv], ///
+          ($dep_var = IV_SS_5) ///
+          [pweight = panel_wt_10_16], ///
          vce(cl district_iid)
 estimates table, k($dep_var) star(.1 .05 .01) b(%7.4f) 
 estimates table, b(%7.4f) se(%7.4f) stats(N r2_a) k($dep_var) 
@@ -155,15 +155,15 @@ drop if year == 2010
 *LPM predicted probabilities are NOT restricted to lie between zero and one
 xi: ivregress 2sls bi_employed_olf_3m  ///
          $controls i.educ1d i.fteducst i.mteducst i.ftempst  ///
-          ($dep_var = ln_IV_SS) ///
-          [pweight = expan_indiv], ///
+          ($dep_var = IV_SS_5) ///
+          [pweight = panel_wt_10_16], ///
          vce(cl district_iid)
 estimates table, k($dep_var) star(.1 .05 .01) b(%7.4f) 
 estimates table, b(%7.4f) se(%7.4f) stats(N r2_a) k($dep_var) 
 margins, dydx($dep_var) 
 
 
-
+/*
         ***************************************************************
         * PROBABILITY OF BEING EMPLOYED INTERACTED BY EDUCATION LEVEL *
         ***************************************************************
@@ -203,13 +203,13 @@ gen aggwp_educ =  bi_education#c.agg_wp
 *LPM predicted probabilities are NOT restricted to lie between zero and one
 ivregress 2sls bi_employed_olf_3m bi_education  ///
          $controls i.educ1d i.fteducst i.mteducst i.ftempst  ///
-          (agg_wp aggwp_educ = ln_IV_SS c.ln_IV_SS#bi_education) ///
-          [pweight = expan_indiv], ///
+          (agg_wp aggwp_educ = IV_SS_5 c.IV_SS_5#bi_education) ///
+          [pweight = panel_wt_10_16], ///
          vce(cl district_iid)
 estimates table, k($dep_var aggwp_educ) star(.1 .05 .01) b(%7.4f) 
 estimates table, b(%7.4f) se(%7.4f) stats(N r2_a) k($dep_var aggwp_educ) 
 margins, dydx($dep_var) 
-
+*/
 
 
 
@@ -238,7 +238,7 @@ keep if empl_info_10_16 == 1 | ///
 ***************
 *** TRANSFO ***
 ***************
-bys year: tab bi_formal, nol
+bys year: tab formal, nol
 
 drop if year == 2010 
 
@@ -247,10 +247,10 @@ drop if year == 2010
 ******************
 *The LPM version
 *LPM predicted probabilities are NOT restricted to lie between zero and one
-xi: ivregress 2sls bi_formal  ///
+xi: ivregress 2sls formal  ///
          $controls i.educ1d i.fteducst i.mteducst i.ftempst  ///
-          ($dep_var = ln_IV_SS) ///
-          [pweight = expan_indiv], ///
+          ($dep_var = IV_SS_5) ///
+          [pweight = panel_wt_10_16], ///
          vce(cl district_iid)
 estimates table, k($dep_var) star(.1 .05 .01) b(%7.4f) 
 estimates table, b(%7.4f) se(%7.4f) stats(N r2_a) k($dep_var) 
@@ -285,7 +285,7 @@ keep if empl_info_10_unemp_16 == 1 | ///
 ***************
 *** TRANSFO ***
 ***************
-bys year: tab bi_formal, nol
+bys year: tab formal, nol
 
 drop if year == 2010 
 
@@ -294,10 +294,10 @@ drop if year == 2010
 ******************
 *The LPM version
 *LPM predicted probabilities are NOT restricted to lie between zero and one
-xi: ivregress 2sls bi_formal  ///
+xi: ivregress 2sls formal  ///
          $controls i.educ1d i.fteducst i.mteducst i.ftempst  ///
-          ($dep_var = ln_IV_SS) ///
-          [pweight = expan_indiv], ///
+          ($dep_var = IV_SS_5) ///
+          [pweight = panel_wt_10_16], ///
          vce(cl district_iid)
 estimates table, k($dep_var) star(.1 .05 .01) b(%7.4f) 
 estimates table, b(%7.4f) se(%7.4f) stats(N r2_a) k($dep_var) 
@@ -333,7 +333,7 @@ keep if empl_form_10_info_16 == 1 | ///
 ***************
 *** TRANSFO ***
 ***************
-bys year: tab bi_formal, nol
+bys year: tab formal, nol
 
 drop if year == 2010 
 
@@ -342,10 +342,10 @@ drop if year == 2010
 ******************
 *The LPM version
 *LPM predicted probabilities are NOT restricted to lie between zero and one
-xi: ivregress 2sls bi_formal  ///
+xi: ivregress 2sls formal  ///
          $controls i.educ1d i.fteducst i.mteducst i.ftempst  ///
-          ($dep_var = ln_IV_SS) ///
-          [pweight = expan_indiv], ///
+          ($dep_var = IV_SS_5) ///
+          [pweight = panel_wt_10_16], ///
          vce(cl district_iid)
 estimates table, k($dep_var) star(.1 .05 .01) b(%7.4f) 
 estimates table, b(%7.4f) se(%7.4f) stats(N r2_a) k($dep_var) 
@@ -379,7 +379,7 @@ keep if empl_form_10_unemp_16 == 1 | ///
 ***************
 *** TRANSFO ***
 ***************
-bys year: tab bi_formal, nol
+bys year: tab formal, nol
 
 drop if year == 2010 
 
@@ -388,10 +388,10 @@ drop if year == 2010
 ******************
 *The LPM version
 *LPM predicted probabilities are NOT restricted to lie between zero and one
-xi: ivregress 2sls bi_formal  ///
+xi: ivregress 2sls formal  ///
          $controls i.educ1d i.fteducst i.mteducst i.ftempst  ///
-          ($dep_var = ln_IV_SS) ///
-          [pweight = expan_indiv], ///
+          ($dep_var = IV_SS_5) ///
+          [pweight = panel_wt_10_16], ///
          vce(cl district_iid)
 estimates table, k($dep_var) star(.1 .05 .01) b(%7.4f) 
 estimates table, b(%7.4f) se(%7.4f) stats(N r2_a) k($dep_var) 
@@ -438,8 +438,8 @@ drop if year == 2010
 *LPM predicted probabilities are NOT restricted to lie between zero and one
 xi: ivregress 2sls wp_industry_jlmps_3m  ///
          $controls i.educ1d i.fteducst i.mteducst i.ftempst  ///
-          ($dep_var = ln_IV_SS) ///
-          [pweight = expan_indiv], ///
+          ($dep_var = IV_SS_5) ///
+          [pweight = panel_wt_10_16], ///
          vce(cl district_iid)
 estimates table, k($dep_var) star(.1 .05 .01) b(%7.4f) 
 estimates table, b(%7.4f) se(%7.4f) stats(N r2_a) k($dep_var) 
@@ -485,8 +485,8 @@ drop if year == 2010
 *LPM predicted probabilities are NOT restricted to lie between zero and one
 xi: ivregress 2sls wp_industry_jlmps_3m  ///
          $controls i.educ1d i.fteducst i.mteducst i.ftempst  ///
-          ($dep_var = ln_IV_SS) ///
-          [pweight = expan_indiv], ///
+          ($dep_var = IV_SS_5) ///
+          [pweight = panel_wt_10_16], ///
          vce(cl district_iid)
 estimates table, k($dep_var) star(.1 .05 .01) b(%7.4f) 
 estimates table, b(%7.4f) se(%7.4f) stats(N r2_a) k($dep_var) 
