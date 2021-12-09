@@ -114,7 +114,7 @@ lab var inter_open "Agg WP x Open"
   foreach outcome of global outcome_cond  {  
      xi: ivreg2  `outcome'  ///
        i.year i.district_iid ///
-       $controls i.educ1d i.fteducst i.mteducst i.ftempst  ///
+       $controls i.educ1d i.fteducst i.mteducst i.ftempst ln_nb_refugees_bygov ///
        (c.$dep_var inter_open = c.IV_SS_5 inter_open_IV) ///
        wp_industry_jlmps_3m ///       
        [pweight = panel_wt_10_16], ///
@@ -135,7 +135,7 @@ estout m_job_stable_3m m_formal ///
       m_work_hours_pweek_3m_w m_work_days_pweek_3m ///
       , cells(b(star fmt(%9.3f)) se(par fmt(%9.3f))) ///
   drop(age age2 gender hhsize _Ieduc1d_2 _Ieduc1d_3 _Ieduc1d_4 _Ieduc1d_5 ///
-        _Ieduc1d_6 _Ieduc1d_7 _Ifteducst_2 ///
+        ln_nb_refugees_bygov _Ieduc1d_6 _Ieduc1d_7 _Ifteducst_2 ///
         _Ifteducst_3 _Ifteducst_4 _Ifteducst_5 _Ifteducst_6 ///
         _Imteducst_2 _Imteducst_3 _Imteducst_4 _Imteducst_5 ///
         _Imteducst_6 _Iftempst_2 _Iftempst_3 _Iftempst_4 _Iftempst_5 ///
@@ -156,7 +156,7 @@ esttab m_job_stable_3m m_formal ///
       cells(b(star fmt(%9.3f)) se(par fmt(%9.3f))) ///
 mtitles("Stable" "formal" "Union" "Skills" "Total W"  "Hourly W" "WH pday" "WD pweek") ///
   drop(age age2 gender hhsize _Ieduc1d_2 _Ieduc1d_3 _Ieduc1d_4 _Ieduc1d_5 ///
-        _Ieduc1d_6 _Ieduc1d_7 _Ifteducst_2 ///
+        ln_nb_refugees_bygov _Ieduc1d_6 _Ieduc1d_7 _Ifteducst_2 ///
         _Ifteducst_3 _Ifteducst_4 _Ifteducst_5 _Ifteducst_6 ///
         _Imteducst_2 _Imteducst_3 _Imteducst_4 _Imteducst_5 ///
         _Imteducst_6 _Iftempst_2 _Iftempst_3 _Iftempst_4 _Iftempst_5 ///
@@ -191,7 +191,7 @@ lab var inter_gender "Agg WP x Male"
   foreach outcome of global outcome_cond  {  
     qui xi: ivreg2  `outcome'  ///
        i.year i.district_iid ///
-       age age2 hhsize i.educ1d i.fteducst i.mteducst i.ftempst  ///
+       age age2 hhsize i.educ1d i.fteducst i.mteducst i.ftempst ln_nb_refugees_bygov ///
        (c.$dep_var inter_gender = c.IV_SS_5 inter_gender_IV) ///
        gender ///       
        [pweight = panel_wt_10_16], ///
@@ -213,7 +213,7 @@ estout m_job_stable_3m m_formal m_wp_industry_jlmps_3m ///
       m_work_hours_pweek_3m_w m_work_days_pweek_3m ///
       , cells(b(star fmt(%9.3f)) se(par fmt(%9.3f)))  ///
   drop(age age2 hhsize _Ieduc1d_2 _Ieduc1d_3 _Ieduc1d_4 _Ieduc1d_5 ///
-        _Ieduc1d_6 _Ieduc1d_7 _Ifteducst_2 ///
+       ln_nb_refugees_bygov _Ieduc1d_6 _Ieduc1d_7 _Ifteducst_2 ///
         _Ifteducst_3 _Ifteducst_4 _Ifteducst_5 _Ifteducst_6 ///
         _Imteducst_2 _Imteducst_3 _Imteducst_4 _Imteducst_5 ///
         _Imteducst_6 _Iftempst_2 _Iftempst_3 _Iftempst_4 _Iftempst_5 ///
@@ -234,7 +234,7 @@ esttab m_job_stable_3m m_formal m_wp_industry_jlmps_3m ///
       cells(b(star fmt(%9.3f)) se(par fmt(%9.3f))) ///
 mtitles("Stable" "Formal" "Industry" "Union" "Skills" "Total W"  "Hourly W" "WH pday" "WD pweek") ///
   drop(age age2 hhsize _Ieduc1d_2 _Ieduc1d_3 _Ieduc1d_4 _Ieduc1d_5 ///
-        _Ieduc1d_6 _Ieduc1d_7 _Ifteducst_2 ///
+       ln_nb_refugees_bygov _Ieduc1d_6 _Ieduc1d_7 _Ifteducst_2 ///
         _Ifteducst_3 _Ifteducst_4 _Ifteducst_5 _Ifteducst_6 ///
         _Imteducst_2 _Imteducst_3 _Imteducst_4 _Imteducst_5 ///
         _Imteducst_6 _Iftempst_2 _Iftempst_3 _Iftempst_4 _Iftempst_5 ///
@@ -271,7 +271,7 @@ lab var inter_bi_education "Agg WP x High Education"
   foreach outcome of global outcome_cond {  
     qui xi: ivreg2  `outcome'  ///
        i.year i.district_iid ///
-       $controls i.fteducst i.mteducst i.ftempst   ///
+       $controls i.fteducst i.mteducst i.ftempst ln_nb_refugees_bygov  ///
        (c.$dep_var inter_bi_education = c.IV_SS_5 inter_bi_education_IV) ///
        bi_education ///       
        [pweight = panel_wt_10_16], ///
@@ -292,7 +292,7 @@ estout m_job_stable_3m m_formal m_wp_industry_jlmps_3m ///
       m_work_hours_pweek_3m_w m_work_days_pweek_3m ///
       , cells(b(star fmt(%9.3f)) se(par fmt(%9.3f))) ///
   drop(age age2 gender hhsize _Ifteducst_2 ///
-        _Ifteducst_3 _Ifteducst_4 _Ifteducst_5 _Ifteducst_6 ///
+       ln_nb_refugees_bygov _Ifteducst_3 _Ifteducst_4 _Ifteducst_5 _Ifteducst_6 ///
         _Imteducst_2 _Imteducst_3 _Imteducst_4 _Imteducst_5 ///
         _Imteducst_6 _Iftempst_2 _Iftempst_3 _Iftempst_4 _Iftempst_5 ///
         _Iftempst_6  _Iyear_2016 ///
@@ -312,7 +312,7 @@ esttab m_job_stable_3m m_formal m_wp_industry_jlmps_3m ///
       cells(b(star fmt(%9.3f)) se(par fmt(%9.3f))) ///
 mtitles("Stable" "Formal" "Industry" "Union" "Skills" "Total W"  "Hourly W" "WH pday" "WD pweek") ///
   drop(age age2 gender hhsize _Ifteducst_2 ///
-        _Ifteducst_3 _Ifteducst_4 _Ifteducst_5 _Ifteducst_6 ///
+      ln_nb_refugees_bygov  _Ifteducst_3 _Ifteducst_4 _Ifteducst_5 _Ifteducst_6 ///
         _Imteducst_2 _Imteducst_3 _Imteducst_4 _Imteducst_5 ///
         _Imteducst_6 _Iftempst_2 _Iftempst_3 _Iftempst_4 _Iftempst_5 ///
         _Iftempst_6  _Iyear_2016 ///
@@ -345,7 +345,7 @@ lab var inter_formal "Agg WP x Formal"
   foreach outcome of global outcome_cond  {  
     qui xi: ivreg2  `outcome'  ///
        i.year i.district_iid ///
-       $controls i.educ1d i.fteducst i.mteducst i.ftempst  ///
+       $controls i.educ1d i.fteducst i.mteducst i.ftempst ln_nb_refugees_bygov ///
        (c.$dep_var inter_formal = c.IV_SS_5 inter_formal_IV) ///
        formal ///       
        [pweight = panel_wt_10_16], ///
@@ -367,7 +367,7 @@ estout m_job_stable_3m m_wp_industry_jlmps_3m ///
        m_work_hours_pweek_3m_w m_work_days_pweek_3m ///
       , cells(b(star fmt(%9.2f)) se(par fmt(%9.2f))) ///
   drop(age age2 gender hhsize  _Ieduc1d_2 _Ieduc1d_3 _Ieduc1d_4 _Ieduc1d_5 ///
-        _Ieduc1d_6 _Ieduc1d_7  _Ifteducst_2 ///
+        ln_nb_refugees_bygov _Ieduc1d_6 _Ieduc1d_7  _Ifteducst_2 ///
         _Ifteducst_3 _Ifteducst_4 _Ifteducst_5 _Ifteducst_6 ///
         _Imteducst_2 _Imteducst_3 _Imteducst_4 _Imteducst_5 ///
         _Imteducst_6 _Iftempst_2 _Iftempst_3 _Iftempst_4 _Iftempst_5 ///
@@ -388,7 +388,7 @@ esttab m_job_stable_3m m_wp_industry_jlmps_3m ///
       cells(b(star fmt(%9.3f)) se(par fmt(%9.3f))) ///
 mtitles("Stable" "Industry" "Union" "Skills" "Total W"  "Hourly W" "WH pday" "WD pweek") ///
   drop(age age2 gender hhsize  _Ieduc1d_2 _Ieduc1d_3 _Ieduc1d_4 _Ieduc1d_5 ///
-        _Ieduc1d_6 _Ieduc1d_7  _Ifteducst_2 ///
+        ln_nb_refugees_bygov _Ieduc1d_6 _Ieduc1d_7  _Ifteducst_2 ///
         _Ifteducst_3 _Ifteducst_4 _Ifteducst_5 _Ifteducst_6 ///
         _Imteducst_2 _Imteducst_3 _Imteducst_4 _Imteducst_5 ///
         _Imteducst_6 _Iftempst_2 _Iftempst_3 _Iftempst_4 _Iftempst_5 ///
@@ -423,7 +423,7 @@ lab var inter_private "Agg WP x Private"
   foreach outcome of global outcome_cond {  
     qui xi: ivreg2  `outcome'  ///
        i.year i.district_iid ///
-       $controls i.educ1d i.fteducst i.mteducst i.ftempst  ///
+       $controls i.educ1d i.fteducst i.mteducst i.ftempst ln_nb_refugees_bygov ///
        (c.$dep_var inter_private = c.IV_SS_5 inter_private_IV) ///
        private ///       
        [pweight = panel_wt_10_16], ///
@@ -446,7 +446,7 @@ estout m_job_stable_3m m_formal m_wp_industry_jlmps_3m ///
       , cells(b(star fmt(%9.2f)) se(par fmt(%9.2f))) ///
   drop(age age2 gender hhsize  _Ieduc1d_2 _Ieduc1d_3 _Ieduc1d_4 _Ieduc1d_5 ///
         _Ieduc1d_6 _Ieduc1d_7  _Ifteducst_2 ///
-        _Ifteducst_3 _Ifteducst_4 _Ifteducst_5 _Ifteducst_6 ///
+       ln_nb_refugees_bygov _Ifteducst_3 _Ifteducst_4 _Ifteducst_5 _Ifteducst_6 ///
         _Imteducst_2 _Imteducst_3 _Imteducst_4 _Imteducst_5 ///
         _Imteducst_6 _Iftempst_2 _Iftempst_3 _Iftempst_4 _Iftempst_5 ///
         _Iftempst_6  _Iyear_2016 ///
@@ -466,7 +466,7 @@ esttab m_job_stable_3m m_formal m_wp_industry_jlmps_3m ///
       cells(b(star fmt(%9.3f)) se(par fmt(%9.3f))) ///
 mtitles("Stable" "Formal" "Industry" "Union" "Skills" "Total W"  "Hourly W" "WH pday" "WD pweek") ///
   drop(age age2 gender hhsize  _Ieduc1d_2 _Ieduc1d_3 _Ieduc1d_4 _Ieduc1d_5 ///
-        _Ieduc1d_6 _Ieduc1d_7  _Ifteducst_2 ///
+       ln_nb_refugees_bygov _Ieduc1d_6 _Ieduc1d_7  _Ifteducst_2 ///
         _Ifteducst_3 _Ifteducst_4 _Ifteducst_5 _Ifteducst_6 ///
         _Imteducst_2 _Imteducst_3 _Imteducst_4 _Imteducst_5 ///
         _Imteducst_6 _Iftempst_2 _Iftempst_3 _Iftempst_4 _Iftempst_5 ///

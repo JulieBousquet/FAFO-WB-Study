@@ -1825,6 +1825,7 @@ drop _merge
 
 lab var district_iid "ID District Jordan"
 gen wp_2016_total = 73580
+
 lab var wp_2016_total "WP 2016 in Jordan by industry"
 
 sort district_iid

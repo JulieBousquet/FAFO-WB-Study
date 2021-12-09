@@ -41,7 +41,13 @@ tab hhsize //  Total o. of Individuals in the Household
 **DEFINING THE SAMPLE *************************************************
 ***********************************************************************
 
-
+/*%
+[I suggest we partial out both variables (meaning we store 
+the residuals from specification where we regress both 
+variables on fixed effects and then use scatter plot, 
+fitted line, and eventually a non-parametric line). 
+I can show you a code].
+*/
 
 **************
 * JORDANIANS *
@@ -128,7 +134,7 @@ lab var $dep_var "Work Permits"
 
   foreach outcome of global outcome_cond {
     qui xi: reg `outcome' $dep_var ///
-             $controls i.educ1d i.fteducst i.mteducst i.ftempst  ///
+             $controls i.educ1d i.fteducst i.mteducst i.ftempst ln_nb_refugees_bygov ///
             [pweight = panel_wt_10_16],  ///
             cluster(district_iid) robust 
     codebook `outcome', c
@@ -146,7 +152,7 @@ estout m_job_stable_3m m_formal m_wp_industry_jlmps_3m ///
       m_work_hours_pweek_3m_w m_work_days_pweek_3m /// 
       , cells(b(star fmt(%9.3f)) se(par fmt(%9.3f))) ///
         drop(age age2 gender hhsize _Ieduc1d_2 _Ieduc1d_3 _Ieduc1d_4 _Ieduc1d_5 ///
-        _Ieduc1d_6 _Ieduc1d_7 _Ifteducst_2 ///
+        ln_nb_refugees_bygov _Ieduc1d_6 _Ieduc1d_7 _Ifteducst_2 ///
         _Ifteducst_3 _Ifteducst_4 _Ifteducst_5 _Ifteducst_6 ///
         _Imteducst_2 _Imteducst_3 _Imteducst_4 _Imteducst_5 ///
         _Imteducst_6 _Iftempst_2 _Iftempst_3 _Iftempst_4 _Iftempst_5 ///
@@ -166,7 +172,7 @@ esttab m_job_stable_3m m_formal m_wp_industry_jlmps_3m ///
       cells(b(star fmt(%9.3f)) se(par fmt(%9.3f))) ///
 mtitles("Stable" "Formal" "Industry" "Union" "Skills" "Total W" "Hourly W" "WH pweek" "WD pweek") ///
         drop(age age2 gender hhsize _Ieduc1d_2 _Ieduc1d_3 _Ieduc1d_4 _Ieduc1d_5 ///
-        _Ieduc1d_6 _Ieduc1d_7 _Ifteducst_2 ///
+        ln_nb_refugees_bygov _Ieduc1d_6 _Ieduc1d_7 _Ifteducst_2 ///
         _Ifteducst_3 _Ifteducst_4 _Ifteducst_5 _Ifteducst_6 ///
         _Imteducst_2 _Imteducst_3 _Imteducst_4 _Imteducst_5 ///
         _Imteducst_6 _Iftempst_2 _Iftempst_3 _Iftempst_4 _Iftempst_5 ///
@@ -195,7 +201,7 @@ estimates drop m_job_stable_3m m_formal m_wp_industry_jlmps_3m ///
   foreach outcome of global outcome_cond {
     qui xi: reg `outcome' $dep_var ///
             i.district_iid i.year ///
-             $controls i.educ1d i.fteducst i.mteducst i.ftempst  ///
+             $controls i.educ1d i.fteducst i.mteducst i.ftempst ln_nb_refugees_bygov ///
             [pweight = panel_wt_10_16],  ///
             cluster(district_iid) robust 
     codebook `outcome', c
@@ -213,7 +219,7 @@ estout m_job_stable_3m m_formal m_wp_industry_jlmps_3m ///
        m_work_hours_pweek_3m_w m_work_days_pweek_3m /// 
       , cells(b(star fmt(%9.3f)) se(par fmt(%9.3f))) ///
         drop(age age2 gender hhsize _Ieduc1d_2 _Ieduc1d_3 _Ieduc1d_4 _Ieduc1d_5 ///
-        _Ieduc1d_6 _Ieduc1d_7 _Ifteducst_2 ///
+        ln_nb_refugees_bygov _Ieduc1d_6 _Ieduc1d_7 _Ifteducst_2 ///
         _Ifteducst_3 _Ifteducst_4 _Ifteducst_5 _Ifteducst_6 ///
         _Imteducst_2 _Imteducst_3 _Imteducst_4 _Imteducst_5 ///
         _Imteducst_6 _Iftempst_2 _Iftempst_3 _Iftempst_4 _Iftempst_5 ///
@@ -247,7 +253,7 @@ esttab m_job_stable_3m m_formal m_wp_industry_jlmps_3m ///
       cells(b(star fmt(%9.3f)) se(par fmt(%9.3f))) ///
 mtitles("Stable" "Formal" "Industry" "Union" "Skills" "Total W"  "Hourly W" "WH pday" "WD pweek") ///
         drop(age age2 gender hhsize _Ieduc1d_2 _Ieduc1d_3 _Ieduc1d_4 _Ieduc1d_5 ///
-        _Ieduc1d_6 _Ieduc1d_7 _Ifteducst_2 ///
+        ln_nb_refugees_bygov _Ieduc1d_6 _Ieduc1d_7 _Ifteducst_2 ///
         _Ifteducst_3 _Ifteducst_4 _Ifteducst_5 _Ifteducst_6 ///
         _Imteducst_2 _Imteducst_3 _Imteducst_4 _Imteducst_5 ///
         _Imteducst_6 _Iftempst_2 _Iftempst_3 _Iftempst_4 _Iftempst_5 ///
@@ -291,15 +297,14 @@ ado uninstall ivreg2
 ssc install ivreg2
 */
 
-
 **********
 *REGRESSION*
 ************
 
   foreach outcome of global outcome_cond {
-    xi: ivreg2  `outcome' ///
+    qui xi: ivreg2  `outcome' ///
                 i.district_iid i.year ///
-                $controls i.educ1d i.fteducst i.mteducst i.ftempst  ///
+                $controls i.educ1d i.fteducst i.mteducst i.ftempst ln_nb_refugees_bygov ///
                 ($dep_var = IV_SS_5) ///
                 [pweight = panel_wt_10_16], ///
                 cluster(district_iid) robust ///
@@ -316,7 +321,7 @@ ssc install ivreg2
 
     qui xi: reg $dep_var IV_SS_5 ///
             i.year i.district_iid ///
-             $controls i.educ1d i.fteducst i.mteducst i.ftempst  ///
+             $controls i.educ1d i.fteducst i.mteducst i.ftempst ln_nb_refugees_bygov ///
             if smpl == 1 [pweight = panel_wt_10_16], ///
             cluster(district_iid) robust
     estimates table, k(IV_SS_5) star(.1 .05 .01)    
@@ -335,7 +340,7 @@ estout m_job_stable_3m m_formal m_wp_industry_jlmps_3m ///
       m_work_hours_pweek_3m_w m_work_days_pweek_3m ///
       , cells(b(star fmt(%9.3f)) se(par fmt(%9.3f))) ///
   drop(age age2 gender hhsize _Ieduc1d_2 _Ieduc1d_3 _Ieduc1d_4 _Ieduc1d_5 ///
-        _Ieduc1d_6 _Ieduc1d_7 _Ifteducst_2 ///
+        ln_nb_refugees_bygov _Ieduc1d_6 _Ieduc1d_7 _Ifteducst_2 ///
         _Ifteducst_3 _Ifteducst_4 _Ifteducst_5 _Ifteducst_6 ///
         _Imteducst_2 _Imteducst_3 _Imteducst_4 _Imteducst_5 ///
         _Imteducst_6 _Iftempst_2 _Iftempst_3 _Iftempst_4 _Iftempst_5 ///
@@ -356,7 +361,7 @@ esttab m_job_stable_3m m_formal m_wp_industry_jlmps_3m ///
       cells(b(star fmt(%9.3f)) se(par fmt(%9.3f))) ///
 mtitles("Stable" "Formal" "Industry" "Union" "Skills" "Total W"  "Hourly W" "WH pday" "WD pweek") ///
   drop(age age2 gender hhsize _Ieduc1d_2 _Ieduc1d_3 _Ieduc1d_4 _Ieduc1d_5 ///
-        _Ieduc1d_6 _Ieduc1d_7 _Ifteducst_2 ///
+        ln_nb_refugees_bygov _Ieduc1d_6 _Ieduc1d_7 _Ifteducst_2 ///
         _Ifteducst_3 _Ifteducst_4 _Ifteducst_5 _Ifteducst_6 ///
         _Imteducst_2 _Imteducst_3 _Imteducst_4 _Imteducst_5 ///
         _Imteducst_6 _Iftempst_2 _Iftempst_3 _Iftempst_4 _Iftempst_5 ///
@@ -381,7 +386,7 @@ estout mIV_job_stable_3m mIV_formal mIV_wp_industry_jlmps_3m ///
        mIV_work_hours_pweek_3m_w mIV_work_days_pweek_3m /// 
        , cells(b(star fmt(%9.1f)) se(par fmt(%9.1f))) ///
   drop(age age2 gender hhsize _Ieduc1d_2 _Ieduc1d_3 _Ieduc1d_4 _Ieduc1d_5 ///
-        _Ieduc1d_6 _Ieduc1d_7 _Ifteducst_2 ///
+        ln_nb_refugees_bygov _Ieduc1d_6 _Ieduc1d_7 _Ifteducst_2 ///
         _Ifteducst_3 _Ifteducst_4 _Ifteducst_5 _Ifteducst_6 ///
         _Imteducst_2 _Imteducst_3 _Imteducst_4 _Imteducst_5 ///
         _Imteducst_6 _Iftempst_2 _Iftempst_3 _Iftempst_4 _Iftempst_5 ///
@@ -415,7 +420,7 @@ esttab mIV_job_stable_3m mIV_formal mIV_wp_industry_jlmps_3m ///
       cells(b(star fmt(%9.1f)) se(par fmt(%9.1f))) ///
 mtitles("Stable" "Formal" "Industry" "Union" "Skills" "Total W"  "Hourly W" "WH pday" "WD pweek") ///
   drop(age age2 gender hhsize _Ieduc1d_2 _Ieduc1d_3 _Ieduc1d_4 _Ieduc1d_5 ///
-        _Ieduc1d_6 _Ieduc1d_7 _Ifteducst_2 ///
+        ln_nb_refugees_bygov _Ieduc1d_6 _Ieduc1d_7 _Ifteducst_2 ///
         _Ifteducst_3 _Ifteducst_4 _Ifteducst_5 _Ifteducst_6 ///
         _Imteducst_2 _Imteducst_3 _Imteducst_4 _Imteducst_5 ///
         _Imteducst_6 _Iftempst_2 _Iftempst_3 _Iftempst_4 _Iftempst_5 ///
@@ -470,9 +475,9 @@ foreach globals of global globals_list {
 **********************
 
   foreach outcome of global outcome_cond {
-    xi: ivreg2  `outcome' ///
+    qui xi: ivreg2  `outcome' ///
                 i.year i.district_iid i.private ///
-                $controls i.educ1d i.fteducst i.mteducst i.ftempst  ///
+                $controls i.educ1d i.fteducst i.mteducst i.ftempst ln_nb_refugees_bygov ///
                 ($dep_var = IV_SS_5) ///
                 [pweight = panel_wt_10_16], ///
                 cluster(district_iid) ///
@@ -489,7 +494,7 @@ foreach globals of global globals_list {
 
     qui xi: reg $dep_var IV_SS_5 ///
             i.year i.district_iid i.private ///
-            $controls i.educ1d i.fteducst i.mteducst i.ftempst  ///
+            $controls i.educ1d i.fteducst i.mteducst i.ftempst ln_nb_refugees_bygov ///
             if smpl == 1 [pweight = panel_wt_10_16], ///
             cluster(district_iid) robust
     estimates table,  k(IV_SS_5) star(.1 .05 .01)          
@@ -505,7 +510,7 @@ estout m_job_stable_3m m_formal m_wp_industry_jlmps_3m ///
       m_work_hours_pweek_3m_w m_work_days_pweek_3m ///
       , cells(b(star fmt(%9.3f)) se(par fmt(%9.3f))) ///
   drop(age age2 gender hhsize _Ieduc1d_2 _Ieduc1d_3 _Ieduc1d_4 _Ieduc1d_5 ///
-        _Ieduc1d_6 _Ieduc1d_7 _Ifteducst_2 ///
+        ln_nb_refugees_bygov _Ieduc1d_6 _Ieduc1d_7 _Ifteducst_2 ///
         _Ifteducst_3 _Ifteducst_4 _Ifteducst_5 _Ifteducst_6 ///
         _Imteducst_2 _Imteducst_3 _Imteducst_4 _Imteducst_5 ///
         _Imteducst_6 _Iftempst_2 _Iftempst_3 _Iftempst_4 _Iftempst_5 ///
@@ -526,7 +531,7 @@ esttab m_job_stable_3m m_formal m_wp_industry_jlmps_3m ///
       cells(b(star fmt(%9.3f)) se(par fmt(%9.3f))) ///
 mtitles("Stable" "Formal" "Industry" "Union" "Skills" "Total W"  "Hourly W" "WH pday" "WD pweek") ///
   drop(age age2 gender hhsize _Ieduc1d_2 _Ieduc1d_3 _Ieduc1d_4 _Ieduc1d_5 ///
-        _Ieduc1d_6 _Ieduc1d_7 _Ifteducst_2 ///
+        ln_nb_refugees_bygov _Ieduc1d_6 _Ieduc1d_7 _Ifteducst_2 ///
         _Ifteducst_3 _Ifteducst_4 _Ifteducst_5 _Ifteducst_6 ///
         _Imteducst_2 _Imteducst_3 _Imteducst_4 _Imteducst_5 ///
         _Imteducst_6 _Iftempst_2 _Iftempst_3 _Iftempst_4 _Iftempst_5 ///
@@ -588,9 +593,9 @@ restore
 preserve
   foreach outcome of global outcome_cond {     
       codebook `outcome', c
-       xi: ivreg2 `outcome' ///
+       qui xi: ivreg2 `outcome' ///
                     i.year i.district_iid ///
-                    $controls i.educ1d i.fteducst i.mteducst i.ftempst  ///
+                    $controls i.educ1d i.fteducst i.mteducst i.ftempst ln_nb_refugees_bygov ///
                     ($dep_var = IV_SS_5) ///
                     [pweight = panel_wt_10_16], ///
                     cluster(district_iid) robust ///
@@ -599,13 +604,13 @@ preserve
         qui gen smpl=0
         qui replace smpl=1 if e(sample)==1
         * Then I partial out all variables
-        foreach y in `outcome' $controls $dep_var IV_SS_5 educ1d fteducst mteducst ftempst  {
+        foreach y in `outcome' $controls $dep_var IV_SS_5 educ1d fteducst mteducst ftempst ln_nb_refugees_bygov {
           qui reghdfe `y' [pw=panel_wt_10_16] if smpl==1, absorb(year indid_2010) residuals(`y'_c2wr)
           qui rename `y' o_`y'
           qui rename `y'_c2wr `y'
         }
-         ivreg2 `outcome' ///
-               $controls educ1d fteducst mteducst ftempst  ///
+        qui ivreg2 `outcome' ///
+               $controls educ1d fteducst mteducst ftempst ln_nb_refugees_bygov ///
                ($dep_var = IV_SS_5) ///
                [pweight = panel_wt_10_16], ///
                cluster(district_iid) robust ///
@@ -613,8 +618,8 @@ preserve
       estimates table, k($dep_var) star(.1 .05 .01) b(%7.4f) 
       estimates table, b(%7.4f) se(%7.4f) stats(N r2_a) k($dep_var) 
       estimates store m_`outcome', title(Model `outcome')
-        qui drop `outcome' $dep_var IV_SS_5 $controls educ1d fteducst mteducst ftempst smpl 
-        foreach y in `outcome' $controls  $dep_var IV_SS_5 educ1d fteducst mteducst ftempst   {
+        qui drop `outcome' $dep_var IV_SS_5 $controls educ1d fteducst mteducst ftempst smpl ln_nb_refugees_bygov
+        foreach y in `outcome' $controls  $dep_var IV_SS_5 educ1d fteducst mteducst ftempst ln_nb_refugees_bygov  {
           qui rename o_`y' `y' 
         }
     }
@@ -629,7 +634,7 @@ estout m_job_stable_3m m_formal m_wp_industry_jlmps_3m ///
       m_work_hours_pweek_3m_w m_work_days_pweek_3m  ///
       , cells(b(star fmt(%9.3f)) se(par fmt(%9.3f))) ///
   drop(age age2 gender hhsize educ1d fteducst mteducst ftempst _cons ///
-         $controls)   ///
+       ln_nb_refugees_bygov  $controls)   ///
    legend label varlabels(_cons constant) starlevels(* 0.1 ** 0.05 *** 0.01)           ///
    stats(r2 df_r bic, fmt(3 0 1) label(R-sqr dfres BIC))
 
@@ -645,7 +650,7 @@ esttab m_job_stable_3m m_formal m_wp_industry_jlmps_3m ///
 mtitles("Stable" "Formal" "Industry" "Union" "Skills" "Total W"  "Hourly W" "WH pday" "WD pweek") ///
  drop(age age2 gender hhsize  educ1d fteducst mteducst ftempst ///
      _cons ///
-         $controls) starlevels(* 0.1 ** 0.05 *** 0.01) ///
+       ln_nb_refugees_bygov  $controls) starlevels(* 0.1 ** 0.05 *** 0.01) ///
    title("Results IV Regression with Year and Individual FE"\label{tab1}) nofloat ///
    stats(N r2_a, labels("Obs" "Adj. R-Squared" "Control Mean")) ///
     nonotes ///
@@ -914,7 +919,7 @@ foreach IV of global IVs {
     codebook `IV', c
         xi: ivreg2  ln_t_rwage_unemp ///
                     i.district_iid i.year ///
-                    $controls i.educ1d i.fteducst i.mteducst i.ftempst  ///
+                    $controls i.educ1d i.fteducst i.mteducst i.ftempst ln_nb_refugees_bygov ///
                     ($dep_var = `IV') ///
                     [pweight = panel_wt_10_16], ///
                     cluster(district_iid) robust ///
@@ -933,7 +938,7 @@ foreach IV of global IVs {
       foreach outcome of global iv_check_uncond {
         qui xi: ivreg2  `outcome' ///
                     i.district_iid i.year ///
-                    $controls i.educ1d i.fteducst i.mteducst i.ftempst  ///
+                    $controls i.educ1d i.fteducst i.mteducst i.ftempst ln_nb_refugees_bygov ///
                     ($dep_var = `IV') ///
                     [pweight = panel_wt_10_16], ///
                     cluster(district_iid) robust ///
@@ -974,7 +979,7 @@ foreach IV of global IVs {
       foreach outcome of global iv_check_cond {
         qui xi: ivreg2  `outcome' ///
                     i.district_iid i.year ///
-                    $controls i.educ1d i.fteducst i.mteducst i.ftempst  ///
+                    $controls i.educ1d i.fteducst i.mteducst i.ftempst ln_nb_refugees_bygov ///
                     ($dep_var = `IV') ///
                     [pweight = panel_wt_10_16], ///
                     cluster(district_iid) robust ///
