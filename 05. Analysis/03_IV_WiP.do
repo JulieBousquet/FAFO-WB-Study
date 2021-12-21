@@ -1940,7 +1940,8 @@ lab var wp_2016_total "WP 2016 in Jordan by industry"
 sort district_iid
 
 *WORKING MODELS
-gen IV_SS_5 = (ln_nb_refugees_bygov/distance_dis_gov) * (wp_2016/distance_dis_camp) * wp_2016 * diff_share 
+gen IV_SS_5 = (ln_nb_refugees_bygov/distance_dis_gov) * (wp_2016_total/distance_dis_camp) * wp_2016 * diff_share 
+*gen IV_SS_5 = (ln_nb_refugees_bygov/distance_dis_gov) * wp_2016_total * diff_share 
 
 tab IV_SS_5, m 
 

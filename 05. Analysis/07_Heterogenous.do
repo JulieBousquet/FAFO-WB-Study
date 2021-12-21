@@ -83,6 +83,14 @@ xtset, clear
 xtset indid_2010 year 
 
 
+gen ln_agg_wp_orig = ln(1+agg_wp_orig)
+gen IHS_agg_wp_orig = log(agg_wp_orig + ((agg_wp_orig^2 + 1)^0.5))
+
+gen ln_agg_wp = ln(1+agg_wp)
+gen IHS_agg_wp = log(agg_wp + ((agg_wp^2 + 1)^0.5))
+
+global dep_var agg_wp_orig
+global IV_var  IV_SS_5
 
 
 codebook $dep_var
@@ -108,14 +116,14 @@ lab val wp_industry_jlmps_3m wp_industry_jlmps_3m
 lab var wp_industry_jlmps_3m "Open"
 
 gen inter_open = wp_industry_jlmps_3m*$dep_var 
-gen inter_open_IV = wp_industry_jlmps_3m*IV_SS_5 
+gen inter_open_IV = wp_industry_jlmps_3m*$IV_var 
 lab var inter_open "Agg WP x Open"
 
   foreach outcome of global outcome_cond  {  
      xi: ivreg2  `outcome'  ///
        i.year i.district_iid ///
        $controls i.educ1d i.fteducst i.mteducst i.ftempst ln_nb_refugees_bygov ///
-       (c.$dep_var inter_open = c.IV_SS_5 inter_open_IV) ///
+       (c.$dep_var inter_open = c.$IV_var inter_open_IV) ///
        wp_industry_jlmps_3m ///       
        [pweight = panel_wt_10_16], ///
        cluster(district_iid) robust ///
