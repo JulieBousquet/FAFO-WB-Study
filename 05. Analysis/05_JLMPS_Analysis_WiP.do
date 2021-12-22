@@ -147,7 +147,7 @@ lab var $dep_var "Work Permits"
 
 ereturn list
 mat list e(b)
-estout m_job_stable_3m m_formal m_wp_industry_jlmps_3m ///
+estout m_job_stable_3m m_formal m_private m_wp_industry_jlmps_3m ///
       m_member_union_3m m_skills_required_pjob  ///
       m_ln_total_rwage_3m  m_ln_hourly_rwage ///
       m_work_hours_pweek_3m_w m_work_days_pweek_3m /// 
@@ -165,13 +165,13 @@ estout m_job_stable_3m m_formal m_wp_industry_jlmps_3m ///
 *(95%) [90%] level. Based
 
 *erase "$out/reg_infra_access.tex"
-esttab m_job_stable_3m m_formal m_wp_industry_jlmps_3m ///
+esttab m_job_stable_3m m_formal m_private m_wp_industry_jlmps_3m ///
       m_member_union_3m m_skills_required_pjob  ///
       m_ln_total_rwage_3m  m_ln_hourly_rwage ///
       m_work_hours_pweek_3m_w  m_work_days_pweek_3m /// 
       using "$out_analysis/reg_01_OLS.tex", se label replace booktabs ///
       cells(b(star fmt(%9.3f)) se(par fmt(%9.3f))) ///
-mtitles("Stable" "Formal" "Industry" "Union" "Skills" "Total W" "Hourly W" "WH pweek" "WD pweek") ///
+mtitles("Stable" "Formal" "Private" "Open" "Union" "Skills" "Total W" "Hourly W" "WH pweek" "WD pweek") ///
         drop(age age2 gender hhsize _Ieduc1d_2 _Ieduc1d_3 _Ieduc1d_4 _Ieduc1d_5 ///
         ln_nb_refugees_bygov _Ieduc1d_6 _Ieduc1d_7 _Ifteducst_2 ///
         _Ifteducst_3 _Ifteducst_4 _Ifteducst_5 _Ifteducst_6 ///
@@ -184,7 +184,7 @@ starlevels(* 0.1 ** 0.05 *** 0.01) ///
     nonotes ///
     addnotes("Standard errors clustered at the district level. Significance levels: *p $<$ 0.1, ** p $<$ 0.05, *** p $<$ 0.01") 
 
-estimates drop m_job_stable_3m m_formal m_wp_industry_jlmps_3m ///
+estimates drop m_job_stable_3m m_formal m_private m_wp_industry_jlmps_3m ///
       m_member_union_3m m_skills_required_pjob  ///
       m_ln_total_rwage_3m  m_ln_hourly_rwage ///
        m_work_hours_pweek_3m_w m_work_days_pweek_3m 
@@ -214,7 +214,7 @@ estimates drop m_job_stable_3m m_formal m_wp_industry_jlmps_3m ///
 
 ereturn list
 mat list e(b)
-estout m_job_stable_3m m_formal m_wp_industry_jlmps_3m ///
+estout m_job_stable_3m m_formal m_private m_wp_industry_jlmps_3m ///
       m_member_union_3m m_skills_required_pjob  ///
       m_ln_total_rwage_3m  m_ln_hourly_rwage ///
        m_work_hours_pweek_3m_w m_work_days_pweek_3m /// 
@@ -246,13 +246,13 @@ estout m_job_stable_3m m_formal m_wp_industry_jlmps_3m ///
 *(95%) [90%] level. Based
 
 *erase "$out/reg_infra_access.tex"
-esttab m_job_stable_3m m_formal m_wp_industry_jlmps_3m ///
+esttab m_job_stable_3m m_formal m_private m_wp_industry_jlmps_3m ///
       m_member_union_3m m_skills_required_pjob  ///
       m_ln_total_rwage_3m  m_ln_hourly_rwage ///
       m_work_hours_pweek_3m_w  m_work_days_pweek_3m /// 
       using "$out_analysis/reg_02_OLS_FE_district_year.tex", se label replace booktabs ///
       cells(b(star fmt(%9.3f)) se(par fmt(%9.3f))) ///
-mtitles("Stable" "Formal" "Industry" "Union" "Skills" "Total W"  "Hourly W" "WH pday" "WD pweek") ///
+mtitles("Stable" "Formal" "Private" "Open" "Union" "Skills" "Total W"  "Hourly W" "WH pday" "WD pweek") ///
         drop(age age2 gender hhsize _Ieduc1d_2 _Ieduc1d_3 _Ieduc1d_4 _Ieduc1d_5 ///
         ln_nb_refugees_bygov _Ieduc1d_6 _Ieduc1d_7 _Ifteducst_2 ///
         _Ifteducst_3 _Ifteducst_4 _Ifteducst_5 _Ifteducst_6 ///
@@ -335,7 +335,7 @@ ssc install ivreg2
 
 ereturn list
 mat list e(b)
-estout m_job_stable_3m m_formal m_wp_industry_jlmps_3m ///
+estout m_job_stable_3m m_formal m_private m_wp_industry_jlmps_3m ///
       m_member_union_3m m_skills_required_pjob  ///
       m_ln_total_rwage_3m  m_ln_hourly_rwage ///
       m_work_hours_pweek_3m_w m_work_days_pweek_3m ///
@@ -354,13 +354,13 @@ estout m_job_stable_3m m_formal m_wp_industry_jlmps_3m ///
 *(95%) [90%] level. Based
 
 *erase "$out/reg_infra_access.tex"
-esttab m_job_stable_3m m_formal m_wp_industry_jlmps_3m ///
+esttab m_job_stable_3m m_formal m_private m_wp_industry_jlmps_3m ///
       m_member_union_3m m_skills_required_pjob  ///
       m_ln_total_rwage_3m  m_ln_hourly_rwage ///
       m_work_hours_pweek_3m_w m_work_days_pweek_3m /// 
       using "$out_analysis/reg_03_IV_FE_district_year.tex", se label replace booktabs ///
       cells(b(star fmt(%9.3f)) se(par fmt(%9.3f))) ///
-mtitles("Stable" "Formal" "Industry" "Union" "Skills" "Total W"  "Hourly W" "WH pday" "WD pweek") ///
+mtitles("Stable" "Formal" "Private" "Open" "Union" "Skills" "Total W"  "Hourly W" "WH pday" "WD pweek") ///
   drop(age age2 gender hhsize _Ieduc1d_2 _Ieduc1d_3 _Ieduc1d_4 _Ieduc1d_5 ///
         ln_nb_refugees_bygov _Ieduc1d_6 _Ieduc1d_7 _Ifteducst_2 ///
         _Ifteducst_3 _Ifteducst_4 _Ifteducst_5 _Ifteducst_6 ///
@@ -373,7 +373,7 @@ mtitles("Stable" "Formal" "Industry" "Union" "Skills" "Total W"  "Hourly W" "WH 
     nonotes ///
     addnotes("Standard errors clustered at the district level. Significance levels: *p $<$ 0.1, ** p $<$ 0.05, *** p $<$ 0.01") 
 
-estimates drop m_job_stable_3m m_formal m_wp_industry_jlmps_3m ///
+estimates drop m_job_stable_3m m_formal m_private m_wp_industry_jlmps_3m ///
       m_member_union_3m m_skills_required_pjob  ///
       m_ln_total_rwage_3m  m_ln_hourly_rwage ///
        m_work_hours_pweek_3m_w m_work_days_pweek_3m 
@@ -381,7 +381,7 @@ estimates drop m_job_stable_3m m_formal m_wp_industry_jlmps_3m ///
 
 ereturn list
 mat list e(b)
-estout mIV_job_stable_3m mIV_formal mIV_wp_industry_jlmps_3m ///
+estout mIV_job_stable_3m mIV_formal mIV_private mIV_wp_industry_jlmps_3m ///
       mIV_member_union_3m mIV_skills_required_pjob  ///
       mIV_ln_total_rwage_3m  mIV_ln_hourly_rwage ///
        mIV_work_hours_pweek_3m_w mIV_work_days_pweek_3m /// 
@@ -413,13 +413,13 @@ estout mIV_job_stable_3m mIV_formal mIV_wp_industry_jlmps_3m ///
 *(95%) [90%] level. Based
 
 *erase "$out/reg_infra_access.tex"
-esttab mIV_job_stable_3m mIV_formal mIV_wp_industry_jlmps_3m ///
+esttab mIV_job_stable_3m mIV_formal mIV_private mIV_wp_industry_jlmps_3m ///
       mIV_member_union_3m mIV_skills_required_pjob  ///
       mIV_ln_total_rwage_3m  mIV_ln_hourly_rwage ///
       mIV_work_hours_pweek_3m_w mIV_work_days_pweek_3m /// 
       using "$out_analysis/reg_03_IV_FE_district_year_stage1.tex", se label replace booktabs ///
       cells(b(star fmt(%9.3f)) se(par fmt(%9.3f))) ///
-mtitles("Stable" "Formal" "Industry" "Union" "Skills" "Total W"  "Hourly W" "WH pday" "WD pweek") ///
+mtitles("Stable" "Formal" "Private" "Open" "Union" "Skills" "Total W"  "Hourly W" "WH pday" "WD pweek") ///
   drop(age age2 gender hhsize _Ieduc1d_2 _Ieduc1d_3 _Ieduc1d_4 _Ieduc1d_5 ///
         ln_nb_refugees_bygov _Ieduc1d_6 _Ieduc1d_7 _Ifteducst_2 ///
         _Ifteducst_3 _Ifteducst_4 _Ifteducst_5 _Ifteducst_6 ///
@@ -445,7 +445,7 @@ mtitles("Stable" "Formal" "Industry" "Union" "Skills" "Total W"  "Hourly W" "WH 
     nonotes ///
     addnotes("Standard errors clustered at the district level. Significance levels: *p $<$ 0.1, ** p $<$ 0.05, *** p $<$ 0.01") 
 
-estimates drop mIV_job_stable_3m mIV_formal mIV_wp_industry_jlmps_3m ///
+estimates drop mIV_job_stable_3m mIV_formal mIV_private mIV_wp_industry_jlmps_3m ///
       mIV_member_union_3m mIV_skills_required_pjob  ///
       mIV_ln_total_rwage_3m  mIV_ln_hourly_rwage ///
        mIV_work_hours_pweek_3m_w mIV_work_days_pweek_3m 
@@ -505,7 +505,7 @@ foreach globals of global globals_list {
 
 ereturn list
 mat list e(b)
-estout m_job_stable_3m m_formal m_wp_industry_jlmps_3m ///
+estout m_job_stable_3m m_formal m_private m_wp_industry_jlmps_3m ///
       m_member_union_3m m_skills_required_pjob  ///
       m_ln_total_rwage_3m  m_ln_hourly_rwage ///
       m_work_hours_pweek_3m_w m_work_days_pweek_3m ///
@@ -524,13 +524,13 @@ estout m_job_stable_3m m_formal m_wp_industry_jlmps_3m ///
 *(95%) [90%] level. Based
 
 *erase "$out/reg_infra_access.tex"
-esttab m_job_stable_3m m_formal m_wp_industry_jlmps_3m ///
+esttab m_job_stable_3m m_formal m_private m_wp_industry_jlmps_3m ///
       m_member_union_3m m_skills_required_pjob  ///
       m_ln_total_rwage_3m  m_ln_hourly_rwage ///
       m_work_hours_pweek_3m_w m_work_days_pweek_3m /// 
       using "$out_analysis/reg_04_IV_FE_district_year_sector.tex", se label replace booktabs ///
       cells(b(star fmt(%9.3f)) se(par fmt(%9.3f))) ///
-mtitles("Stable" "Formal" "Industry" "Union" "Skills" "Total W"  "Hourly W" "WH pday" "WD pweek") ///
+mtitles("Stable" "Formal" "Private" "Open" "Union" "Skills" "Total W"  "Hourly W" "WH pday" "WD pweek") ///
   drop(age age2 gender hhsize _Ieduc1d_2 _Ieduc1d_3 _Ieduc1d_4 _Ieduc1d_5 ///
         ln_nb_refugees_bygov _Ieduc1d_6 _Ieduc1d_7 _Ifteducst_2 ///
         _Ifteducst_3 _Ifteducst_4 _Ifteducst_5 _Ifteducst_6 ///
@@ -543,7 +543,7 @@ mtitles("Stable" "Formal" "Industry" "Union" "Skills" "Total W"  "Hourly W" "WH 
     nonotes ///
     addnotes("Standard errors clustered at the district level. Significance levels: *p $<$ 0.1, ** p $<$ 0.05, *** p $<$ 0.01") 
 
-estimates drop m_job_stable_3m m_formal m_wp_industry_jlmps_3m ///
+estimates drop m_job_stable_3m m_formal m_private m_wp_industry_jlmps_3m ///
       m_member_union_3m m_skills_required_pjob  ///
       m_ln_total_rwage_3m  m_ln_hourly_rwage ///
        m_work_hours_pweek_3m_w m_work_days_pweek_3m 
@@ -629,7 +629,7 @@ restore
 
 ereturn list
 mat list e(b)
-estout m_job_stable_3m m_formal m_wp_industry_jlmps_3m ///
+estout m_job_stable_3m m_formal m_private m_wp_industry_jlmps_3m ///
       m_member_union_3m m_skills_required_pjob  ///
       m_ln_total_rwage_3m  m_ln_hourly_rwage ///
       m_work_hours_pweek_3m_w m_work_days_pweek_3m  ///
@@ -642,13 +642,13 @@ estout m_job_stable_3m m_formal m_wp_industry_jlmps_3m ///
 *** (**) [*] indicates significance at the 99%
 *(95%) [90%] level. Based
 
-esttab m_job_stable_3m m_formal m_wp_industry_jlmps_3m ///
+esttab m_job_stable_3m m_formal m_private m_wp_industry_jlmps_3m ///
       m_member_union_3m m_skills_required_pjob  ///
       m_ln_total_rwage_3m  m_ln_hourly_rwage ///
       m_work_hours_pweek_3m_w m_work_days_pweek_3m  ///
       using "$out_analysis/reg_05_IV_FE_year_indiv.tex", se label replace booktabs ///
       cells(b(star fmt(%9.3f)) se(par fmt(%9.3f))) ///
-mtitles("Stable" "Formal" "Industry" "Union" "Skills" "Total W"  "Hourly W" "WH pday" "WD pweek") ///
+mtitles("Stable" "Formal" "Private" "Open" "Union" "Skills" "Total W"  "Hourly W" "WH pday" "WD pweek") ///
  drop(age age2 gender hhsize  educ1d fteducst mteducst ftempst ///
      _cons ///
        ln_nb_refugees_bygov  $controls) starlevels(* 0.1 ** 0.05 *** 0.01) ///
@@ -657,7 +657,7 @@ mtitles("Stable" "Formal" "Industry" "Union" "Skills" "Total W"  "Hourly W" "WH 
     nonotes ///
     addnotes("Standard errors clustered at the district level. Significance levels: *p $<$ 0.1, ** p $<$ 0.05, *** p $<$ 0.01") 
 
-estimates drop m_job_stable_3m m_formal m_wp_industry_jlmps_3m ///
+estimates drop m_job_stable_3m m_formal m_private m_wp_industry_jlmps_3m ///
       m_member_union_3m m_skills_required_pjob  ///
       m_ln_total_rwage_3m  m_ln_hourly_rwage ///
        m_work_hours_pweek_3m_w m_work_days_pweek_3m 

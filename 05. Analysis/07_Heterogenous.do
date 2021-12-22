@@ -151,7 +151,7 @@ esttab m_job_stable_3m m_formal ///
       m_work_hours_pweek_3m_w m_work_days_pweek_3m /// 
       using "$out_analysis/reg_hetero_open_close.tex", se label replace booktabs ///
       cells(b(star fmt(%9.3f)) se(par fmt(%9.3f))) ///
-mtitles("Stable" "formal" "Union" "Skills" "Total W"  "Hourly W" "WH pday" "WD pweek") ///
+mtitles("Stable" "Formal" "Union" "Skills" "Total W"  "Hourly W" "WH pday" "WD pweek") ///
   drop(age age2 gender hhsize _Ieduc1d_2 _Ieduc1d_3 _Ieduc1d_4 _Ieduc1d_5 ///
         ln_nb_refugees_bygov _Ieduc1d_6 _Ieduc1d_7 _Ifteducst_2 ///
         _Ifteducst_3 _Ifteducst_4 _Ifteducst_5 _Ifteducst_6 ///
@@ -229,7 +229,7 @@ esttab m_job_stable_3m m_formal m_wp_industry_jlmps_3m ///
       m_work_hours_pweek_3m_w m_work_days_pweek_3m /// 
       using "$out_analysis/reg_hetero_gender.tex", se label replace booktabs ///
       cells(b(star fmt(%9.3f)) se(par fmt(%9.3f))) ///
-mtitles("Stable" "Formal" "Industry" "Union" "Skills" "Total W"  "Hourly W" "WH pday" "WD pweek") ///
+mtitles("Stable" "Formal" "Open" "Union" "Skills" "Total W"  "Hourly W" "WH pday" "WD pweek") ///
   drop(age age2 hhsize _Ieduc1d_2 _Ieduc1d_3 _Ieduc1d_4 _Ieduc1d_5 ///
        ln_nb_refugees_bygov _Ieduc1d_6 _Ieduc1d_7 _Ifteducst_2 ///
         _Ifteducst_3 _Ifteducst_4 _Ifteducst_5 _Ifteducst_6 ///
@@ -307,7 +307,7 @@ esttab m_job_stable_3m m_formal m_wp_industry_jlmps_3m ///
       m_work_hours_pweek_3m_w m_work_days_pweek_3m /// 
       using "$out_analysis/reg_hetero_educ.tex", se label replace booktabs ///
       cells(b(star fmt(%9.3f)) se(par fmt(%9.3f))) ///
-mtitles("Stable" "Formal" "Industry" "Union" "Skills" "Total W"  "Hourly W" "WH pday" "WD pweek") ///
+mtitles("Stable" "Formal" "Open" "Union" "Skills" "Total W"  "Hourly W" "WH pday" "WD pweek") ///
   drop(age age2 gender hhsize _Ifteducst_2 ///
       ln_nb_refugees_bygov  _Ifteducst_3 _Ifteducst_4 _Ifteducst_5 _Ifteducst_6 ///
         _Imteducst_2 _Imteducst_3 _Imteducst_4 _Imteducst_5 ///
@@ -383,7 +383,7 @@ esttab m_job_stable_3m m_wp_industry_jlmps_3m ///
       m_work_hours_pweek_3m_w m_work_days_pweek_3m /// 
       using "$out_analysis/reg_hetero_formal.tex", se label replace booktabs ///
       cells(b(star fmt(%9.3f)) se(par fmt(%9.3f))) ///
-mtitles("Stable" "Industry" "Union" "Skills" "Total W"  "Hourly W" "WH pday" "WD pweek") ///
+mtitles("Stable" "Open" "Union" "Skills" "Total W"  "Hourly W" "WH pday" "WD pweek") ///
   drop(age age2 gender hhsize  _Ieduc1d_2 _Ieduc1d_3 _Ieduc1d_4 _Ieduc1d_5 ///
         ln_nb_refugees_bygov _Ieduc1d_6 _Ieduc1d_7  _Ifteducst_2 ///
         _Ifteducst_3 _Ifteducst_4 _Ifteducst_5 _Ifteducst_6 ///
@@ -461,7 +461,7 @@ esttab m_job_stable_3m m_formal m_wp_industry_jlmps_3m ///
       m_work_hours_pweek_3m_w m_work_days_pweek_3m /// 
       using "$out_analysis/reg_hetero_private.tex", se label replace booktabs ///
       cells(b(star fmt(%9.3f)) se(par fmt(%9.3f))) ///
-mtitles("Stable" "Formal" "Industry" "Union" "Skills" "Total W"  "Hourly W" "WH pday" "WD pweek") ///
+mtitles("Stable" "Formal" "Open" "Union" "Skills" "Total W"  "Hourly W" "WH pday" "WD pweek") ///
   drop(age age2 gender hhsize  _Ieduc1d_2 _Ieduc1d_3 _Ieduc1d_4 _Ieduc1d_5 ///
        ln_nb_refugees_bygov _Ieduc1d_6 _Ieduc1d_7  _Ifteducst_2 ///
         _Ifteducst_3 _Ifteducst_4 _Ifteducst_5 _Ifteducst_6 ///
