@@ -225,6 +225,15 @@ tab agg_wp_orig year, m
 *br agg_wp year IV_SS 
 *sort year 
 
+
+*LOG AND IHS TRANSOFRMATION
+gen ln_agg_wp_orig = ln(1+agg_wp_orig)
+gen IHS_agg_wp_orig = log(agg_wp_orig + ((agg_wp_orig^2 + 1)^0.5))
+
+gen ln_agg_wp = ln(1+agg_wp)
+gen IHS_agg_wp = log(agg_wp + ((agg_wp^2 + 1)^0.5))
+
+
 bys year: distinct district_iid
 bys year: tab district_iid
 bys year: tab district_en
@@ -1864,6 +1873,12 @@ tab IV_SS_1 , m
 gen ln_IV_SS_1 = log(1 + IV_SS_1)
 gen IHS_IV_SS_1 = log(IV_SS_1 + ((IV_SS_1^2 + 1)^0.5))
 
+su IV_SS_1
+gen resc_IV_SS_1 = IV_SS_1/100
+su resc_IV_SS_1
+lab var resc_IV_SS_1 "IV1"
+
+
 *THE ASKED QUESTION IN QUEST (binary)
 tab work_permit, m
 *AGGREGATED MEASURE OF WP BASED ON work_permit
@@ -1903,6 +1918,12 @@ tab IV_SS_2 , m
 *THE INSTRUMENT + TRANSFORMATION
 gen ln_IV_SS_2 = log(1 + IV_SS_2)
 gen IHS_IV_SS_2 = log(IV_SS_2 + ((IV_SS_2^2 + 1)^0.5))
+
+su IV_SS_2
+gen resc_IV_SS_2 = IV_SS_2/10000
+su resc_IV_SS_2
+lab var resc_IV_SS_2 "IV2"
+
 
 *THE ASKED QUESTION IN QUEST (binary)
 tab work_permit, m
@@ -1944,6 +1965,11 @@ tab IV_SS_3 , m
 *THE INSTRUMENT + TRANSFORMATION
 gen ln_IV_SS_3 = log(1 + IV_SS_3)
 gen IHS_IV_SS_3 = log(IV_SS_3 + ((IV_SS_3^2 + 1)^0.5))
+
+su IV_SS_3
+gen resc_IV_SS_3 = IV_SS_3/1000
+su resc_IV_SS_3
+lab var resc_IV_SS_3 "IV3"
 
 *THE ASKED QUESTION IN QUEST (binary)
 tab work_permit, m
@@ -1987,6 +2013,12 @@ tab IV_SS_4 , m
 *THE INSTRUMENT + TRANSFORMATION
 gen ln_IV_SS_4 = log(1 + IV_SS_4)
 gen IHS_IV_SS_4 = log(IV_SS_4 + ((IV_SS_4^2 + 1)^0.5))
+
+su IV_SS_4
+gen resc_IV_SS_4 = IV_SS_4/1000000
+su resc_IV_SS_4
+lab var resc_IV_SS_4 "IV4"
+
 
 *THE ASKED QUESTION IN QUEST (binary)
 tab work_permit, m
@@ -2034,6 +2066,10 @@ tab IV_SS_5 , m
 *THE INSTRUMENT + TRANSFORMATION
 gen ln_IV_SS_5 = log(1 + IV_SS_5)
 gen IHS_IV_SS_5 = log(IV_SS_5 + ((IV_SS_5^2 + 1)^0.5))
+su IV_SS_5
+gen resc_IV_SS_5 = IV_SS_5/1000000
+su resc_IV_SS_5 
+lab var resc_IV_SS_5 "IV5"
 
 *THE ASKED QUESTION IN QUEST (binary)
 tab work_permit, m

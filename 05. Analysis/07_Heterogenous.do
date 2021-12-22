@@ -82,17 +82,6 @@ xtset, clear
 *xtset year
 xtset indid_2010 year 
 
-
-gen ln_agg_wp_orig = ln(1+agg_wp_orig)
-gen IHS_agg_wp_orig = log(agg_wp_orig + ((agg_wp_orig^2 + 1)^0.5))
-
-gen ln_agg_wp = ln(1+agg_wp)
-gen IHS_agg_wp = log(agg_wp + ((agg_wp^2 + 1)^0.5))
-
-global dep_var agg_wp_orig
-global IV_var  IV_SS_5
-
-
 codebook $dep_var
 lab var $dep_var "Agg WP"
 
@@ -192,7 +181,7 @@ codebook gender
 lab var gender "Male"
 
 gen inter_gender = gender*$dep_var 
-gen inter_gender_IV = gender*IV_SS_5 
+gen inter_gender_IV = gender*$IV_var  
 lab var inter_gender "Agg WP x Male"
 
 
@@ -200,7 +189,7 @@ lab var inter_gender "Agg WP x Male"
     qui xi: ivreg2  `outcome'  ///
        i.year i.district_iid ///
        age age2 hhsize i.educ1d i.fteducst i.mteducst i.ftempst ln_nb_refugees_bygov ///
-       (c.$dep_var inter_gender = c.IV_SS_5 inter_gender_IV) ///
+       (c.$dep_var inter_gender = c.$IV_var inter_gender_IV) ///
        gender ///       
        [pweight = panel_wt_10_16], ///
        cluster(district_iid) robust ///
@@ -272,7 +261,7 @@ lab var bi_education "High Education"
 
 
 gen inter_bi_education = bi_education*$dep_var 
-gen inter_bi_education_IV = bi_education*IV_SS_5 
+gen inter_bi_education_IV = bi_education*$IV_var 
 lab var inter_bi_education "Agg WP x High Education"
 
 
@@ -280,7 +269,7 @@ lab var inter_bi_education "Agg WP x High Education"
     qui xi: ivreg2  `outcome'  ///
        i.year i.district_iid ///
        $controls i.fteducst i.mteducst i.ftempst ln_nb_refugees_bygov  ///
-       (c.$dep_var inter_bi_education = c.IV_SS_5 inter_bi_education_IV) ///
+       (c.$dep_var inter_bi_education = c.$IV_var inter_bi_education_IV) ///
        bi_education ///       
        [pweight = panel_wt_10_16], ///
        cluster(district_iid) robust ///
@@ -347,14 +336,14 @@ tab formal
 lab var formal "Formal"
 
 gen inter_formal = formal*$dep_var 
-gen inter_formal_IV = formal*IV_SS_5 
+gen inter_formal_IV = formal*$IV_var 
 lab var inter_formal "Agg WP x Formal"
 
   foreach outcome of global outcome_cond  {  
     qui xi: ivreg2  `outcome'  ///
        i.year i.district_iid ///
        $controls i.educ1d i.fteducst i.mteducst i.ftempst ln_nb_refugees_bygov ///
-       (c.$dep_var inter_formal = c.IV_SS_5 inter_formal_IV) ///
+       (c.$dep_var inter_formal = c.$IV_var inter_formal_IV) ///
        formal ///       
        [pweight = panel_wt_10_16], ///
        cluster(district_iid) robust ///
@@ -425,14 +414,14 @@ tab private
 lab var private "Private"
 
 gen inter_private = private*$dep_var 
-gen inter_private_IV = private*IV_SS_5 
+gen inter_private_IV = private*$IV_var 
 lab var inter_private "Agg WP x Private"
 
   foreach outcome of global outcome_cond {  
     qui xi: ivreg2  `outcome'  ///
        i.year i.district_iid ///
        $controls i.educ1d i.fteducst i.mteducst i.ftempst ln_nb_refugees_bygov ///
-       (c.$dep_var inter_private = c.IV_SS_5 inter_private_IV) ///
+       (c.$dep_var inter_private = c.$IV_var inter_private_IV) ///
        private ///       
        [pweight = panel_wt_10_16], ///
        cluster(district_iid) robust ///

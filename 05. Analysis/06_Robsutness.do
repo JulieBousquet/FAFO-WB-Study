@@ -368,7 +368,7 @@ tab ln_IV_SS_ref_inflow
     xi: ivreg2  `outcome' ///
                 i.district_iid i.year ///
                 $controls i.educ1d i.fteducst i.mteducst i.ftempst  ///
-                ($dep_var = IV_SS_5) ///
+                ($dep_var = $IV_var) ///
                 [pweight = panel_wt_10_16], ///
                 cluster(district_iid) robust ///
                 partial(i.district_iid) ///
@@ -382,12 +382,12 @@ tab ln_IV_SS_ref_inflow
     gen smpl=0
     replace smpl=1 if e(sample)==1
 
-    qui xi: reg $dep_var IV_SS_5 ///
+    qui xi: reg $dep_var $IV_var ///
             i.year i.district_iid ///
              $controls i.educ1d i.fteducst i.mteducst i.ftempst  ///
             if smpl == 1 [pweight = panel_wt_10_16], ///
             cluster(district_iid) robust
-    estimates table, k(IV_SS_5) star(.1 .05 .01)    
+    estimates table, k($IV_var) star(.1 .05 .01)    
     estimates store mIV_`outcome', title(Model `outcome')
 
     drop smpl 
@@ -451,7 +451,7 @@ estimates drop m_job_stable_3m m_formal m_wp_industry_jlmps_3m ///
     xi: ivreg2  `outcome' ///
                 i.district_iid i.year ///
                 $controls i.educ1d i.fteducst i.mteducst i.ftempst ln_nb_refugees_bygov ///
-                ($dep_var = IV_SS_5) ///
+                ($dep_var = $IV_var) ///
                 [pweight = panel_wt_10_16], ///
                 cluster(district_iid) robust ///
                 partial(i.district_iid) ///
@@ -465,12 +465,12 @@ estimates drop m_job_stable_3m m_formal m_wp_industry_jlmps_3m ///
     gen smpl=0
     replace smpl=1 if e(sample)==1
 
-    qui xi: reg $dep_var IV_SS_5 ///
+    qui xi: reg $dep_var $IV_var ///
             i.year i.district_iid ///
              $controls i.educ1d i.fteducst i.mteducst i.ftempst ln_nb_refugees_bygov ///
             if smpl == 1 [pweight = panel_wt_10_16], ///
             cluster(district_iid) robust
-    estimates table, k(IV_SS_5) star(.1 .05 .01)    
+    estimates table, k($IV_var) star(.1 .05 .01)    
     estimates store mIV_`outcome', title(Model `outcome')
 
     drop smpl 

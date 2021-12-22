@@ -1667,6 +1667,7 @@ egen district_iid = group(district_en)
 
 drop if district_en == "Husseiniyyeh District"
 distinct district_iid
+
 save "$data_final/03_ShiftShare_IV_1", replace 
 
 
@@ -1703,6 +1704,7 @@ egen district_iid = group(district_en)
 
 drop if district_en == "Husseiniyyeh District"
 distinct district_iid
+
 
 save "$data_final/03_ShiftShare_IV_2", replace 
 
@@ -1765,6 +1767,8 @@ egen district_iid = group(district_en)
 
 drop if district_en == "Husseiniyyeh District"
 distinct district_iid
+
+
 
 save "$data_final/03_ShiftShare_IV_3", replace 
 
@@ -1844,6 +1848,8 @@ egen district_iid = group(district_en)
 
 drop if district_en == "Husseiniyyeh District"
 distinct district_iid
+
+
 
 save "$data_final/03_ShiftShare_IV_4", replace 
 

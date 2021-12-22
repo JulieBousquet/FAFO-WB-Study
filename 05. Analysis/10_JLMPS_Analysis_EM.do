@@ -109,7 +109,7 @@ margins, dydx($dep_var)
 *LPM predicted probabilities are NOT restricted to lie between zero and one
 xi: ivregress 2sls bi_employed_olf_3m  ///
          $controls i.educ1d i.fteducst i.mteducst i.ftempst ln_nb_refugees_bygov ///
-          ($dep_var = IV_SS_5) ///
+          ($dep_var = $IV_var) ///
           [pweight = panel_wt_10_16], ///
          vce(cl district_iid)
 estimates table, k($dep_var) star(.1 .05 .01) b(%7.4f) 
@@ -155,7 +155,7 @@ drop if year == 2010
 *LPM predicted probabilities are NOT restricted to lie between zero and one
 xi: ivregress 2sls bi_employed_olf_3m  ///
          $controls i.educ1d i.fteducst i.mteducst i.ftempst ln_nb_refugees_bygov ///
-          ($dep_var = IV_SS_5) ///
+          ($dep_var = $IV_var) ///
           [pweight = panel_wt_10_16], ///
          vce(cl district_iid)
 estimates table, k($dep_var) star(.1 .05 .01) b(%7.4f) 
@@ -249,7 +249,7 @@ drop if year == 2010
 *LPM predicted probabilities are NOT restricted to lie between zero and one
 xi: ivregress 2sls formal  ///
          $controls i.educ1d i.fteducst i.mteducst i.ftempst ln_nb_refugees_bygov ///
-          ($dep_var = IV_SS_5) ///
+          ($dep_var = $IV_var) ///
           [pweight = panel_wt_10_16], ///
          vce(cl district_iid)
 estimates table, k($dep_var) star(.1 .05 .01) b(%7.4f) 
@@ -296,7 +296,7 @@ drop if year == 2010
 *LPM predicted probabilities are NOT restricted to lie between zero and one
 xi: ivregress 2sls formal  ///
          $controls i.educ1d i.fteducst i.mteducst i.ftempst ln_nb_refugees_bygov ///
-          ($dep_var = IV_SS_5) ///
+          ($dep_var = $IV_var) ///
           [pweight = panel_wt_10_16], ///
          vce(cl district_iid)
 estimates table, k($dep_var) star(.1 .05 .01) b(%7.4f) 
@@ -344,7 +344,7 @@ drop if year == 2010
 *LPM predicted probabilities are NOT restricted to lie between zero and one
 xi: ivregress 2sls formal  ///
          $controls i.educ1d i.fteducst i.mteducst i.ftempst ln_nb_refugees_bygov ///
-          ($dep_var = IV_SS_5) ///
+          ($dep_var = $IV_var) ///
           [pweight = panel_wt_10_16], ///
          vce(cl district_iid)
 estimates table, k($dep_var) star(.1 .05 .01) b(%7.4f) 
@@ -390,7 +390,7 @@ drop if year == 2010
 *LPM predicted probabilities are NOT restricted to lie between zero and one
 xi: ivregress 2sls formal  ///
          $controls i.educ1d i.fteducst i.mteducst i.ftempst ln_nb_refugees_bygov ///
-          ($dep_var = IV_SS_5) ///
+          ($dep_var = $IV_var) ///
           [pweight = panel_wt_10_16], ///
          vce(cl district_iid)
 estimates table, k($dep_var) star(.1 .05 .01) b(%7.4f) 
@@ -438,7 +438,7 @@ drop if year == 2010
 *LPM predicted probabilities are NOT restricted to lie between zero and one
 xi: ivregress 2sls wp_industry_jlmps_3m  ///
          $controls i.educ1d i.fteducst i.mteducst i.ftempst ln_nb_refugees_bygov ///
-          ($dep_var = IV_SS_5) ///
+          ($dep_var = $IV_var) ///
           [pweight = panel_wt_10_16], ///
          vce(cl district_iid)
 estimates table, k($dep_var) star(.1 .05 .01) b(%7.4f) 
@@ -485,7 +485,7 @@ drop if year == 2010
 *LPM predicted probabilities are NOT restricted to lie between zero and one
 xi: ivregress 2sls wp_industry_jlmps_3m  ///
          $controls i.educ1d i.fteducst i.mteducst i.ftempst ln_nb_refugees_bygov ///
-          ($dep_var = IV_SS_5) ///
+          ($dep_var = $IV_var) ///
           [pweight = panel_wt_10_16], ///
          vce(cl district_iid)
 estimates table, k($dep_var) star(.1 .05 .01) b(%7.4f) 

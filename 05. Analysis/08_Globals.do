@@ -23,10 +23,16 @@ set mem 100m
                               *  GLOBALS *
                               ************
 
+*DEPENDENT VARIABLE
+global    dep_var   ln_agg_wp_orig
 *global    dep_var   agg_wp 
 *global    dep_var   share_wp_100
-global    dep_var   agg_wp_orig
 
+*IV VARIABLE
+global    IV_var    resc_IV_SS_5
+
+
+*OUTCOME CONDITIONAL ON EMPLOYEMENT
 global    outcome_cond ///
               job_stable_3m ///  From usstablp - Stability of employement (3m) - 1 permanent - 0 temp, seas, cas
               formal  /// 0 Informal - 1 Formal - Informal if no contract (uscontrp=0) OR no insurance (ussocinsp=0)
@@ -49,6 +55,7 @@ global    outcome_cond ///
               work_days_pweek_3m  // Avg. num. of wrk. days per week during 3 mnth.
 */
 
+*OUTCONES UNCONDITIONAL
 global    outcome_uncond ///
               ln_b_rwage_unolf ///UNCONDITIONAL - UNEMPLOYED & OLF: WAGE 0 - LOG - Basic Wage (3-month)
               ln_b_rwage_unemp ///UNCONDITIONAL - UNEMPLOYED WAGE 0 / OLF WAGE MISSING - LOG Basic (3m)
@@ -116,6 +123,7 @@ global    globals_list ///
 
 */
 
+*CONTROL VARIABLES
 global controls ///
           age  /// Age
           age2 /// Age square
