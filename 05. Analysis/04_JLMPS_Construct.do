@@ -256,6 +256,7 @@ keep if surveyed_2_rounds == 1
 
 distinct indid_2010 
 duplicates tag indid_2010, gen(dup)
+drop if dup == 0
 bys year: tab dup
 drop surveyed_2_rounds dup
 

@@ -20,9 +20,8 @@ keep if surveyed_2_rounds == 1
 gen surveyed_2_rounds = 1 if !mi(indid_2010) & !mi(indid_2016)
 *Keep only the surveyed in both round
 keep if surveyed_2_rounds == 1 
-*/
 
-preserv
+
 *Common identifier
 sort indid_2010
 
