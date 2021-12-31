@@ -110,6 +110,7 @@ drop if nationality_cl != 2
 distinct district_iid
 tab work_permit, m
 collapse (sum) work_permit if year == 2016, by(district_iid)
+distinct district_iid //only 26 districts have WP
 ren work_permit agg_wp_2016
 gen year = 2016
 tempfile wp2016
@@ -123,6 +124,12 @@ gen agg_wp = agg_wp_2016
 replace agg_wp = 0 if year == 2010 //No WP in 2010
 replace agg_wp = 0 if mi(agg_wp) //No WP in District
 tab district_iid 
+
+
+gen agg_wp_bi = 1 if agg_wp != 0
+replace agg_wp_bi = 0 if agg_wp == 0
+bys year: tab district_iid agg_wp_bi 
+drop agg_wp_bi
 
 *tab district_iid if nationality_cl == 2 
 *gen migr_in_district = 0 if mi(nationality_cl == 2) 

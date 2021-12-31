@@ -72,7 +72,12 @@ drop if olf_10_unemp_16 == 1
 drop if olf_16_unemp_10  == 1 
 
 *keep if emp_16_10 == 1 
-
+distinct indid_2010 
+duplicates tag indid_2010, gen(dup)
+bys year: tab dup
+drop if dup == 0
+drop dup
+tab year
                                   ************
                                   *   PANEL  *
                                   ************
