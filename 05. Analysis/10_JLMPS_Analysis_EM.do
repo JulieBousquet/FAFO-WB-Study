@@ -22,31 +22,6 @@ log using "$out_analysis/10_JLMPS_Analysis_EM.log", replace
 *adoupdate, update **
 *ssc inst ivreg2, replace
 
-
-/* ALL THE EMPLOYMENT STATUSES
-tab miss_16_10, m  
-tab unemp_16_10, m  
-tab olf_16_10, m  
-tab emp_16_miss_10, m  
-tab emp_10_miss_16, m  
-tab unemp_16_miss_10, m  
-tab unemp_10_miss_16, m  
-tab olf_16_miss_10, m  
-tab olf_10_miss_16, m
-tab emp_10_olf_16, m 
-tab emp_16_olf_10, m 
-tab unemp_10_emp_16, m 
-tab unemp_16_emp_10, m 
-tab olf_10_unemp_16, m 
-tab olf_16_unemp_10, m 
-tab empl_form_10_info_16, m
-tab empl_form_16_info_10, m
-tab empl_form_10_16, m
-tab empl_info_10_16, m
-tab empl_form_10_unemp_16, m
-tab empl_info_10_unemp_16, m
-*/
-
                 *************************************
                 * PROBABILITY OF REMAINING EMPLOYED *
                 *************************************
@@ -84,7 +59,7 @@ keep if emp_10_olf_16  == 1 | unemp_16_emp_10 == 1 | emp_16_10 == 1
 ***************
 bys year: tab employed_3cat_3m 
 recode employed_olf_3m (2=1) (1=0), gen(bi_employed_olf_3m)
-lab var bi_employed_olf_3m "BINARY: 1 empl - 0 unemp&OL - From uswrkstsr1 - mkt def, search req; 3m"
+lab var bi_employed_olf_3m "BINARY: 1 empl - 0 unemp&OLF - From uswrkstsr1 - mkt def, search req; 3m"
 lab def bi_employed_olf_3m 0 "Unemp-OLF" 1 "Empl", modify
 lab val bi_employed_olf_3m bi_employed_olf_3m
 
@@ -142,7 +117,7 @@ keep if unemp_10_emp_16 == 1 | unemp_16_10 == 1
 ***************
 bys year: tab employed_3cat_3m 
 recode employed_olf_3m (2=1) (1=0), gen(bi_employed_olf_3m)
-lab var bi_employed_olf_3m "BINARY: 1 empl - 0 unemp&OL - From uswrkstsr1 - mkt def, search req; 3m"
+lab var bi_employed_olf_3m "BINARY: 1 empl - 0 unemp&OLF - From uswrkstsr1 - mkt def, search req; 3m"
 lab def bi_employed_olf_3m 0 "Unemp-OLF" 1 "Empl", modify
 lab val bi_employed_olf_3m bi_employed_olf_3m
 
@@ -161,56 +136,6 @@ xi: ivregress 2sls bi_employed_olf_3m  ///
 estimates table, k($dep_var) star(.1 .05 .01) b(%7.4f) 
 estimates table, b(%7.4f) se(%7.4f) stats(N r2_a) k($dep_var) 
 margins, dydx($dep_var) 
-
-
-/*
-        ***************************************************************
-        * PROBABILITY OF BEING EMPLOYED INTERACTED BY EDUCATION LEVEL *
-        ***************************************************************
-
-use "$data_final/06_IV_JLMPS_Construct_Outcomes.dta", clear
-
-tab bi_education, m 
-
-**************
-*** SAMPLE ***
-**************
-tab nationality_cl year 
-drop if nationality_cl != 1
-
-drop if age > 64 & year == 2016
-drop if age > 60 & year == 2010 
-drop if age < 15 & year == 2016 
-drop if age < 11 & year == 2010 
-
-*keep if emp_10_olf_16  == 1 | unemp_16_emp_10 == 1 | emp_16_10 == 1 
-
-***************
-*** TRANSFO ***
-***************
-bys year: tab employed_3cat_3m 
-recode employed_olf_3m (2=1) (1=0), gen(bi_employed_olf_3m)
-lab var bi_employed_olf_3m "BINARY: 1 empl - 0 unemp&OL - From uswrkstsr1 - mkt def, search req; 3m"
-lab def bi_employed_olf_3m 0 "Unemp-OLF" 1 "Empl", modify
-lab val bi_employed_olf_3m bi_employed_olf_3m
-
-gen aggwp_educ =  bi_education#c.agg_wp
-
-******************
-*** IV REGRESS ***
-******************
-*The LPM version
-*LPM predicted probabilities are NOT restricted to lie between zero and one
-ivregress 2sls bi_employed_olf_3m bi_education  ///
-         $controls i.educ1d i.fteducst i.mteducst i.ftempst  ///
-          (agg_wp aggwp_educ = IV_SS_5 c.IV_SS_5#bi_education) ///
-          [pweight = panel_wt_10_16], ///
-         vce(cl district_iid)
-estimates table, k($dep_var aggwp_educ) star(.1 .05 .01) b(%7.4f) 
-estimates table, b(%7.4f) se(%7.4f) stats(N r2_a) k($dep_var aggwp_educ) 
-margins, dydx($dep_var) 
-*/
-
 
 
 
@@ -285,16 +210,22 @@ keep if empl_info_10_unemp_16 == 1 | ///
 ***************
 *** TRANSFO ***
 ***************
-bys year: tab formal, nol
-
+bys year: tab employed_3cat_3m 
 drop if year == 2010 
+
+recode employed_olf_3m (2=0) (0=1), gen(bi_employed_olf_3m_rec)
+bys year: tab bi_employed_olf_3m_rec 
+lab var bi_employed_olf_3m_rec "BINARY: 0 empl - 1 unemp&OLF - From uswrkstsr1 - mkt def, search req; 3m"
+lab def bi_employed_olf_3m_rec 1 "Unemp-OLF" 0 "Empl", modify
+lab val bi_employed_olf_3m_rec bi_employed_olf_3m_rec
+bys year: tab bi_employed_olf_3m_rec 
 
 ******************
 *** IV REGRESS ***
 ******************
 *The LPM version
 *LPM predicted probabilities are NOT restricted to lie between zero and one
-xi: ivregress 2sls formal  ///
+xi: ivregress 2sls bi_employed_olf_3m_rec  ///
          $controls i.educ1d i.fteducst i.mteducst i.ftempst ln_nb_refugees_bygov ///
           ($dep_var = $IV_var) ///
           [pweight = panel_wt_10_16], ///
@@ -380,7 +311,6 @@ keep if empl_form_10_unemp_16 == 1 | ///
 *** TRANSFO ***
 ***************
 bys year: tab formal, nol
-
 drop if year == 2010 
 
 ******************
@@ -398,52 +328,6 @@ estimates table, b(%7.4f) se(%7.4f) stats(N r2_a) k($dep_var)
 margins, dydx($dep_var) 
 
 
-
-            **********************************************
-            * PROBA OF BEING IN OPEN SECTOR [FROM CLOSE] *
-            **********************************************
-
-use "$data_final/06_IV_JLMPS_Construct_Outcomes.dta", clear
-
-**************
-*** SAMPLE ***
-**************
-tab nationality_cl year 
-*drop if nationality_cl != 1
-
-drop if age > 64 & year == 2016
-drop if age > 60 & year == 2010 
-drop if age < 15 & year == 2016 
-drop if age < 11 & year == 2010 
-
-tab open_10_16, m
-tab close_10_16, m
-tab open_10_close_16, m
-tab close_10_open_16, m
-
-* KEEP ALL CLOSE IN 10 AND OPEN/CLOSE 2016
-keep if close_10_16 == 1 | close_10_open_16 == 1 
-
-
-***************
-*** TRANSFO ***
-***************
-bys year: tab wp_industry_jlmps_3m 
-drop if year == 2010 
-
-******************
-*** IV REGRESS ***
-******************
-*The LPM version
-*LPM predicted probabilities are NOT restricted to lie between zero and one
-xi: ivregress 2sls wp_industry_jlmps_3m  ///
-         $controls i.educ1d i.fteducst i.mteducst i.ftempst ln_nb_refugees_bygov ///
-          ($dep_var = $IV_var) ///
-          [pweight = panel_wt_10_16], ///
-         vce(cl district_iid)
-estimates table, k($dep_var) star(.1 .05 .01) b(%7.4f) 
-estimates table, b(%7.4f) se(%7.4f) stats(N r2_a) k($dep_var) 
-margins, dydx($dep_var) 
 
 
             **********************************************
@@ -468,7 +352,7 @@ tab close_10_16, m
 tab open_10_close_16, m
 tab close_10_open_16, m
 
-* KEEP ALL OPEN IN 10 AND OPEN/CLOSE 2016
+* KEEP ALL CLOSE IN 10 AND OPEN/CLOSE 2016
 keep if open_10_16 == 1 | open_10_close_16 == 1 
 
 
@@ -477,6 +361,12 @@ keep if open_10_16 == 1 | open_10_close_16 == 1
 ***************
 bys year: tab wp_industry_jlmps_3m 
 drop if year == 2010 
+
+bys year: tab wp_industry_jlmps_3m 
+recode wp_industry_jlmps_3m (1=0) (0=1)
+lab def wp_indus_em 1 "Close" 0 "Open", modify
+lab val wp_industry_jlmps_3m wp_indus_em
+bys year: tab wp_industry_jlmps_3m 
 
 ******************
 *** IV REGRESS ***
@@ -491,6 +381,62 @@ xi: ivregress 2sls wp_industry_jlmps_3m  ///
 estimates table, k($dep_var) star(.1 .05 .01) b(%7.4f) 
 estimates table, b(%7.4f) se(%7.4f) stats(N r2_a) k($dep_var) 
 margins, dydx($dep_var) 
+
+
+           **********************************************
+            * PROBA OF GOING TO THE PUBLIC SECTOR [FROM PRIVATE] *
+            **********************************************
+
+
+use "$data_final/06_IV_JLMPS_Construct_Outcomes.dta", clear
+
+**************
+*** SAMPLE ***
+**************
+tab nationality_cl year 
+*drop if nationality_cl != 1
+
+drop if age > 64 & year == 2016
+drop if age > 60 & year == 2010 
+drop if age < 15 & year == 2016 
+drop if age < 11 & year == 2010 
+
+tab private_10_16, m
+tab public_10_16, m
+tab private_10_public_16, m
+tab public_10_private_16, m
+
+* KEEP ALL PUBLIC IN 10 AND PUBLIC/PRIVATE 2016
+keep if private_10_16 == 1 | private_10_public_16 == 1 
+
+***************
+*** TRANSFO ***
+***************
+bys year: tab private 
+drop if year == 2010 
+codebook private
+
+bys year: tab private 
+recode private (1=0) (0=1)
+lab def private_em 1 "Public" 0 "Private", modify
+lab val private private_em
+bys year: tab private 
+
+
+******************
+*** IV REGRESS ***
+******************
+*The LPM version
+*LPM predicted probabilities are NOT restricted to lie between zero and one
+xi: ivregress 2sls private  ///
+         $controls i.educ1d i.fteducst i.mteducst i.ftempst ln_nb_refugees_bygov ///
+          ($dep_var = $IV_var) ///
+          [pweight = panel_wt_10_16], ///
+         vce(cl district_iid)
+estimates table, k($dep_var) star(.1 .05 .01) b(%7.4f) 
+estimates table, b(%7.4f) se(%7.4f) stats(N r2_a) k($dep_var) 
+margins, dydx($dep_var) 
+
 
 
         ****************************

@@ -17,8 +17,8 @@ Creation Date:    18 September 2020
 	*Change the data path 
 if inlist(c(username), "u0131185", "julie") == 1 {
    
-	*global github 	`"/users/`c(username)'/Documents/GitHub/FAFO-WB-Study-Jordan/"'
-	global github 	`"/users/`c(username)'/OneDrive/Documents/GitHub/FAFO-WB-Study-Jordan/"'
+	global github 	`"/users/`c(username)'/Documents/GitHub/FAFO-WB-Study-Jordan/"'
+	*global github 	`"/users/`c(username)'/OneDrive/Documents/GitHub/FAFO-WB-Study-Jordan/"'
 	global dropbox	`"/users/`c(username)'/Dropbox/Fafo-WB Study/Jordan/06. DataWork/"'
    
    }

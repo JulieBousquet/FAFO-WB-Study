@@ -904,6 +904,45 @@ lab def private 0 "Public" 1 "Private", modify
 lab val private private
 lab var private "Economic Sector of Primary Job 3m - 0 Public 1 Private"
 
+
+
+
+
+
+preserve 
+
+keep private indid_2010 year 
+reshape wide private, i(indid_2010) j(year)
+format indid_2010 %12.0g
+
+*br indid_2010 employed_3m2016 employed_3m2010
+
+*MISS 2016 - MISS 2010
+gen private_10_16 = 1 if  private2010 == 1  & private2016 == 1
+gen public_10_16 = 1 if private2010 == 0 & private2016 == 0
+gen private_10_public_16 = 1 if private2010 == 1  & private2016 == 0
+gen public_10_private_16 = 1 if private2010 == 0 & private2016 == 1
+
+tab private_10_16, m
+tab private_10_16, m
+tab private_10_public_16, m
+tab public_10_private_16, m
+
+reshape long private, i(indid_2010) j(year)
+format indid_2010 %12.0g
+
+tempfile data_private
+save `data_private'
+restore 
+
+drop private 
+merge 1:1 indid_2010 year using  `data_private'
+drop _merge
+
+
+
+
+
 tab usecac2d if ussectrp == 4
 codebook usecac2d
 
