@@ -519,6 +519,7 @@ gen ln_nb_refugees_bygov = ln(1 + nb_refugees_bygov)
 *replace ln_nb_refugees_bygov = 0 if year == 2010
 
 lab var ln_nb_refugees_bygov "[CTRL] LOG Number of refugees out of camps by governorate in 2016"
+lab var ln_nb_refugees_bygov "Number of refugees (ln)"
 *ln_ref, as of now, does not include refugees in 2010, only in 2016
 
 ****** Other
@@ -532,10 +533,10 @@ lab var IHS_nb_refugees_bygov "IHS - Number of refugees out of camps by governor
 
 /*respondents' age and age squared. */
 su age
-lab var age "[CTRL] Age"
+lab var age "Age"
 
 gen age2 = age^2
-lab var age2 "[CTRL] Age Square"
+lab var age2 "Age Square"
 
 *******************
 ** DISTANCE CAMP **
@@ -592,7 +593,7 @@ gen gender = 0 if sex == 2 //Female
 replace gender = 1 if sex == 1 //Male
 lab def gender 0 "Female" 1 "Male", modify 
 lab val gender gender 
-lab var gender "[CTRL] Gender - 1 Male 0 Female"
+lab var gender "Gender 1 Male 0 Female"
 
 ********************
 ** HOUSEHOLD SIZE **
@@ -600,7 +601,7 @@ lab var gender "[CTRL] Gender - 1 Male 0 Female"
 
 tab hhsize
 codebook hhsize 
-lab var hhsize "[CTRL] Total No. of Individuals in the Household"
+lab var hhsize "Total No. of Individuals in the Household"
 
 ***************
 ** EDUCATION **
@@ -616,7 +617,7 @@ years beyond secondary) (6) university (four additional years beyond secondary) 
 */
 tab educ1d, m
 codebook educ1d
-lab var educ1d "[CTRL] Education Levels (1-digit)" 
+lab var educ1d "Education Levels (1-digit)" 
 
 /*These same education categories are included for mother's and father's education, 
 although we aggregate post-graduate studies with university for parents. */
@@ -635,20 +636,20 @@ lab def Leduc1d_agg     ///
            6 "University and more", ///
            modify
 lab val fteducst Leduc1d_agg
-lab var fteducst "[CTRL] Father's Level of education attained" 
+lab var fteducst "Father's Level of education attained" 
 
 *-Mother
 tab mteducst, m
 replace mteducst = 6 if mteducst == 7
 lab val mteducst Leduc1d_agg
-lab var mteducst "[CTRL] Mother's Level of education attained" 
+lab var mteducst "Mother's Level of education attained" 
 
 /*
 father's employment status when the respondent was aged 15 as: (1) waged employee 
 (2) employer (3) self-employed (4) unpaid worker (5) non-employed or (6) don't know. 
 */
 tab ftempst, m 
-lab var ftempst "[CTRL] Father's Employment Status (When Resp. 15)" 
+lab var ftempst "Father's Employment Status (When Resp. 15)" 
 
 
 /*

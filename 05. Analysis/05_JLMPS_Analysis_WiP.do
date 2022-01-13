@@ -174,7 +174,7 @@ estout m_job_stable_3m m_formal m_private m_wp_industry_jlmps_3m ///
       m_ln_total_rwage_3m  m_ln_hourly_rwage ///
       m_work_hours_pweek_3m_w m_work_days_pweek_3m /// 
       , cells(b(star fmt(%9.3f)) se(par fmt(%9.3f))) ///
-        drop(age age2 gender hhsize _Ieduc1d_2 _Ieduc1d_3 _Ieduc1d_4 _Ieduc1d_5 ///
+      drop( age2 gender hhsize _Ieduc1d_2 _Ieduc1d_3 _Ieduc1d_4 _Ieduc1d_5 ///
         ln_nb_refugees_bygov _Ieduc1d_6 _Ieduc1d_7 _Ifteducst_2 ///
         _Ifteducst_3 _Ifteducst_4 _Ifteducst_5 _Ifteducst_6 ///
         _Imteducst_2 _Imteducst_3 _Imteducst_4 _Imteducst_5 ///
@@ -194,12 +194,32 @@ esttab m_job_stable_3m m_formal m_private m_wp_industry_jlmps_3m ///
       using "$out_analysis/reg_01_OLS.tex", se label replace booktabs ///
       cells(b(star fmt(%9.3f)) se(par fmt(%9.3f))) ///
 mtitles("Stable" "Formal" "Private" "Open" "Union" "Skills" "Total W" "Hourly W" "WH pweek" "WD pweek") ///
-        drop(age age2 gender hhsize _Ieduc1d_2 _Ieduc1d_3 _Ieduc1d_4 _Ieduc1d_5 ///
+drop(age age2 gender hhsize _Ieduc1d_2 _Ieduc1d_3 _Ieduc1d_4 _Ieduc1d_5 ///
         ln_nb_refugees_bygov _Ieduc1d_6 _Ieduc1d_7 _Ifteducst_2 ///
         _Ifteducst_3 _Ifteducst_4 _Ifteducst_5 _Ifteducst_6 ///
         _Imteducst_2 _Imteducst_3 _Imteducst_4 _Imteducst_5 ///
         _Imteducst_6 _Iftempst_2 _Iftempst_3 _Iftempst_4 _Iftempst_5 ///
         _Iftempst_6 _cons $controls)   ///
+        starlevels(* 0.1 ** 0.05 *** 0.01) ///
+   title("Results OLS Regression"\label{tab1}) nofloat ///
+   stats(N r2_a, labels("Obs" "Adj. R-Squared" "Control Mean")) ///
+    nonotes ///
+    addnotes("Standard errors clustered at the district level. Significance levels: *p $<$ 0.1, ** p $<$ 0.05, *** p $<$ 0.01") 
+
+
+* CONTROLS 
+
+ereturn list
+mat list e(b)
+estout m_ln_total_rwage_3m m_work_hours_pweek_3m_w /// 
+      , cells(b(star fmt(%9.3f)) se(par fmt(%9.3f))) ///
+   legend label varlabels(_cons constant) starlevels(* 0.1 ** 0.05 *** 0.01)  ///
+   stats(r2 df_r bic, fmt(3 0 1) label(R-sqr dfres BIC))
+
+esttab m_ln_total_rwage_3m m_work_hours_pweek_3m_w /// 
+      using "$out_analysis/CTRL_reg_01_OLS.tex", se label replace booktabs ///
+      cells(b(star fmt(%9.3f)) se(par fmt(%9.3f))) ///
+mtitles("Total W" "WH pweek") ///
 starlevels(* 0.1 ** 0.05 *** 0.01) ///
    title("Results OLS Regression"\label{tab1}) nofloat ///
    stats(N r2_a, labels("Obs" "Adj. R-Squared" "Control Mean")) ///
@@ -209,9 +229,7 @@ starlevels(* 0.1 ** 0.05 *** 0.01) ///
 estimates drop m_job_stable_3m m_formal m_private m_wp_industry_jlmps_3m ///
       m_member_union_3m m_skills_required_pjob  ///
       m_ln_total_rwage_3m  m_ln_hourly_rwage ///
-       m_work_hours_pweek_3m_w m_work_days_pweek_3m 
-
-
+      m_work_hours_pweek_3m_w m_work_days_pweek_3m 
 
             ***********************************************************************
               ***** M2: YEAR FE / DISTRICT FE    *****
@@ -274,7 +292,7 @@ esttab m_job_stable_3m m_formal m_private m_wp_industry_jlmps_3m ///
       m_work_hours_pweek_3m_w  m_work_days_pweek_3m /// 
       using "$out_analysis/reg_02_OLS_FE_district_year.tex", se label replace booktabs ///
       cells(b(star fmt(%9.3f)) se(par fmt(%9.3f))) ///
-mtitles("Stable" "Formal" "Private" "Open" "Union" "Skills" "Total W"  "Hourly W" "WH pday" "WD pweek") ///
+mtitles("Stable" "Formal" "Private" "Open" "Union" "Skills" "Total W"  "Hourly W" "WH pweek" "WD pweek") ///
         drop(age age2 gender hhsize _Ieduc1d_2 _Ieduc1d_3 _Ieduc1d_4 _Ieduc1d_5 ///
         ln_nb_refugees_bygov _Ieduc1d_6 _Ieduc1d_7 _Ifteducst_2 ///
         _Ifteducst_3 _Ifteducst_4 _Ifteducst_5 _Ifteducst_6 ///
@@ -300,6 +318,57 @@ starlevels(* 0.1 ** 0.05 *** 0.01) ///
    stats(N r2_a, labels("Obs" "Adj. R-Squared" "Control Mean")) ///
     nonotes ///
     addnotes("Standard errors clustered at the district level. Significance levels: *p $<$ 0.1, ** p $<$ 0.05, *** p $<$ 0.01") 
+
+
+** CONTROLS **
+
+ereturn list
+mat list e(b)
+estout  m_ln_total_rwage_3m  m_work_hours_pweek_3m_w  /// 
+      , cells(b(star fmt(%9.3f)) se(par fmt(%9.3f))) ///
+        drop( _Idistrict__2 _Idistrict__3 ///
+        _Idistrict__4 _Idistrict__5 _Idistrict__6 _Idistrict__7 ///
+        _Idistrict__8 _Idistrict__9 _Idistrict__10 _Idistrict__11 ///
+        _Idistrict__12 _Idistrict__13 _Idistrict__14 _Idistrict__15 ///
+        _Idistrict__16  _Idistrict__18 _Idistrict__19 ///
+        _Idistrict__20 _Idistrict__21 _Idistrict__22 _Idistrict__23 ///
+        _Idistrict__24 _Idistrict__25 _Idistrict__26 _Idistrict__27 ///
+        _Idistrict__28 _Idistrict__29 _Idistrict__30 _Idistrict__31 ///
+        _Idistrict__32 _Idistrict__33 _Idistrict__34 _Idistrict__35 ///
+        _Idistrict__36 _Idistrict__37 _Idistrict__38 _Idistrict__39 ///
+        _Idistrict__40 _Idistrict__41 _Idistrict__42 _Idistrict__43 ///
+        _Idistrict__44 _Idistrict__45 _Idistrict__46 _Idistrict__47 ///
+        _Idistrict__48 _Idistrict__49 _Idistrict__50 _Idistrict__51 )   ///
+   legend label varlabels(_cons constant) starlevels(* 0.1 ** 0.05 *** 0.01)  ///
+   stats(r2 df_r bic, fmt(3 0 1) label(R-sqr dfres BIC))
+
+*** (**) [*] indicates significance at the 99%
+*(95%) [90%] level. Based
+
+*erase "$out/reg_infra_access.tex"
+esttab m_ln_total_rwage_3m m_work_hours_pweek_3m_w  /// 
+      using "$out_analysis/CTRL_reg_02_OLS_FE_district_year.tex", se label replace booktabs ///
+      cells(b(star fmt(%9.3f)) se(par fmt(%9.3f))) ///
+mtitles("Total W" "WH pweek") ///
+        drop(  _Idistrict__2 _Idistrict__3 ///
+        _Idistrict__4 _Idistrict__5 _Idistrict__6 _Idistrict__7 ///
+        _Idistrict__8 _Idistrict__9 _Idistrict__10 _Idistrict__11 ///
+        _Idistrict__12 _Idistrict__13 _Idistrict__14 _Idistrict__15 ///
+        _Idistrict__16 _Idistrict__18 _Idistrict__19 ///
+        _Idistrict__20 _Idistrict__21 _Idistrict__22 _Idistrict__23 ///
+        _Idistrict__24 _Idistrict__25 _Idistrict__26 _Idistrict__27 ///
+        _Idistrict__28 _Idistrict__29 _Idistrict__30 _Idistrict__31 ///
+        _Idistrict__32 _Idistrict__33 _Idistrict__34 _Idistrict__35 ///
+        _Idistrict__36 _Idistrict__37 _Idistrict__38 _Idistrict__39 ///
+        _Idistrict__40 _Idistrict__41 _Idistrict__42 _Idistrict__43 ///
+        _Idistrict__44 _Idistrict__45 _Idistrict__46 _Idistrict__47 ///
+        _Idistrict__48 _Idistrict__49 _Idistrict__50 _Idistrict__51 )   ///
+starlevels(* 0.1 ** 0.05 *** 0.01) ///
+   title("Results OLS Regression with time and district FE"\label{tab1}) nofloat ///
+   stats(N r2_a, labels("Obs" "Adj. R-Squared" "Control Mean")) ///
+    nonotes ///
+    addnotes("Standard errors clustered at the district level. Significance levels: *p $<$ 0.1, ** p $<$ 0.05, *** p $<$ 0.01") 
+
 
 estimates drop m_job_stable_3m m_formal m_wp_industry_jlmps_3m ///
       m_member_union_3m m_skills_required_pjob  ///
@@ -382,7 +451,7 @@ esttab m_job_stable_3m m_formal m_private m_wp_industry_jlmps_3m ///
       m_work_hours_pweek_3m_w m_work_days_pweek_3m /// 
       using "$out_analysis/reg_03_IV_FE_district_year.tex", se label replace booktabs ///
       cells(b(star fmt(%9.3f)) se(par fmt(%9.3f))) ///
-mtitles("Stable" "Formal" "Private" "Open" "Union" "Skills" "Total W"  "Hourly W" "WH pday" "WD pweek") ///
+mtitles("Stable" "Formal" "Private" "Open" "Union" "Skills" "Total W"  "Hourly W" "WH pweek" "WD pweek") ///
   drop(age age2 gender hhsize _Ieduc1d_2 _Ieduc1d_3 _Ieduc1d_4 _Ieduc1d_5 ///
         ln_nb_refugees_bygov _Ieduc1d_6 _Ieduc1d_7 _Ifteducst_2 ///
         _Ifteducst_3 _Ifteducst_4 _Ifteducst_5 _Ifteducst_6 ///
@@ -394,6 +463,31 @@ mtitles("Stable" "Formal" "Private" "Open" "Union" "Skills" "Total W"  "Hourly W
    stats(N r2_a , labels("Obs" "Adj. R-Squared" "Control Mean")) ///
     nonotes ///
     addnotes("Standard errors clustered at the district level. Significance levels: *p $<$ 0.1, ** p $<$ 0.05, *** p $<$ 0.01") 
+
+** CONTROLS **
+
+
+ereturn list
+mat list e(b)
+estout m_ln_total_rwage_3m m_work_hours_pweek_3m_w ///
+      , cells(b(star fmt(%9.3f)) se(par fmt(%9.3f))) ///
+   legend label varlabels(_cons constant) starlevels(* 0.1 ** 0.05 *** 0.01)           ///
+   stats(r2 df_r bic, fmt(3 0 1) label(R-sqr dfres BIC))
+
+*** (**) [*] indicates significance at the 99%
+*(95%) [90%] level. Based
+
+*erase "$out/reg_infra_access.tex"
+esttab m_ln_total_rwage_3m m_work_hours_pweek_3m_w /// 
+      using "$out_analysis/CTRL_reg_03_IV_FE_district_year.tex", se label replace booktabs ///
+      cells(b(star fmt(%9.3f)) se(par fmt(%9.3f))) ///
+mtitles("Total W" "WH pweek") ///
+starlevels(* 0.1 ** 0.05 *** 0.01) ///
+   title("Results IV Regression with District and Year FE"\label{tab1}) nofloat ///
+   stats(N r2_a , labels("Obs" "Adj. R-Squared" "Control Mean")) ///
+    nonotes ///
+    addnotes("Standard errors clustered at the district level. Significance levels: *p $<$ 0.1, ** p $<$ 0.05, *** p $<$ 0.01") 
+
 
 estimates drop m_job_stable_3m m_formal m_private m_wp_industry_jlmps_3m ///
       m_member_union_3m m_skills_required_pjob  ///
@@ -553,7 +647,7 @@ esttab m_job_stable_3m m_formal m_private m_wp_industry_jlmps_3m ///
       m_work_hours_pweek_3m_w m_work_days_pweek_3m /// 
       using "$out_analysis/reg_04_IV_FE_district_year_sector.tex", se label replace booktabs ///
       cells(b(star fmt(%9.3f)) se(par fmt(%9.3f))) ///
-mtitles("Stable" "Formal" "Private" "Open" "Union" "Skills" "Total W"  "Hourly W" "WH pday" "WD pweek") ///
+mtitles("Stable" "Formal" "Private" "Open" "Union" "Skills" "Total W"  "Hourly W" "WH pweek" "WD pweek") ///
   drop(age age2 gender hhsize _Ieduc1d_2 _Ieduc1d_3 _Ieduc1d_4 _Ieduc1d_5 ///
         ln_nb_refugees_bygov _Ieduc1d_6 _Ieduc1d_7 _Ifteducst_2 ///
         _Ifteducst_3 _Ifteducst_4 _Ifteducst_5 _Ifteducst_6 ///
@@ -565,6 +659,30 @@ mtitles("Stable" "Formal" "Private" "Open" "Union" "Skills" "Total W"  "Hourly W
    stats(N r2_a , labels("Obs" "Adj. R-Squared" "Control Mean")) ///
     nonotes ///
     addnotes("Standard errors clustered at the district level. Significance levels: *p $<$ 0.1, ** p $<$ 0.05, *** p $<$ 0.01") 
+
+** CONTROLS ** 
+
+ereturn list
+mat list e(b)
+estout m_ln_total_rwage_3m  m_work_hours_pweek_3m_w ///
+      , cells(b(star fmt(%9.3f)) se(par fmt(%9.3f))) ///
+   legend label varlabels(_cons constant) starlevels(* 0.1 ** 0.05 *** 0.01)           ///
+   stats(r2 df_r bic, fmt(3 0 1) label(R-sqr dfres BIC))
+
+*** (**) [*] indicates significance at the 99%
+*(95%) [90%] level. Based
+
+*erase "$out/reg_infra_access.tex"
+esttab m_ln_total_rwage_3m  m_work_hours_pweek_3m_w ///
+      using "$out_analysis/CTRL_reg_04_IV_FE_district_year_sector.tex", se label replace booktabs ///
+      cells(b(star fmt(%9.3f)) se(par fmt(%9.3f))) ///
+mtitles("Total W" "WH pweek") ///
+starlevels(* 0.1 ** 0.05 *** 0.01) ///
+   title("Results IV Regression with District, Year and Sector FE"\label{tab1}) nofloat ///
+   stats(N r2_a , labels("Obs" "Adj. R-Squared" "Control Mean")) ///
+    nonotes ///
+    addnotes("Standard errors clustered at the district level. Significance levels: *p $<$ 0.1, ** p $<$ 0.05, *** p $<$ 0.01") 
+
 
 estimates drop m_job_stable_3m m_formal m_private m_wp_industry_jlmps_3m ///
       m_member_union_3m m_skills_required_pjob  ///
@@ -671,10 +789,32 @@ esttab m_job_stable_3m m_formal m_private m_wp_industry_jlmps_3m ///
       m_work_hours_pweek_3m_w m_work_days_pweek_3m  ///
       using "$out_analysis/reg_05_IV_FE_year_indiv.tex", se label replace booktabs ///
       cells(b(star fmt(%9.3f)) se(par fmt(%9.3f))) ///
-mtitles("Stable" "Formal" "Private" "Open" "Union" "Skills" "Total W"  "Hourly W" "WH pday" "WD pweek") ///
+mtitles("Stable" "Formal" "Private" "Open" "Union" "Skills" "Total W"  "Hourly W" "WH pweek" "WD pweek") ///
  drop(age age2 gender hhsize  educ1d fteducst mteducst ftempst ///
      _cons ///
        ln_nb_refugees_bygov  $controls) starlevels(* 0.1 ** 0.05 *** 0.01) ///
+   title("Results IV Regression with Year and Individual FE"\label{tab1}) nofloat ///
+   stats(N r2_a, labels("Obs" "Adj. R-Squared" "Control Mean")) ///
+    nonotes ///
+    addnotes("Standard errors clustered at the district level. Significance levels: *p $<$ 0.1, ** p $<$ 0.05, *** p $<$ 0.01") 
+
+** CONTROLS ** 
+
+ereturn list
+mat list e(b)
+estout m_ln_total_rwage_3m  m_work_hours_pweek_3m_w   ///
+      , cells(b(star fmt(%9.3f)) se(par fmt(%9.3f))) ///
+ legend label varlabels(_cons constant) starlevels(* 0.1 ** 0.05 *** 0.01)           ///
+   stats(r2 df_r bic, fmt(3 0 1) label(R-sqr dfres BIC))
+
+*** (**) [*] indicates significance at the 99%
+*(95%) [90%] level. Based
+
+esttab m_ln_total_rwage_3m  m_work_hours_pweek_3m_w   ///
+      using "$out_analysis/CTRL_reg_05_IV_FE_year_indiv.tex", se label replace booktabs ///
+      cells(b(star fmt(%9.3f)) se(par fmt(%9.3f))) ///
+mtitles("Total W" "WH pweek") ///
+ starlevels(* 0.1 ** 0.05 *** 0.01) ///
    title("Results IV Regression with Year and Individual FE"\label{tab1}) nofloat ///
    stats(N r2_a, labels("Obs" "Adj. R-Squared" "Control Mean")) ///
     nonotes ///
@@ -687,10 +827,20 @@ estimates drop m_job_stable_3m m_formal m_private m_wp_industry_jlmps_3m ///
 
 
 
-
-
-
-
+*CONTROL VARIABLES
+codebook educ1d 
+codebook fteducst ///  Father's Level of education attained
+codebook mteducst ///  Mother's Level of education attained
+ codebook  ftempst ///  Father's Employment Status (When Resp. 15)
+/*
+1  Illiterate
+2  Read & Write
+3  Basic Education
+4  Secondary Educ
+5  Post-Secondary
+6  University
+7  Post-Graduate
+*/
 
 /*
 ************************************************

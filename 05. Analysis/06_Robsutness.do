@@ -521,15 +521,17 @@ tab dep_var_res
 reg $IV_var i.district_iid i.year   [pweight = panel_wt_10_16], cluster(district_iid) robust 
 predict iv_var_res
 tab iv_var_res
-winsor2 iv_var_res, replace cuts(0 90)
+*winsor2 iv_var_res, replace cuts(0 90)
 tab iv_var_res
 reg dep_var_res iv_var_res
 
 twoway (scatter dep_var_res iv_var_res, mcolor(gray) msize(small) legend(label(1 "Fitted Values"))) ///
-(lfit dep_var_res iv_var_res, lwidth(thick) legend(label(2 "Linear Pred"))) ///
-|| (lpoly dep_var_res iv_var_res, lwidth(thick)  kernel(epan2) degree(4) legend(label(3 "Local Poly"))) ///
-|| (fpfit dep_var_res iv_var_res, lwidth(thick) legend(label(4 "Fractional Poly"))) ///
+(lfit dep_var_res iv_var_res, lwidth(thick) legend(label(2 "Linear Prediction"))) ///
 , graphregion(color(white))
+
+*|| (lpoly dep_var_res iv_var_res, lwidth(thick)  kernel(epan2) degree(4) legend(label(3 "Local Poly"))) ///
+*|| (fpfit dep_var_res iv_var_res, lwidth(thick) legend(label(4 "Fractional Poly"))) ///
+
 
 graph export "$out_analysis\fitted_values_IVres.png", as(png) replace
 
