@@ -42,9 +42,10 @@ global    outcome_cond ///
               skills_required_pjob ///  Does primary job require any skill
               ln_total_rwage_3m  /// LOG Total Wage (3-month) - CONDITIONAL - UNEMPLOYED & OLF: WAGE MISSING
               ln_hourly_rwage  /// LOG Hourly Wage (Prim.& Second. Jobs)
-              work_hours_pday_3m_w  /// Winsorized - No. of Hours/Day (Ref. 3 mnths) Market Work
               work_hours_pweek_3m_w  /// Winsorized - Usual No. of Hours/Week, Market Work, (Ref. 3-month)
               work_days_pweek_3m  // Avg. num. of wrk. days per week during 3 mnth.
+             
+             *work_hours_pday_3m_w  /// Winsorized - No. of Hours/Day (Ref. 3 mnths) Market Work
 
 /*              ln_monthly_rwage  /// LOG Monthly Wage (Prim.& Second. Jobs)
               ln_basic_rwage_3m  /// LOG Basic Wage (3-month) - CONDITIONAL - UNEMPLOYED & OLF: WAGE MISSING
