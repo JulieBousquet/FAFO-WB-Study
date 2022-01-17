@@ -562,6 +562,395 @@ linear prediction plot
 local polynomial smooth plot
 */
 
+
+
+
+
+
+
+
+
+
+
+/******************************
+CONTROL FOR CONFLICT SPILLOVERS
+*******************************/
+
+
+use "$data_final/06_IV_JLMPS_Construct_Outcomes.dta", clear
+
+tab nationality_cl year , m 
+
+drop if age > 64 & year == 2016
+drop if age > 60 & year == 2010 //60 in 2010 so 64 in 2016
+
+drop if age < 15 & year == 2016 
+drop if age < 11 & year == 2010 //11 in 2010 so 15 in 2016
+
+keep if emp_16_10 == 1 
+
+distinct indid_2010 
+duplicates tag indid_2010, gen(dup)
+bys year: tab dup
+drop if dup == 0
+drop dup
+tab year
+
+xtset, clear 
+destring indid_2010 , replace
+xtset indid_2010 year 
+
+codebook $dep_var
+lab var $dep_var "Work Permits"
+
+*****************************
+* 1. 1/distance to border*dt
+*****************************
+
+tab distance_dis_camp year 
+
+preserve
+keep distance_dis_camp indid_2010 year
+reshape wide distance_dis_camp, i(indid_2010) j(year)
+
+replace distance_dis_camp2010 = distance_dis_camp2016 
+
+reshape long distance_dis_camp, i(indid_2010) j(year)
+format indid_2010 %12.0g
+
+tempfile data_distcamp
+save `data_distcamp'
+restore 
+
+drop distance_dis_camp 
+merge 1:1 indid_2010 year using  `data_distcamp'
+drop _merge 
+
+tab distance_dis_camp year 
+
+gen d2016 = 1 if year == 2016
+replace d2016 = 0 if year == 2010
+gen dist_year = distance_dis_camp*d2016
+tab dist_year, m 
+
+
+  foreach outcome of global outcome_cond {
+    xi: ivreg2  ln_total_rwage_3m ///
+                i.district_iid i.year ///
+                $controls i.educ1d i.fteducst i.mteducst i.ftempst ///
+                dist_year ln_nb_refugees_bygov ///
+                ($dep_var = $IV_var) ///
+                [pweight = panel_wt_10_16], ///
+                cluster(district_iid) robust ///
+                partial(i.district_iid) ///
+                first
+   codebook `outcome', c
+    estimates table, k($dep_var dist_year) star(.1 .05 .01) b(%7.4f) 
+    estimates table, b(%7.4f) se(%7.4f) stats(N r2_a) k($dep_var dist_year) 
+    estimates store m_`outcome', title(Model `outcome')
+ }
+
+
+
+ereturn list
+mat list e(b)
+estout m_job_stable_3m m_formal m_private m_wp_industry_jlmps_3m ///
+      m_member_union_3m m_skills_required_pjob  ///
+      m_ln_total_rwage_3m  m_ln_hourly_rwage ///
+      m_work_hours_pweek_3m_w m_work_days_pweek_3m ///
+      , cells(b(star fmt(%9.3f)) se(par fmt(%9.3f))) ///
+  drop(age age2 gender hhsize _Ieduc1d_2 _Ieduc1d_3 _Ieduc1d_4 _Ieduc1d_5 ///
+        ln_nb_refugees_bygov _Ieduc1d_6 _Ieduc1d_7 _Ifteducst_2 ///
+        _Ifteducst_3 _Ifteducst_4 _Ifteducst_5 _Ifteducst_6 ///
+        _Imteducst_2 _Imteducst_3 _Imteducst_4 _Imteducst_5 ///
+        _Imteducst_6 _Iftempst_2 _Iftempst_3 _Iftempst_4 _Iftempst_5 ///
+        _Iftempst_6 _Iyear_2016 ///
+         $controls)   ///
+   legend label varlabels(_cons constant) starlevels(* 0.1 ** 0.05 *** 0.01)           ///
+   stats(r2 df_r bic, fmt(3 0 1) label(R-sqr dfres BIC))
+
+*** (**) [*] indicates significance at the 99%
+*(95%) [90%] level. Based
+
+*erase "$out/reg_infra_access.tex"
+esttab m_job_stable_3m m_formal m_private m_wp_industry_jlmps_3m ///
+      m_member_union_3m m_skills_required_pjob  ///
+      m_ln_total_rwage_3m  m_ln_hourly_rwage ///
+      m_work_hours_pweek_3m_w m_work_days_pweek_3m /// 
+      using "$out_analysis/ROB_reg_IV_FE_district_year_DISTANCE_TIME.tex", se label replace booktabs ///
+      cells(b(star fmt(%9.3f)) se(par fmt(%9.3f))) ///
+mtitles("Stable" "Formal" "Private" "Open" "Union" "Skills" "Total W"  "Hourly W" "WH pweek" "WD pweek") ///
+  drop(age age2 gender hhsize _Ieduc1d_2 _Ieduc1d_3 _Ieduc1d_4 _Ieduc1d_5 ///
+        ln_nb_refugees_bygov _Ieduc1d_6 _Ieduc1d_7 _Ifteducst_2 ///
+        _Ifteducst_3 _Ifteducst_4 _Ifteducst_5 _Ifteducst_6 ///
+        _Imteducst_2 _Imteducst_3 _Imteducst_4 _Imteducst_5 ///
+        _Imteducst_6 _Iftempst_2 _Iftempst_3 _Iftempst_4 _Iftempst_5 ///
+        _Iftempst_6 _Iyear_2016 ///
+         $controls) starlevels(* 0.1 ** 0.05 *** 0.01) ///
+   title("Results IV Regression with District, Year and Sector FE"\label{tab1}) nofloat ///
+   stats(N r2_a , labels("Obs" "Adj. R-Squared" "Control Mean")) ///
+    nonotes ///
+    addnotes("Standard errors clustered at the district level. Significance levels: *p $<$ 0.1, ** p $<$ 0.05, *** p $<$ 0.01") 
+
+
+
+
+/*
+
+         ****************************************************************************
+         ***** Controlling for c.distance_dis_camp##i.year or usig it as an IV ******
+         ****************************************************************************
+
+sum distance_dis_camp year
+gen d2016=0
+replace d2016=1 if year==2016
+gen ldistance_dis_camp=log(distance_dis_camp)
+gen inter_dist=ldistance_dis_camp*d2016
+
+sum $controls 
+
+*with the distance to the border $\times$ sector dummy 
+xi: ivreg2 ln_basic_rwage_3m ///
+    i.year i.district_iid i.crsectrp i.educ1d ///
+    i.fteducst i.mteducst age age2 sex hhsize ///
+    ($dep_var ln_nb_refugees_bygov= IV_SS_5 inter_dist) ///
+    [pweight = panel_wt_10_16], ///
+     liml cluster(district_iid) ///
+     partial(i.district_iid  i.crsectrp) 
+    estimates table, k($dep_var) star(.1 .05 .01) b(%7.4f) 
+    estimates table, b(%7.4f) se(%7.4f) stats(N r2_a) k($dep_var) 
+
+*the border $\times$ time dummy
+gen interact =  inter_dist*crsectrp
+
+xi: ivreg2 ln_basic_rwage_3m ///
+    i.year i.district_iid i.crsectrp i.educ1d ///
+    i.fteducst i.mteducst age age2 sex hhsize i.inter_dist i.interact ///
+    ($dep_var = $dep_var) ///
+    [pweight = panel_wt_10_16], ///
+     liml cluster(district_iid) ///
+     partial(i.district_iid  i.crsectrp) 
+    estimates table, k($dep_var) star(.1 .05 .01) b(%7.4f) 
+    estimates table, b(%7.4f) se(%7.4f) stats(N r2_a) k($dep_var) 
+    estimates store m_`outcome', title(Model `outcome')
+
+
+*/
+
+***************************************************************************
+* 2. 1/distance to Syrian governorate*intensity of conflict in governorate
+***************************************************************************
+
+*** GET DATA IN 2010 **
+
+
+
+/*
+ACLED
+"Raleigh, Clionadh, Andrew Linke, Håvard Hegre and Joakim Karlsen. (2010). 
+“Introducing ACLED-Armed Conflict Location and Event Data.” 
+Journal of Peace Research 47(5) 651-660."
+key : pjAwSYakTpR0iRErpG3x
+*/
+
+
+/*
+import excel using "$data_ACLED_base/Acled - Syria - 2009-01-01-2017-01-31.xlsx", firstrow clear
+
+ren admin1 governorate_syria
+list governorate_syria 
+
+replace governorate_syria = "Al Raqqah" if governorate_syria == "Ar Raqqa"
+replace governorate_syria = "Al Suwayda" if governorate_syria == "As Sweida"
+replace governorate_syria = "Daraa" if governorate_syria == "Dara"
+replace governorate_syria = "Deir El Zour" if governorate_syria == "Deir ez Zor"
+replace governorate_syria = "Idlib" if governorate_syria == "Idleb"
+replace governorate_syria = "Rural Damascus" if governorate_syria == "Damascus Rural"
+replace governorate_syria = "Al Hasakah" if governorate_syria == "Al Hasakeh"
+
+
+sort governorate_syria 
+egen id_gov_syria = group(governorate_syria)
+
+gen conflict = 1 if !mi(event_type)
+collapse (sum) conflict, by(year id_gov_syria)
+
+
+merge m:m id_gov_syria using "$data_temp/04_IV_Share_Empl_Syria" 
+
+*Distance between governorates syria and districts jordan
+geodist district_lat district_long gov_syria_lat gov_syria_long, gen(distance_dis_gov)
+tab distance_dis_gov, m
+lab var distance_dis_gov "Distance (km) between JORD districts and SYR centroid governorates"
+
+unique distance_dis_gov //714
+
+drop district_long district_lat gov_syria_long gov_syria_lat
+sort district_en governorate_syria 
+
+drop id_district_jordan 
+egen district_iid = group(district_en) 
+
+list id_gov_syria governorate_syria
+sort district_en governorate_syria industry_id
+
+
+drop if district_en == "Husseiniyyeh District"
+distinct district_iid 
+
+collapse (sum) distance_dis_gov, by(district_iid)
+
+merge 1:m district_iid using "$data_final/06_IV_JLMPS_Construct_Outcomes.dta"
+
+
+
+tab nationality_cl year , m 
+
+drop if age > 64 & year == 2016
+drop if age > 60 & year == 2010 //60 in 2010 so 64 in 2016
+
+drop if age < 15 & year == 2016 
+drop if age < 11 & year == 2010 //11 in 2010 so 15 in 2016
+
+keep if emp_16_10 == 1 
+
+distinct indid_2010 
+duplicates tag indid_2010, gen(dup)
+bys year: tab dup
+drop if dup == 0
+drop dup
+tab year
+
+xtset, clear 
+destring indid_2010 , replace
+xtset indid_2010 year 
+
+codebook $dep_var
+lab var $dep_var "Work Permits"
+
+tab distance_dis_gov year 
+
+*duplicates drop governorate_syria, force
+*list id_gov_syria governorate_syria
+
+
+foreach outcome of global outcome_cond {
+    xi: ivreg2  `outcome' ///
+                i.district_iid i.year ///
+                $controls i.educ1d i.fteducst i.mteducst i.ftempst ///
+                ln_nb_refugees_bygov ///
+                distance_dis_gov ///
+                ($dep_var = $IV_var) ///
+                [pweight = panel_wt_10_16], ///
+                cluster(district_iid) robust ///
+                partial(i.district_iid) ///
+                first
+    codebook `outcome', c
+    estimates table, k($dep_var) star(.1 .05 .01) b(%7.4f) 
+    estimates table, b(%7.4f) se(%7.4f) stats(N r2_a) k($dep_var) 
+    estimates store m_`outcome', title(Model `outcome')
+  }
+*/
+
+
+
+************* PRIVATE / PUBLIC SECTOR
+
+
+use "$data_final/06_IV_JLMPS_Construct_Outcomes.dta", clear
+
+tab nationality_cl year , m 
+
+drop if age > 64 & year == 2016
+drop if age > 60 & year == 2010 //60 in 2010 so 64 in 2016
+
+drop if age < 15 & year == 2016 
+drop if age < 11 & year == 2010 //11 in 2010 so 15 in 2016
+
+keep if emp_16_10 == 1 
+
+distinct indid_2010 
+duplicates tag indid_2010, gen(dup)
+bys year: tab dup
+drop if dup == 0
+drop dup
+tab year
+
+xtset, clear 
+destring indid_2010 , replace
+xtset indid_2010 year 
+
+codebook $dep_var
+lab var $dep_var "Work Permits"
+
+
+gen d2016 = 1 if year == 2016
+replace d2016 = 0 if year == 2010
+gen private_dt = private*d2016
+tab private_dt, m 
+tab private_dt year 
+
+  foreach outcome of global outcome_cond {
+     xi: ivreg2  `outcome' ///
+                i.year i.district_iid  ///
+                $controls i.educ1d i.fteducst i.mteducst i.ftempst ///
+                ln_nb_refugees_bygov ///
+                i.private_dt ///
+                ($dep_var = $IV_var) ///
+                [pweight = panel_wt_10_16], ///
+                cluster(district_iid) ///
+                partial(i.district_iid) ///
+                first
+    codebook `outcome', c
+    estimates table, k($dep_var _Iprivate_d_1) star(.1 .05 .01) b(%7.4f) 
+    estimates table, b(%7.4f) se(%7.4f) stats(N r2_a) k($dep_var _Iprivate_d_1) 
+    estimates store m_`outcome', title(Model `outcome')
+  }
+
+
+ereturn list
+mat list e(b)
+estout m_job_stable_3m m_formal m_private m_wp_industry_jlmps_3m ///
+      m_member_union_3m m_skills_required_pjob  ///
+      m_ln_total_rwage_3m  m_ln_hourly_rwage ///
+      m_work_hours_pweek_3m_w m_work_days_pweek_3m ///
+      , cells(b(star fmt(%9.3f)) se(par fmt(%9.3f))) ///
+  drop(age age2 gender hhsize _Ieduc1d_2 _Ieduc1d_3 _Ieduc1d_4 _Ieduc1d_5 ///
+        ln_nb_refugees_bygov _Ieduc1d_6 _Ieduc1d_7 _Ifteducst_2 ///
+        _Ifteducst_3 _Ifteducst_4 _Ifteducst_5 _Ifteducst_6 ///
+        _Imteducst_2 _Imteducst_3 _Imteducst_4 _Imteducst_5 ///
+        _Imteducst_6 _Iftempst_2 _Iftempst_3 _Iftempst_4 _Iftempst_5 ///
+        _Iftempst_6 _Iyear_2016 ///
+         $controls)   ///
+   legend label varlabels(_cons constant) starlevels(* 0.1 ** 0.05 *** 0.01)           ///
+   stats(r2 df_r bic, fmt(3 0 1) label(R-sqr dfres BIC))
+
+*** (**) [*] indicates significance at the 99%
+*(95%) [90%] level. Based
+
+*erase "$out/reg_infra_access.tex"
+esttab m_job_stable_3m m_formal m_private m_wp_industry_jlmps_3m ///
+      m_member_union_3m m_skills_required_pjob  ///
+      m_ln_total_rwage_3m  m_ln_hourly_rwage ///
+      m_work_hours_pweek_3m_w m_work_days_pweek_3m /// 
+      using "$out_analysis/ROB_reg_IV_FE_district_year_SECTOR_TIME.tex", se label replace booktabs ///
+      cells(b(star fmt(%9.3f)) se(par fmt(%9.3f))) ///
+mtitles("Stable" "Formal" "Private" "Open" "Union" "Skills" "Total W"  "Hourly W" "WH pweek" "WD pweek") ///
+  drop(age age2 gender hhsize _Ieduc1d_2 _Ieduc1d_3 _Ieduc1d_4 _Ieduc1d_5 ///
+        ln_nb_refugees_bygov _Ieduc1d_6 _Ieduc1d_7 _Ifteducst_2 ///
+        _Ifteducst_3 _Ifteducst_4 _Ifteducst_5 _Ifteducst_6 ///
+        _Imteducst_2 _Imteducst_3 _Imteducst_4 _Imteducst_5 ///
+        _Imteducst_6 _Iftempst_2 _Iftempst_3 _Iftempst_4 _Iftempst_5 ///
+        _Iftempst_6 _Iyear_2016 ///
+         $controls) starlevels(* 0.1 ** 0.05 *** 0.01) ///
+   title("Results IV Regression with District, Year and Sector FE"\label{tab1}) nofloat ///
+   stats(N r2_a , labels("Obs" "Adj. R-Squared" "Control Mean")) ///
+    nonotes ///
+    addnotes("Standard errors clustered at the district level. Significance levels: *p $<$ 0.1, ** p $<$ 0.05, *** p $<$ 0.01") 
+
+
+
+
 log close
 
 

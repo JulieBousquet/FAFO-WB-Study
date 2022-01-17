@@ -694,12 +694,31 @@ save "$data_temp/05_IV_shift_byIndus.dta", replace
 * SHARE 2 : GOV OF ORIGIN *
 ***************************
 
-/*
+
 * SYRIAN GOVERNROATE OF ORIGIN REFUGES
 import excel "$data_UNHCR_base/Datasets_WP_RegisteredSyrians.xlsx" , sheet("Registered Syrian by Gov Orig") firstrow clear
 *I will use 2016
-save "$data_temp/06_IV_Share_GovOrig_Refugee.dta", replace 
+
+/*
+id_gov_syria  governorate_syria
+1 Al Hasakah
+2 Al Raqqah
+3 Al Suwayda
+4 Aleppo
+5 Damascus
+6 Daraa
+7 Deir El Zour
+8 Hama
+9 Homs
+10  Idlib
+11  Lattakia
+12  Quneitra
+13  Rural Damascus
+14  Tartous
 */
+
+save "$data_temp/06_IV_Share_GovOrig_Refugee.dta", replace 
+
 
 **CONTROL: Number of refugees
 import excel "$data_UNHCR_base/Datasets_WP_RegisteredSyrians.xlsx", sheet("WP_REF - byGov byYear") firstrow clear
@@ -1682,7 +1701,34 @@ Layman term: Expected demand for work P at destination
 Story: Augmented by the number of refugees since it will affect the demand for work permits
 */
 
-use "$data_final/10_JLMPS_Distance_Zaatari.dta" , clear
+/*
+use "$data_temp/04_IV_Share_Empl_Syria", clear 
+
+*Distance between governorates syria and districts jordan
+geodist district_lat district_long gov_syria_lat gov_syria_long, gen(distance_dis_gov)
+tab distance_dis_gov, m
+lab var distance_dis_gov "Distance (km) between JORD districts and SYR centroid governorates"
+
+unique distance_dis_gov //714
+
+drop district_long district_lat gov_syria_long gov_syria_lat
+sort district_en governorate_syria 
+
+drop id_district_jordan 
+egen district_iid = group(district_en) 
+
+list id_gov_syria governorate_syria
+sort district_en governorate_syria industry_id
+
+tab industry_en industry_id
+drop industry_id 
+egen industry_id = group(industry_en)
+
+merge m:1 id_gov_syria using "$data_temp/06_IV_Share_GovOrig_Refugee.dta" 
+drop _merge
+
+merge m:1 district_iid using "$data_final/10_JLMPS_Distance_Zaatari.dta" 
+drop _merge
 
 lab var district_iid "ID District Jordan"
 gen wp_2016 = 73580
@@ -1691,7 +1737,8 @@ lab var wp_2016 "WP 2016 in Jordan by industry"
 sort district_iid
 
 *WORKING MODELS
-gen IV_SS_2 = (wp_2016*ln_nb_refugees_bygov) / (distance_dis_camp)  
+gen IV_SS_2 = (wp_2016*nb_ref_syr_bygov_2015) / (distance_dis_camp)  
+*gen IV_SS_2 = (wp_2016*ln_nb_refugees_bygov) / (distance_dis_camp)  
 
 tab IV_SS_2, m 
 
@@ -1707,7 +1754,7 @@ distinct district_iid
 
 
 save "$data_final/03_ShiftShare_IV_2", replace 
-
+*/
 
 
 
@@ -1744,8 +1791,11 @@ tab industry_en industry_id
 drop industry_id 
 egen industry_id = group(industry_en)
 
+merge m:1 id_gov_syria using "$data_temp/06_IV_Share_GovOrig_Refugee.dta" 
+drop _merge
 
 merge m:1 district_iid using "$data_final/10_JLMPS_Distance_Zaatari.dta" 
+drop _merge 
 
 lab var district_iid "ID District Jordan"
 gen wp_2016 = 73580
@@ -1754,7 +1804,8 @@ lab var wp_2016 "WP 2016 in Jordan by industry"
 sort district_iid
 
 *WORKING MODELS
-gen IV_SS_3 = (ln_nb_refugees_bygov/distance_dis_gov) * (wp_2016/distance_dis_camp)  
+*gen IV_SS_3 = (ln_nb_refugees_bygov/distance_dis_gov) * (wp_2016/distance_dis_camp)  
+gen IV_SS_3 = (nb_ref_syr_bygov_2015/distance_dis_gov) * (wp_2016/distance_dis_camp)  
 
 tab IV_SS_3, m 
 
@@ -1822,6 +1873,8 @@ drop industry_en industry_id share
 merge m:1 gov using "$data_temp/08_Share_empl_Jordan_DOS_ORIG_WP.dta"
 drop _merge 
 
+merge m:1 id_gov_syria using "$data_temp/06_IV_Share_GovOrig_Refugee.dta" 
+drop _merge 
 
 merge m:1 district_iid using "$data_final/10_JLMPS_Distance_Zaatari.dta" 
 *drop if _merge == 2 
@@ -1835,7 +1888,8 @@ lab var wp_2016_total "WP 2016 in Jordan by industry"
 sort district_iid
 
 *WORKING MODELS
-gen IV_SS_4 = (ln_nb_refugees_bygov/distance_dis_gov) * (wp_2016/distance_dis_camp) * inter_wp_empl 
+*gen IV_SS_4 = (ln_nb_refugees_bygov/distance_dis_gov) * (wp_2016_total/distance_dis_camp) * inter_wp_empl 
+gen IV_SS_4 = (nb_ref_syr_bygov_2015/distance_dis_gov) * (1/distance_dis_camp) * inter_wp_empl 
 
 tab IV_SS_4, m 
 
@@ -1899,6 +1953,10 @@ merge m:1 industry_id using  "$data_temp/05_IV_shift_byIndus.dta"
 drop _merge 
 ren share share_empl_syr 
 
+merge m:1 id_gov_syria using "$data_temp/06_IV_Share_GovOrig_Refugee.dta" 
+drop _merge 
+
+
 *merge m:m industry_id district_iid using "$data_temp/09_Share_empl_byDist_byIndus.dta",
 *drop _merge 
 
@@ -1946,7 +2004,8 @@ lab var wp_2016_total "WP 2016 in Jordan by industry"
 sort district_iid
 
 *WORKING MODELS
-gen IV_SS_5 = (ln_nb_refugees_bygov/distance_dis_gov) * (wp_2016_total/distance_dis_camp) * wp_2016 * diff_share 
+gen IV_SS_5 = (nb_ref_syr_bygov_2015/distance_dis_gov) * (1/distance_dis_camp) * wp_2016 * diff_share 
+*gen IV_SS_5 = (ln_nb_refugees_bygov/distance_dis_gov) * (wp_2016_total/distance_dis_camp) * wp_2016 * diff_share 
 *gen IV_SS_5 = (ln_nb_refugees_bygov/distance_dis_gov) * wp_2016_total * diff_share 
 
 tab IV_SS_5, m 

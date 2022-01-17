@@ -1949,7 +1949,7 @@ Layman term: Expected demand for work P at destination
 Story: Augmented by the number of refugees since it will affect the demand for work permits
 */
 
-
+/*
 *use "$data_final/06_IV_JLMPS_Construct_Outcomes_nowp.dta", clear
 
 merge m:1 district_iid using "$data_final/03_ShiftShare_IV_2.dta" 
@@ -1985,7 +1985,7 @@ corr IV_SS_2 agg_wp_orig //
 corr IV_SS_2 share_wp //
 
 
-
+*/
 
 
 

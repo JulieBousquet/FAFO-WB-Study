@@ -609,14 +609,20 @@ foreach globals of global globals_list {
 ********* IV *********
 **********************
 
+*Economics Activities
+tab usecac1d 
+*tab usocp1d 
+*tab usempstp 
+*tab ussectrp
+
   foreach outcome of global outcome_cond {
-    qui xi: ivreg2  `outcome' ///
-                i.year i.district_iid i.private ///
+    xi: ivreg2  `outcome' ///
+                i.year i.district_iid i.usecac1d ///
                 $controls i.educ1d i.fteducst i.mteducst i.ftempst ln_nb_refugees_bygov ///
                 ($dep_var = $IV_var) ///
                 [pweight = panel_wt_10_16], ///
                 cluster(district_iid) ///
-                partial(i.district_iid i.private) ///
+                partial(i.district_iid i.usecac1d) ///
                 first
     codebook `outcome', c
     estimates table, k($dep_var) star(.1 .05 .01) b(%7.4f) 
@@ -628,7 +634,7 @@ foreach globals of global globals_list {
     replace smpl=1 if e(sample)==1
 
     qui xi: reg $dep_var $IV_var ///
-            i.year i.district_iid i.private ///
+            i.year i.district_iid i.usecac1d ///
             $controls i.educ1d i.fteducst i.mteducst i.ftempst ln_nb_refugees_bygov ///
             if smpl == 1 [pweight = panel_wt_10_16], ///
             cluster(district_iid) robust
@@ -1191,7 +1197,7 @@ ren work_hours_pday_3m_w wdpw
 
 
 ren resc_IV_SS_1 IV_1 
-ren resc_IV_SS_2 IV_2 
+*ren resc_IV_SS_2 IV_2 
 ren resc_IV_SS_3 IV_3 
 ren resc_IV_SS_4 IV_4 
 ren resc_IV_SS_5 IV_5 
@@ -1267,7 +1273,7 @@ global    outcome ///
               whpw  /// Winsorized - Usual No. of Hours/Week, Market Work, (Ref. 3-month)
               wdpw  // Avg. num. of wrk. days per week during 3 mnth.
 
-global IVs  IV_1 IV_2 IV_4 IV_5
+global IVs  IV_1 IV_3 IV_4 IV_5
 
 
 foreach IV of global IVs {
