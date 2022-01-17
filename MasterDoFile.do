@@ -124,6 +124,17 @@ if inlist(c(username), "u0131185", "julie") == 1 {
 	global data_sec_DOS "$dropbox/04. Secondary Data/02. Data Jordan_MSc/DoS/"
 
 
+	***********************************
+	**    SECONDARY DATA: ACLED     **
+	***********************************
+	*Master to locate the folder
+	global data_sec_ACLED "$dropbox/04. Secondary Data/08. Acled Syria/"
+		global data_ACLED 		"$data_sec_ACLED/01. Datasets/"
+			global data_ACLED_base 	"$data_ACLED/01. Base"
+			global data_ACLED_temp 	"$data_ACLED/02. Temp"
+			global data_ACLED_final 	"$data_ACLED/03. Final"
+
+
 	**********************
 	**     ANALYSIS     **
 	**********************
