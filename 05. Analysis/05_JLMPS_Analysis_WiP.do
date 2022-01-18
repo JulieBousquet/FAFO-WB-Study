@@ -147,7 +147,7 @@ xtset indid_2010 year
               ***************************************************
 
 codebook $dep_var
-lab var $dep_var "Work Permits"
+lab var $dep_var "Work Permits (ln)"
 
 
 **********************
@@ -1398,6 +1398,13 @@ drop if age > 60 & year == 2010 //60 in 2010 so 64 in 2016
 drop if age < 15 & year == 2016 
 drop if age < 11 & year == 2010 //11 in 2010 so 15 in 2016
 
+drop if miss_16_10 == 1
+drop if emp_16_miss_10 == 1
+drop if emp_10_miss_16 == 1
+drop if unemp_16_miss_10 == 1
+drop if unemp_10_miss_16 == 1
+drop if olf_16_miss_10 == 1
+drop if olf_10_miss_16 == 1 
 
 distinct indid_2010 
 duplicates tag indid_2010, gen(dup)
@@ -1469,7 +1476,7 @@ esttab m_job_stable_3m_unolf m_union_unolf ///
           m_unemployed_olf_3m  m_unemployed_3m ///
       using "$out_analysis/reg_Year_District_FE_Uncond.tex", se label replace booktabs ///
       cells(b(star fmt(%9.3f)) se(par fmt(%9.3f))) ///
-mtitles("Empl" "Unemp" "Wage" "Hourly Wage" "W. Hours") ///
+mtitles("Stable" "Union" "Skills" "Total Wage" "Hourly Wage" "Work Hours pw" "Work Day pw" "Empl" "Unempl OLF" "Unemp") ///
   drop(age age2 gender hhsize _Ieduc1d_2 _Ieduc1d_3 _Ieduc1d_4 _Ieduc1d_5 ///
         ln_nb_refugees_bygov _Ieduc1d_6 _Ieduc1d_7 _Ifteducst_2 ///
         _Ifteducst_3 _Ifteducst_4 _Ifteducst_5 _Ifteducst_6 ///

@@ -231,7 +231,7 @@ tab IV_SS_ref_inflow
 
 ereturn list
 mat list e(b)
-estout m_job_stable_3m m_formal m_wp_industry_jlmps_3m ///
+estout m_job_stable_3m m_formal m_private m_wp_industry_jlmps_3m ///
       m_member_union_3m m_skills_required_pjob  ///
       m_ln_total_rwage_3m  m_ln_hourly_rwage ///
       m_work_hours_pweek_3m_w m_work_days_pweek_3m ///
@@ -250,7 +250,7 @@ estout m_job_stable_3m m_formal m_wp_industry_jlmps_3m ///
 *(95%) [90%] level. Based
 
 *erase "$out/reg_infra_access.tex"
-esttab m_job_stable_3m m_formal m_wp_industry_jlmps_3m ///
+esttab m_job_stable_3m m_formal m_private m_wp_industry_jlmps_3m ///
       m_member_union_3m m_skills_required_pjob  ///
       m_ln_total_rwage_3m  m_ln_hourly_rwage ///
       m_work_hours_pweek_3m_w m_work_days_pweek_3m /// 
@@ -269,7 +269,7 @@ mtitles("Stable" "Formal" "Industry" "Union" "Skills" "Total W"  "Hourly W" "WH 
     nonotes ///
     addnotes("Standard errors clustered at the district level. Significance levels: *p $<$ 0.1, ** p $<$ 0.05, *** p $<$ 0.01") 
 
-estimates drop m_job_stable_3m m_formal m_wp_industry_jlmps_3m ///
+estimates drop m_job_stable_3m m_formal m_private m_wp_industry_jlmps_3m ///
       m_member_union_3m m_skills_required_pjob  ///
       m_ln_total_rwage_3m  m_ln_hourly_rwage ///
        m_work_hours_pweek_3m_w m_work_days_pweek_3m 
@@ -321,32 +321,17 @@ tab ln_IV_SS_ref_inflow
                 ($dep_var = $IV_var) ///
                 [pweight = panel_wt_10_16], ///
                 cluster(district_iid) robust ///
-                partial(i.district_iid) ///
-                first
+                partial(i.district_iid) 
     codebook `outcome', c
     estimates table, k($dep_var) star(.1 .05 .01) b(%7.4f) 
     estimates table, b(%7.4f) se(%7.4f) stats(N r2_a) k($dep_var) 
     estimates store m_`outcome', title(Model `outcome')
-
-    * With equivalent first-stage
-    gen smpl=0
-    replace smpl=1 if e(sample)==1
-
-    qui xi: reg $dep_var $IV_var ///
-            i.year i.district_iid ///
-             $controls i.educ1d i.fteducst i.mteducst i.ftempst  ///
-            if smpl == 1 [pweight = panel_wt_10_16], ///
-            cluster(district_iid) robust
-    estimates table, k($IV_var) star(.1 .05 .01)    
-    estimates store mIV_`outcome', title(Model `outcome')
-
-    drop smpl 
   }
 
 
 ereturn list
 mat list e(b)
-estout m_job_stable_3m m_formal m_wp_industry_jlmps_3m ///
+estout m_job_stable_3m m_formal m_private m_wp_industry_jlmps_3m ///
       m_member_union_3m m_skills_required_pjob  ///
       m_ln_total_rwage_3m  m_ln_hourly_rwage ///
       m_work_hours_pweek_3m_w m_work_days_pweek_3m ///
@@ -365,7 +350,7 @@ estout m_job_stable_3m m_formal m_wp_industry_jlmps_3m ///
 *(95%) [90%] level. Based
 
 *erase "$out/reg_infra_access.tex"
-esttab m_job_stable_3m m_formal m_wp_industry_jlmps_3m ///
+esttab m_job_stable_3m m_formal m_private m_wp_industry_jlmps_3m ///
       m_member_union_3m m_skills_required_pjob  ///
       m_ln_total_rwage_3m  m_ln_hourly_rwage ///
       m_work_hours_pweek_3m_w m_work_days_pweek_3m /// 
@@ -384,7 +369,7 @@ mtitles("Stable" "Formal" "Industry" "Union" "Skills" "Total W"  "Hourly W" "WH 
     nonotes ///
     addnotes("Standard errors clustered at the district level. Significance levels: *p $<$ 0.1, ** p $<$ 0.05, *** p $<$ 0.01") 
 
-estimates drop m_job_stable_3m m_formal m_wp_industry_jlmps_3m ///
+estimates drop m_job_stable_3m m_formal m_private m_wp_industry_jlmps_3m ///
       m_member_union_3m m_skills_required_pjob  ///
       m_ln_total_rwage_3m  m_ln_hourly_rwage ///
        m_work_hours_pweek_3m_w m_work_days_pweek_3m 
@@ -461,7 +446,7 @@ tab dist_year, m
 
 
   foreach outcome of global outcome_cond {
-    xi: ivreg2  ln_total_rwage_3m ///
+    xi: ivreg2  `outcome' ///
                 i.district_iid i.year ///
                 $controls i.educ1d i.fteducst i.mteducst i.ftempst ///
                 dist_year ln_nb_refugees_bygov ///
@@ -517,7 +502,10 @@ mtitles("Stable" "Formal" "Private" "Open" "Union" "Skills" "Total W"  "Hourly W
     nonotes ///
     addnotes("Standard errors clustered at the district level. Significance levels: *p $<$ 0.1, ** p $<$ 0.05, *** p $<$ 0.01") 
 
-
+estimates drop m_job_stable_3m m_formal m_private m_wp_industry_jlmps_3m ///
+      m_member_union_3m m_skills_required_pjob  ///
+      m_ln_total_rwage_3m  m_ln_hourly_rwage ///
+      m_work_hours_pweek_3m_w m_work_days_pweek_3m 
 
 
 /*
