@@ -184,7 +184,7 @@ margins, dydx($dep_var)
 
 
 
-
+/*
         ****************************************************************
         * PROBABILITY OF BECOMING UNEMPLOYED [FROM INFORMALY EMPLOYED] *
         ****************************************************************
@@ -235,13 +235,13 @@ estimates table, b(%7.4f) se(%7.4f) stats(N r2_a) k($dep_var)
 margins, dydx($dep_var) 
 
 
-
+*/
 
 
         **********************************************************************
         * PROBABILITY OF BECOMING INFORMALY EMPLOYED [FROM FORMALY EMPLOYED] *
         **********************************************************************
-
+/*
 use "$data_final/06_IV_JLMPS_Construct_Outcomes.dta", clear
 
 **************
@@ -283,12 +283,12 @@ estimates table, b(%7.4f) se(%7.4f) stats(N r2_a) k($dep_var)
 margins, dydx($dep_var) 
 
 
-
+*/
 
         **************************************************************
         * PROBABILITY OF BECOMING UNEMPLOYED [FROM FORMALY EMPLOYED] *
         **************************************************************
-
+/*
 use "$data_final/06_IV_JLMPS_Construct_Outcomes.dta", clear
 
 **************
@@ -327,7 +327,7 @@ estimates table, k($dep_var) star(.1 .05 .01) b(%7.4f)
 estimates table, b(%7.4f) se(%7.4f) stats(N r2_a) k($dep_var) 
 margins, dydx($dep_var) 
 
-
+*/
 
 
             **********************************************

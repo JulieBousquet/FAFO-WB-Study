@@ -254,7 +254,7 @@ esttab m_job_stable_3m m_formal m_wp_industry_jlmps_3m ///
       m_member_union_3m m_skills_required_pjob  ///
       m_ln_total_rwage_3m  m_ln_hourly_rwage ///
       m_work_hours_pweek_3m_w m_work_days_pweek_3m /// 
-      using "$out_analysis/reg_robust_m3.tex", se label replace booktabs ///
+      using "$out_analysis/ROB_reg_m3_2IVs.tex", se label replace booktabs ///
       cells(b(star fmt(%9.3f)) se(par fmt(%9.3f))) ///
 mtitles("Stable" "Formal" "Industry" "Union" "Skills" "Total W"  "Hourly W" "WH pday" "WD pweek") ///
   drop(age age2 gender hhsize _Ieduc1d_2 _Ieduc1d_3 _Ieduc1d_4 _Ieduc1d_5 ///
@@ -278,7 +278,7 @@ estimates drop m_job_stable_3m m_formal m_wp_industry_jlmps_3m ///
 */
 
             ***********************************************************************
-              ***** M2: YEAR FE / DISTRICT FE / CONTROL Nb of Refugee   *****
+              ***** M2: YEAR FE / DISTRICT FE / NO CONTROL Nb of Refugee   *****
             ***********************************************************************
 
 use "$data_final/06_IV_JLMPS_Construct_Outcomes.dta", clear
@@ -369,7 +369,7 @@ esttab m_job_stable_3m m_formal m_wp_industry_jlmps_3m ///
       m_member_union_3m m_skills_required_pjob  ///
       m_ln_total_rwage_3m  m_ln_hourly_rwage ///
       m_work_hours_pweek_3m_w m_work_days_pweek_3m /// 
-      using "$out_analysis/reg_robust_m3_NOCTRL_REF.tex", se label replace booktabs ///
+      using "$out_analysis/ROB_reg_m3_NOCTRL_REF.tex", se label replace booktabs ///
       cells(b(star fmt(%9.3f)) se(par fmt(%9.3f))) ///
 mtitles("Stable" "Formal" "Industry" "Union" "Skills" "Total W"  "Hourly W" "WH pday" "WD pweek") ///
   drop(age age2 gender hhsize _Ieduc1d_2 _Ieduc1d_3 _Ieduc1d_4 _Ieduc1d_5 ///
@@ -389,180 +389,6 @@ estimates drop m_job_stable_3m m_formal m_wp_industry_jlmps_3m ///
       m_ln_total_rwage_3m  m_ln_hourly_rwage ///
        m_work_hours_pweek_3m_w m_work_days_pweek_3m 
 *m2 m3 m4 m5 
-
-
-
-
-
-
-* CONTROL REFUGEES
-
-  foreach outcome of global outcome_cond {
-    xi: ivreg2  `outcome' ///
-                i.district_iid i.year ///
-                $controls i.educ1d i.fteducst i.mteducst i.ftempst ln_nb_refugees_bygov ///
-                ($dep_var = $IV_var) ///
-                [pweight = panel_wt_10_16], ///
-                cluster(district_iid) robust ///
-                partial(i.district_iid) ///
-                first
-    codebook `outcome', c
-    estimates table, k($dep_var) star(.1 .05 .01) b(%7.4f) 
-    estimates table, b(%7.4f) se(%7.4f) stats(N r2_a) k($dep_var) 
-    estimates store m_`outcome', title(Model `outcome')
-
-    * With equivalent first-stage
-    gen smpl=0
-    replace smpl=1 if e(sample)==1
-
-    qui xi: reg $dep_var $IV_var ///
-            i.year i.district_iid ///
-             $controls i.educ1d i.fteducst i.mteducst i.ftempst ln_nb_refugees_bygov ///
-            if smpl == 1 [pweight = panel_wt_10_16], ///
-            cluster(district_iid) robust
-    estimates table, k($IV_var) star(.1 .05 .01)    
-    estimates store mIV_`outcome', title(Model `outcome')
-
-    drop smpl 
-  }
-
-
-
-
-ereturn list
-mat list e(b)
-estout m_job_stable_3m m_formal m_wp_industry_jlmps_3m ///
-      m_member_union_3m m_skills_required_pjob  ///
-      m_ln_total_rwage_3m  m_ln_hourly_rwage ///
-      m_work_hours_pweek_3m_w m_work_days_pweek_3m ///
-      , cells(b(star fmt(%9.3f)) se(par fmt(%9.3f))) ///
-  drop(age age2 gender hhsize _Ieduc1d_2 _Ieduc1d_3 _Ieduc1d_4 _Ieduc1d_5 ///
-         _Ieduc1d_6 _Ieduc1d_7 _Ifteducst_2 ///
-        _Ifteducst_3 _Ifteducst_4 _Ifteducst_5 _Ifteducst_6 ///
-        _Imteducst_2 _Imteducst_3 _Imteducst_4 _Imteducst_5 ///
-        _Imteducst_6 _Iftempst_2 _Iftempst_3 _Iftempst_4 _Iftempst_5 ///
-        _Iftempst_6 _Iyear_2016 ///
-         $controls)   ///
-   legend label varlabels(_cons constant) starlevels(* 0.1 ** 0.05 *** 0.01)           ///
-   stats(r2 df_r bic, fmt(3 0 1) label(R-sqr dfres BIC))
-
-*** (**) [*] indicates significance at the 99%
-*(95%) [90%] level. Based
-
-*erase "$out/reg_infra_access.tex"
-esttab m_job_stable_3m m_formal m_wp_industry_jlmps_3m ///
-      m_member_union_3m m_skills_required_pjob  ///
-      m_ln_total_rwage_3m  m_ln_hourly_rwage ///
-      m_work_hours_pweek_3m_w m_work_days_pweek_3m /// 
-      using "$out_analysis/reg_robust_m3_CTRL_REF.tex", se label replace booktabs ///
-      cells(b(star fmt(%9.3f)) se(par fmt(%9.3f))) ///
-mtitles("Stable" "Formal" "Industry" "Union" "Skills" "Total W"  "Hourly W" "WH pday" "WD pweek") ///
-  drop(age age2 gender hhsize _Ieduc1d_2 _Ieduc1d_3 _Ieduc1d_4 _Ieduc1d_5 ///
-         _Ieduc1d_6 _Ieduc1d_7 _Ifteducst_2 ///
-        _Ifteducst_3 _Ifteducst_4 _Ifteducst_5 _Ifteducst_6 ///
-        _Imteducst_2 _Imteducst_3 _Imteducst_4 _Imteducst_5 ///
-        _Imteducst_6 _Iftempst_2 _Iftempst_3 _Iftempst_4 _Iftempst_5 ///
-        _Iftempst_6 _Iyear_2016 ///
-         $controls) starlevels(* 0.1 ** 0.05 *** 0.01) ///
-   title("Results IV Regression with District and Year FE, Control for the refugee inflow"\label{tab1}) nofloat ///
-   stats(N r2_a , labels("Obs" "Adj. R-Squared" "Control Mean")) ///
-    nonotes ///
-    addnotes("Standard errors clustered at the district level. Significance levels: *p $<$ 0.1, ** p $<$ 0.05, *** p $<$ 0.01") 
-
-estimates drop m_job_stable_3m m_formal m_wp_industry_jlmps_3m ///
-      m_member_union_3m m_skills_required_pjob  ///
-      m_ln_total_rwage_3m  m_ln_hourly_rwage ///
-       m_work_hours_pweek_3m_w m_work_days_pweek_3m 
-*m2 m3 m4 m5 
-
-
-
-
-
-
-
-
-
-          ***********************************************************************
-            *****    M4:  PARTIAL OUT + SCATTER    *****
-          ***********************************************************************
-
-/*INSTRUCTION: I suggest we partial out both variables (meaning we store the residuals 
-from specification where we regress both variables on fixed effects and then use scatter plot, 
-fitted line, and eventually a non-parametric line).*/
-
-use "$data_final/06_IV_JLMPS_Construct_Outcomes.dta", clear
-
-tab nationality_cl year 
-*drop if nationality_cl != 1
-
-drop if age > 64 & year == 2016
-drop if age > 60 & year == 2010 //60 in 2010 so 64 in 2016
-
-drop if age < 15 & year == 2016 
-drop if age < 11 & year == 2010 //11 in 2010 so 15 in 2016
-
-keep if emp_16_10 == 1 
-
-distinct indid_2010 
-duplicates tag indid_2010, gen(dup)
-bys year: tab dup
-drop if dup == 0
-drop dup
-tab year
-
-xtset, clear 
-xtset indid_2010 year 
-
-reg $dep_var i.district_iid i.year  [pweight = panel_wt_10_16], cluster(district_iid) robust 
-predict dep_var_res
-tab dep_var_res
-
-reg $IV_var i.district_iid i.year   [pweight = panel_wt_10_16], cluster(district_iid) robust 
-predict iv_var_res
-tab iv_var_res
-*winsor2 iv_var_res, replace cuts(0 90)
-tab iv_var_res
-reg dep_var_res iv_var_res
-
-twoway (scatter dep_var_res iv_var_res, mcolor(gray) msize(small) legend(label(1 "Fitted Values"))) ///
-(lfit dep_var_res iv_var_res, lwidth(thick) legend(label(2 "Linear Prediction"))) ///
-, graphregion(color(white))
-
-*|| (lpoly dep_var_res iv_var_res, lwidth(thick)  kernel(epan2) degree(4) legend(label(3 "Local Poly"))) ///
-*|| (fpfit dep_var_res iv_var_res, lwidth(thick) legend(label(4 "Fractional Poly"))) ///
-
-
-graph export "$out_analysis\fitted_values_IVres.png", as(png) replace
-
-
-/*
-twoway scatter dep_var_res iv_var_res || lfit dep_var_res iv_var_res
-
-*ssc des krls
-*net install krls
-
-twoway (scatter dep_var_res iv_var_res, mcolor(gray) msize(small)) ///
-|| (lfit dep_var_res iv_var_res, lcolor(black) lwidth(thick)) ///
-, legend(off) graphregion(color(white))
-
-twoway (scatter dep_var_res iv_var_res, mcolor(gray) msize(small)) ///
-|| (lpoly dep_var_res iv_var_res, kernel(epan2) degree(4) lcolor(black) lwidth(thick)) ///
-, legend(off) graphregion(color(white))
-
-twoway (scatter dep_var_res iv_var_res, mcolor(gray) msize(small)) ///
-|| (lowess dep_var_res iv_var_res, lcolor(black) lwidth(thick)) ///
-, legend(off) graphregion(color(white))
-*/
-
-/*
-Lowess smoothing
-fpfit fractional polynomial plot
-linear prediction plot
-local polynomial smooth plot
-*/
-
-
 
 
 
@@ -642,8 +468,7 @@ tab dist_year, m
                 ($dep_var = $IV_var) ///
                 [pweight = panel_wt_10_16], ///
                 cluster(district_iid) robust ///
-                partial(i.district_iid) ///
-                first
+                partial(i.district_iid) 
    codebook `outcome', c
     estimates table, k($dep_var dist_year) star(.1 .05 .01) b(%7.4f) 
     estimates table, b(%7.4f) se(%7.4f) stats(N r2_a) k($dep_var dist_year) 
@@ -854,8 +679,11 @@ foreach outcome of global outcome_cond {
 
 
 
-************* PRIVATE / PUBLIC SECTOR
+************* 
 
+/******************************
+CONTROL PRIVATE / PUBLIC SECTOR
+*******************************/
 
 use "$data_final/06_IV_JLMPS_Construct_Outcomes.dta", clear
 
@@ -899,8 +727,7 @@ tab private_dt year
                 ($dep_var = $IV_var) ///
                 [pweight = panel_wt_10_16], ///
                 cluster(district_iid) ///
-                partial(i.district_iid) ///
-                first
+                partial(i.district_iid) 
     codebook `outcome', c
     estimates table, k($dep_var _Iprivate_d_1) star(.1 .05 .01) b(%7.4f) 
     estimates table, b(%7.4f) se(%7.4f) stats(N r2_a) k($dep_var _Iprivate_d_1) 
@@ -933,7 +760,7 @@ esttab m_job_stable_3m m_formal m_private m_wp_industry_jlmps_3m ///
       m_member_union_3m m_skills_required_pjob  ///
       m_ln_total_rwage_3m  m_ln_hourly_rwage ///
       m_work_hours_pweek_3m_w m_work_days_pweek_3m /// 
-      using "$out_analysis/ROB_reg_IV_FE_district_year_SECTOR_TIME.tex", se label replace booktabs ///
+      using "$out_analysis/ROB_reg_IV_FE_district_year_PRIVATE_TIME.tex", se label replace booktabs ///
       cells(b(star fmt(%9.3f)) se(par fmt(%9.3f))) ///
 mtitles("Stable" "Formal" "Private" "Open" "Union" "Skills" "Total W"  "Hourly W" "WH pweek" "WD pweek") ///
   drop(age age2 gender hhsize _Ieduc1d_2 _Ieduc1d_3 _Ieduc1d_4 _Ieduc1d_5 ///
@@ -947,6 +774,201 @@ mtitles("Stable" "Formal" "Private" "Open" "Union" "Skills" "Total W"  "Hourly W
    stats(N r2_a , labels("Obs" "Adj. R-Squared" "Control Mean")) ///
     nonotes ///
     addnotes("Standard errors clustered at the district level. Significance levels: *p $<$ 0.1, ** p $<$ 0.05, *** p $<$ 0.01") 
+
+
+
+/******************************
+CONTROL ALL SECTORS - OCCUPATION
+*******************************/
+
+use "$data_final/06_IV_JLMPS_Construct_Outcomes.dta", clear
+
+tab nationality_cl year , m 
+
+drop if age > 64 & year == 2016
+drop if age > 60 & year == 2010 //60 in 2010 so 64 in 2016
+
+drop if age < 15 & year == 2016 
+drop if age < 11 & year == 2010 //11 in 2010 so 15 in 2016
+
+keep if emp_16_10 == 1 
+
+distinct indid_2010 
+duplicates tag indid_2010, gen(dup)
+bys year: tab dup
+drop if dup == 0
+drop dup
+tab year
+
+xtset, clear 
+destring indid_2010 , replace
+xtset indid_2010 year 
+
+codebook $dep_var
+lab var $dep_var "Work Permits"
+
+gen d2016 = 1 if year == 2016
+replace d2016 = 0 if year == 2010
+gen open_dt = wp_industry_jlmps_3m*d2016
+tab open_dt, m 
+tab open_dt year 
+
+  foreach outcome of global outcome_cond {
+    xi: ivreg2  `outcome' ///
+                i.year i.district_iid  ///
+                $controls i.educ1d i.fteducst i.mteducst i.ftempst ///
+                 ln_nb_refugees_bygov ///
+                 i.open_dt ///
+                ($dep_var = $IV_var) ///
+                [pweight = panel_wt_10_16], ///
+                cluster(district_iid) ///
+                partial(i.district_iid) 
+    codebook `outcome', c
+    estimates table, k($dep_var _Iopen_dt_1) star(.1 .05 .01) b(%7.4f) 
+    estimates table, b(%7.4f) se(%7.4f) stats(N r2_a) k($dep_var  _Iopen_dt_1) 
+    estimates store m_`outcome', title(Model `outcome')
+
+  }
+
+
+ereturn list
+mat list e(b)
+estout m_job_stable_3m m_formal m_private m_wp_industry_jlmps_3m ///
+      m_member_union_3m m_skills_required_pjob  ///
+      m_ln_total_rwage_3m  m_ln_hourly_rwage ///
+      m_work_hours_pweek_3m_w m_work_days_pweek_3m ///
+      , cells(b(star fmt(%9.3f)) se(par fmt(%9.3f))) ///
+  drop(age age2 gender hhsize _Ieduc1d_2 _Ieduc1d_3 _Ieduc1d_4 _Ieduc1d_5 ///
+        ln_nb_refugees_bygov _Ieduc1d_6 _Ieduc1d_7 _Ifteducst_2 ///
+        _Ifteducst_3 _Ifteducst_4 _Ifteducst_5 _Ifteducst_6 ///
+        _Imteducst_2 _Imteducst_3 _Imteducst_4 _Imteducst_5 ///
+        _Imteducst_6 _Iftempst_2 _Iftempst_3 _Iftempst_4 _Iftempst_5 ///
+        _Iftempst_6 _Iyear_2016 ///
+         $controls)   ///
+   legend label varlabels(_cons constant) starlevels(* 0.1 ** 0.05 *** 0.01)           ///
+   stats(r2 df_r bic, fmt(3 0 1) label(R-sqr dfres BIC))
+
+*** (**) [*] indicates significance at the 99%
+*(95%) [90%] level. Based
+
+*erase "$out/reg_infra_access.tex"
+esttab m_job_stable_3m m_formal m_private m_wp_industry_jlmps_3m ///
+      m_member_union_3m m_skills_required_pjob  ///
+      m_ln_total_rwage_3m  m_ln_hourly_rwage ///
+      m_work_hours_pweek_3m_w m_work_days_pweek_3m /// 
+      using "$out_analysis/ROB_reg_IV_FE_district_year_OPEN_TIME.tex", se label replace booktabs ///
+      cells(b(star fmt(%9.3f)) se(par fmt(%9.3f))) ///
+mtitles("Stable" "Formal" "Private" "Open" "Union" "Skills" "Total W"  "Hourly W" "WH pweek" "WD pweek") ///
+  drop(age age2 gender hhsize _Ieduc1d_2 _Ieduc1d_3 _Ieduc1d_4 _Ieduc1d_5 ///
+        ln_nb_refugees_bygov _Ieduc1d_6 _Ieduc1d_7 _Ifteducst_2 ///
+        _Ifteducst_3 _Ifteducst_4 _Ifteducst_5 _Ifteducst_6 ///
+        _Imteducst_2 _Imteducst_3 _Imteducst_4 _Imteducst_5 ///
+        _Imteducst_6 _Iftempst_2 _Iftempst_3 _Iftempst_4 _Iftempst_5 ///
+        _Iftempst_6 _Iyear_2016 ///
+         $controls) starlevels(* 0.1 ** 0.05 *** 0.01) ///
+   title("Results IV Regression with District, Year and Sector FE"\label{tab1}) nofloat ///
+   stats(N r2_a , labels("Obs" "Adj. R-Squared" "Control Mean")) ///
+    nonotes ///
+    addnotes("Standard errors clustered at the district level. Significance levels: *p $<$ 0.1, ** p $<$ 0.05, *** p $<$ 0.01") 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+          ***********************************************************************
+            *****    M4:  PARTIAL OUT + SCATTER    *****
+          ***********************************************************************
+
+/*INSTRUCTION: I suggest we partial out both variables (meaning we store the residuals 
+from specification where we regress both variables on fixed effects and then use scatter plot, 
+fitted line, and eventually a non-parametric line).*/
+
+use "$data_final/06_IV_JLMPS_Construct_Outcomes.dta", clear
+
+tab nationality_cl year 
+*drop if nationality_cl != 1
+
+drop if age > 64 & year == 2016
+drop if age > 60 & year == 2010 //60 in 2010 so 64 in 2016
+
+drop if age < 15 & year == 2016 
+drop if age < 11 & year == 2010 //11 in 2010 so 15 in 2016
+
+keep if emp_16_10 == 1 
+
+distinct indid_2010 
+duplicates tag indid_2010, gen(dup)
+bys year: tab dup
+drop if dup == 0
+drop dup
+tab year
+
+xtset, clear 
+xtset indid_2010 year 
+
+reg $dep_var i.district_iid i.year  [pweight = panel_wt_10_16], cluster(district_iid) robust 
+predict dep_var_res
+tab dep_var_res
+
+reg $IV_var i.district_iid i.year   [pweight = panel_wt_10_16], cluster(district_iid) robust 
+predict iv_var_res
+tab iv_var_res
+*winsor2 iv_var_res, replace cuts(0 90)
+tab iv_var_res
+reg dep_var_res iv_var_res
+
+twoway (scatter dep_var_res iv_var_res, mcolor(gray) msize(small) legend(label(1 "Fitted Values"))) ///
+(lfit dep_var_res iv_var_res, lwidth(thick) legend(label(2 "Linear Prediction"))) ///
+, graphregion(color(white))
+
+*|| (lpoly dep_var_res iv_var_res, lwidth(thick)  kernel(epan2) degree(4) legend(label(3 "Local Poly"))) ///
+*|| (fpfit dep_var_res iv_var_res, lwidth(thick) legend(label(4 "Fractional Poly"))) ///
+
+
+graph export "$out_analysis\fitted_values_IVres.png", as(png) replace
+
+
+/*
+twoway scatter dep_var_res iv_var_res || lfit dep_var_res iv_var_res
+
+*ssc des krls
+*net install krls
+
+twoway (scatter dep_var_res iv_var_res, mcolor(gray) msize(small)) ///
+|| (lfit dep_var_res iv_var_res, lcolor(black) lwidth(thick)) ///
+, legend(off) graphregion(color(white))
+
+twoway (scatter dep_var_res iv_var_res, mcolor(gray) msize(small)) ///
+|| (lpoly dep_var_res iv_var_res, kernel(epan2) degree(4) lcolor(black) lwidth(thick)) ///
+, legend(off) graphregion(color(white))
+
+twoway (scatter dep_var_res iv_var_res, mcolor(gray) msize(small)) ///
+|| (lowess dep_var_res iv_var_res, lcolor(black) lwidth(thick)) ///
+, legend(off) graphregion(color(white))
+*/
+
+/*
+Lowess smoothing
+fpfit fractional polynomial plot
+linear prediction plot
+local polynomial smooth plot
+*/
+
+
 
 
 

@@ -31,6 +31,8 @@ global    dep_var   ln_agg_wp_orig
 *IV VARIABLE
 global    IV_var    resc_IV_SS_5
 
+*IV VARIABLE LIST
+global IVs  IV_1 IV_3 IV_4 IV_5
 
 *OUTCOME CONDITIONAL ON EMPLOYEMENT
 global    outcome_cond ///
@@ -58,7 +60,7 @@ global    outcome_cond ///
 */
 
 *OUTCONES UNCONDITIONAL
-global    outcome_uncond ///
+/*global    outcome_uncond ///
               ln_b_rwage_unolf ///UNCONDITIONAL - UNEMPLOYED & OLF: WAGE 0 - LOG - Basic Wage (3-month)
               ln_b_rwage_unemp ///UNCONDITIONAL - UNEMPLOYED WAGE 0 / OLF WAGE MISSING - LOG Basic (3m)
               ln_t_rwage_unolf ///UNCONDITIONAL - UNEMPLOYED & OLF: WAGE 0 - LOG - Total Wage (3-month)
@@ -71,11 +73,23 @@ global    outcome_uncond ///
               work_hours_pday_3m_w_unemp /// UNCONDITIONAL - UNEMPLOYED work hours 0 / OLF work hours MISSING - work hours (3m)
               unemployed_3cat_3m /// From unempsr1m - mrk def, search req; 3m, 3 empl 2 unemp 1 OLF
               unemployed_3m /// From unempsr1m - mrk def, search req; 3m, empl or unemp, OLF is miss
-              unemployed_olf_3m /// From unempsr1 - mrk def, search req; 3m, empl&OLF or unemp
+              unemployed_olf_3m /// From unempsr1 - mrk def, search req; 3m, empl or unemp&OLF
               employed_3cat_3m /// From uswrkstsr1 - mkt def, search req; 3m, 2 empl - 1 unemp - 0 OLF
               employed_3m /// From uswrkstsr1 - mkt def, search req; 3m, 2 empl - 1 unemp - OLF miss
               employed_olf_3m /// From uswrkstsr1 - mkt def, search req; 3m, 2 empl - 1 unemp&OLF
- 
+*/ 
+global    outcome_uncond ///
+              job_stable_3m_unolf ///  UNCONDITIONAL - UNEMPLOYED & OLF: 0  : From usstablp - Stability of employement (3m) - 1 permanent - 0 temp, seas, cas
+              member_union_3m_unolf /// UNCONDITIONAL - UNEMPLOYED & OLF: 0  : Member of a syndicate/trade union (ref. 3-mnths)
+              skills_required_pjob_unolf /// UNCONDITIONAL - UNEMPLOYED & OLF: 0 : Does primary job require any skill
+              ln_t_rwage_unolf /// UNCONDITIONAL - UNEMPLOYED & OLF: WAGE 0 - LOG - Total Wage (3-month)
+              ln_hourly_rwage_unolf /// UNCONDITIONAL - UNEMPLOYED & OLF: WAGE 0 - LOG - Hourly Wage (3-month)
+              work_hours_pday_3m_w_unolf /// UNCONDITIONAL - UNEMPLOYED & OLF: 0 - work hours (3-month)
+              work_days_pweek_3m_unolf /// UNCONDITIONAL - UNEMPLOYED & OLF: 0 - work day per week (3-month)
+              employed_olf_3m /// From uswrkstsr1 - mkt def, search req; 3m, 2 empl - 1 unemp&OLF
+              unemployed_olf_3m /// From unempsr1 - mrk def, search req; 3m, empl or unemp&OLF
+              unemployed_3m // From unempsr1m - mrk def, search req; 3m, empl or unemp, OLF is miss
+
 global    globals_list ///
             outcome_cond outcome_uncond
 

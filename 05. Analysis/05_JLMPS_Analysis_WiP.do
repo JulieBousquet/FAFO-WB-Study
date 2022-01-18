@@ -1167,42 +1167,13 @@ xtset indid_2010 year
 codebook $dep_var
 lab var $dep_var "Work Permits"
 
-*ren work_hours_pday_3m_w_unemp wh_pd
-
-
-/*
-gen unemp_olf = 1 if unemployed_3cat_3m == 3
-replace unemp_olf = 2 if unemployed_3cat_3m == 2
-
-ren ln_t_rwage_unemp ln_wage
-ren ln_hourly_rwage_unemp ln_wh
-
-global iv_check_uncond  employed_3m unemp_olf ///
-                        ln_wage ln_wh wh_pd
-*/
-
-/*
-ren ln_total_rwage_3m ln_wage_c
-ren ln_hourly_rwage ln_wh_c
-gen ln_whw = ln(1+ work_hours_pweek_3m_w)
-gen ln_wd = ln(1+ work_hours_pday_3m_w)
-
-global iv_check_cond    formal ln_wage_c ln_wh_c ///
-                        ln_whw  ln_wd 
-
-*/
-
-ren work_hours_pweek_3m_w whpw
-ren work_hours_pday_3m_w wdpw 
-
 
 ren resc_IV_SS_1 IV_1 
-*ren resc_IV_SS_2 IV_2 
 ren resc_IV_SS_3 IV_3 
 ren resc_IV_SS_4 IV_4 
 ren resc_IV_SS_5 IV_5 
 
-global IVs  IV_1 IV_3 IV_4 IV_5
+*global IVs  IV_1 IV_3 IV_4 IV_5
 
 ***************
 *   SAMPLE *
@@ -1257,11 +1228,65 @@ foreach IV of global IVs {
 cls 
 
 **************
-* MODEL 3 IVs*
+* MODEL 4 IVs*
 **************
 
+
+use "$data_final/06_IV_JLMPS_Construct_Outcomes.dta", clear
+
+xtset, clear 
+destring indid_2010 Findid, replace
+mdesc indid_2010
+xtset indid_2010 year 
+
+codebook $dep_var
+lab var $dep_var "Work Permits"
+
+
+ren work_hours_pweek_3m_w whpw
+ren work_hours_pday_3m_w wdpw 
+
+ren resc_IV_SS_1 IV_1 
+ren resc_IV_SS_3 IV_3 
+ren resc_IV_SS_4 IV_4 
+ren resc_IV_SS_5 IV_5 
+
+
+***************
+*   SAMPLE *
+*************** 
+
+tab nationality_cl year 
+*drop if nationality_cl != 1
+
+*Keep only working age pop? 15-64 ? As defined by the ERF
+drop if age > 64 & year == 2016
+drop if age > 60 & year == 2010 //60 in 2010 so 64 in 2016
+
+drop if age < 15 & year == 2016 
+drop if age < 11 & year == 2010 //11 in 2010 so 15 in 2016
+
+drop if miss_16_10 == 1
+drop if emp_16_miss_10 == 1
+drop if emp_10_miss_16 == 1
+drop if unemp_16_miss_10 == 1
+drop if unemp_10_miss_16 == 1
+drop if olf_16_miss_10 == 1
+drop if olf_10_miss_16 == 1 
+
+keep if emp_16_10 == 1
+
+distinct indid_2010 
+duplicates tag indid_2010, gen(dup)
+bys year: tab dup
+drop if dup == 0
+drop dup
+tab year
+
+cls 
+
 *OUTCOME CONDITIONAL ON EMPLOYEMENT
-global    outcome ///
+global    outcome_cond_temp ///
               job_stable_3m ///  From usstablp - Stability of employement (3m) - 1 permanent - 0 temp, seas, cas
               formal  /// 0 Informal - 1 Formal - Informal if no contract (uscontrp=0) OR no insurance (ussocinsp=0)
               private /// Economic Sector of Primary Job  3m - 0 Public 1 Private
@@ -1273,12 +1298,10 @@ global    outcome ///
               whpw  /// Winsorized - Usual No. of Hours/Week, Market Work, (Ref. 3-month)
               wdpw  // Avg. num. of wrk. days per week during 3 mnth.
 
-global IVs  IV_1 IV_3 IV_4 IV_5
-
 
 foreach IV of global IVs {
     codebook `IV', c
-  foreach outcome of global outcome {
+  foreach outcome of global outcome_cond_temp {
     xi: ivreg2  `outcome' ///
                 i.district_iid i.year ///
                 $controls i.educ1d i.fteducst i.mteducst i.ftempst ln_nb_refugees_bygov ///
@@ -1347,34 +1370,83 @@ estimates drop m_`IV'_job_stable_3m m_`IV'_formal ///
 
 
 ***************************
-* UNCONDITIONAL VARIABLES *
+* M3 UNCONDITIONAL VARIABLES *
 ***************************
 
 
-/*
+use "$data_final/06_IV_JLMPS_Construct_Outcomes.dta", clear
+
+xtset, clear 
+destring indid_2010 Findid, replace
+mdesc indid_2010
+xtset indid_2010 year 
+
+codebook $dep_var
+lab var $dep_var "Work Permits"
+
+***************
+*   SAMPLE *
+*************** 
+
+tab nationality_cl year 
+*drop if nationality_cl != 1
+
+*Keep only working age pop? 15-64 ? As defined by the ERF
+drop if age > 64 & year == 2016
+drop if age > 60 & year == 2010 //60 in 2010 so 64 in 2016
+
+drop if age < 15 & year == 2016 
+drop if age < 11 & year == 2010 //11 in 2010 so 15 in 2016
+
+
+distinct indid_2010 
+duplicates tag indid_2010, gen(dup)
+bys year: tab dup
+drop if dup == 0
+drop dup
+tab year
+
+ren member_union_3m_unolf union_unolf
+ren skills_required_pjob_unolf skills_pjob_unolf
+ren ln_hourly_rwage_unolf ln_h_wage_unolf
+ren work_hours_pw_3m_w_unolf whpw_unolf
+ren work_days_pweek_3m_unolf wdpw_unolf
+
+global    outcome_uncond_temp ///
+              job_stable_3m_unolf ///  UNCONDITIONAL - UNEMPLOYED & OLF: 0  : From usstablp - Stability of employement (3m) - 1 permanent - 0 temp, seas, cas
+              union_unolf /// UNCONDITIONAL - UNEMPLOYED & OLF: 0  : Member of a syndicate/trade union (ref. 3-mnths)
+              skills_pjob_unolf /// UNCONDITIONAL - UNEMPLOYED & OLF: 0 : Does primary job require any skill
+              ln_t_rwage_unolf /// UNCONDITIONAL - UNEMPLOYED & OLF: WAGE 0 - LOG - Total Wage (3-month)
+              ln_h_wage_unolf /// UNCONDITIONAL - UNEMPLOYED & OLF: WAGE 0 - LOG - Hourly Wage (3-month)
+              whpw_unolf /// UNCONDITIONAL - UNEMPLOYED & OLF: 0 - work hours (3-month)
+              wdpw_unolf /// UNCONDITIONAL - UNEMPLOYED & OLF: 0 - work day per week (3-month)
+              employed_olf_3m /// From uswrkstsr1 - mkt def, search req; 3m, 2 empl - 1 unemp&OLF
+              unemployed_olf_3m /// From unempsr1 - mrk def, search req; 3m, empl or unemp&OLF
+              unemployed_3m // From unempsr1m - mrk def, search req; 3m, empl or unemp, OLF is miss
+
 cls 
 
-foreach IV of global IVs {
-    codebook `IV', c
-      foreach outcome of global iv_check_uncond {
+      foreach outcome of global outcome_uncond_temp {
         qui xi: ivreg2  `outcome' ///
                     i.district_iid i.year ///
                     $controls i.educ1d i.fteducst i.mteducst i.ftempst ln_nb_refugees_bygov ///
-                    ($dep_var = `IV') ///
+                    ($dep_var = $IV_var) ///
                     [pweight = panel_wt_10_16], ///
                     cluster(district_iid) robust ///
                     partial(i.district_iid) 
         codebook `outcome', c
         estimates table, k($dep_var) star(.1 .05 .01) b(%7.4f) 
         estimates table, b(%7.4f) se(%7.4f) stats(N r2_a) k($dep_var) 
-        estimates store m_`IV'_`outcome', title(Model `outcome')
+        estimates store m_`outcome', title(Model `outcome')
       }
     
 ereturn list
 mat list e(b)
-estout m_`IV'_employed_3m m_`IV'_unemp_olf ///
-         m_`IV'_ln_wage ///
-        m_`IV'_ln_wh m_`IV'_wh_pd ///
+estout m_job_stable_3m_unolf m_union_unolf ///
+        m_skills_pjob_unolf m_ln_t_rwage_unolf ///
+          m_ln_h_wage_unolf  m_whpw_unolf ///
+        m_wdpw_unolf  m_employed_olf_3m ///
+          m_unemployed_olf_3m  m_unemployed_3m ///
       , cells(b(star fmt(%9.3f)) se(par fmt(%9.3f))) ///
   drop(age age2 gender hhsize _Ieduc1d_2 _Ieduc1d_3 _Ieduc1d_4 _Ieduc1d_5 ///
         ln_nb_refugees_bygov _Ieduc1d_6 _Ieduc1d_7 _Ifteducst_2 ///
@@ -1390,9 +1462,12 @@ estout m_`IV'_employed_3m m_`IV'_unemp_olf ///
 *(95%) [90%] level. Based
 
 *erase "$out/reg_infra_access.tex"
-esttab m_`IV'_employed_3m m_`IV'_unemp_olf m_`IV'_ln_wage ///
-        m_`IV'_ln_wh m_`IV'_wh_pd ///
-      using "$out_analysis/reg_`IV'_01_Uncond.tex", se label replace booktabs ///
+esttab m_job_stable_3m_unolf m_union_unolf ///
+        m_skills_pjob_unolf m_ln_t_rwage_unolf ///
+          m_ln_h_wage_unolf  m_whpw_unolf ///
+        m_wdpw_unolf  m_employed_olf_3m ///
+          m_unemployed_olf_3m  m_unemployed_3m ///
+      using "$out_analysis/reg_Year_District_FE_Uncond.tex", se label replace booktabs ///
       cells(b(star fmt(%9.3f)) se(par fmt(%9.3f))) ///
 mtitles("Empl" "Unemp" "Wage" "Hourly Wage" "W. Hours") ///
   drop(age age2 gender hhsize _Ieduc1d_2 _Ieduc1d_3 _Ieduc1d_4 _Ieduc1d_5 ///
@@ -1407,10 +1482,14 @@ mtitles("Empl" "Unemp" "Wage" "Hourly Wage" "W. Hours") ///
     nonotes ///
     addnotes("Standard errors clustered at the district level. Significance levels: *p $<$ 0.1, ** p $<$ 0.05, *** p $<$ 0.01") 
 
-estimates drop m_`IV'_employed_3m m_`IV'_unemp_olf m_`IV'_ln_wage ///
-        m_`IV'_ln_wh m_`IV'_wh_pd 
-}
-*/
+estimates drop m_job_stable_3m_unolf m_union_unolf ///
+        m_skills_pjob_unolf m_ln_t_rwage_unolf ///
+          m_ln_h_wage_unolf  m_whpw_unolf ///
+        m_wdpw_unolf  m_employed_olf_3m ///
+          m_unemployed_olf_3m  m_unemployed_3m 
+
+
+
 ***************************
 * CONDITIONAL VARIABLES *
 ***************************

@@ -767,6 +767,12 @@ replace job_stable_3m = 0 if usstablp != 1 & !mi(usstablp)
 lab var job_stable_3m "From usstablp - Stability of employement (3m) - 1 permanent - 0 temp, seas, cas"
 tab job_stable_3m, m
 
+            *Unconditional : IF UNEMPLOYED & OLF: IS 0
+            gen job_stable_3m_unolf = job_stable_3m if employed_3cat_3m == 2
+            replace job_stable_3m_unolf = 0 if employed_3cat_3m  == 1 | employed_3cat_3m  == 0 
+            tab job_stable_3m_unolf
+            lab var job_stable_3m_unolf "UNCONDITIONAL - UNEMPLOYED & OLF: 0 - job_stable_3m"
+
 *LABOR FORCE PARTICIPATION
 *The labor force participation rate indicates the percentage of all people of working age who 
 *are employed or are actively seeking work
@@ -1319,12 +1325,16 @@ tab unemployed_3m, m
 
 *Std. unemployed with mrkt def. (search is required)
 tab unempsr1, m
-gen unemployed_olf_3m = 2 if unempsr1 == 1
-replace unemployed_olf_3m = 1 if unempsr1 == 0
+gen unemployed_olf_3m = 2 if unempsr1 == 1 & uswrkstsr1 == 2
+replace unemployed_olf_3m = 2 if unempsr1 == 0 & uswrkstsr1 == 3
+replace unemployed_olf_3m = 2 if unempsr1 == . & uswrkstsr1 == 3
+replace unemployed_olf_3m = 1 if unempsr1 == 0 & uswrkstsr1 == 1
+replace unemployed_olf_3m = 1 if unempsr1 == . & uswrkstsr1 == 1
+replace unemployed_olf_3m = 1 if unempsr1 == 1 & uswrkstsr1 == 1
 
-lab def unemployed_olf_3m 2 "Unemployed" 1 "Employed or OLF", modify
+lab def unemployed_olf_3m 2 "Unemployed or OLF" 1 "Employed ", modify
 lab val unemployed_olf_3m unemployed_olf_3m
-lab var unemployed_olf_3m "From unempsr1 - mrk def, search req; 3m, empl&OLF or unemp"
+lab var unemployed_olf_3m "From unempsr1 - mrk def, search req; 3m, empl or unemp&OLF"
 tab unemployed_olf_3m, m 
 
 *Current unemployment duration (in months)
@@ -1381,6 +1391,19 @@ ren usnumdys work_days_pweek_3m
 tab work_days_pweek_3m , m
 replace work_days_pweek_3m = . if work_days_pweek_3m == 0
 
+            *Unconditional work hours per day: IF UNEMPLOYED & OLF: WAGE IS 0
+            gen work_days_pweek_3m_unolf = work_days_pweek_3m if employed_3cat_3m == 2
+            replace work_days_pweek_3m_unolf = 0 if employed_3cat_3m  == 1 | employed_3cat_3m  == 0 
+            tab work_days_pweek_3m_unolf
+            lab var work_days_pweek_3m_unolf "UNCONDITIONAL - UNEMPLOYED & OLF: 0 - work day per week (3-month)"
+
+            *Unconditional work hours per day: IF UNEMPLOYED : WAGE IS 0 / IF OLF: WAGE IS MISSING
+            gen work_days_pweek_3m_unemp = work_days_pweek_3m if employed_3cat_3m == 2
+            replace work_days_pweek_3m_unemp = 0 if employed_3cat_3m == 1 //UNEMP
+            replace work_days_pweek_3m_unemp = . if employed_3cat_3m == 0 //OLF
+            tab work_days_pweek_3m_unemp
+            lab var work_days_pweek_3m_unemp "UNCONDITIONAL - UNEMPLOYED work day per week 0 / OLF work day pweek MISSING - work day pw (3m)"
+
                                  *******************************
                                  ****    HOURS OF WORK      ****
                                  *******************************
@@ -1404,18 +1427,18 @@ su work_hours_pday_3m, d
 winsor2 work_hours_pday_3m, s(_w) c(0 98)
 su work_hours_pday_3m_w
 
-          *Unconditional hourly wage: IF UNEMPLOYED & OLF: WAGE IS 0
+            *Unconditional work hours per day: IF UNEMPLOYED & OLF: WAGE IS 0
             gen work_hours_pday_3m_w_unolf = work_hours_pday_3m_w if employed_3cat_3m == 2
             replace work_hours_pday_3m_w_unolf = 0 if employed_3cat_3m  == 1 | employed_3cat_3m  == 0 
             tab work_hours_pday_3m_w_unolf
-            lab var work_hours_pday_3m_w_unolf "UNCONDITIONAL - UNEMPLOYED & OLF: 0 - work hours (3-month)"
+            lab var work_hours_pday_3m_w_unolf "UNCONDITIONAL - UNEMPLOYED & OLF: 0 - work hours day (3-month)"
 
-            *Unconditional hourly wage: IF UNEMPLOYED : WAGE IS 0 / IF OLF: WAGE IS MISSING
+            *Unconditional work hours per day: IF UNEMPLOYED : WAGE IS 0 / IF OLF: WAGE IS MISSING
             gen work_hours_pday_3m_w_unemp = work_hours_pday_3m_w if employed_3cat_3m == 2
             replace work_hours_pday_3m_w_unemp = 0 if employed_3cat_3m == 1 //UNEMP
             replace work_hours_pday_3m_w_unemp = . if employed_3cat_3m == 0 //OLF
             tab work_hours_pday_3m_w_unemp
-            lab var work_hours_pday_3m_w_unemp "UNCONDITIONAL - UNEMPLOYED work hours 0 / OLF work hours MISSING - work hours (3m)"
+            lab var work_hours_pday_3m_w_unemp "UNCONDITIONAL - UNEMPLOYED work hours 0 / OLF work hours day MISSING - work hours (3m)"
 
 *Crr. No. of Hours/Week, Market Work, (Ref. 1 Week).
 tab crnumhrs1, m 
@@ -1434,6 +1457,20 @@ tab work_hours_pweek_3m
 su work_hours_pweek_3m, d
 winsor2 work_hours_pweek_3m, s(_w) c(0 99)
 su work_hours_pweek_3m_w
+
+            *Unconditional work hours per day: IF UNEMPLOYED & OLF: WAGE IS 0
+            gen work_hours_pw_3m_w_unolf = work_hours_pweek_3m if employed_3cat_3m == 2
+            replace work_hours_pw_3m_w_unolf = 0 if employed_3cat_3m  == 1 | employed_3cat_3m  == 0 
+            tab work_hours_pw_3m_w_unolf
+            lab var work_hours_pw_3m_w_unolf "UNCONDITIONAL - UNEMPLOYED & OLF: 0 - work hours week (3-month)"
+
+            *Unconditional work hours per day: IF UNEMPLOYED : WAGE IS 0 / IF OLF: WAGE IS MISSING
+            gen work_hours_pw_3m_w_unemp = work_hours_pweek_3m if employed_3cat_3m == 2
+            replace work_hours_pw_3m_w_unemp = 0 if employed_3cat_3m == 1 //UNEMP
+            replace work_hours_pw_3m_w_unemp = . if employed_3cat_3m == 0 //OLF
+            tab work_hours_pw_3m_w_unemp
+            lab var work_hours_pw_3m_w_unemp "UNCONDITIONAL - UNEMPLOYED work hours week 0 / OLF work hours MISSING - work hours (3m)"
+
 
 *Usual No. of Hours/Week, Market & Subsistence Work, (Ref. 3-month)
 tab ushrswk2, m 
@@ -1752,6 +1789,13 @@ replace daily_wage_irregular = `r(mean)' if daily_wage_irregular > `r(max)' & !m
 tab unionont
 ren unionont member_union_3m
 
+            *Unconditional : IF UNEMPLOYED & OLF: IS 0
+            gen member_union_3m_unolf = member_union_3m if employed_3cat_3m == 2
+            replace member_union_3m_unolf = 0 if employed_3cat_3m  == 1 | employed_3cat_3m  == 0 
+            tab member_union_3m_unolf
+            lab var member_union_3m_unolf "UNCONDITIONAL - UNEMPLOYED & OLF: 0 - member_union_3m"
+
+
                                     *******************************
                                     ****       SKILLS          ****
                                     *******************************
@@ -1760,6 +1804,13 @@ codebook skilreq edreq skillev
 *Does primary job require any skill
 tab skilreq 
 ren skilreq skills_required_pjob 
+
+            *Unconditional : IF UNEMPLOYED & OLF: IS 0
+            gen skills_required_pjob_unolf = skills_required_pjob if employed_3cat_3m == 2
+            replace skills_required_pjob_unolf = 0 if employed_3cat_3m  == 1 | employed_3cat_3m  == 0 
+            tab skills_required_pjob_unolf
+            lab var skills_required_pjob_unolf "UNCONDITIONAL - UNEMPLOYED & OLF: 0 - skills_required_pjob"
+
 
 *Minimum education requirements for job
 tab edreq 
