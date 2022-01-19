@@ -797,27 +797,26 @@ lab var $dep_var "Work Permits"
 
 gen d2016 = 1 if year == 2016
 replace d2016 = 0 if year == 2010
-gen open_dt = wp_industry_jlmps_3m*d2016
-tab open_dt, m 
-tab open_dt year 
+gen industry_dt = usecac1d*d2016
+tab industry_dt, m 
+tab industry_dt year 
 
   foreach outcome of global outcome_cond {
     xi: ivreg2  `outcome' ///
                 i.year i.district_iid  ///
                 $controls i.educ1d i.fteducst i.mteducst i.ftempst ///
                  ln_nb_refugees_bygov ///
-                 i.open_dt ///
+                 industry_dt ///
                 ($dep_var = $IV_var) ///
                 [pweight = panel_wt_10_16], ///
                 cluster(district_iid) ///
                 partial(i.district_iid) 
     codebook `outcome', c
-    estimates table, k($dep_var _Iopen_dt_1) star(.1 .05 .01) b(%7.4f) 
-    estimates table, b(%7.4f) se(%7.4f) stats(N r2_a) k($dep_var  _Iopen_dt_1) 
+    estimates table, k($dep_var industry_dt) star(.1 .05 .01) b(%7.4f) 
+    estimates table, b(%7.4f) se(%7.4f) stats(N r2_a) k($dep_var  industry_dt) 
     estimates store m_`outcome', title(Model `outcome')
 
   }
-
 
 ereturn list
 mat list e(b)
@@ -844,7 +843,7 @@ esttab m_job_stable_3m m_formal m_private m_wp_industry_jlmps_3m ///
       m_member_union_3m m_skills_required_pjob  ///
       m_ln_total_rwage_3m  m_ln_hourly_rwage ///
       m_work_hours_pweek_3m_w m_work_days_pweek_3m /// 
-      using "$out_analysis/ROB_reg_IV_FE_district_year_OPEN_TIME.tex", se label replace booktabs ///
+      using "$out_analysis/ROB_reg_IV_FE_district_year_INDUS_TIME.tex", se label replace booktabs ///
       cells(b(star fmt(%9.3f)) se(par fmt(%9.3f))) ///
 mtitles("Stable" "Formal" "Private" "Open" "Union" "Skills" "Total W"  "Hourly W" "WH pweek" "WD pweek") ///
   drop(age age2 gender hhsize _Ieduc1d_2 _Ieduc1d_3 _Ieduc1d_4 _Ieduc1d_5 ///

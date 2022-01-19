@@ -766,7 +766,8 @@ preserve
       codebook `outcome', c
        qui xi: ivreg2 `outcome' ///
                     i.year i.district_iid ///
-                    $controls i.educ1d i.fteducst i.mteducst i.ftempst ln_nb_refugees_bygov ///
+                    $controls i.educ1d i.fteducst i.mteducst i.ftempst ///
+                    ln_nb_refugees_bygov ///
                     ($dep_var = $IV_var) ///
                     [pweight = panel_wt_10_16], ///
                     cluster(district_iid) robust ///
@@ -775,13 +776,22 @@ preserve
         qui gen smpl=0
         qui replace smpl=1 if e(sample)==1
         * Then I partial out all variables
-        foreach y in `outcome' $controls $dep_var $IV_var educ1d fteducst mteducst ftempst ln_nb_refugees_bygov {
+        foreach y in `outcome' $controls $dep_var $IV_var ///
+            _Ieduc1d_2 _Ieduc1d_3 _Ieduc1d_4 _Ieduc1d_5 _Ieduc1d_6 _Ieduc1d_7 ///
+            _Ifteducst_2 _Ifteducst_3 _Ifteducst_4 _Ifteducst_5 _Ifteducst_6 ///
+            _Imteducst_2 _Imteducst_3 _Imteducst_4 _Imteducst_5 _Imteducst_6 ///
+            _Iftempst_2 _Iftempst_3 _Iftempst_4 _Iftempst_5 _Iftempst_6 ///
+             ln_nb_refugees_bygov {
           qui reghdfe `y' [pw=panel_wt_10_16] if smpl==1, absorb(year indid_2010) residuals(`y'_c2wr)
           qui rename `y' o_`y'
           qui rename `y'_c2wr `y'
         }
         qui ivreg2 `outcome' ///
-               $controls educ1d fteducst mteducst ftempst ln_nb_refugees_bygov ///
+               $controls _Ieduc1d_2 _Ieduc1d_3 _Ieduc1d_4 _Ieduc1d_5 _Ieduc1d_6 _Ieduc1d_7 ///
+            _Ifteducst_2 _Ifteducst_3 _Ifteducst_4 _Ifteducst_5 _Ifteducst_6 ///
+            _Imteducst_2 _Imteducst_3 _Imteducst_4 _Imteducst_5 _Imteducst_6 ///
+            _Iftempst_2 _Iftempst_3 _Iftempst_4 _Iftempst_5 _Iftempst_6 ///
+             ln_nb_refugees_bygov ///
                ($dep_var = $IV_var) ///
                [pweight = panel_wt_10_16], ///
                cluster(district_iid) robust ///
@@ -789,8 +799,18 @@ preserve
       estimates table, k($dep_var) star(.1 .05 .01) b(%7.4f) 
       estimates table, b(%7.4f) se(%7.4f) stats(N r2_a) k($dep_var) 
       estimates store m_`outcome', title(Model `outcome')
-        qui drop `outcome' $dep_var $IV_var $controls educ1d fteducst mteducst ftempst smpl ln_nb_refugees_bygov
-        foreach y in `outcome' $controls  $dep_var $IV_var educ1d fteducst mteducst ftempst ln_nb_refugees_bygov  {
+        qui drop `outcome' $dep_var $IV_var $controls ///
+        _Ieduc1d_2 _Ieduc1d_3 _Ieduc1d_4 _Ieduc1d_5 _Ieduc1d_6 _Ieduc1d_7 ///
+            _Ifteducst_2 _Ifteducst_3 _Ifteducst_4 _Ifteducst_5 _Ifteducst_6 ///
+            _Imteducst_2 _Imteducst_3 _Imteducst_4 _Imteducst_5 _Imteducst_6 ///
+            _Iftempst_2 _Iftempst_3 _Iftempst_4 _Iftempst_5 _Iftempst_6 ///
+        smpl ln_nb_refugees_bygov
+        foreach y in `outcome' $controls  $dep_var $IV_var ///
+         _Ieduc1d_2 _Ieduc1d_3 _Ieduc1d_4 _Ieduc1d_5 _Ieduc1d_6 _Ieduc1d_7 ///
+            _Ifteducst_2 _Ifteducst_3 _Ifteducst_4 _Ifteducst_5 _Ifteducst_6 ///
+            _Imteducst_2 _Imteducst_3 _Imteducst_4 _Imteducst_5 _Imteducst_6 ///
+            _Iftempst_2 _Iftempst_3 _Iftempst_4 _Iftempst_5 _Iftempst_6 ///
+         ln_nb_refugees_bygov  {
           qui rename o_`y' `y' 
         }
     }
@@ -804,7 +824,12 @@ estout m_job_stable_3m m_formal m_private m_wp_industry_jlmps_3m ///
       m_ln_total_rwage_3m  m_ln_hourly_rwage ///
       m_work_hours_pweek_3m_w m_work_days_pweek_3m  ///
       , cells(b(star fmt(%9.3f)) se(par fmt(%9.3f))) ///
-  drop(age age2 gender hhsize educ1d fteducst mteducst ftempst _cons ///
+  drop(age age2 gender hhsize ///
+         _Ieduc1d_2 _Ieduc1d_3 _Ieduc1d_4 _Ieduc1d_5 _Ieduc1d_6 _Ieduc1d_7 ///
+            _Ifteducst_2 _Ifteducst_3 _Ifteducst_4 _Ifteducst_5 _Ifteducst_6 ///
+            _Imteducst_2 _Imteducst_3 _Imteducst_4 _Imteducst_5 _Imteducst_6 ///
+            _Iftempst_2 _Iftempst_3 _Iftempst_4 _Iftempst_5 _Iftempst_6 /// 
+   _cons ///
        ln_nb_refugees_bygov  $controls)   ///
    legend label varlabels(_cons constant) starlevels(* 0.1 ** 0.05 *** 0.01)           ///
    stats(r2 df_r bic, fmt(3 0 1) label(R-sqr dfres BIC))
@@ -819,7 +844,11 @@ esttab m_job_stable_3m m_formal m_private m_wp_industry_jlmps_3m ///
       using "$out_analysis/reg_05_IV_FE_year_indiv.tex", se label replace booktabs ///
       cells(b(star fmt(%9.3f)) se(par fmt(%9.3f))) ///
 mtitles("Stable" "Formal" "Private" "Open" "Union" "Skills" "Total W"  "Hourly W" "WH pweek" "WD pweek") ///
- drop(age age2 gender hhsize  educ1d fteducst mteducst ftempst ///
+ drop(age age2 gender hhsize  ///
+           _Ieduc1d_2 _Ieduc1d_3 _Ieduc1d_4 _Ieduc1d_5 _Ieduc1d_6 _Ieduc1d_7 ///
+            _Ifteducst_2 _Ifteducst_3 _Ifteducst_4 _Ifteducst_5 _Ifteducst_6 ///
+            _Imteducst_2 _Imteducst_3 _Imteducst_4 _Imteducst_5 _Imteducst_6 ///
+            _Iftempst_2 _Iftempst_3 _Iftempst_4 _Iftempst_5 _Iftempst_6 ///
      _cons ///
        ln_nb_refugees_bygov  $controls) starlevels(* 0.1 ** 0.05 *** 0.01) ///
    title("Results IV Regression with Year and Individual FE"\label{tab1}) nofloat ///
