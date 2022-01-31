@@ -399,6 +399,59 @@ distinct locality_iid
 bys district_iid: tab locality_iid
 
 
+
+
+
+
+
+
+************
+* DISTRICT *
+************ 
+
+*drop district_iid
+
+preserve 
+*codebook locality
+
+*keep if nationality_cl == 1 //Keep only the jordanians
+*keep if nationality_cl != 2 //Keep all but the syrians
+tab district_iid year, m 
+
+keep district_iid indid_2010 year
+reshape wide district_iid, i(indid_2010) j(year)
+
+gen district_move_10_16 = 0
+replace district_move_10_16 = 1 if district_iid2010 != district_iid2016 
+
+
+tab district_move_10_16
+*sort district_move_10_16
+
+reshape long district_iid, i(indid_2010) j(year)
+format indid_2010 %12.0g
+
+tempfile data_distr
+save `data_distr'
+restore 
+
+*ORIGINAL CODE ORIGINAL CODE 
+drop district_iid 
+
+merge 1:1 indid_2010 year using  `data_distr'
+drop _merge 
+
+tab district_iid, m 
+
+
+lab def district_move_10_16 1 "Moved" 0 "Stayed", modify
+lab val district_move_10_16 district_move_10_16
+
+tab district_move_10_16, m 
+
+
+
+
 ***************
 * WORKING AGE *
 *************** 

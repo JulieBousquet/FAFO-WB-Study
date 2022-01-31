@@ -795,9 +795,12 @@ xtset indid_2010 year
 codebook $dep_var
 lab var $dep_var "Work Permits"
 
+tab usocp1d //Occupation of primary job (9)
+tab usecac1d //Economic Activity of primary job (21)
+
 gen d2016 = 1 if year == 2016
 replace d2016 = 0 if year == 2010
-gen industry_dt = usecac1d*d2016
+gen industry_dt = usocp1d*d2016
 tab industry_dt, m 
 tab industry_dt year 
 
@@ -806,14 +809,15 @@ tab industry_dt year
                 i.year i.district_iid  ///
                 $controls i.educ1d i.fteducst i.mteducst i.ftempst ///
                  ln_nb_refugees_bygov ///
-                 industry_dt ///
+                 i.industry_dt ///
                 ($dep_var = $IV_var) ///
                 [pweight = panel_wt_10_16], ///
                 cluster(district_iid) ///
                 partial(i.district_iid) 
     codebook `outcome', c
-    estimates table, k($dep_var industry_dt) star(.1 .05 .01) b(%7.4f) 
-    estimates table, b(%7.4f) se(%7.4f) stats(N r2_a) k($dep_var  industry_dt) 
+    estimates table, star(.1 .05 .01) b(%7.4f) 
+    estimates table, k($dep_var) star(.1 .05 .01) b(%7.4f) 
+    estimates table, b(%7.4f) se(%7.4f) stats(N r2_a) k($dep_var ) 
     estimates store m_`outcome', title(Model `outcome')
 
   }

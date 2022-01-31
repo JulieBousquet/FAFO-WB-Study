@@ -439,6 +439,115 @@ margins, dydx($dep_var)
 
 
 
+            ******************************
+            * PROBA OF CHANGING DISTRICT *
+            ******************************
+
+
+use "$data_final/06_IV_JLMPS_Construct_Outcomes.dta", clear
+
+**************
+*** SAMPLE ***
+**************
+tab nationality_cl year 
+*drop if nationality_cl != 1
+
+drop if age > 64 & year == 2016
+drop if age > 60 & year == 2010 
+drop if age < 15 & year == 2016 
+drop if age < 11 & year == 2010 
+
+tab district_move_10_16, m
+
+***************
+*** TRANSFO ***
+***************
+drop if year == 2010 
+codebook district_move_10_16
+
+bys year: tab district_move_10_16 
+
+gen move_to_wp = .
+replace move_to_wp = 1 if district_move_10_16 == 1 & agg_wp_orig != 0 
+replace move_to_wp = 0 if district_move_10_16 == 1 & agg_wp_orig == 0 
+lab def move_to_wp 0 "Moved to area without WP" 1 "Moved to area with WP", modify
+lab val move_to_wp move_to_wp
+
+gen move_to_no_wp = .
+replace move_to_no_wp = 1 if district_move_10_16 == 1 & agg_wp_orig == 0  
+replace move_to_no_wp = 0 if district_move_10_16 == 1 & agg_wp_orig != 0  
+lab def move_to_no_wp 0 "Moved to area with WP" 1 "Moved to area without WP", modify
+lab val move_to_no_wp move_to_no_wp
+
+gen move_to_wp_3cat = 0
+replace move_to_wp_3cat = 1 if district_move_10_16 == 1 & agg_wp_orig != 0   
+replace move_to_wp_3cat = 2 if district_move_10_16 == 1 & agg_wp_orig == 0  
+lab def move_to_wp_3cat 0 "Did not move" 1 "Moved to area without WP" 2 "Moved to area with WP", modify
+lab val move_to_wp_3cat move_to_wp_3cat
+
+tab move_to_wp, m 
+tab move_to_no_wp, m 
+tab move_to_wp_3cat, m  
+
+tab district_move_10_16, m 
+
+**** Determinent of moving 
+logit district_move_10_16 educ1d fteducst mteducst ftempst ln_nb_refugees_bygov ///
+                                hhsize ln_agg_wp_orig numchildinhh
+estimates table, k() star(.1 .05 .01) b(%7.4f) 
+margins, dydx(_all) 
+
+
+******************
+*** IV REGRESS ***
+******************
+
+xi: ivregress 2sls district_move_10_16  ///
+         $controls i.educ1d i.fteducst i.mteducst i.ftempst ln_nb_refugees_bygov ///
+          ($dep_var = $IV_var) ///
+          [pweight = panel_wt_10_16], ///
+         vce(cl district_iid)
+estimates table, k($dep_var) star(.1 .05 .01) b(%7.4f) 
+estimates table, b(%7.4f) se(%7.4f) stats(N r2_a) k($dep_var) 
+margins, dydx($dep_var) 
+
+divprob  district_move_10_16 , ///
+         endog($dep_var) iv($IV_var) exog(educ1d fteducst mteducst ftempst ln_nb_refugees_bygov)
+estimates table, k($dep_var) star(.1 .05 .01) b(%7.4f) 
+estimates table, b(%7.4f) se(%7.4f) stats(N r2_a) k($dep_var) 
+margins, dydx($dep_var) 
+
+/***** 
+The probability to move decreases when there are more WP !!! 
+The more WP the less likely one is to move (-0.013***)
+*/
+
+xi: ivregress 2sls move_to_wp  ///
+         $controls i.educ1d i.fteducst i.mteducst i.ftempst ln_nb_refugees_bygov ///
+          ($dep_var = $IV_var) ///
+          [pweight = panel_wt_10_16], ///
+         vce(cl district_iid)
+estimates table, k($dep_var) star(.1 .05 .01) b(%7.4f) 
+estimates table, b(%7.4f) se(%7.4f) stats(N r2_a) k($dep_var) 
+margins, dydx($dep_var) 
+
+/*
+If you move, the probability to move to an area with more WP 
+increases with more WP available (0.27***)
+
+If you move, the probability to move to an area without WP
+decraeses with more WP available (-0.27***)
+*/
+
+
+
+
+
+
+
+
+
+
         ****************************
         ***************************************************************
        ***************************************************************
