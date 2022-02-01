@@ -502,6 +502,9 @@ margins, dydx(_all)
 *** IV REGRESS ***
 ******************
 
+********************
+**       MOVE     **
+********************
 xi: ivregress 2sls district_move_10_16  ///
          $controls i.educ1d i.fteducst i.mteducst i.ftempst ln_nb_refugees_bygov ///
           ($dep_var = $IV_var) ///
@@ -521,6 +524,10 @@ margins, dydx($dep_var)
 The probability to move decreases when there are more WP !!! 
 The more WP the less likely one is to move (-0.013***)
 */
+
+********************
+**  MOVE TO WP    **
+********************
 
 xi: ivregress 2sls move_to_wp  ///
          $controls i.educ1d i.fteducst i.mteducst i.ftempst ln_nb_refugees_bygov ///
