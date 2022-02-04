@@ -623,7 +623,7 @@ sort district_en governorate_syria industry_id
 drop if district_en == "Husseiniyyeh District"
 distinct district_iid 
 
-gen inter_dist_confl = distance_dis_gov * share_conflict 
+gen inter_dist_confl = (1/distance_dis_gov) * share_conflict 
 
 collapse (sum) inter_dist_confl, by(district_iid)
 

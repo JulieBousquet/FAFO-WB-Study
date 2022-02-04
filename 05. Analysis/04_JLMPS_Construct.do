@@ -945,6 +945,8 @@ drop _merge
 
 *Institutional Sector Crr. Job (ref 1-week)
 tab crinstsec, m 
+*Institutional Sector Crr. Job (ref 3-months)
+tab usinstsec, m
 *employment status in prim job (ref. 3 months)
 tab usempstp, m 
 gen lf_participation = usempstp
