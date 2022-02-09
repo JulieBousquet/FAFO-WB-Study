@@ -48,6 +48,7 @@ save "$data_JLMPS_temp/JLMPS_GeoUnits_Dico.dta", replace
 *Dictiornnary of geo unit Jordan as of 2015
 import excel "$data_JLMPS_base/Location Codes Arabic 2015 revised 1.19.16 (for 2016).xlsx", firstrow clear
 
+
 ren governorate governorate_iid 
 ren SubDistrict subdistrict_ar
 ren SubDistrictID subdistrict_id
@@ -150,6 +151,9 @@ restore
 *DATA 2016 ONLY to extract the WORK PERMIT VARIABLE AT THE INDIV LEVEL
 use "$data_JLMPS_base/JLMPS 2016 xs v1.1.dta", clear 
 
+*NEW FOR SSIV REFUGEE INFLOW
+destring gov district subdistrict locality, replace
+gen loc_code=string(gov, "%02.0f")+string(district, "%02.0f")+string(subdistrict, "%01.0f")+string(locality, "%03.0f")
 
 ren gov governorate_iid 
 ren district district_id
@@ -270,6 +274,9 @@ use "$data_JLMPS_base/JLMPS 2016 rep xs v1.1.dta", clear
 merge m:1 Findid using "$data_JLMPS_base/JLMPS 2016 panel v1.1.dta", keepusing(Findid panel_wt_10_16 locality_16)
 drop _merge
 
+
+
+
 tab locality_16 if round == 2010
 tab locality_16, m 
 tab locality, m 
@@ -278,6 +285,11 @@ drop locality_16
 tab locality, m 
 
 isid indid
+
+*NEW FOR SSIV REFUGEE INFLOW
+destring gov district subdistrict locality, replace
+gen loc_code=string(gov, "%02.0f")+string(district, "%02.0f")+string(subdistrict, "%01.0f")+string(locality, "%03.0f")
+
 
 ren gov governorate_iid 
 ren district district_id
@@ -595,7 +607,7 @@ tab work_permit, m
 keep  indid district_iid governorate_iid work_permit work_permit_orig ///
     nationality_cl forced_migr ///
       q11201a q11201b q11202 q11203 q11204a q11204b q11205 q11206 ///
-      q11208a q11208b q11212 q11213 q11214 employed
+      q11208a q11208b q11212 q11213 q11214 employed loc_code
 
 *MERGE BY INDIVD ID TO INCLUDET THE WORK PERMIT VARIABLE INTO THE MAIN
 *DATASET

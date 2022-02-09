@@ -893,9 +893,9 @@ estimates drop m_job_stable_3m m_formal m_private m_wp_industry_jlmps_3m ///
 
 *CONTROL VARIABLES
 codebook educ1d 
-codebook fteducst ///  Father's Level of education attained
-codebook mteducst ///  Mother's Level of education attained
- codebook  ftempst ///  Father's Employment Status (When Resp. 15)
+codebook fteducst //  Father's Level of education attained
+codebook mteducst //  Mother's Level of education attained
+codebook ftempst //  Father's Employment Status (When Resp. 15)
 /*
 1  Illiterate
 2  Read & Write
@@ -1123,6 +1123,17 @@ bys year: su ftempst //  Father's Employment Status (When Resp. 15)
 ttest ftempst, by(year)
 
 
+
+
+
+
+
+
+
+
+
+
+
 **************************
 * TT TEST BY DISTRICT WITH WP - 2016
 **************************
@@ -1179,6 +1190,21 @@ ttest real_hourly_wage if year == 2016, by(agg_wp_bi)
 ttest work_hours_pday_3m_w if year == 2016, by(agg_wp_bi)
 ttest work_hours_pweek_3m_w if year == 2016, by(agg_wp_bi)
 ttest work_days_pweek_3m if year == 2016, by(agg_wp_bi)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

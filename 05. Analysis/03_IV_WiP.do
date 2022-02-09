@@ -1968,7 +1968,11 @@ drop _merge
 *tab share_empl_byindus, m 
 
 *gen diff = abs(share_empl_syr - share_empl_byindus)
-gen diff_share = (abs(share_empl_syr - share_empl)^0.5) * share_empl 
+*gen diff_share = (abs(share_empl_syr - share_empl)^0.5) * share_empl //oriig!!!
+*gen diff_share = (abs(share_empl_syr - share_empl)^2) 
+*gen diff_share2 = (abs(share_empl_syr - share_empl)^0.5)
+gen diff_share = 1/(abs(share_empl_syr - share_empl)^0.5) 
+
 tab diff_share, m 
 
 
@@ -2004,9 +2008,20 @@ lab var wp_2016_total "WP 2016 in Jordan by industry"
 sort district_iid
 
 *WORKING MODELS
-gen IV_SS_5 = (nb_ref_syr_bygov_2015/distance_dis_gov) * (1/distance_dis_camp) * wp_2016 * diff_share 
+**ORIG GOOD 
+gen IV_SS_5 = (nb_ref_syr_bygov_2015/distance_dis_gov) * (1/distance_dis_camp) * wp_2016 * diff_share  
+**ORIG GOOD
+
+**TRIALS
 *gen IV_SS_5 = (ln_nb_refugees_bygov/distance_dis_gov) * (wp_2016_total/distance_dis_camp) * wp_2016 * diff_share 
 *gen IV_SS_5 = (ln_nb_refugees_bygov/distance_dis_gov) * wp_2016_total * diff_share 
+
+*gen IV_SS_5 =  (nb_ref_syr_bygov_2015/distance_dis_gov) * wp_2016_total * diff_share 
+*gen IV_SS_5 =  (1/distance_dis_camp) * wp_2016 * (1/diff_share) 
+
+*gen IV_SS_5 = (nb_ref_syr_bygov_2015/distance_dis_gov) * (1/distance_dis_camp) * wp_2016 * diff_share  
+*(1/distance_dis_camp) * wp_2016 * diff_share  
+
 
 tab IV_SS_5, m 
 
@@ -2138,6 +2153,132 @@ save "$data_final/03_ShiftShare_IV_6", replace
 
 
 
+******************************
+/* REFUGE INFLOW INSTRUMENT */
+******************************
+
+
+
+import excel "$data_loc/Location Codes Arabic 2015 revised 1.19.16 (for 2016) Google for import.xls", sheet("Distance to locakity") firstrow clear
+
+drop H-L
+
+destring gov district subdistrict locality, replace
+
+gen loc_code=string(gov, "%02.0f")+string(district, "%02.0f")+string(subdistrict, "%01.0f")+string(locality, "%03.0f")
+
+duplicates drop
+
+rename Amman Amman
+
+foreach var of varlist ZataariCamp AzraqCamp Amman {
+
+egen subd_mean_`var'=mean(`var'), by(gov district subdistrict)
+
+replace `var'=subd_mean_`var' if `var'==.
+
+}
+
+
+
+merge m:1 loc_code using "$data_census/Nationality all v1.dta"
+
+drop _merge
+
+
+
+use "$data_JLMPS_temp/JLMPS 2016 long.dta", clear
+
+foreach num of numlist 2004/2017 {
+
+gen int_`num'=0
+replace int_`num'= prop_hh_syrians if year==`num'
+
+la var int_`num' "Int. `num' and %  HH Syr."
+}
+
+la var prop_hh_syrian "Percentage of HH Syr."
+
+destring indid, gen(ds_indid)
+
+gen subdis_code=substr(loc_code,1,5)
+replace subdis_code="" if subdis_code=="...."
+destring subdis_code, replace
+
+gen dis_code=substr(loc_code,1,4)
+replace dis_code="" if dis_code=="...."
+destring dis_code, replace
+
+ren gov governorate_iid 
+ren district district_id
+ren subdistrict subdistrict_id 
+ren locality locality_id 
+
+distinct governorate_iid //12
+
+mdesc governorate_iid district_id subdistrict_id locality_id
+egen district_iid = concat(governorate_iid district_id) 
+distinct district_iid //51
+
+egen subdistrict_iid = concat(governorate_iid district_id subdistrict_id)
+distinct subdistrict_iid //87
+
+egen locality_iid = concat(governorate_iid district_id subdistrict_id locality_id) if !mi(locality_id)
+distinct locality_iid //505
+mdesc locality_iid 
+
+*START NEW CODE START NEW CODE 
+destring governorate_iid district_iid subdistrict_iid locality_iid, replace 
+
+merge m:1 loc_code using "$data_census/2004 census pct syr.dta"
+
+tabu _merge
+drop if _merge==2
+
+drop _merge
+
+tab pct_hh_syr_eg_2004 
+tab pct_hh_syr_2004
+
+sort locality_iid
+br pct_hh_syr_eg_2004 locality_iid
+sort district_iid 
+br pct_hh_syr_eg_2004 district_iid 
+
+save "$data_temp/SS_IV_RefInflow.dta", replace
+
+
+use "$data_census/2004 census pct syr.dta", clear 
+
+*tab loc_code
+*gen loc_code=string(gov, "%02.0f")+string(district, "%02.0f")+string(subdistrict, "%01.0f")+string(locality, "%03.0f")
+
+
+*Merging in xs
+use "$data_final/02_JLMPS_10_16.dta", clear
+
+*destring gov district subdistrict locality, replace
+*gen loc_code=string(gov, "%02.0f")+string(district, "%02.0f")+string(subdistrict, "%01.0f")+string(locality, "%03.0f")
+
+
+********
+*Dist.
+********
+
+merge m:1 locality_iid using "$data_temp/SS_IV_RefInflow.dta"
+
+tabu _merge
+drop if _merge==2
+
+
+replace pct_hh_syr_eg_2004 = 0 if _merge == 1
+drop _merge
+
+tab pct_hh_syr_eg_2004
+
+*******
+*Sample
+*******
 
 
 
@@ -2148,16 +2289,23 @@ save "$data_final/03_ShiftShare_IV_6", replace
 
 
 
+use "$data_census\2004 census pct syr"
+
+tab pct_hh_syr_eg_2004, m 
+tab pct_hh_syr_2004, m 
+tab loc_code, m 
+*2004_census_syr_bysubdis
+
+use "$data_JLMPS_temp/JLMPS_GeoUnits_Dico_updated2016.dta", clear
 
 
 
+merge m:1 loc_code using "$data_census/2004 census pct syr.dta"
 
+tabu _merge
+drop if _merge==2
 
-
-
-
-
-
+drop _merge
 
 
 
@@ -2169,4 +2317,28 @@ save "$data_final/03_ShiftShare_IV_6", replace
 log close
 
 *use "$data_final/03_ShiftShare_IV", clear 
+
+
+
+*Merging in xs
+use "$data_final/02_JLMPS_10_16.dta", clear
+
+*destring gov district subdistrict locality, replace
+*gen loc_code=string(gov, "%02.0f")+string(district, "%02.0f")+string(subdistrict, "%01.0f")+string(locality, "%03.0f")
+
+
+********
+*Dist.
+********
+
+merge m:1 locality_iid using "$data_temp/SS_IV_RefInflow.dta"
+
+tabu _merge
+drop if _merge==2
+
+
+replace pct_hh_syr_eg_2004 = 0 if _merge == 1
+drop _merge
+
+tab pct_hh_syr_eg_2004
 

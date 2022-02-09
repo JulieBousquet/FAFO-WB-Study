@@ -34,6 +34,23 @@ merge m:1 governorate_iid using "$data_temp/07_Ctrl_Nb_Refugee_byGov.dta"
 drop _merge
 *save "$data_final/10_JLMPS_Distance_Zaatari.dta", replace 
 
+********
+*Dist.
+********
+/*
+*NEW FOR SSIV REFUGEE INFLOW
+destring locality_iid, replace
+merge m:1 locality_iid using "$data_Fallah_final/SS_IV_RefInflow.dta"
+
+tabu _merge
+drop if _merge==2
+
+
+replace pct_hh_syr_eg_2004 = 0 if _merge == 1
+drop _merge
+
+tab pct_hh_syr_eg_2004, m
+*/
 /*
 *Those are the districts in which we surveyed refugees
 *the other ones, we had no refugees
@@ -580,6 +597,18 @@ gen IHS_nb_refugees_bygov = log(nb_refugees_bygov + ((nb_refugees_bygov^2 + 1)^0
 lab var IHS_nb_refugees_bygov "IHS - Number of refugees out of camps by governorate in 2016"
 
 
+**************
+* IV NETWORK *
+**************
+/*
+egen tot_nbr_ref = sum(nb_refugees_bygov)
+tab tot_nbr_ref, m 
+tab pct_hh_syr_eg_2004, m 
+gen IV_network = tot_nbr_ref * pct_hh_syr_eg_2004
+tab IV_network, m 
+
+corr IV_network nb_refugees_bygov
+*/
 *********
 ** AGE **
 *********
@@ -1998,7 +2027,7 @@ corr IV_SS_OP share_wp //0.55
 */
 *save "$data_final/06_IV_JLMPS_Regression.dta", replace
 
-save "$data_final/06_IV_JLMPS_Construct_Outcomes_nowp.dta", replace
+save "$data_temp/06_IV_JLMPS_Construct_Outcomes_nowp.dta", replace
 
 
 
@@ -2010,7 +2039,7 @@ Layman term: Expected demand for work P at destination
 Story : We start with the Fallah e al. IV augmented by the number of work permits allocated in Jordan 
 */
 
-use "$data_final/06_IV_JLMPS_Construct_Outcomes_nowp.dta", clear
+use "$data_temp/06_IV_JLMPS_Construct_Outcomes_nowp.dta", clear
 
 merge m:1 district_iid using "$data_final/03_ShiftShare_IV_1.dta" 
 tab district_iid if _merge == 1
@@ -2028,7 +2057,8 @@ gen ln_IV_SS_1 = log(1 + IV_SS_1)
 gen IHS_IV_SS_1 = log(IV_SS_1 + ((IV_SS_1^2 + 1)^0.5))
 
 su IV_SS_1
-gen resc_IV_SS_1 = IV_SS_1/100
+*gen resc_IV_SS_1 = IV_SS_1/100 //orig
+gen resc_IV_SS_1 = IV_SS_1/10000
 su resc_IV_SS_1
 lab var resc_IV_SS_1 "IV1"
 
@@ -2121,7 +2151,8 @@ gen ln_IV_SS_3 = log(1 + IV_SS_3)
 gen IHS_IV_SS_3 = log(IV_SS_3 + ((IV_SS_3^2 + 1)^0.5))
 
 su IV_SS_3
-gen resc_IV_SS_3 = IV_SS_3/1000
+*gen resc_IV_SS_3 = IV_SS_3/1000 //orig
+gen resc_IV_SS_3 = IV_SS_3/1000000000
 su resc_IV_SS_3
 lab var resc_IV_SS_3 "IV3"
 
@@ -2221,9 +2252,9 @@ tab IV_SS_5 , m
 gen ln_IV_SS_5 = log(1 + IV_SS_5)
 gen IHS_IV_SS_5 = log(IV_SS_5 + ((IV_SS_5^2 + 1)^0.5))
 su IV_SS_5
-gen resc_IV_SS_5 = IV_SS_5/1000000
+gen resc_IV_SS_5 = IV_SS_5/100000000
 su resc_IV_SS_5 
-lab var resc_IV_SS_5 "IV5"
+*lab var resc_IV_SS_5 "IV5"
 
 *THE ASKED QUESTION IN QUEST (binary)
 tab work_permit, m
@@ -2237,6 +2268,7 @@ corr IV_SS_5 agg_wp_orig //
 corr IV_SS_5 share_wp //
 
 
+save "$data_final/06_IV_JLMPS_Construct_Outcomes.dta", replace
 
 
 /*
@@ -2301,7 +2333,6 @@ corr IV_SS_6B share_wp //
 
 */
 
-save "$data_final/06_IV_JLMPS_Construct_Outcomes.dta", replace
 
 
 
