@@ -211,10 +211,9 @@ xtset indid_2010 year
 lab var $dep_var "Work Permits"
 lab var IV_SS_ref_inflow "LOG IV Nb Refugees"
 
-tab nb_refugees_bygov
-tab IV_SS_ref_inflow
-
-  foreach outcome of global outcome_cond {
+*** ORIG REGRESSION WITH DISTRICT CLUSTER ***
+/*
+ foreach outcome of global outcome_cond {
      xi: ivreg2  `outcome' ///
                 i.year i.district_iid ///
                 $controls i.educ1d i.fteducst i.mteducst i.ftempst  ///
@@ -224,8 +223,27 @@ tab IV_SS_ref_inflow
                 partial(i.district_iid) ///
                 first
     codebook `outcome', c
-    estimates table, k($dep_var ln_nb_refugees_bygov) star(.1 .05 .01) b(%7.4f) 
-    estimates table, b(%7.4f) se(%7.4f) stats(N r2_a) k($dep_var ln_nb_refugees_bygov) 
+    estimates table, k($dep_var prop_hh_syrians) star(.1 .05 .01) b(%7.4f) 
+    estimates table, b(%7.4f) se(%7.4f) stats(N r2_a) k($dep_var prop_hh_syrians) 
+    estimates store m_`outcome', title(Model `outcome')
+    }
+*/
+
+tab pct_hh_syr_eg_2004,m 
+tab prop_hh_syrians,m 
+
+  foreach outcome of global outcome_cond {
+     xi: ivreg2  `outcome' ///
+                i.year i.district_iid ///
+                $controls i.educ1d i.fteducst i.mteducst i.ftempst  ///
+                ($dep_var prop_hh_syrians = $IV_var pct_hh_syr_eg_2004) ///
+                [pweight = panel_wt_10_16], ///
+                cluster(locality_iid) robust ///
+                partial(i.district_iid) ///
+                first
+    codebook `outcome', c
+    estimates table, k($dep_var prop_hh_syrians) star(.1 .05 .01) b(%7.4f) 
+    estimates table, b(%7.4f) se(%7.4f) stats(N r2_a) k($dep_var prop_hh_syrians) 
     estimates store m_`outcome', title(Model `outcome')
 	}
 

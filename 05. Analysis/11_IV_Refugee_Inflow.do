@@ -534,26 +534,20 @@ drop _merge
 
 save "$data_Fallah_final/IV data.dta", replace
 
-***********************
-*Pre-trends
-***********************
-
-*Merging into retro
-
-use "$data_Fallah_final/JLMPS 2016 long.dta", clear
 
 
-foreach num of numlist 2004/2017 {
 
-gen int_`num'=0
-replace int_`num'= prop_hh_syrians if year==`num'
+**********************
+* MERGE TO LSMS DATA *
+**********************
 
-la var int_`num' "Int. `num' and %  HH Syr."
-}
 
-la var prop_hh_syrian "Percentage of HH Syr."
+*Merging in xs
+use "$data_JLMPS_base/JLMPS 2016 xs v1.1.dta", clear
 
-destring indid, gen(ds_indid)
+merge 1:1 indid using "$data_Fallah_temp/JLMPS 2016 loc_code in 2010.dta"
+
+gen loc_code=loc_code_2010
 
 gen subdis_code=substr(loc_code,1,5)
 replace subdis_code="" if subdis_code=="...."
@@ -563,6 +557,7 @@ gen dis_code=substr(loc_code,1,4)
 replace dis_code="" if dis_code=="...."
 destring dis_code, replace
 
+drop _merge
 
 ********
 *Dist.
@@ -587,36 +582,16 @@ drop if _merge==2
 drop _merge
 
 
-*Testing pretrends - 2004 inst. 
-
-foreach outcome of varlist lm_2 lm_3 formal_  man_prof_ usecactp_comp_ usecactp_hhs_ uspriv_  {
-
-*Men
-regress `outcome' pct_hh_syr_eg_2004 b2010.year b2010.year#c.pct_hh_syr_eg_2004 i.educ1d i.mteducst i.fteducst i.ftempst  ///
-c.age c.age#c.age i.dis_code if sex==1 & year<=2010 [aw=expan_indiv], vce(cluster loc_code)
-
-estimates store est_pret_men_`outcome'
-
-}
 
 
-*Testing pretrends - Zataari inst. 
 
-foreach outcome of varlist lm_2 lm_3 formal_  man_prof_ usecactp_comp_ usecactp_hhs_ uspriv_ {
 
-*Men
-regress `outcome' ZataariCamp b2010.year b2010.year#c.ZataariCamp i.educ1d i.mteducst i.fteducst i.ftempst  ///
-c.age c.age#c.age i.dis_code if sex==1 & year<=2010 [aw=expan_indiv], vce(cluster loc_code)
 
-estimates store est_preZ_men_`outcome'
+                  **************************************
+                  ***********     ANALYSIS    **********
+                  **************************************
 
-}
 
- *Men main results
-
- esttab est_pret_men* est_preZ_men*  using "Graphs/IV_pre_male.csv",  cells(b(star fmt(%9.3f)) se(par))  ///     
- stats(N r2, fmt(%9.0g %9.3f)) label  ///
- nobase noomit replace keep(*year* pct_* *ZataariCamp*) ///
 
 ************************************
 *Analysis
@@ -662,6 +637,8 @@ drop if _merge==2
 drop _merge
 
 
+*bys dis_code: egen pct_hh_syr_eg_2004_bydis = sum(prop_hh_syrians) 
+*bys dis_code: egen prop_hh_syrians_bydis = sum(prop_hh_syrians) 
 
 *Jordanians only
 keep if nationality_cl==1 
@@ -764,7 +741,7 @@ drop if age < 11 & year == 2010 //11 in 2010 so 15 in 2016
                 
 
 
-/*
+
 
                                   ************
                                   *REGRESSION*
@@ -804,21 +781,53 @@ lab var IV_SS_ref_inflow "LOG IV Nb Refugees"
 tab nb_refugees_bygov
 tab IV_SS_ref_inflow
 
+tab pct_hh_syr_eg_2004,m 
+tab prop_hh_syrians,m 
+
+*gen dis_code=string(gov, "%02.0f")+string(district, "%02.0f")
+*distinct dis_code 
+*bys district_iid: egen prop_hh_syrians_bydis = sum(prop_hh_syrians) 
+*bys district_iid: egen pct_hh_syr_eg_2004_bydis = sum(prop_hh_syrians) 
+
+*tab prop_hh_syrians_bydis, m 
+*tab pct_hh_syr_eg_2004_bydis, m 
+
+ foreach outcome of global outcome_cond {
+     xi: ivreg2  `outcome' ///
+                i.year i.district_iid ///
+                $controls i.educ1d i.fteducst i.mteducst i.ftempst  ///
+                (prop_hh_syrians = pct_hh_syr_eg_2004) ///
+                [pweight = panel_wt_10_16], ///
+                cluster(locality_iid) robust ///
+                partial(i.district_iid) ///
+                first
+    codebook `outcome', c
+    estimates table, k(prop_hh_syrians) star(.1 .05 .01) b(%7.4f) 
+    estimates table, b(%7.4f) se(%7.4f) stats(N r2_a) k(prop_hh_syrians) 
+    estimates store m_`outcome', title(Model `outcome')
+  }
+
   foreach outcome of global outcome_cond {
      xi: ivreg2  `outcome' ///
                 i.year i.district_iid ///
                 $controls i.educ1d i.fteducst i.mteducst i.ftempst  ///
-                ($dep_var ln_nb_refugees_bygov = $IV_var IV_SS_ref_inflow) ///
+                ($dep_var prop_hh_syrians = $IV_var pct_hh_syr_eg_2004) ///
                 [pweight = panel_wt_10_16], ///
-                cluster(district_iid) robust ///
+                cluster(locality_iid) robust ///
                 partial(i.district_iid) ///
                 first
     codebook `outcome', c
-    estimates table, k($dep_var ln_nb_refugees_bygov) star(.1 .05 .01) b(%7.4f) 
-    estimates table, b(%7.4f) se(%7.4f) stats(N r2_a) k($dep_var ln_nb_refugees_bygov) 
+    estimates table, k($dep_var prop_hh_syrians) star(.1 .05 .01) b(%7.4f) 
+    estimates table, b(%7.4f) se(%7.4f) stats(N r2_a) k($dep_var prop_hh_syrians) 
     estimates store m_`outcome', title(Model `outcome')
   }
 
+
+  ** outcome variables 
+
+  
+
+/*
 ereturn list
 mat list e(b)
 estout m_job_stable_3m m_formal m_private m_wp_industry_jlmps_3m ///
@@ -927,3 +936,90 @@ tab total_wage_3m usempstp
 
 
 
+/*
+
+***********************
+*Pre-trends
+***********************
+
+*Merging into retro
+
+use "$data_Fallah_final/JLMPS 2016 long.dta", clear
+
+
+foreach num of numlist 2004/2017 {
+
+gen int_`num'=0
+replace int_`num'= prop_hh_syrians if year==`num'
+
+la var int_`num' "Int. `num' and %  HH Syr."
+}
+
+la var prop_hh_syrian "Percentage of HH Syr."
+
+destring indid, gen(ds_indid)
+
+gen subdis_code=substr(loc_code,1,5)
+replace subdis_code="" if subdis_code=="...."
+destring subdis_code, replace
+
+gen dis_code=substr(loc_code,1,4)
+replace dis_code="" if dis_code=="...."
+destring dis_code, replace
+
+
+********
+*Dist.
+********
+
+merge m:1 loc_code using "$data_Fallah_final/IV data.dta"
+
+tabu _merge
+drop if _merge==2
+
+drop _merge
+
+********
+*2004 census
+********
+
+merge m:1 loc_code using "$data_Fallah_base/2004 census pct syr.dta"
+
+tabu _merge
+drop if _merge==2
+
+drop _merge
+
+
+*Testing pretrends - 2004 inst. 
+
+foreach outcome of varlist lm_2 lm_3 formal_  man_prof_ usecactp_comp_ usecactp_hhs_ uspriv_  {
+
+*Men
+regress `outcome' pct_hh_syr_eg_2004 b2010.year b2010.year#c.pct_hh_syr_eg_2004 i.educ1d i.mteducst i.fteducst i.ftempst  ///
+c.age c.age#c.age i.dis_code if sex==1 & year<=2010 [aw=expan_indiv], vce(cluster loc_code)
+
+estimates store est_pret_men_`outcome'
+
+}
+
+
+*Testing pretrends - Zataari inst. 
+
+foreach outcome of varlist lm_2 lm_3 formal_  man_prof_ usecactp_comp_ usecactp_hhs_ uspriv_ {
+
+*Men
+regress `outcome' ZataariCamp b2010.year b2010.year#c.ZataariCamp i.educ1d i.mteducst i.fteducst i.ftempst  ///
+c.age c.age#c.age i.dis_code if sex==1 & year<=2010 [aw=expan_indiv], vce(cluster loc_code)
+
+estimates store est_preZ_men_`outcome'
+
+}
+
+ *Men main results
+
+* esttab est_pret_men* est_preZ_men*  using "Graphs/IV_pre_male.csv",  cells(b(star fmt(%9.3f)) se(par))  ///     
+* stats(N r2, fmt(%9.0g %9.3f)) label  ///
+* nobase noomit replace keep(*year* pct_* *ZataariCamp*) ///
+
+*/

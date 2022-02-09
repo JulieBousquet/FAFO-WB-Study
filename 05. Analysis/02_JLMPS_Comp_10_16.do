@@ -152,8 +152,8 @@ restore
 use "$data_JLMPS_base/JLMPS 2016 xs v1.1.dta", clear 
 
 *NEW FOR SSIV REFUGEE INFLOW
-destring gov district subdistrict locality, replace
-gen loc_code=string(gov, "%02.0f")+string(district, "%02.0f")+string(subdistrict, "%01.0f")+string(locality, "%03.0f")
+*destring gov district subdistrict locality, replace
+*gen loc_code=string(gov, "%02.0f")+string(district, "%02.0f")+string(subdistrict, "%01.0f")+string(locality, "%03.0f")
 
 ren gov governorate_iid 
 ren district district_id
@@ -277,6 +277,74 @@ drop _merge
 
 
 
+
+
+
+
+merge 1:1 indid using "$data_Fallah_temp/JLMPS 2016 loc_code in 2010.dta"
+
+gen loc_code=loc_code_2010
+
+gen subdis_code=substr(loc_code,1,5)
+replace subdis_code="" if subdis_code=="...."
+destring subdis_code, replace
+
+gen dis_code=substr(loc_code,1,4)
+replace dis_code="" if dis_code=="...."
+destring dis_code, replace
+
+drop _merge
+
+********
+*Dist.
+********
+
+merge m:1 loc_code using "$data_Fallah_final/IV data.dta"
+
+tabu _merge
+drop if _merge==2
+
+drop _merge
+
+********
+*2004 census
+********
+
+merge m:1 loc_code using "$data_Fallah_base/2004 census pct syr.dta"
+
+tabu _merge
+drop if _merge==2
+
+drop _merge
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 tab locality_16 if round == 2010
 tab locality_16, m 
 tab locality, m 
@@ -287,8 +355,8 @@ tab locality, m
 isid indid
 
 *NEW FOR SSIV REFUGEE INFLOW
-destring gov district subdistrict locality, replace
-gen loc_code=string(gov, "%02.0f")+string(district, "%02.0f")+string(subdistrict, "%01.0f")+string(locality, "%03.0f")
+*destring gov district subdistrict locality, replace
+*gen loc_code=string(gov, "%02.0f")+string(district, "%02.0f")+string(subdistrict, "%01.0f")+string(locality, "%03.0f")
 
 
 ren gov governorate_iid 
@@ -607,7 +675,8 @@ tab work_permit, m
 keep  indid district_iid governorate_iid work_permit work_permit_orig ///
     nationality_cl forced_migr ///
       q11201a q11201b q11202 q11203 q11204a q11204b q11205 q11206 ///
-      q11208a q11208b q11212 q11213 q11214 employed loc_code
+      q11208a q11208b q11212 q11213 q11214 employed 
+      *loc_code
 
 *MERGE BY INDIVD ID TO INCLUDET THE WORK PERMIT VARIABLE INTO THE MAIN
 *DATASET

@@ -801,7 +801,7 @@ gen ln_nb_refugees_bygov = ln(1 + nb_refugees_bygov)
 lab var ln_nb_refugees_bygov "[CTRL] LOG Number of refugees out of camps by governorate in 2016"
 *ln_ref, as of now, does not include refugees in 2010, only in 2016
 
-save "$data_final/10_JLMPS_Distance_Zaatari.dta", replace 
+save "$data_temp/10_JLMPS_Distance_Zaatari.dta", replace 
 
 
 
@@ -2153,13 +2153,31 @@ save "$data_final/03_ShiftShare_IV_6", replace
 
 
 
-******************************
-/* REFUGE INFLOW INSTRUMENT */
-******************************
 
 
 
-import excel "$data_loc/Location Codes Arabic 2015 revised 1.19.16 (for 2016) Google for import.xls", sheet("Distance to locakity") firstrow clear
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/*
+                            ******************************
+                            /* REFUGE INFLOW INSTRUMENT */
+                            ******************************
+
+
+
+import excel "$data_Fallah_base/Location Codes Arabic 2015 revised 1.19.16 (for 2016) Google for import.xls", sheet("Distance to locakity") firstrow clear
 
 drop H-L
 
@@ -2181,7 +2199,7 @@ replace `var'=subd_mean_`var' if `var'==.
 
 
 
-merge m:1 loc_code using "$data_census/Nationality all v1.dta"
+merge m:1 loc_code using "$data_Fallah_base/Nationality all v1.dta"
 
 drop _merge
 
@@ -2210,9 +2228,10 @@ replace dis_code="" if dis_code=="...."
 destring dis_code, replace
 
 ren gov governorate_iid 
-ren district district_id
-ren subdistrict subdistrict_id 
-ren locality locality_id 
+ren dis_code district_id
+ren subdis_code subdistrict_id 
+gen locality_id = loc_code
+*ren locality locality_id 
 
 distinct governorate_iid //12
 
@@ -2230,7 +2249,7 @@ mdesc locality_iid
 *START NEW CODE START NEW CODE 
 destring governorate_iid district_iid subdistrict_iid locality_iid, replace 
 
-merge m:1 loc_code using "$data_census/2004 census pct syr.dta"
+merge m:1 loc_code using "$data_Fallah_base/2004 census pct syr.dta"
 
 tabu _merge
 drop if _merge==2
@@ -2241,14 +2260,14 @@ tab pct_hh_syr_eg_2004
 tab pct_hh_syr_2004
 
 sort locality_iid
-br pct_hh_syr_eg_2004 locality_iid
+*br pct_hh_syr_eg_2004 locality_iid
 sort district_iid 
-br pct_hh_syr_eg_2004 district_iid 
+*br pct_hh_syr_eg_2004 district_iid 
 
-save "$data_temp/SS_IV_RefInflow.dta", replace
+save "$data_Fallah_final/SS_IV_RefInflow.dta", replace
 
 
-use "$data_census/2004 census pct syr.dta", clear 
+use "$data_Fallah_base/2004 census pct syr.dta", clear 
 
 *tab loc_code
 *gen loc_code=string(gov, "%02.0f")+string(district, "%02.0f")+string(subdistrict, "%01.0f")+string(locality, "%03.0f")
@@ -2265,7 +2284,7 @@ use "$data_final/02_JLMPS_10_16.dta", clear
 *Dist.
 ********
 
-merge m:1 locality_iid using "$data_temp/SS_IV_RefInflow.dta"
+merge m:1 locality_iid using "$data_Fallah_final/SS_IV_RefInflow.dta"
 
 tabu _merge
 drop if _merge==2
@@ -2289,7 +2308,7 @@ tab pct_hh_syr_eg_2004
 
 
 
-use "$data_census\2004 census pct syr"
+use "$data_Fallah_base\2004 census pct syr"
 
 tab pct_hh_syr_eg_2004, m 
 tab pct_hh_syr_2004, m 
@@ -2300,7 +2319,7 @@ use "$data_JLMPS_temp/JLMPS_GeoUnits_Dico_updated2016.dta", clear
 
 
 
-merge m:1 loc_code using "$data_census/2004 census pct syr.dta"
+merge m:1 loc_code using "$data_Fallah_base/2004 census pct syr.dta"
 
 tabu _merge
 drop if _merge==2
@@ -2331,7 +2350,7 @@ use "$data_final/02_JLMPS_10_16.dta", clear
 *Dist.
 ********
 
-merge m:1 locality_iid using "$data_temp/SS_IV_RefInflow.dta"
+merge m:1 locality_iid using "$data_Fallah_final/SS_IV_RefInflow.dta"
 
 tabu _merge
 drop if _merge==2
@@ -2342,3 +2361,4 @@ drop _merge
 
 tab pct_hh_syr_eg_2004
 
+*/
