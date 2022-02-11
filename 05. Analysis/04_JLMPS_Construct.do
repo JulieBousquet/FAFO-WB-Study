@@ -1374,6 +1374,10 @@ srchdurmth      float   %9.0g                 Search duration (in months)
 
 */
 
+*UNEMP 
+*‘strict’ or ‘narrow’ definition which includes only active
+*job seekers
+
 tab unemp2m, m //Unemp1m
 tab employed_3m, m
 
@@ -1944,7 +1948,7 @@ gen bi_education = 1 if educ1d == 7 | /// Post Graduate
 replace bi_education = 0 if educ1d == 3 | /// Basic Education
                      educ1d == 2 | /// Read and Write
                      educ1d == 1 // Illiterate
-lab def bi_education 1 "Educated" 0 "Non Educated", modify
+lab def bi_education 1 "Secondary or more" 0 "Below Secondary", modify
 lab val bi_education bi_education
 lab var bi_education "Educated is from Secondary education until post graduate"
 

@@ -1662,7 +1662,7 @@ Layman term: Expected demand for work P at destination
 Story : We start with the Fallah e al. IV augmented by the number of work permits allocated in Jordan 
 */
 
-use "$data_final/10_JLMPS_Distance_Zaatari.dta" , clear
+use "$data_temp/10_JLMPS_Distance_Zaatari.dta" , clear
 
 lab var district_iid "ID District Jordan"
 gen wp_2016 = 73580
@@ -1794,7 +1794,7 @@ egen industry_id = group(industry_en)
 merge m:1 id_gov_syria using "$data_temp/06_IV_Share_GovOrig_Refugee.dta" 
 drop _merge
 
-merge m:1 district_iid using "$data_final/10_JLMPS_Distance_Zaatari.dta" 
+merge m:1 district_iid using "$data_temp/10_JLMPS_Distance_Zaatari.dta" 
 drop _merge 
 
 lab var district_iid "ID District Jordan"
@@ -1876,7 +1876,7 @@ drop _merge
 merge m:1 id_gov_syria using "$data_temp/06_IV_Share_GovOrig_Refugee.dta" 
 drop _merge 
 
-merge m:1 district_iid using "$data_final/10_JLMPS_Distance_Zaatari.dta" 
+merge m:1 district_iid using "$data_temp/10_JLMPS_Distance_Zaatari.dta" 
 *drop if _merge == 2 
 drop _merge 
 
@@ -1995,7 +1995,7 @@ sort id_gov_syria district_en industry_id
 *merge m:1 id_gov_syria using "$data_temp/06_IV_Share_GovOrig_Refugee.dta", keepusing(nb_ref_syr_bygov_2016)
 *drop _merge 
 
-merge m:1 district_iid using "$data_final/10_JLMPS_Distance_Zaatari.dta",
+merge m:1 district_iid using "$data_temp/10_JLMPS_Distance_Zaatari.dta",
 drop _merge
 
 *merge m:1 governorate_iid using "$data_temp/07_Ctrl_Nb_Refugee_byGov.dta"

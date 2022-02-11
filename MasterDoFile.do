@@ -177,12 +177,12 @@ if inlist(c(username), "u0131185", "julie") == 1 {
 	*****************************
 	**     RUN THE GLOBALS     **
 	*****************************
-	qui do "$do_analysis/08_Globals.do"
+	qui do "$do_analysis/00_Globals.do"
 
-	qui do "$do_analysis/05_JLMPS_Analysis_WiP.do"
-	qui do "$do_analysis/06_Robsutness.do"
-	qui do "$do_analysis/07_Heterogenous.do"
-	qui do "$do_analysis/10_JLMPS_Analysis_EM.do"
+	*qui do "$do_analysis/05_JLMPS_Analysis_WiP.do"
+	*qui do "$do_analysis/06_Robsutness.do"
+	*qui do "$do_analysis/07_Heterogenous.do"
+	*qui do "$do_analysis/10_JLMPS_Analysis_EM.do"
 	*qui do "$do_analysis/.do"
 
 
