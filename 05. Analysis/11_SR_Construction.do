@@ -203,7 +203,7 @@ tab hrwg , m
 
 *Work hours per week: 
 
-tab work_hours_pweek_3m, m 
+tab work_hours_pweek_3m_w, m 
 
 /*
 *usual Number of Hours per Week, reference 7 days, 

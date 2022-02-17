@@ -149,20 +149,7 @@ mat list e(b)
 estout m_employed_olf_3m m_unemployed_olf_3m m_lfp_3m_empl ///
          m_lfp_3m_temp m_lfp_3m_employer m_lfp_3m_se m_lfp_3m_unpaid  /// 
       , cells(b(star fmt(%9.3f)) se(par fmt(%9.3f)) F(par fmt(%9.3f))) ///
-        drop(age age2 _Iyear_2016 ///
-        _Idistrict__2 _Idistrict__3 ///
-        _Idistrict__4 _Idistrict__5 _Idistrict__6 _Idistrict__7 ///
-        _Idistrict__8 _Idistrict__9 _Idistrict__10 _Idistrict__11 ///
-        _Idistrict__12 _Idistrict__13 _Idistrict__14 _Idistrict__15 ///
-        _Idistrict__16  _Idistrict__18 _Idistrict__19 ///
-        _Idistrict__20 _Idistrict__21 _Idistrict__22 _Idistrict__23 ///
-        _Idistrict__24 _Idistrict__25 _Idistrict__26 _Idistrict__27 ///
-        _Idistrict__28 _Idistrict__29 _Idistrict__30 _Idistrict__31 ///
-        _Idistrict__32 _Idistrict__33 _Idistrict__34 _Idistrict__35 ///
-        _Idistrict__36 _Idistrict__37 _Idistrict__38 _Idistrict__39 ///
-        _Idistrict__40 _Idistrict__41 _Idistrict__42 _Idistrict__43 ///
-        _Idistrict__44 _Idistrict__45 _Idistrict__46 _Idistrict__47 ///
-        _Idistrict__48 _Idistrict__49 _Idistrict__50 _Idistrict__51 ///
+        drop(age age2 _Iyear_2016  $district ///
         _cons )   ///
    legend label varlabels(_cons constant) starlevels(* 0.1 ** 0.05 *** 0.01)  ///
    stats(r2 df_r, fmt(3 0 1) label(R-sqr dfres))
@@ -176,20 +163,7 @@ esttab m_employed_olf_3m m_unemployed_olf_3m m_lfp_3m_empl ///
       using "$out_analysis/SR_REF_reg_HET_GENDER_OLS_Uncond_FE_DIS_YEAR.tex", se label replace booktabs ///
       cells(b(star fmt(%9.3f)) se(par fmt(%9.3f))) ///
 mtitles("Employed" "Unemployed" "LFP Employee" "LFP Temp" "LFP Employer" "LFP SE" "LFP Unpaid") ///
-        drop(age age2  _Iyear_2016 ///
-        _Idistrict__2 _Idistrict__3 ///
-        _Idistrict__4 _Idistrict__5 _Idistrict__6 _Idistrict__7 ///
-        _Idistrict__8 _Idistrict__9 _Idistrict__10 _Idistrict__11 ///
-        _Idistrict__12 _Idistrict__13 _Idistrict__14 _Idistrict__15 ///
-        _Idistrict__16 _Idistrict__18 _Idistrict__19 ///
-        _Idistrict__20 _Idistrict__21 _Idistrict__22 _Idistrict__23 ///
-        _Idistrict__24 _Idistrict__25 _Idistrict__26 _Idistrict__27 ///
-        _Idistrict__28 _Idistrict__29 _Idistrict__30 _Idistrict__31 ///
-        _Idistrict__32 _Idistrict__33 _Idistrict__34 _Idistrict__35 ///
-        _Idistrict__36 _Idistrict__37 _Idistrict__38 _Idistrict__39 ///
-        _Idistrict__40 _Idistrict__41 _Idistrict__42 _Idistrict__43 ///
-        _Idistrict__44 _Idistrict__45 _Idistrict__46 _Idistrict__47 ///
-        _Idistrict__48 _Idistrict__49 _Idistrict__50 _Idistrict__51 ///
+        drop(age age2  _Iyear_2016  $district ///
         _cons )   ///
 starlevels(* 0.1 ** 0.05 *** 0.01) ///
    title("REF - HET GENDER - Results OLS Regression with time and district FE - UNCOND"\label{tab1}) nofloat ///
@@ -330,20 +304,7 @@ mat list e(b)
 estout m_ln_total_rwage_3m m_ln_hourly_rwage m_work_hours_pweek_3m_w  ///
          m_formal /// 
       , cells(b(star fmt(%9.3f)) se(par fmt(%9.3f))) ///
-        drop(age age2  _Iyear_2016 ///
-        _Idistrict__2 _Idistrict__3 ///
-        _Idistrict__4 _Idistrict__5 _Idistrict__6 _Idistrict__7 ///
-        _Idistrict__8 _Idistrict__9 _Idistrict__10 _Idistrict__11 ///
-        _Idistrict__12 _Idistrict__13 _Idistrict__14 _Idistrict__15 ///
-        _Idistrict__16  _Idistrict__18 _Idistrict__19 ///
-        _Idistrict__20 _Idistrict__21 _Idistrict__22 _Idistrict__23 ///
-        _Idistrict__24 _Idistrict__25 _Idistrict__26 _Idistrict__27 ///
-        _Idistrict__28 _Idistrict__29 _Idistrict__30 _Idistrict__31 ///
-        _Idistrict__32 _Idistrict__33 _Idistrict__34 _Idistrict__35 ///
-        _Idistrict__36 _Idistrict__37 _Idistrict__38 _Idistrict__39 ///
-        _Idistrict__40 _Idistrict__41 _Idistrict__42 _Idistrict__43 ///
-        _Idistrict__44 _Idistrict__45 _Idistrict__46 _Idistrict__47 ///
-        _Idistrict__48 _Idistrict__49 _Idistrict__50 _Idistrict__51 ///
+        drop(age age2  _Iyear_2016  $district ///
         _cons)   ///
    legend label varlabels(_cons constant) starlevels(* 0.1 ** 0.05 *** 0.01)  ///
    stats(r2 df_r, fmt(3 0 1) label(R-sqr dfres))
@@ -357,20 +318,7 @@ esttab m_ln_total_rwage_3m m_ln_hourly_rwage m_work_hours_pweek_3m_w  ///
       using "$out_analysis/SR_REF_reg_HET_GENDER_OLS_Cond_FE_DIS_YEAR.tex", se label replace booktabs ///
       cells(b(star fmt(%9.3f)) se(par fmt(%9.3f))) ///
 mtitles("Total Wage (ln)" "Hrly Wage (ln)" "Work Hours p.w." "Formal") ///
-        drop(age age2   _Iyear_2016 ///
-        _Idistrict__2 _Idistrict__3 ///
-        _Idistrict__4 _Idistrict__5 _Idistrict__6 _Idistrict__7 ///
-        _Idistrict__8 _Idistrict__9 _Idistrict__10 _Idistrict__11 ///
-        _Idistrict__12 _Idistrict__13 _Idistrict__14 _Idistrict__15 ///
-        _Idistrict__16 _Idistrict__18 _Idistrict__19 ///
-        _Idistrict__20 _Idistrict__21 _Idistrict__22 _Idistrict__23 ///
-        _Idistrict__24 _Idistrict__25 _Idistrict__26 _Idistrict__27 ///
-        _Idistrict__28 _Idistrict__29 _Idistrict__30 _Idistrict__31 ///
-        _Idistrict__32 _Idistrict__33 _Idistrict__34 _Idistrict__35 ///
-        _Idistrict__36 _Idistrict__37 _Idistrict__38 _Idistrict__39 ///
-        _Idistrict__40 _Idistrict__41 _Idistrict__42 _Idistrict__43 ///
-        _Idistrict__44 _Idistrict__45 _Idistrict__46 _Idistrict__47 ///
-        _Idistrict__48 _Idistrict__49 _Idistrict__50 _Idistrict__51 ///
+        drop(age age2   _Iyear_2016  $district ///
         _cons )   ///
 starlevels(* 0.1 ** 0.05 *** 0.01) ///
    title("REF - HET GENDER - Results OLS Regression with time and district FE - COND"\label{tab1}) nofloat ///
@@ -570,20 +518,7 @@ mat list e(b)
 estout m_employed_olf_3m m_unemployed_olf_3m m_lfp_3m_empl ///
          m_lfp_3m_temp m_lfp_3m_employer m_lfp_3m_se m_lfp_3m_unpaid  /// 
       , cells(b(star fmt(%9.3f)) se(par fmt(%9.3f)) F(par fmt(%9.3f))) ///
-        drop(age age2 gender _Iyear_2016 ///
-        _Idistrict__2 _Idistrict__3 ///
-        _Idistrict__4 _Idistrict__5 _Idistrict__6 _Idistrict__7 ///
-        _Idistrict__8 _Idistrict__9 _Idistrict__10 _Idistrict__11 ///
-        _Idistrict__12 _Idistrict__13 _Idistrict__14 _Idistrict__15 ///
-        _Idistrict__16  _Idistrict__18 _Idistrict__19 ///
-        _Idistrict__20 _Idistrict__21 _Idistrict__22 _Idistrict__23 ///
-        _Idistrict__24 _Idistrict__25 _Idistrict__26 _Idistrict__27 ///
-        _Idistrict__28 _Idistrict__29 _Idistrict__30 _Idistrict__31 ///
-        _Idistrict__32 _Idistrict__33 _Idistrict__34 _Idistrict__35 ///
-        _Idistrict__36 _Idistrict__37 _Idistrict__38 _Idistrict__39 ///
-        _Idistrict__40 _Idistrict__41 _Idistrict__42 _Idistrict__43 ///
-        _Idistrict__44 _Idistrict__45 _Idistrict__46 _Idistrict__47 ///
-        _Idistrict__48 _Idistrict__49 _Idistrict__50 _Idistrict__51 ///
+        drop(age age2 gender _Iyear_2016  $district ///
         _cons $controls)   ///
    legend label varlabels(_cons constant) starlevels(* 0.1 ** 0.05 *** 0.01)  ///
    stats(r2 df_r, fmt(3 0 1) label(R-sqr dfres))
@@ -597,20 +532,7 @@ esttab m_employed_olf_3m m_unemployed_olf_3m m_lfp_3m_empl ///
       using "$out_analysis/SR_REF_reg_HET_URBAN_OLS_Uncond_FE_DIS_YEAR.tex", se label replace booktabs ///
       cells(b(star fmt(%9.3f)) se(par fmt(%9.3f))) ///
 mtitles("Employed" "Unemployed" "LFP Employee" "LFP Temp" "LFP Employer" "LFP SE" "LFP Unpaid") ///
-        drop(age age2 gender _Iyear_2016 ///
-        _Idistrict__2 _Idistrict__3 ///
-        _Idistrict__4 _Idistrict__5 _Idistrict__6 _Idistrict__7 ///
-        _Idistrict__8 _Idistrict__9 _Idistrict__10 _Idistrict__11 ///
-        _Idistrict__12 _Idistrict__13 _Idistrict__14 _Idistrict__15 ///
-        _Idistrict__16 _Idistrict__18 _Idistrict__19 ///
-        _Idistrict__20 _Idistrict__21 _Idistrict__22 _Idistrict__23 ///
-        _Idistrict__24 _Idistrict__25 _Idistrict__26 _Idistrict__27 ///
-        _Idistrict__28 _Idistrict__29 _Idistrict__30 _Idistrict__31 ///
-        _Idistrict__32 _Idistrict__33 _Idistrict__34 _Idistrict__35 ///
-        _Idistrict__36 _Idistrict__37 _Idistrict__38 _Idistrict__39 ///
-        _Idistrict__40 _Idistrict__41 _Idistrict__42 _Idistrict__43 ///
-        _Idistrict__44 _Idistrict__45 _Idistrict__46 _Idistrict__47 ///
-        _Idistrict__48 _Idistrict__49 _Idistrict__50 _Idistrict__51 ///
+        drop(age age2 gender _Iyear_2016  $district ///
         _cons $controls)   ///
 starlevels(* 0.1 ** 0.05 *** 0.01) ///
    title("REF - HET URBAN - Results OLS Regression with time and district FE - UNCOND"\label{tab1}) nofloat ///
@@ -751,20 +673,7 @@ mat list e(b)
 estout m_ln_total_rwage_3m m_ln_hourly_rwage m_work_hours_pweek_3m_w  ///
          m_formal /// 
       , cells(b(star fmt(%9.3f)) se(par fmt(%9.3f))) ///
-        drop(age age2 gender _Iyear_2016 ///
-        _Idistrict__2 _Idistrict__3 ///
-        _Idistrict__4 _Idistrict__5 _Idistrict__6 _Idistrict__7 ///
-        _Idistrict__8 _Idistrict__9 _Idistrict__10 _Idistrict__11 ///
-        _Idistrict__12 _Idistrict__13 _Idistrict__14 _Idistrict__15 ///
-        _Idistrict__16  _Idistrict__18 _Idistrict__19 ///
-        _Idistrict__20 _Idistrict__21 _Idistrict__22 _Idistrict__23 ///
-        _Idistrict__24 _Idistrict__25 _Idistrict__26 _Idistrict__27 ///
-        _Idistrict__28 _Idistrict__29 _Idistrict__30 _Idistrict__31 ///
-        _Idistrict__32 _Idistrict__33 _Idistrict__34 _Idistrict__35 ///
-        _Idistrict__36 _Idistrict__37 _Idistrict__38 _Idistrict__39 ///
-        _Idistrict__40 _Idistrict__41 _Idistrict__42 _Idistrict__43 ///
-        _Idistrict__44 _Idistrict__45 _Idistrict__46 _Idistrict__47 ///
-        _Idistrict__48 _Idistrict__49 _Idistrict__50 _Idistrict__51 ///
+        drop(age age2 gender _Iyear_2016  $district ///
         _cons $controls)   ///
    legend label varlabels(_cons constant) starlevels(* 0.1 ** 0.05 *** 0.01)  ///
    stats(r2 df_r, fmt(3 0 1) label(R-sqr dfres))
@@ -778,20 +687,7 @@ esttab m_ln_total_rwage_3m m_ln_hourly_rwage m_work_hours_pweek_3m_w  ///
       using "$out_analysis/SR_REF_reg_HET_URBAN_OLS_Cond_FE_DIS_YEAR.tex", se label replace booktabs ///
       cells(b(star fmt(%9.3f)) se(par fmt(%9.3f))) ///
 mtitles("Total Wage (ln)" "Hrly Wage (ln)" "Work Hours p.w." "Formal") ///
-        drop(age age2 gender _Iyear_2016 ///
-        _Idistrict__2 _Idistrict__3 ///
-        _Idistrict__4 _Idistrict__5 _Idistrict__6 _Idistrict__7 ///
-        _Idistrict__8 _Idistrict__9 _Idistrict__10 _Idistrict__11 ///
-        _Idistrict__12 _Idistrict__13 _Idistrict__14 _Idistrict__15 ///
-        _Idistrict__16 _Idistrict__18 _Idistrict__19 ///
-        _Idistrict__20 _Idistrict__21 _Idistrict__22 _Idistrict__23 ///
-        _Idistrict__24 _Idistrict__25 _Idistrict__26 _Idistrict__27 ///
-        _Idistrict__28 _Idistrict__29 _Idistrict__30 _Idistrict__31 ///
-        _Idistrict__32 _Idistrict__33 _Idistrict__34 _Idistrict__35 ///
-        _Idistrict__36 _Idistrict__37 _Idistrict__38 _Idistrict__39 ///
-        _Idistrict__40 _Idistrict__41 _Idistrict__42 _Idistrict__43 ///
-        _Idistrict__44 _Idistrict__45 _Idistrict__46 _Idistrict__47 ///
-        _Idistrict__48 _Idistrict__49 _Idistrict__50 _Idistrict__51 ///
+        drop(age age2 gender _Iyear_2016  $district ///
         _cons $controls)   ///
 starlevels(* 0.1 ** 0.05 *** 0.01) ///
    title("REF - HET GENDER - Results OLS Regression with time and district FE - COND"\label{tab1}) nofloat ///
@@ -981,20 +877,7 @@ mat list e(b)
 estout m_employed_olf_3m m_unemployed_olf_3m m_lfp_3m_empl ///
          m_lfp_3m_temp m_lfp_3m_employer m_lfp_3m_se m_lfp_3m_unpaid  /// 
       , cells(b(star fmt(%9.3f)) se(par fmt(%9.3f)) F(par fmt(%9.3f))) ///
-        drop(age age2 gender _Iyear_2016 ///
-        _Idistrict__2 _Idistrict__3 ///
-        _Idistrict__4 _Idistrict__5 _Idistrict__6 _Idistrict__7 ///
-        _Idistrict__8 _Idistrict__9 _Idistrict__10 _Idistrict__11 ///
-        _Idistrict__12 _Idistrict__13 _Idistrict__14 _Idistrict__15 ///
-        _Idistrict__16  _Idistrict__18 _Idistrict__19 ///
-        _Idistrict__20 _Idistrict__21 _Idistrict__22 _Idistrict__23 ///
-        _Idistrict__24 _Idistrict__25 _Idistrict__26 _Idistrict__27 ///
-        _Idistrict__28 _Idistrict__29 _Idistrict__30 _Idistrict__31 ///
-        _Idistrict__32 _Idistrict__33 _Idistrict__34 _Idistrict__35 ///
-        _Idistrict__36 _Idistrict__37 _Idistrict__38 _Idistrict__39 ///
-        _Idistrict__40 _Idistrict__41 _Idistrict__42 _Idistrict__43 ///
-        _Idistrict__44 _Idistrict__45 _Idistrict__46 _Idistrict__47 ///
-        _Idistrict__48 _Idistrict__49 _Idistrict__50 _Idistrict__51 ///
+        drop(age age2 gender _Iyear_2016  $district ///
         _cons $controls)   ///
    legend label varlabels(_cons constant) starlevels(* 0.1 ** 0.05 *** 0.01)  ///
    stats(r2 df_r, fmt(3 0 1) label(R-sqr dfres))
@@ -1008,20 +891,7 @@ esttab m_employed_olf_3m m_unemployed_olf_3m m_lfp_3m_empl ///
       using "$out_analysis/SR_REF_reg_HET_EDUC_OLS_Uncond_FE_DIS_YEAR.tex", se label replace booktabs ///
       cells(b(star fmt(%9.3f)) se(par fmt(%9.3f))) ///
 mtitles("Employed" "Unemployed" "LFP Employee" "LFP Temp" "LFP Employer" "LFP SE" "LFP Unpaid") ///
-        drop(age age2 gender _Iyear_2016 ///
-        _Idistrict__2 _Idistrict__3 ///
-        _Idistrict__4 _Idistrict__5 _Idistrict__6 _Idistrict__7 ///
-        _Idistrict__8 _Idistrict__9 _Idistrict__10 _Idistrict__11 ///
-        _Idistrict__12 _Idistrict__13 _Idistrict__14 _Idistrict__15 ///
-        _Idistrict__16 _Idistrict__18 _Idistrict__19 ///
-        _Idistrict__20 _Idistrict__21 _Idistrict__22 _Idistrict__23 ///
-        _Idistrict__24 _Idistrict__25 _Idistrict__26 _Idistrict__27 ///
-        _Idistrict__28 _Idistrict__29 _Idistrict__30 _Idistrict__31 ///
-        _Idistrict__32 _Idistrict__33 _Idistrict__34 _Idistrict__35 ///
-        _Idistrict__36 _Idistrict__37 _Idistrict__38 _Idistrict__39 ///
-        _Idistrict__40 _Idistrict__41 _Idistrict__42 _Idistrict__43 ///
-        _Idistrict__44 _Idistrict__45 _Idistrict__46 _Idistrict__47 ///
-        _Idistrict__48 _Idistrict__49 _Idistrict__50 _Idistrict__51 ///
+        drop(age age2 gender _Iyear_2016  $district ///
         _cons $controls)   ///
 starlevels(* 0.1 ** 0.05 *** 0.01) ///
    title("REF - HET EDUC - Results OLS Regression with time and district FE - UNCOND"\label{tab1}) nofloat ///
@@ -1161,20 +1031,7 @@ mat list e(b)
 estout m_ln_total_rwage_3m m_ln_hourly_rwage m_work_hours_pweek_3m_w  ///
          m_formal /// 
       , cells(b(star fmt(%9.3f)) se(par fmt(%9.3f))) ///
-        drop(age age2 gender _Iyear_2016 ///
-        _Idistrict__2 _Idistrict__3 ///
-        _Idistrict__4 _Idistrict__5 _Idistrict__6 _Idistrict__7 ///
-        _Idistrict__8 _Idistrict__9 _Idistrict__10 _Idistrict__11 ///
-        _Idistrict__12 _Idistrict__13 _Idistrict__14 _Idistrict__15 ///
-        _Idistrict__16  _Idistrict__18 _Idistrict__19 ///
-        _Idistrict__20 _Idistrict__21 _Idistrict__22 _Idistrict__23 ///
-        _Idistrict__24 _Idistrict__25 _Idistrict__26 _Idistrict__27 ///
-        _Idistrict__28 _Idistrict__29 _Idistrict__30 _Idistrict__31 ///
-        _Idistrict__32 _Idistrict__33 _Idistrict__34 _Idistrict__35 ///
-        _Idistrict__36 _Idistrict__37 _Idistrict__38 _Idistrict__39 ///
-        _Idistrict__40 _Idistrict__41 _Idistrict__42 _Idistrict__43 ///
-        _Idistrict__44 _Idistrict__45 _Idistrict__46 _Idistrict__47 ///
-        _Idistrict__48 _Idistrict__49 _Idistrict__50 _Idistrict__51 ///
+        drop(age age2 gender _Iyear_2016  $district ///
         _cons $controls)   ///
    legend label varlabels(_cons constant) starlevels(* 0.1 ** 0.05 *** 0.01)  ///
    stats(r2 df_r, fmt(3 0 1) label(R-sqr dfres))
@@ -1188,20 +1045,7 @@ esttab m_ln_total_rwage_3m m_ln_hourly_rwage m_work_hours_pweek_3m_w  ///
       using "$out_analysis/SR_REF_reg_HET_EDUC_OLS_Cond_FE_DIS_YEAR.tex", se label replace booktabs ///
       cells(b(star fmt(%9.3f)) se(par fmt(%9.3f))) ///
 mtitles("Total Wage (ln)" "Hrly Wage (ln)" "Work Hours p.w." "Formal") ///
-        drop(age age2 gender _Iyear_2016 ///
-        _Idistrict__2 _Idistrict__3 ///
-        _Idistrict__4 _Idistrict__5 _Idistrict__6 _Idistrict__7 ///
-        _Idistrict__8 _Idistrict__9 _Idistrict__10 _Idistrict__11 ///
-        _Idistrict__12 _Idistrict__13 _Idistrict__14 _Idistrict__15 ///
-        _Idistrict__16 _Idistrict__18 _Idistrict__19 ///
-        _Idistrict__20 _Idistrict__21 _Idistrict__22 _Idistrict__23 ///
-        _Idistrict__24 _Idistrict__25 _Idistrict__26 _Idistrict__27 ///
-        _Idistrict__28 _Idistrict__29 _Idistrict__30 _Idistrict__31 ///
-        _Idistrict__32 _Idistrict__33 _Idistrict__34 _Idistrict__35 ///
-        _Idistrict__36 _Idistrict__37 _Idistrict__38 _Idistrict__39 ///
-        _Idistrict__40 _Idistrict__41 _Idistrict__42 _Idistrict__43 ///
-        _Idistrict__44 _Idistrict__45 _Idistrict__46 _Idistrict__47 ///
-        _Idistrict__48 _Idistrict__49 _Idistrict__50 _Idistrict__51 ///
+        drop(age age2 gender _Iyear_2016  $district ///
         _cons $controls)   ///
 starlevels(* 0.1 ** 0.05 *** 0.01) ///
    title("REF - HET EDUC - Results OLS Regression with time and district FE - COND"\label{tab1}) nofloat ///
@@ -1402,20 +1246,7 @@ mat list e(b)
 estout m_employed_olf_3m m_unemployed_olf_3m m_lfp_3m_empl ///
          m_lfp_3m_temp m_lfp_3m_employer m_lfp_3m_se m_lfp_3m_unpaid  /// 
       , cells(b(star fmt(%9.3f)) se(par fmt(%9.3f)) F(par fmt(%9.3f))) ///
-        drop(age age2 gender _Iyear_2016 ///
-        _Idistrict__2 _Idistrict__3 ///
-        _Idistrict__4 _Idistrict__5 _Idistrict__6 _Idistrict__7 ///
-        _Idistrict__8 _Idistrict__9 _Idistrict__10 _Idistrict__11 ///
-        _Idistrict__12 _Idistrict__13 _Idistrict__14 _Idistrict__15 ///
-        _Idistrict__16  _Idistrict__18 _Idistrict__19 ///
-        _Idistrict__20 _Idistrict__21 _Idistrict__22 _Idistrict__23 ///
-        _Idistrict__24 _Idistrict__25 _Idistrict__26 _Idistrict__27 ///
-        _Idistrict__28 _Idistrict__29 _Idistrict__30 _Idistrict__31 ///
-        _Idistrict__32 _Idistrict__33 _Idistrict__34 _Idistrict__35 ///
-        _Idistrict__36 _Idistrict__37 _Idistrict__38 _Idistrict__39 ///
-        _Idistrict__40 _Idistrict__41 _Idistrict__42 _Idistrict__43 ///
-        _Idistrict__44 _Idistrict__45 _Idistrict__46 _Idistrict__47 ///
-        _Idistrict__48 _Idistrict__49 _Idistrict__50 _Idistrict__51 ///
+        drop(age age2 gender _Iyear_2016  $district ///
         _cons $controls)   ///
    legend label varlabels(_cons constant) starlevels(* 0.1 ** 0.05 *** 0.01)  ///
    stats(r2 df_r, fmt(3 0 1) label(R-sqr dfres))
@@ -1429,20 +1260,7 @@ esttab m_employed_olf_3m m_unemployed_olf_3m m_lfp_3m_empl ///
       using "$out_analysis/SR_REF_reg_HET_EDUC_OLS_Uncond_FE_DIS_YEAR.tex", se label replace booktabs ///
       cells(b(star fmt(%9.3f)) se(par fmt(%9.3f))) ///
 mtitles("Employed" "Unemployed" "LFP Employee" "LFP Temp" "LFP Employer" "LFP SE" "LFP Unpaid") ///
-        drop(age age2 gender _Iyear_2016 ///
-        _Idistrict__2 _Idistrict__3 ///
-        _Idistrict__4 _Idistrict__5 _Idistrict__6 _Idistrict__7 ///
-        _Idistrict__8 _Idistrict__9 _Idistrict__10 _Idistrict__11 ///
-        _Idistrict__12 _Idistrict__13 _Idistrict__14 _Idistrict__15 ///
-        _Idistrict__16 _Idistrict__18 _Idistrict__19 ///
-        _Idistrict__20 _Idistrict__21 _Idistrict__22 _Idistrict__23 ///
-        _Idistrict__24 _Idistrict__25 _Idistrict__26 _Idistrict__27 ///
-        _Idistrict__28 _Idistrict__29 _Idistrict__30 _Idistrict__31 ///
-        _Idistrict__32 _Idistrict__33 _Idistrict__34 _Idistrict__35 ///
-        _Idistrict__36 _Idistrict__37 _Idistrict__38 _Idistrict__39 ///
-        _Idistrict__40 _Idistrict__41 _Idistrict__42 _Idistrict__43 ///
-        _Idistrict__44 _Idistrict__45 _Idistrict__46 _Idistrict__47 ///
-        _Idistrict__48 _Idistrict__49 _Idistrict__50 _Idistrict__51 ///
+        drop(age age2 gender _Iyear_2016  $district ///
         _cons $controls)   ///
 starlevels(* 0.1 ** 0.05 *** 0.01) ///
    title("REF - HET EDUC - Results OLS Regression with time and district FE - UNCOND"\label{tab1}) nofloat ///
@@ -1583,20 +1401,7 @@ mat list e(b)
 estout m_ln_total_rwage_3m m_ln_hourly_rwage m_work_hours_pweek_3m_w  ///
          m_formal /// 
       , cells(b(star fmt(%9.3f)) se(par fmt(%9.3f))) ///
-        drop(age age2 gender _Iyear_2016 ///
-        _Idistrict__2 _Idistrict__3 ///
-        _Idistrict__4 _Idistrict__5 _Idistrict__6 _Idistrict__7 ///
-        _Idistrict__8 _Idistrict__9 _Idistrict__10 _Idistrict__11 ///
-        _Idistrict__12 _Idistrict__13 _Idistrict__14 _Idistrict__15 ///
-        _Idistrict__16  _Idistrict__18 _Idistrict__19 ///
-        _Idistrict__20 _Idistrict__21 _Idistrict__22 _Idistrict__23 ///
-        _Idistrict__24 _Idistrict__25 _Idistrict__26 _Idistrict__27 ///
-        _Idistrict__28 _Idistrict__29 _Idistrict__30 _Idistrict__31 ///
-        _Idistrict__32 _Idistrict__33 _Idistrict__34 _Idistrict__35 ///
-        _Idistrict__36 _Idistrict__37 _Idistrict__38 _Idistrict__39 ///
-        _Idistrict__40 _Idistrict__41 _Idistrict__42 _Idistrict__43 ///
-        _Idistrict__44 _Idistrict__45 _Idistrict__46 _Idistrict__47 ///
-        _Idistrict__48 _Idistrict__49 _Idistrict__50 _Idistrict__51 ///
+        drop(age age2 gender _Iyear_2016  $district ///
         _cons $controls)   ///
    legend label varlabels(_cons constant) starlevels(* 0.1 ** 0.05 *** 0.01)  ///
    stats(r2 df_r, fmt(3 0 1) label(R-sqr dfres))
@@ -1610,20 +1415,7 @@ esttab m_ln_total_rwage_3m m_ln_hourly_rwage m_work_hours_pweek_3m_w  ///
       using "$out_analysis/SR_REF_reg_HET_EDUC_OLS_Cond_FE_DIS_YEAR.tex", se label replace booktabs ///
       cells(b(star fmt(%9.3f)) se(par fmt(%9.3f))) ///
 mtitles("Total Wage (ln)" "Hrly Wage (ln)" "Work Hours p.w." "Formal") ///
-        drop(age age2 gender _Iyear_2016 ///
-        _Idistrict__2 _Idistrict__3 ///
-        _Idistrict__4 _Idistrict__5 _Idistrict__6 _Idistrict__7 ///
-        _Idistrict__8 _Idistrict__9 _Idistrict__10 _Idistrict__11 ///
-        _Idistrict__12 _Idistrict__13 _Idistrict__14 _Idistrict__15 ///
-        _Idistrict__16 _Idistrict__18 _Idistrict__19 ///
-        _Idistrict__20 _Idistrict__21 _Idistrict__22 _Idistrict__23 ///
-        _Idistrict__24 _Idistrict__25 _Idistrict__26 _Idistrict__27 ///
-        _Idistrict__28 _Idistrict__29 _Idistrict__30 _Idistrict__31 ///
-        _Idistrict__32 _Idistrict__33 _Idistrict__34 _Idistrict__35 ///
-        _Idistrict__36 _Idistrict__37 _Idistrict__38 _Idistrict__39 ///
-        _Idistrict__40 _Idistrict__41 _Idistrict__42 _Idistrict__43 ///
-        _Idistrict__44 _Idistrict__45 _Idistrict__46 _Idistrict__47 ///
-        _Idistrict__48 _Idistrict__49 _Idistrict__50 _Idistrict__51 ///
+        drop(age age2 gender _Iyear_2016  $district ///
         _cons $controls)   ///
 starlevels(* 0.1 ** 0.05 *** 0.01) ///
    title("REF - HET EDUC - Results OLS Regression with time and district FE - COND"\label{tab1}) nofloat ///

@@ -186,8 +186,11 @@ global dep_var_ref  ln_hh_syrians_bydis
 global iv_ref       ln_IV_Ref_NETW
 
 global dep_var_wp ln_agg_wp_orig
-global iv_wp      IV_WP_DIST
-  
+*global iv_wp      IV_WP_DIST //GOOD ORIG
+
+global iv_wp      IV_WP_DIST 
+
+
 global outcomes_uncond  employed_olf_3m   ///
                         unemployed_olf_3m ///
                         lfp_3m_empl ///
@@ -201,7 +204,7 @@ global outcomes_uncond  employed_olf_3m   ///
 
 global outcomes_cond  ln_total_rwage_3m ///
                       ln_hourly_rwage ///
-                      work_hours_pweek_3m ///
+                      work_hours_pweek_3m_w ///
                       formal
 *ln_rmthly_wage_main 
 *ln_rhourly_wage_main 
@@ -213,7 +216,21 @@ global heterogenous gender urb_rural_camps lfp_3m bi_education
 
 
 
-
+            
+global   district      ///
+        _Idistrict__2 _Idistrict__3 ///
+        _Idistrict__4 _Idistrict__5 _Idistrict__6 _Idistrict__7 ///
+        _Idistrict__8 _Idistrict__9 _Idistrict__10 _Idistrict__11 ///
+        _Idistrict__12 _Idistrict__13 _Idistrict__14 _Idistrict__15 ///
+        _Idistrict__16  _Idistrict__18 _Idistrict__19 ///
+        _Idistrict__20 _Idistrict__21 _Idistrict__22 _Idistrict__23 ///
+        _Idistrict__24 _Idistrict__25 _Idistrict__26 _Idistrict__27 ///
+        _Idistrict__28 _Idistrict__29 _Idistrict__30 _Idistrict__31 ///
+        _Idistrict__32 _Idistrict__33 _Idistrict__34 _Idistrict__35 ///
+        _Idistrict__36 _Idistrict__37 _Idistrict__38 _Idistrict__39 ///
+        _Idistrict__40 _Idistrict__41 _Idistrict__42 _Idistrict__43 ///
+        _Idistrict__44 _Idistrict__45 _Idistrict__46 _Idistrict__47 ///
+        _Idistrict__48 _Idistrict__49 _Idistrict__50 _Idistrict__51 
 
 
 
