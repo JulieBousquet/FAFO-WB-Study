@@ -295,6 +295,29 @@ destring dis_code, replace
 
 drop _merge
 
+
+
+
+/*
+ren gov governorate_iid 
+ren district district_id
+
+*NEW CODE NEW CODE
+ren subdistrict subdistrict_id 
+ren locality locality_id 
+
+egen district_iid = concat(governorate_iid district_id)
+distinct district_iid //51
+
+*START NEW CODE START NEW CODE 
+egen subdistrict_iid = concat(governorate_iid district_id subdistrict_id)
+distinct subdistrict_iid //87
+
+egen locality_iid = concat(governorate_iid district_id subdistrict_id locality_id)
+distinct locality_iid //334
+destring district_iid subdistrict_iid locality_iid, replace 
+*/
+
 ********
 *Dist.
 ********
@@ -316,11 +339,6 @@ tabu _merge
 drop if _merge==2
 
 drop _merge
-
-
-
-
-
 
 
 
@@ -382,6 +400,13 @@ mdesc locality_iid
 *START NEW CODE START NEW CODE 
 destring governorate_iid district_iid subdistrict_iid locality_iid, replace 
 
+
+bys district_iid: egen hh_syrians_bydis = sum(hh_syrians)
+bys district_iid: egen pct_hh_syr_eg_2004_bydis = sum(pct_hh_syr_eg_2004)
+
+
+tab hh_syrians_bydis, m 
+tab pct_hh_syr_eg_2004_bydis, m 
 
 merge m:1 district_iid  using "$data_JLMPS_temp/JLMPS_GeoUnits_Dico_dis.dta"
 drop if _merge == 2 

@@ -157,6 +157,89 @@ global controls ///
 */
 
 
+
+*********************************************************************
+*********************************************************************
+
+                              ************
+                              *  GLOBALS *
+                              ************
+
+              ********************
+              * SYTHESIS REPORT  *
+              ********************
+
+*Sampling weights.  
+
+*SEs clustered one admin level above treatment variation, 
+*unless variation is available only at highly aggregated level 
+*(e.g. district). 
+
+*Robust SEs  
+*Sample:  
+*hosts/natives 
+*Working Age 15-64 
+*Individual-level analysis for most variables  
+
+global dep_var_ref  ln_hh_syrians_bydis 
+*ln_prop_hh_syrians
+global iv_ref       ln_IV_Ref_NETW
+
+global dep_var_wp ln_agg_wp_orig
+global iv_wp      IV_WP_DIST
+  
+global outcomes_uncond  employed_olf_3m   ///
+                        unemployed_olf_3m ///
+                        lfp_3m_empl ///
+                        lfp_3m_temp ///
+                        lfp_3m_employer ///
+                        lfp_3m_se ///
+                        lfp_3m_unpaid
+*employed_olf_7d 
+*unemployed_olf_7d
+
+
+global outcomes_cond  ln_total_rwage_3m ///
+                      ln_hourly_rwage ///
+                      work_hours_pweek_3m ///
+                      formal
+*ln_rmthly_wage_main 
+*ln_rhourly_wage_main 
+ *wh_pw_7d_w formal 
+
+global controls age age2 gender 
+
+global heterogenous gender urb_rural_camps lfp_3m bi_education
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 /*
 
 
