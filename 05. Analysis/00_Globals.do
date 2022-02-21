@@ -204,7 +204,7 @@ global outcomes_uncond  employed_olf_3m   ///
 
 global outcomes_cond  ln_total_rwage_3m ///
                       ln_hourly_rwage ///
-                      work_hours_pweek_3m_w ///
+                      ln_whpw_3m ///
                       formal
 *ln_rmthly_wage_main 
 *ln_rhourly_wage_main 

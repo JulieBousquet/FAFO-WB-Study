@@ -301,7 +301,7 @@ tab year
 
 ereturn list
 mat list e(b)
-estout m_ln_total_rwage_3m m_ln_hourly_rwage m_work_hours_pweek_3m_w  ///
+estout m_ln_total_rwage_3m m_ln_hourly_rwage m_ln_whpw_3m  ///
          m_formal /// 
       , cells(b(star fmt(%9.3f)) se(par fmt(%9.3f))) ///
         drop(age age2  _Iyear_2016  $district ///
@@ -313,7 +313,7 @@ estout m_ln_total_rwage_3m m_ln_hourly_rwage m_work_hours_pweek_3m_w  ///
 *(95%) [90%] level. Based
 
 *erase "$out/reg_infra_access.tex"
-esttab m_ln_total_rwage_3m m_ln_hourly_rwage m_work_hours_pweek_3m_w  ///
+esttab m_ln_total_rwage_3m m_ln_hourly_rwage m_ln_whpw_3m  ///
          m_formal   /// 
       using "$out_analysis/SR_REF_reg_HET_GENDER_OLS_Cond_FE_DIS_YEAR.tex", se label replace booktabs ///
       cells(b(star fmt(%9.3f)) se(par fmt(%9.3f))) ///
@@ -326,7 +326,7 @@ starlevels(* 0.1 ** 0.05 *** 0.01) ///
     nonotes ///
     addnotes("Standard errors clustered at the district level. Significance levels: *p $<$ 0.1, ** p $<$ 0.05, *** p $<$ 0.01") 
 
-estimates drop  m_ln_total_rwage_3m m_ln_hourly_rwage m_work_hours_pweek_3m_w ///
+estimates drop  m_ln_total_rwage_3m m_ln_hourly_rwage m_ln_whpw_3m ///
                 m_formal  
 
 
@@ -374,7 +374,7 @@ restore
 
 ereturn list
 mat list e(b)
-estout m_ln_total_rwage_3m m_ln_hourly_rwage m_work_hours_pweek_3m_w ///
+estout m_ln_total_rwage_3m m_ln_hourly_rwage m_ln_whpw_3m ///
          m_formal   /// 
       , cells(b(star fmt(%9.3f)) se(par fmt(%9.3f)) F(par fmt(%9.3f))) ///
         drop(age age2  ///
@@ -386,7 +386,7 @@ estout m_ln_total_rwage_3m m_ln_hourly_rwage m_work_hours_pweek_3m_w ///
 *(95%) [90%] level. Based
 
 *erase "$out/reg_infra_access.tex"
-esttab m_ln_total_rwage_3m m_ln_hourly_rwage m_work_hours_pweek_3m_w ///
+esttab m_ln_total_rwage_3m m_ln_hourly_rwage m_ln_whpw_3m ///
          m_formal   /// 
       using "$out_analysis/SR_REF_reg_HET_GENDER_OLS_Cond_FE_INDIV_YEAR.tex", se label replace booktabs ///
       cells(b(star fmt(%9.3f)) se(par fmt(%9.3f))) ///
@@ -399,7 +399,7 @@ starlevels(* 0.1 ** 0.05 *** 0.01) ///
     nonotes ///
     addnotes("Standard errors clustered at the district level. Significance levels: *p $<$ 0.1, ** p $<$ 0.05, *** p $<$ 0.01") 
 
-estimates drop m_ln_total_rwage_3m m_ln_hourly_rwage m_work_hours_pweek_3m_w ///
+estimates drop m_ln_total_rwage_3m m_ln_hourly_rwage m_ln_whpw_3m ///
          m_formal   
 ************
 
@@ -670,7 +670,7 @@ tab year
 
 ereturn list
 mat list e(b)
-estout m_ln_total_rwage_3m m_ln_hourly_rwage m_work_hours_pweek_3m_w  ///
+estout m_ln_total_rwage_3m m_ln_hourly_rwage m_ln_whpw_3m  ///
          m_formal /// 
       , cells(b(star fmt(%9.3f)) se(par fmt(%9.3f))) ///
         drop(age age2 gender _Iyear_2016  $district ///
@@ -682,7 +682,7 @@ estout m_ln_total_rwage_3m m_ln_hourly_rwage m_work_hours_pweek_3m_w  ///
 *(95%) [90%] level. Based
 
 *erase "$out/reg_infra_access.tex"
-esttab m_ln_total_rwage_3m m_ln_hourly_rwage m_work_hours_pweek_3m_w  ///
+esttab m_ln_total_rwage_3m m_ln_hourly_rwage m_ln_whpw_3m  ///
          m_formal   /// 
       using "$out_analysis/SR_REF_reg_HET_URBAN_OLS_Cond_FE_DIS_YEAR.tex", se label replace booktabs ///
       cells(b(star fmt(%9.3f)) se(par fmt(%9.3f))) ///
@@ -695,7 +695,7 @@ starlevels(* 0.1 ** 0.05 *** 0.01) ///
     nonotes ///
     addnotes("Standard errors clustered at the district level. Significance levels: *p $<$ 0.1, ** p $<$ 0.05, *** p $<$ 0.01") 
 
-estimates drop  m_ln_total_rwage_3m m_ln_hourly_rwage m_work_hours_pweek_3m_w ///
+estimates drop  m_ln_total_rwage_3m m_ln_hourly_rwage m_ln_whpw_3m ///
                 m_formal  
 
 
@@ -743,7 +743,7 @@ restore
 
 ereturn list
 mat list e(b)
-estout m_ln_total_rwage_3m m_ln_hourly_rwage m_work_hours_pweek_3m_w ///
+estout m_ln_total_rwage_3m m_ln_hourly_rwage m_ln_whpw_3m ///
          m_formal   /// 
       , cells(b(star fmt(%9.3f)) se(par fmt(%9.3f)) F(par fmt(%9.3f))) ///
         drop(age age2 gender ///
@@ -755,7 +755,7 @@ estout m_ln_total_rwage_3m m_ln_hourly_rwage m_work_hours_pweek_3m_w ///
 *(95%) [90%] level. Based
 
 *erase "$out/reg_infra_access.tex"
-esttab m_ln_total_rwage_3m m_ln_hourly_rwage m_work_hours_pweek_3m_w ///
+esttab m_ln_total_rwage_3m m_ln_hourly_rwage m_ln_whpw_3m ///
          m_formal   /// 
       using "$out_analysis/SR_REF_reg_HET_URBAN_OLS_Cond_FE_INDIV_YEAR.tex", se label replace booktabs ///
       cells(b(star fmt(%9.3f)) se(par fmt(%9.3f))) ///
@@ -768,7 +768,7 @@ starlevels(* 0.1 ** 0.05 *** 0.01) ///
     nonotes ///
     addnotes("Standard errors clustered at the district level. Significance levels: *p $<$ 0.1, ** p $<$ 0.05, *** p $<$ 0.01") 
 
-estimates drop m_ln_total_rwage_3m m_ln_hourly_rwage m_work_hours_pweek_3m_w ///
+estimates drop m_ln_total_rwage_3m m_ln_hourly_rwage m_ln_whpw_3m ///
          m_formal   
 ************
 
@@ -1028,7 +1028,7 @@ tab year
 
 ereturn list
 mat list e(b)
-estout m_ln_total_rwage_3m m_ln_hourly_rwage m_work_hours_pweek_3m_w  ///
+estout m_ln_total_rwage_3m m_ln_hourly_rwage m_ln_whpw_3m  ///
          m_formal /// 
       , cells(b(star fmt(%9.3f)) se(par fmt(%9.3f))) ///
         drop(age age2 gender _Iyear_2016  $district ///
@@ -1040,7 +1040,7 @@ estout m_ln_total_rwage_3m m_ln_hourly_rwage m_work_hours_pweek_3m_w  ///
 *(95%) [90%] level. Based
 
 *erase "$out/reg_infra_access.tex"
-esttab m_ln_total_rwage_3m m_ln_hourly_rwage m_work_hours_pweek_3m_w  ///
+esttab m_ln_total_rwage_3m m_ln_hourly_rwage m_ln_whpw_3m  ///
          m_formal   /// 
       using "$out_analysis/SR_REF_reg_HET_EDUC_OLS_Cond_FE_DIS_YEAR.tex", se label replace booktabs ///
       cells(b(star fmt(%9.3f)) se(par fmt(%9.3f))) ///
@@ -1053,7 +1053,7 @@ starlevels(* 0.1 ** 0.05 *** 0.01) ///
     nonotes ///
     addnotes("Standard errors clustered at the district level. Significance levels: *p $<$ 0.1, ** p $<$ 0.05, *** p $<$ 0.01") 
 
-estimates drop  m_ln_total_rwage_3m m_ln_hourly_rwage m_work_hours_pweek_3m_w ///
+estimates drop  m_ln_total_rwage_3m m_ln_hourly_rwage m_ln_whpw_3m ///
                 m_formal  
 
 
@@ -1101,7 +1101,7 @@ restore
 
 ereturn list
 mat list e(b)
-estout m_ln_total_rwage_3m m_ln_hourly_rwage m_work_hours_pweek_3m_w ///
+estout m_ln_total_rwage_3m m_ln_hourly_rwage m_ln_whpw_3m ///
          m_formal   /// 
       , cells(b(star fmt(%9.3f)) se(par fmt(%9.3f)) F(par fmt(%9.3f))) ///
         drop(age age2 gender ///
@@ -1113,7 +1113,7 @@ estout m_ln_total_rwage_3m m_ln_hourly_rwage m_work_hours_pweek_3m_w ///
 *(95%) [90%] level. Based
 
 *erase "$out/reg_infra_access.tex"
-esttab m_ln_total_rwage_3m m_ln_hourly_rwage m_work_hours_pweek_3m_w ///
+esttab m_ln_total_rwage_3m m_ln_hourly_rwage m_ln_whpw_3m ///
          m_formal   /// 
       using "$out_analysis/SR_REF_reg_HET_EDUC_OLS_Cond_FE_INDIV_YEAR.tex", se label replace booktabs ///
       cells(b(star fmt(%9.3f)) se(par fmt(%9.3f))) ///
@@ -1126,7 +1126,7 @@ starlevels(* 0.1 ** 0.05 *** 0.01) ///
     nonotes ///
     addnotes("Standard errors clustered at the district level. Significance levels: *p $<$ 0.1, ** p $<$ 0.05, *** p $<$ 0.01") 
 
-estimates drop m_ln_total_rwage_3m m_ln_hourly_rwage m_work_hours_pweek_3m_w ///
+estimates drop m_ln_total_rwage_3m m_ln_hourly_rwage m_ln_whpw_3m ///
          m_formal   
 ************
 
@@ -1398,7 +1398,7 @@ tab year
 
 ereturn list
 mat list e(b)
-estout m_ln_total_rwage_3m m_ln_hourly_rwage m_work_hours_pweek_3m_w  ///
+estout m_ln_total_rwage_3m m_ln_hourly_rwage m_ln_whpw_3m  ///
          m_formal /// 
       , cells(b(star fmt(%9.3f)) se(par fmt(%9.3f))) ///
         drop(age age2 gender _Iyear_2016  $district ///
@@ -1410,7 +1410,7 @@ estout m_ln_total_rwage_3m m_ln_hourly_rwage m_work_hours_pweek_3m_w  ///
 *(95%) [90%] level. Based
 
 *erase "$out/reg_infra_access.tex"
-esttab m_ln_total_rwage_3m m_ln_hourly_rwage m_work_hours_pweek_3m_w  ///
+esttab m_ln_total_rwage_3m m_ln_hourly_rwage m_ln_whpw_3m  ///
          m_formal   /// 
       using "$out_analysis/SR_REF_reg_HET_EDUC_OLS_Cond_FE_DIS_YEAR.tex", se label replace booktabs ///
       cells(b(star fmt(%9.3f)) se(par fmt(%9.3f))) ///
@@ -1423,7 +1423,7 @@ starlevels(* 0.1 ** 0.05 *** 0.01) ///
     nonotes ///
     addnotes("Standard errors clustered at the district level. Significance levels: *p $<$ 0.1, ** p $<$ 0.05, *** p $<$ 0.01") 
 
-estimates drop  m_ln_total_rwage_3m m_ln_hourly_rwage m_work_hours_pweek_3m_w ///
+estimates drop  m_ln_total_rwage_3m m_ln_hourly_rwage m_ln_whpw_3m ///
                 m_formal  
 
 
@@ -1471,7 +1471,7 @@ restore
 
 ereturn list
 mat list e(b)
-estout m_ln_total_rwage_3m m_ln_hourly_rwage m_work_hours_pweek_3m_w ///
+estout m_ln_total_rwage_3m m_ln_hourly_rwage m_ln_whpw_3m ///
          m_formal   /// 
       , cells(b(star fmt(%9.3f)) se(par fmt(%9.3f)) F(par fmt(%9.3f))) ///
         drop(age age2 gender ///
@@ -1483,7 +1483,7 @@ estout m_ln_total_rwage_3m m_ln_hourly_rwage m_work_hours_pweek_3m_w ///
 *(95%) [90%] level. Based
 
 *erase "$out/reg_infra_access.tex"
-esttab m_ln_total_rwage_3m m_ln_hourly_rwage m_work_hours_pweek_3m_w ///
+esttab m_ln_total_rwage_3m m_ln_hourly_rwage m_ln_whpw_3m ///
          m_formal   /// 
       using "$out_analysis/SR_REF_reg_HET_EDUC_OLS_Cond_FE_INDIV_YEAR.tex", se label replace booktabs ///
       cells(b(star fmt(%9.3f)) se(par fmt(%9.3f))) ///
@@ -1496,7 +1496,7 @@ starlevels(* 0.1 ** 0.05 *** 0.01) ///
     nonotes ///
     addnotes("Standard errors clustered at the district level. Significance levels: *p $<$ 0.1, ** p $<$ 0.05, *** p $<$ 0.01") 
 
-estimates drop m_ln_total_rwage_3m m_ln_hourly_rwage m_work_hours_pweek_3m_w ///
+estimates drop m_ln_total_rwage_3m m_ln_hourly_rwage m_ln_whpw_3m ///
          m_formal   
 ************
 
