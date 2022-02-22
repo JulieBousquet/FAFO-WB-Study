@@ -503,7 +503,7 @@ lab var inter_urban "Nbr Ref x urban"
 **** OLS *****
   foreach outcome of global outcomes_uncond {
     qui xi: reg `outcome' $dep_var_ref inter_urban urban ///
-                $controls  ///
+                $controls_SR  ///
                 i.district_iid i.year  ///
             [pw = $weight],  ///
             cluster(district_iid) robust 
@@ -519,7 +519,7 @@ estout m_employed_olf_3m m_unemployed_olf_3m m_lfp_3m_empl ///
          m_lfp_3m_temp m_lfp_3m_employer m_lfp_3m_se m_lfp_3m_unpaid  /// 
       , cells(b(star fmt(%9.3f)) se(par fmt(%9.3f)) F(par fmt(%9.3f))) ///
         drop(age age2 gender _Iyear_2016  $district ///
-        _cons $controls)   ///
+        _cons $controls_SR)   ///
    legend label varlabels(_cons constant) starlevels(* 0.1 ** 0.05 *** 0.01)  ///
    stats(r2 df_r, fmt(3 0 1) label(R-sqr dfres))
 
@@ -533,7 +533,7 @@ esttab m_employed_olf_3m m_unemployed_olf_3m m_lfp_3m_empl ///
       cells(b(star fmt(%9.3f)) se(par fmt(%9.3f))) ///
 mtitles("Employed" "Unemployed" "LFP Employee" "LFP Temp" "LFP Employer" "LFP SE" "LFP Unpaid") ///
         drop(age age2 gender _Iyear_2016  $district ///
-        _cons $controls)   ///
+        _cons $controls_SR)   ///
 starlevels(* 0.1 ** 0.05 *** 0.01) ///
    title("REF - HET URBAN - Results OLS Regression with time and district FE - UNCOND"\label{tab1}) nofloat ///
    stats(N r2_a, labels("Obs" "Adj. R-Squared")) ///
@@ -559,7 +559,7 @@ estimates drop m_employed_olf_3m m_unemployed_olf_3m m_lfp_3m_empl ///
 preserve
   foreach outcome of global outcomes_uncond {
        qui reghdfe `outcome' $dep_var_ref inter_urban urban ///
-                $controls ///  
+                $controls_SR ///  
                 [pw = $weight], ///
                 absorb(year indid_2010) ///
                 cluster(district_iid) 
@@ -568,22 +568,22 @@ preserve
         qui replace smpl=1 if e(sample)==1
         * Then I partial out all variables
       foreach y in `outcome' $dep_var_ref  inter_urban urban ///
-                $controls {
+                $controls_SR {
         qui reghdfe `y' [pw = $weight] if smpl==1, absorb(year indid_2010) residuals(`y'_c2wr)
         rename `y' o_`y'
         rename `y'_c2wr `y'
       }
       
-      qui reg `outcome' $dep_var_ref inter_urban urban $controls /// 
+      qui reg `outcome' $dep_var_ref inter_urban urban $controls_SR /// 
        [pw = $weight], cluster(district_iid) robust
       codebook `outcome', c
       estimates table,  k($dep_var_ref  inter_urban urban) star(.1 .05 .01) 
       estimates table, b(%7.4f) se(%7.4f) stats(N r2_a) k($dep_var_ref  inter_urban urban) 
       estimates store m_`outcome', title(Model `outcome')
 
-      drop `outcome' inter_urban urban $controls  $dep_var_ref smpl
+      drop `outcome' inter_urban urban $controls_SR  $dep_var_ref smpl
       
-      foreach y in `outcome' inter_urban urban $controls $dep_var_ref  {
+      foreach y in `outcome' inter_urban urban $controls_SR $dep_var_ref  {
         rename o_`y' `y' 
       } 
     }
@@ -596,7 +596,7 @@ estout m_employed_olf_3m m_unemployed_olf_3m m_lfp_3m_empl ///
          m_lfp_3m_temp m_lfp_3m_employer m_lfp_3m_se m_lfp_3m_unpaid  /// 
       , cells(b(star fmt(%9.3f)) se(par fmt(%9.3f)) F(par fmt(%9.3f))) ///
         drop(age age2 gender ///
-        _cons $controls)   ///
+        _cons $controls_SR)   ///
    legend label varlabels(_cons constant) starlevels(* 0.1 ** 0.05 *** 0.01)  ///
    stats(r2 df_r, fmt(3 0 1) label(R-sqr dfres))
 
@@ -610,7 +610,7 @@ esttab m_employed_olf_3m m_unemployed_olf_3m m_lfp_3m_empl ///
       cells(b(star fmt(%9.3f)) se(par fmt(%9.3f))) ///
 mtitles("Employed" "Unemployed" "LFP Employee" "LFP Temp" "LFP Employer" "LFP SE" "LFP Unpaid") ///
         drop(age age2  gender ///
-        _cons $controls)   ///
+        _cons $controls_SR)   ///
 starlevels(* 0.1 ** 0.05 *** 0.01) ///
    title("REF - HET URBAN - Results OLS Regression with time and Individual FE - UNCOND"\label{tab1}) nofloat ///
    stats(N r2_a, labels("Obs" "Adj. R-Squared")) ///
@@ -658,7 +658,7 @@ tab year
 
   foreach outcome of global outcomes_cond {
     qui xi: reg `outcome' $dep_var_ref inter_urban urban ///
-                $controls ///
+                $controls_SR ///
              i.district_iid i.year ///
             [pw = $weight],  ///
             cluster(district_iid) robust 
@@ -674,7 +674,7 @@ estout m_ln_total_rwage_3m m_ln_hourly_rwage m_ln_whpw_3m  ///
          m_formal /// 
       , cells(b(star fmt(%9.3f)) se(par fmt(%9.3f))) ///
         drop(age age2 gender _Iyear_2016  $district ///
-        _cons $controls)   ///
+        _cons $controls_SR)   ///
    legend label varlabels(_cons constant) starlevels(* 0.1 ** 0.05 *** 0.01)  ///
    stats(r2 df_r, fmt(3 0 1) label(R-sqr dfres))
 
@@ -688,7 +688,7 @@ esttab m_ln_total_rwage_3m m_ln_hourly_rwage m_ln_whpw_3m  ///
       cells(b(star fmt(%9.3f)) se(par fmt(%9.3f))) ///
 mtitles("Total Wage (ln)" "Hrly Wage (ln)" "Work Hours p.w." "Formal") ///
         drop(age age2 gender _Iyear_2016  $district ///
-        _cons $controls)   ///
+        _cons $controls_SR)   ///
 starlevels(* 0.1 ** 0.05 *** 0.01) ///
    title("REF - HET GENDER - Results OLS Regression with time and district FE - COND"\label{tab1}) nofloat ///
    stats(N r2_a, labels("Obs" "Adj. R-Squared")) ///
@@ -712,7 +712,7 @@ estimates drop  m_ln_total_rwage_3m m_ln_hourly_rwage m_ln_whpw_3m ///
 preserve
   foreach outcome of global outcomes_cond {
        qui reghdfe `outcome' $dep_var_ref inter_urban urban ///
-                $controls ///  
+                $controls_SR ///  
                 [pw = $weight], ///
                 absorb(year indid_2010) ///
                 cluster(district_iid) 
@@ -720,21 +720,21 @@ preserve
         qui gen smpl=0
         qui replace smpl=1 if e(sample)==1
         * Then I partial out all variables
-      foreach y in `outcome' $dep_var_ref inter_urban urban $controls {
+      foreach y in `outcome' $dep_var_ref inter_urban urban $controls_SR {
         qui reghdfe `y' [pw = $weight] if smpl==1, absorb(year indid_2010) residuals(`y'_c2wr)
         rename `y' o_`y'
         rename `y'_c2wr `y'
       }
       
-      qui reg `outcome' $dep_var_ref inter_urban urban $controls [pw = $weight], cluster(district_iid) robust
+      qui reg `outcome' $dep_var_ref inter_urban urban $controls_SR [pw = $weight], cluster(district_iid) robust
       codebook `outcome', c
       estimates table,  k($dep_var_ref inter_urban urban) star(.1 .05 .01) 
       estimates table, b(%7.4f) se(%7.4f) stats(N r2_a) k($dep_var_ref inter_urban urban) 
       estimates store m_`outcome', title(Model `outcome')
 
-      drop `outcome' inter_urban urban $controls $dep_var_ref smpl
+      drop `outcome' inter_urban urban $controls_SR $dep_var_ref smpl
       
-      foreach y in `outcome' inter_urban urban $controls $dep_var_ref  {
+      foreach y in `outcome' inter_urban urban $controls_SR $dep_var_ref  {
         rename o_`y' `y' 
       } 
     }
@@ -747,7 +747,7 @@ estout m_ln_total_rwage_3m m_ln_hourly_rwage m_ln_whpw_3m ///
          m_formal   /// 
       , cells(b(star fmt(%9.3f)) se(par fmt(%9.3f)) F(par fmt(%9.3f))) ///
         drop(age age2 gender ///
-        _cons $controls)   ///
+        _cons $controls_SR)   ///
    legend label varlabels(_cons constant) starlevels(* 0.1 ** 0.05 *** 0.01)  ///
    stats(r2 df_r, fmt(3 0 1) label(R-sqr dfres))
 
@@ -761,7 +761,7 @@ esttab m_ln_total_rwage_3m m_ln_hourly_rwage m_ln_whpw_3m ///
       cells(b(star fmt(%9.3f)) se(par fmt(%9.3f))) ///
 mtitles("Total Wage (ln)" "Hrly Wage (ln)" "Work Hours p.w." "Formal") ///
         drop(age age2 gender  ///
-        _cons $controls)   ///
+        _cons $controls_SR)   ///
 starlevels(* 0.1 ** 0.05 *** 0.01) ///
    title("REF - HET URBAN - Results OLS Regression with time and Individual FE - COND"\label{tab1}) nofloat ///
    stats(N r2_a, labels("Obs" "Adj. R-Squared")) ///
@@ -862,7 +862,7 @@ lab var inter_educ "Nbr Ref x education"
 **** OLS *****
   foreach outcome of global outcomes_uncond {
     qui xi: reg `outcome' $dep_var_ref inter_educ bi_education ///
-                $controls  ///
+                $controls_SR  ///
                 i.district_iid i.year  ///
             [pw = $weight],  ///
             cluster(district_iid) robust 
@@ -878,7 +878,7 @@ estout m_employed_olf_3m m_unemployed_olf_3m m_lfp_3m_empl ///
          m_lfp_3m_temp m_lfp_3m_employer m_lfp_3m_se m_lfp_3m_unpaid  /// 
       , cells(b(star fmt(%9.3f)) se(par fmt(%9.3f)) F(par fmt(%9.3f))) ///
         drop(age age2 gender _Iyear_2016  $district ///
-        _cons $controls)   ///
+        _cons $controls_SR)   ///
    legend label varlabels(_cons constant) starlevels(* 0.1 ** 0.05 *** 0.01)  ///
    stats(r2 df_r, fmt(3 0 1) label(R-sqr dfres))
 
@@ -892,7 +892,7 @@ esttab m_employed_olf_3m m_unemployed_olf_3m m_lfp_3m_empl ///
       cells(b(star fmt(%9.3f)) se(par fmt(%9.3f))) ///
 mtitles("Employed" "Unemployed" "LFP Employee" "LFP Temp" "LFP Employer" "LFP SE" "LFP Unpaid") ///
         drop(age age2 gender _Iyear_2016  $district ///
-        _cons $controls)   ///
+        _cons $controls_SR)   ///
 starlevels(* 0.1 ** 0.05 *** 0.01) ///
    title("REF - HET EDUC - Results OLS Regression with time and district FE - UNCOND"\label{tab1}) nofloat ///
    stats(N r2_a, labels("Obs" "Adj. R-Squared")) ///
@@ -918,7 +918,7 @@ estimates drop m_employed_olf_3m m_unemployed_olf_3m m_lfp_3m_empl ///
 preserve
   foreach outcome of global outcomes_uncond {
        qui reghdfe `outcome' $dep_var_ref inter_educ bi_education ///
-                $controls ///  
+                $controls_SR ///  
                 [pw = $weight], ///
                 absorb(year indid_2010) ///
                 cluster(district_iid) 
@@ -927,22 +927,22 @@ preserve
         qui replace smpl=1 if e(sample)==1
         * Then I partial out all variables
       foreach y in `outcome' $dep_var_ref  inter_educ bi_education ///
-                $controls {
+                $controls_SR {
         qui reghdfe `y' [pw = $weight] if smpl==1, absorb(year indid_2010) residuals(`y'_c2wr)
         rename `y' o_`y'
         rename `y'_c2wr `y'
       }
       
-      qui reg `outcome' $dep_var_ref inter_educ bi_education $controls /// 
+      qui reg `outcome' $dep_var_ref inter_educ bi_education $controls_SR /// 
        [pw = $weight], cluster(district_iid) robust
       codebook `outcome', c
       estimates table,  k($dep_var_ref  inter_educ bi_education) star(.1 .05 .01) 
       estimates table, b(%7.4f) se(%7.4f) stats(N r2_a) k($dep_var_ref  inter_educ bi_education) 
       estimates store m_`outcome', title(Model `outcome')
 
-      drop `outcome' inter_educ bi_education $controls  $dep_var_ref smpl
+      drop `outcome' inter_educ bi_education $controls_SR  $dep_var_ref smpl
       
-      foreach y in `outcome' inter_educ bi_education $controls $dep_var_ref  {
+      foreach y in `outcome' inter_educ bi_education $controls_SR $dep_var_ref  {
         rename o_`y' `y' 
       } 
     }
@@ -955,7 +955,7 @@ estout m_employed_olf_3m m_unemployed_olf_3m m_lfp_3m_empl ///
          m_lfp_3m_temp m_lfp_3m_employer m_lfp_3m_se m_lfp_3m_unpaid  /// 
       , cells(b(star fmt(%9.3f)) se(par fmt(%9.3f)) F(par fmt(%9.3f))) ///
         drop(age age2 gender ///
-        _cons $controls)   ///
+        _cons $controls_SR)   ///
    legend label varlabels(_cons constant) starlevels(* 0.1 ** 0.05 *** 0.01)  ///
    stats(r2 df_r, fmt(3 0 1) label(R-sqr dfres))
 
@@ -969,7 +969,7 @@ esttab m_employed_olf_3m m_unemployed_olf_3m m_lfp_3m_empl ///
       cells(b(star fmt(%9.3f)) se(par fmt(%9.3f))) ///
 mtitles("Employed" "Unemployed" "LFP Employee" "LFP Temp" "LFP Employer" "LFP SE" "LFP Unpaid") ///
         drop(age age2  gender ///
-        _cons $controls)   ///
+        _cons $controls_SR)   ///
 starlevels(* 0.1 ** 0.05 *** 0.01) ///
    title("REF - HET EDUC - Results OLS Regression with time and Individual FE - UNCOND"\label{tab1}) nofloat ///
    stats(N r2_a, labels("Obs" "Adj. R-Squared")) ///
@@ -1016,7 +1016,7 @@ tab year
 
   foreach outcome of global outcomes_cond {
     qui xi: reg `outcome' $dep_var_ref inter_educ bi_education ///
-                $controls ///
+                $controls_SR ///
              i.district_iid i.year ///
             [pw = $weight],  ///
             cluster(district_iid) robust 
@@ -1032,7 +1032,7 @@ estout m_ln_total_rwage_3m m_ln_hourly_rwage m_ln_whpw_3m  ///
          m_formal /// 
       , cells(b(star fmt(%9.3f)) se(par fmt(%9.3f))) ///
         drop(age age2 gender _Iyear_2016  $district ///
-        _cons $controls)   ///
+        _cons $controls_SR)   ///
    legend label varlabels(_cons constant) starlevels(* 0.1 ** 0.05 *** 0.01)  ///
    stats(r2 df_r, fmt(3 0 1) label(R-sqr dfres))
 
@@ -1046,7 +1046,7 @@ esttab m_ln_total_rwage_3m m_ln_hourly_rwage m_ln_whpw_3m  ///
       cells(b(star fmt(%9.3f)) se(par fmt(%9.3f))) ///
 mtitles("Total Wage (ln)" "Hrly Wage (ln)" "Work Hours p.w." "Formal") ///
         drop(age age2 gender _Iyear_2016  $district ///
-        _cons $controls)   ///
+        _cons $controls_SR)   ///
 starlevels(* 0.1 ** 0.05 *** 0.01) ///
    title("REF - HET EDUC - Results OLS Regression with time and district FE - COND"\label{tab1}) nofloat ///
    stats(N r2_a, labels("Obs" "Adj. R-Squared")) ///
@@ -1070,7 +1070,7 @@ estimates drop  m_ln_total_rwage_3m m_ln_hourly_rwage m_ln_whpw_3m ///
 preserve
   foreach outcome of global outcomes_cond {
        qui reghdfe `outcome' $dep_var_ref inter_educ bi_education ///
-                $controls ///  
+                $controls_SR ///  
                 [pw = $weight], ///
                 absorb(year indid_2010) ///
                 cluster(district_iid) 
@@ -1078,21 +1078,21 @@ preserve
         qui gen smpl=0
         qui replace smpl=1 if e(sample)==1
         * Then I partial out all variables
-      foreach y in `outcome' $dep_var_ref inter_educ bi_education $controls {
+      foreach y in `outcome' $dep_var_ref inter_educ bi_education $controls_SR {
         qui reghdfe `y' [pw = $weight] if smpl==1, absorb(year indid_2010) residuals(`y'_c2wr)
         rename `y' o_`y'
         rename `y'_c2wr `y'
       }
       
-      qui reg `outcome' $dep_var_ref inter_educ bi_education $controls [pw = $weight], cluster(district_iid) robust
+      qui reg `outcome' $dep_var_ref inter_educ bi_education $controls_SR [pw = $weight], cluster(district_iid) robust
       codebook `outcome', c
       estimates table,  k($dep_var_ref inter_educ bi_education) star(.1 .05 .01) 
       estimates table, b(%7.4f) se(%7.4f) stats(N r2_a) k($dep_var_ref inter_educ bi_education) 
       estimates store m_`outcome', title(Model `outcome')
 
-      drop `outcome' inter_educ bi_education $controls $dep_var_ref smpl
+      drop `outcome' inter_educ bi_education $controls_SR $dep_var_ref smpl
       
-      foreach y in `outcome' inter_educ bi_education $controls $dep_var_ref  {
+      foreach y in `outcome' inter_educ bi_education $controls_SR $dep_var_ref  {
         rename o_`y' `y' 
       } 
     }
@@ -1105,7 +1105,7 @@ estout m_ln_total_rwage_3m m_ln_hourly_rwage m_ln_whpw_3m ///
          m_formal   /// 
       , cells(b(star fmt(%9.3f)) se(par fmt(%9.3f)) F(par fmt(%9.3f))) ///
         drop(age age2 gender ///
-        _cons $controls)   ///
+        _cons $controls_SR)   ///
    legend label varlabels(_cons constant) starlevels(* 0.1 ** 0.05 *** 0.01)  ///
    stats(r2 df_r, fmt(3 0 1) label(R-sqr dfres))
 
@@ -1119,7 +1119,7 @@ esttab m_ln_total_rwage_3m m_ln_hourly_rwage m_ln_whpw_3m ///
       cells(b(star fmt(%9.3f)) se(par fmt(%9.3f))) ///
 mtitles("Total Wage (ln)" "Hrly Wage (ln)" "Work Hours p.w." "Formal") ///
         drop(age age2 gender  ///
-        _cons $controls)   ///
+        _cons $controls_SR)   ///
 starlevels(* 0.1 ** 0.05 *** 0.01) ///
    title("REF - HET EDUC - Results OLS Regression with time and Individual FE - COND"\label{tab1}) nofloat ///
    stats(N r2_a, labels("Obs" "Adj. R-Squared")) ///
@@ -1231,7 +1231,7 @@ lab var inter_educ "Nbr Ref x education"
 **** OLS *****
   foreach outcome of global outcomes_uncond {
     qui xi: reg `outcome' $dep_var_ref inter_educ bi_education ///
-                $controls  ///
+                $controls_SR  ///
                 i.district_iid i.year  ///
             [pw = $weight],  ///
             cluster(district_iid) robust 
@@ -1247,7 +1247,7 @@ estout m_employed_olf_3m m_unemployed_olf_3m m_lfp_3m_empl ///
          m_lfp_3m_temp m_lfp_3m_employer m_lfp_3m_se m_lfp_3m_unpaid  /// 
       , cells(b(star fmt(%9.3f)) se(par fmt(%9.3f)) F(par fmt(%9.3f))) ///
         drop(age age2 gender _Iyear_2016  $district ///
-        _cons $controls)   ///
+        _cons $controls_SR)   ///
    legend label varlabels(_cons constant) starlevels(* 0.1 ** 0.05 *** 0.01)  ///
    stats(r2 df_r, fmt(3 0 1) label(R-sqr dfres))
 
@@ -1261,7 +1261,7 @@ esttab m_employed_olf_3m m_unemployed_olf_3m m_lfp_3m_empl ///
       cells(b(star fmt(%9.3f)) se(par fmt(%9.3f))) ///
 mtitles("Employed" "Unemployed" "LFP Employee" "LFP Temp" "LFP Employer" "LFP SE" "LFP Unpaid") ///
         drop(age age2 gender _Iyear_2016  $district ///
-        _cons $controls)   ///
+        _cons $controls_SR)   ///
 starlevels(* 0.1 ** 0.05 *** 0.01) ///
    title("REF - HET EDUC - Results OLS Regression with time and district FE - UNCOND"\label{tab1}) nofloat ///
    stats(N r2_a, labels("Obs" "Adj. R-Squared")) ///
@@ -1287,7 +1287,7 @@ estimates drop m_employed_olf_3m m_unemployed_olf_3m m_lfp_3m_empl ///
 preserve
   foreach outcome of global outcomes_uncond {
        qui reghdfe `outcome' $dep_var_ref inter_educ bi_education ///
-                $controls ///  
+                $controls_SR ///  
                 [pw = $weight], ///
                 absorb(year indid_2010) ///
                 cluster(district_iid) 
@@ -1296,22 +1296,22 @@ preserve
         qui replace smpl=1 if e(sample)==1
         * Then I partial out all variables
       foreach y in `outcome' $dep_var_ref  inter_educ bi_education ///
-                $controls {
+                $controls_SR {
         qui reghdfe `y' [pw = $weight] if smpl==1, absorb(year indid_2010) residuals(`y'_c2wr)
         rename `y' o_`y'
         rename `y'_c2wr `y'
       }
       
-      qui reg `outcome' $dep_var_ref inter_educ bi_education $controls /// 
+      qui reg `outcome' $dep_var_ref inter_educ bi_education $controls_SR /// 
        [pw = $weight], cluster(district_iid) robust
       codebook `outcome', c
       estimates table,  k($dep_var_ref  inter_educ bi_education) star(.1 .05 .01) 
       estimates table, b(%7.4f) se(%7.4f) stats(N r2_a) k($dep_var_ref  inter_educ bi_education) 
       estimates store m_`outcome', title(Model `outcome')
 
-      drop `outcome' inter_educ bi_education $controls  $dep_var_ref smpl
+      drop `outcome' inter_educ bi_education $controls_SR  $dep_var_ref smpl
       
-      foreach y in `outcome' inter_educ bi_education $controls $dep_var_ref  {
+      foreach y in `outcome' inter_educ bi_education $controls_SR $dep_var_ref  {
         rename o_`y' `y' 
       } 
     }
@@ -1324,7 +1324,7 @@ estout m_employed_olf_3m m_unemployed_olf_3m m_lfp_3m_empl ///
          m_lfp_3m_temp m_lfp_3m_employer m_lfp_3m_se m_lfp_3m_unpaid  /// 
       , cells(b(star fmt(%9.3f)) se(par fmt(%9.3f)) F(par fmt(%9.3f))) ///
         drop(age age2 gender ///
-        _cons $controls)   ///
+        _cons $controls_SR)   ///
    legend label varlabels(_cons constant) starlevels(* 0.1 ** 0.05 *** 0.01)  ///
    stats(r2 df_r, fmt(3 0 1) label(R-sqr dfres))
 
@@ -1338,7 +1338,7 @@ esttab m_employed_olf_3m m_unemployed_olf_3m m_lfp_3m_empl ///
       cells(b(star fmt(%9.3f)) se(par fmt(%9.3f))) ///
 mtitles("Employed" "Unemployed" "LFP Employee" "LFP Temp" "LFP Employer" "LFP SE" "LFP Unpaid") ///
         drop(age age2  gender ///
-        _cons $controls)   ///
+        _cons $controls_SR)   ///
 starlevels(* 0.1 ** 0.05 *** 0.01) ///
    title("REF - HET EDUC - Results OLS Regression with time and Individual FE - UNCOND"\label{tab1}) nofloat ///
    stats(N r2_a, labels("Obs" "Adj. R-Squared")) ///
@@ -1386,7 +1386,7 @@ tab year
 
   foreach outcome of global outcomes_cond {
     qui xi: reg `outcome' $dep_var_ref inter_educ bi_education ///
-                $controls ///
+                $controls_SR ///
              i.district_iid i.year ///
             [pw = $weight],  ///
             cluster(district_iid) robust 
@@ -1402,7 +1402,7 @@ estout m_ln_total_rwage_3m m_ln_hourly_rwage m_ln_whpw_3m  ///
          m_formal /// 
       , cells(b(star fmt(%9.3f)) se(par fmt(%9.3f))) ///
         drop(age age2 gender _Iyear_2016  $district ///
-        _cons $controls)   ///
+        _cons $controls_SR)   ///
    legend label varlabels(_cons constant) starlevels(* 0.1 ** 0.05 *** 0.01)  ///
    stats(r2 df_r, fmt(3 0 1) label(R-sqr dfres))
 
@@ -1416,7 +1416,7 @@ esttab m_ln_total_rwage_3m m_ln_hourly_rwage m_ln_whpw_3m  ///
       cells(b(star fmt(%9.3f)) se(par fmt(%9.3f))) ///
 mtitles("Total Wage (ln)" "Hrly Wage (ln)" "Work Hours p.w." "Formal") ///
         drop(age age2 gender _Iyear_2016  $district ///
-        _cons $controls)   ///
+        _cons $controls_SR)   ///
 starlevels(* 0.1 ** 0.05 *** 0.01) ///
    title("REF - HET EDUC - Results OLS Regression with time and district FE - COND"\label{tab1}) nofloat ///
    stats(N r2_a, labels("Obs" "Adj. R-Squared")) ///
@@ -1440,7 +1440,7 @@ estimates drop  m_ln_total_rwage_3m m_ln_hourly_rwage m_ln_whpw_3m ///
 preserve
   foreach outcome of global outcomes_cond {
        qui reghdfe `outcome' $dep_var_ref inter_educ bi_education ///
-                $controls ///  
+                $controls_SR ///  
                 [pw = $weight], ///
                 absorb(year indid_2010) ///
                 cluster(district_iid) 
@@ -1448,21 +1448,21 @@ preserve
         qui gen smpl=0
         qui replace smpl=1 if e(sample)==1
         * Then I partial out all variables
-      foreach y in `outcome' $dep_var_ref inter_educ bi_education $controls {
+      foreach y in `outcome' $dep_var_ref inter_educ bi_education $controls_SR {
         qui reghdfe `y' [pw = $weight] if smpl==1, absorb(year indid_2010) residuals(`y'_c2wr)
         rename `y' o_`y'
         rename `y'_c2wr `y'
       }
       
-      qui reg `outcome' $dep_var_ref inter_educ bi_education $controls [pw = $weight], cluster(district_iid) robust
+      qui reg `outcome' $dep_var_ref inter_educ bi_education $controls_SR [pw = $weight], cluster(district_iid) robust
       codebook `outcome', c
       estimates table,  k($dep_var_ref inter_educ bi_education) star(.1 .05 .01) 
       estimates table, b(%7.4f) se(%7.4f) stats(N r2_a) k($dep_var_ref inter_educ bi_education) 
       estimates store m_`outcome', title(Model `outcome')
 
-      drop `outcome' inter_educ bi_education $controls $dep_var_ref smpl
+      drop `outcome' inter_educ bi_education $controls_SR $dep_var_ref smpl
       
-      foreach y in `outcome' inter_educ bi_education $controls $dep_var_ref  {
+      foreach y in `outcome' inter_educ bi_education $controls_SR $dep_var_ref  {
         rename o_`y' `y' 
       } 
     }
@@ -1475,7 +1475,7 @@ estout m_ln_total_rwage_3m m_ln_hourly_rwage m_ln_whpw_3m ///
          m_formal   /// 
       , cells(b(star fmt(%9.3f)) se(par fmt(%9.3f)) F(par fmt(%9.3f))) ///
         drop(age age2 gender ///
-        _cons $controls)   ///
+        _cons $controls_SR)   ///
    legend label varlabels(_cons constant) starlevels(* 0.1 ** 0.05 *** 0.01)  ///
    stats(r2 df_r, fmt(3 0 1) label(R-sqr dfres))
 
@@ -1489,7 +1489,7 @@ esttab m_ln_total_rwage_3m m_ln_hourly_rwage m_ln_whpw_3m ///
       cells(b(star fmt(%9.3f)) se(par fmt(%9.3f))) ///
 mtitles("Total Wage (ln)" "Hrly Wage (ln)" "Work Hours p.w." "Formal") ///
         drop(age age2 gender  ///
-        _cons $controls)   ///
+        _cons $controls_SR)   ///
 starlevels(* 0.1 ** 0.05 *** 0.01) ///
    title("REF - HET EDUC - Results OLS Regression with time and Individual FE - COND"\label{tab1}) nofloat ///
    stats(N r2_a, labels("Obs" "Adj. R-Squared")) ///

@@ -210,7 +210,7 @@ global outcomes_cond  ln_total_rwage_3m ///
 *ln_rhourly_wage_main 
  *wh_pw_7d_w formal 
 
-global controls age age2 gender 
+global controls_SR age age2 gender 
 
 global heterogenous gender urb_rural_camps lfp_3m bi_education
 
