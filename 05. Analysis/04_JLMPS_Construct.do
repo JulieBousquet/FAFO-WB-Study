@@ -822,19 +822,25 @@ lab val employed_3cat_3m employed_3cat_3m
 lab var employed_3cat_3m "From uswrkstsr1 - mkt def, search req; 3m, 2 empl - 1 unemp - 0 OLF"
 
 *** OLF AS MISSING ***
-gen employed_3m = 2 if uswrkstsr1 == 1 & (usempstp != 3 | usempstp != 4) //EMPLOYED BUT NO SUBS WORK
+gen employed_3m = 2 if uswrkstsr1 == 1 & (usempstp != 4) //EMPLOYED BUT NO SUBS WORK
+replace employed_3m = 2 if uswrkstsr1 == 1 & usempstp == 3 //SE EMPLOYED
 replace employed_3m = 1 if uswrkstsr1 == 2 // UNEMP
-replace employed_3m = 1 if uswrkstsr1 == 1 & (usempstp == 3 | usempstp == 4) //EMPLOYED IN SUBS WORK
+replace employed_3m = 1 if uswrkstsr1 == 1 & (usempstp == 4) //EMPLOYED IN SUBS WORK
 replace employed_3m = . if uswrkstsr1 == 3 //OLF MISS
 tab employed_3m, m 
+tab employed_3m usempstp
+tab uswrkstsr1 usempstp
+codebook uswrkstsr1
+codebook usempstp
 lab def employed_3m 2 "Employed (no subs)" 1 "Unemployed (&subs)", modify 
 lab val employed_3m employed_3m
-lab var employed_3m "From uswrkstsr1 - mkt def, search req; 3m, 2 empl - 1 unemp - OLF miss"
+lab var employed_3m "From uswrkstsr1 - mkt def, search req; 3m, 2 empl (wage, se, employer) - 1 unemp - OLF miss"
 
 *** OLF AS UNEMPLOYED ***
-gen employed_olf_3m = 2 if uswrkstsr1 == 1 & (usempstp != 3 | usempstp != 4) //EMPLOYED BUT NO SUBS WORK
+gen employed_olf_3m = 2 if uswrkstsr1 == 1 & (usempstp != 4) //EMPLOYED BUT NO SUBS WORK
+replace employed_olf_3m = 2 if uswrkstsr1 == 1 & usempstp == 3 //SE EMPLOYED
 replace employed_olf_3m = 1 if uswrkstsr1 == 2 // UNEMP
-replace employed_olf_3m = 1 if uswrkstsr1 == 1 & (usempstp == 3 | usempstp == 4) //EMPLOYED IN SUBS WORK
+replace employed_olf_3m = 1 if uswrkstsr1 == 1 & (usempstp == 4) //EMPLOYED IN SUBS WORK
 replace employed_olf_3m = 1 if uswrkstsr1 == 3 //OLF MISS
 tab employed_olf_3m, m 
 lab def employed_olf_3m 2 "Employed (no subs)" 1 "Unemployed or OLF (&subs)", modify 

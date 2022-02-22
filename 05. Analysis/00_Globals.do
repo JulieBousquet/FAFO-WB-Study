@@ -215,7 +215,8 @@ global controls age age2 gender
 global heterogenous gender urb_rural_camps lfp_3m bi_education
 
 
-
+global weight expan_indiv
+*panel_wt_10_16
             
 global   district      ///
         _Idistrict__2 _Idistrict__3 ///

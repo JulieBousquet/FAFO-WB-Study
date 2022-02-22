@@ -60,7 +60,7 @@ xtset indid_2010 year
 *OLS_Y_D
 foreach outcome of global outcomes_uncond {
     qui xi: reg `outcome' $dep_var_ref ///
-            [pweight = panel_wt_10_16],  ///
+            [pw = $weight],  ///
             cluster(district_iid) robust 
     estimates store REFOLS_YD_`outcome'
 } 
@@ -69,7 +69,7 @@ preserve
 keep if emp_16_10 == 1 
 foreach outcome of global outcomes_cond {
     qui xi: reg `outcome' $dep_var_ref ///
-            [pweight = panel_wt_10_16],  ///
+            [pw = $weight],  ///
             cluster(district_iid) robust 
     estimates store REFOLS_YD_`outcome'
 } 
@@ -79,7 +79,7 @@ restore
 preserve
   foreach outcome of global outcomes_uncond {
        qui reghdfe `outcome' $dep_var_ref $controls  ///
-                [pw=panel_wt_10_16], ///
+                [pw = $weight], ///
                 absorb(year indid_2010) ///
                 cluster(district_iid) 
       
@@ -87,12 +87,12 @@ preserve
         qui replace smpl=1 if e(sample)==1
         * Then I partial out all variables
       foreach y in `outcome' $dep_var_ref  $controls {
-        qui reghdfe `y' [pw=panel_wt_10_16] if smpl==1, absorb(year indid_2010) residuals(`y'_c2wr)
+        qui reghdfe `y' [pw = $weight] if smpl==1, absorb(year indid_2010) residuals(`y'_c2wr)
         rename `y' o_`y'
         rename `y'_c2wr `y'
       }
       
-      qui reg `outcome' $dep_var_ref $controls [pw=panel_wt_10_16], cluster(district_iid) robust
+      qui reg `outcome' $dep_var_ref $controls [pw = $weight], cluster(district_iid) robust
       estimates store REFOLS_YI_`outcome', title(Model `outcome')
 
       drop `outcome' $controls $dep_var_ref smpl
@@ -107,7 +107,7 @@ preserve
 keep if emp_16_10 == 1 
   foreach outcome of global outcomes_cond {
        qui reghdfe `outcome' $dep_var_ref $controls  ///
-                [pw=panel_wt_10_16], ///
+                [pw = $weight], ///
                 absorb(year indid_2010) ///
                 cluster(district_iid) 
       
@@ -115,12 +115,12 @@ keep if emp_16_10 == 1
         qui replace smpl=1 if e(sample)==1
         * Then I partial out all variables
       foreach y in `outcome' $dep_var_ref  $controls {
-        qui reghdfe `y' [pw=panel_wt_10_16] if smpl==1, absorb(year indid_2010) residuals(`y'_c2wr)
+        qui reghdfe `y' [pw = $weight] if smpl==1, absorb(year indid_2010) residuals(`y'_c2wr)
         rename `y' o_`y'
         rename `y'_c2wr `y'
       }
       
-      qui reg `outcome' $dep_var_ref $controls [pw=panel_wt_10_16], cluster(district_iid) robust
+      qui reg `outcome' $dep_var_ref $controls [pw = $weight], cluster(district_iid) robust
       estimates store REFOLS_YI_`outcome', title(Model `outcome')
 
       drop `outcome' $controls $dep_var_ref smpl
@@ -135,7 +135,7 @@ restore
 foreach outcome of global outcomes_uncond {
     qui xi: ivreg2  `outcome' i.year i.district_iid $controls ///
                 ($dep_var_ref = $iv_ref) ///
-                [pweight = panel_wt_10_16], ///
+                [pw = $weight], ///
                 cluster(district_iid) robust ///
                 partial(i.district_iid) ///
                 first
@@ -147,7 +147,7 @@ keep if emp_16_10 == 1
  foreach outcome of global outcomes_cond {
     qui xi: ivreg2  `outcome' i.year i.district_iid $controls ///
                 ($dep_var_ref = $iv_ref) ///
-                [pweight = panel_wt_10_16], ///
+                [pw = $weight], ///
                 cluster(district_iid) robust ///
                 partial(i.district_iid) ///
                 first
@@ -161,7 +161,7 @@ preserve
        qui xi: ivreghdfe `outcome' ///
                     $controls  ///
                     ($dep_var_ref = $iv_ref) ///
-                    [pweight = panel_wt_10_16], ///
+                    [pw = $weight], ///
                     absorb(year indid_2010) ///
                     cluster(district_iid) 
 
@@ -169,14 +169,14 @@ preserve
         qui replace smpl=1 if e(sample)==1
         * Then I partial out all variables
         foreach y in `outcome' $controls $dep_var_ref $iv_ref { 
-          qui reghdfe `y' [pw=panel_wt_10_16] if smpl==1, absorb(year indid_2010) residuals(`y'_c2wr)
+          qui reghdfe `y' [pw = $weight] if smpl==1, absorb(year indid_2010) residuals(`y'_c2wr)
           qui rename `y' o_`y'
           qui rename `y'_c2wr `y'
         }
         qui ivreg2 `outcome' ///
                $controls  ///
                ($dep_var_ref = $iv_ref) ///
-               [pweight = panel_wt_10_16], ///
+               [pw = $weight], ///
                cluster(district_iid) robust ///
                first 
       estimates store REFIV_YI_`outcome', title(Model `outcome')
@@ -193,7 +193,7 @@ keep if emp_16_10 == 1
        qui xi: ivreghdfe `outcome' ///
                     $controls  ///
                     ($dep_var_ref = $iv_ref) ///
-                    [pweight = panel_wt_10_16], ///
+                    [pw = $weight], ///
                     absorb(year indid_2010) ///
                     cluster(district_iid) 
 
@@ -201,14 +201,14 @@ keep if emp_16_10 == 1
         qui replace smpl=1 if e(sample)==1
         * Then I partial out all variables
         foreach y in `outcome' $controls $dep_var_ref $iv_ref { 
-          qui reghdfe `y' [pw=panel_wt_10_16] if smpl==1, absorb(year indid_2010) residuals(`y'_c2wr)
+          qui reghdfe `y' [pw = $weight] if smpl==1, absorb(year indid_2010) residuals(`y'_c2wr)
           qui rename `y' o_`y'
           qui rename `y'_c2wr `y'
         }
         qui ivreg2 `outcome' ///
                $controls  ///
                ($dep_var_ref = $iv_ref) ///
-               [pweight = panel_wt_10_16], ///
+               [pw = $weight], ///
                cluster(district_iid) robust ///
                first 
       estimates store REFIV_YI_`outcome', title(Model `outcome')
@@ -278,7 +278,7 @@ restore
             levels(99.9 99 95) ciopts(lwidth(*1) lcolor(*.6)) xla(none) xtitle("") xsc(noline)
 
 
-graph export "$out_analysis\SR_Combined_Graph_REF.png", as(png) replace
+graph export "$out_analysis\SR_Combined_Graph_REF.pdf", as(pdf) replace
 
     coefplot (REFOLS_YD_employed_olf_3m, label(Employed))  ///
              (REFOLS_YD_unemployed_olf_3m, label(Unemployed))  ///
@@ -317,7 +317,7 @@ graph export "$out_analysis\SR_Combined_Graph_REF.png", as(png) replace
             levels(99.9 99 95) ciopts(lwidth(*1) lcolor(*.6)) xla(none) xtitle("") xsc(noline)
 
 
-graph export "$out_analysis\SR_Combined_Graph_REF_YD.png", as(png) replace
+graph export "$out_analysis\SR_Combined_Graph_REF_YD.pdf", as(pdf) replace
 
               *note("* p<0.1, ** p<0.05, *** p<0.01", size(vsmall)) ///
 
@@ -358,7 +358,7 @@ graph export "$out_analysis\SR_Combined_Graph_REF_YD.png", as(png) replace
             levels(99.9 99 95) ciopts(lwidth(*1) lcolor(*.6)) xla(none) xtitle("") xsc(noline)
 
 
-graph export "$out_analysis\SR_Combined_Graph_REF_YI.png", as(png) replace
+graph export "$out_analysis\SR_Combined_Graph_REF_YI.pdf", as(pdf) replace
 
 
 ******* WORK PERMITS *******
@@ -366,7 +366,7 @@ graph export "$out_analysis\SR_Combined_Graph_REF_YI.png", as(png) replace
 *OLS_Y_D
 foreach outcome of global outcomes_uncond {
     qui xi: reg `outcome' $dep_var_wp ///
-            [pweight = panel_wt_10_16],  ///
+            [pw = $weight],  ///
             cluster(district_iid) robust 
     estimates store WPOLS_YD_`outcome'
 } 
@@ -375,7 +375,7 @@ preserve
 keep if emp_16_10 == 1 
 foreach outcome of global outcomes_cond {
     qui xi: reg `outcome' $dep_var_wp ///
-            [pweight = panel_wt_10_16],  ///
+            [pw = $weight],  ///
             cluster(district_iid) robust 
     estimates store WPOLS_YD_`outcome'
 } 
@@ -385,7 +385,7 @@ restore
 preserve
   foreach outcome of global outcomes_uncond {
        qui reghdfe `outcome' $dep_var_ref $controls  ///
-                [pw=panel_wt_10_16], ///
+                [pw = $weight], ///
                 absorb(year indid_2010) ///
                 cluster(district_iid) 
       
@@ -393,12 +393,12 @@ preserve
         qui replace smpl=1 if e(sample)==1
         * Then I partial out all variables
       foreach y in `outcome' $dep_var_wp  $controls {
-        qui reghdfe `y' [pw=panel_wt_10_16] if smpl==1, absorb(year indid_2010) residuals(`y'_c2wr)
+        qui reghdfe `y' [pw = $weight] if smpl==1, absorb(year indid_2010) residuals(`y'_c2wr)
         rename `y' o_`y'
         rename `y'_c2wr `y'
       }
       
-      qui reg `outcome' $dep_var_wp $controls [pw=panel_wt_10_16], cluster(district_iid) robust
+      qui reg `outcome' $dep_var_wp $controls [pw = $weight], cluster(district_iid) robust
       estimates store WPOLS_YI_`outcome', title(Model `outcome')
 
       drop `outcome' $controls $dep_var_wp smpl
@@ -413,7 +413,7 @@ preserve
 keep if emp_16_10 == 1 
   foreach outcome of global outcomes_cond {
        qui reghdfe `outcome' $dep_var_ref $controls  ///
-                [pw=panel_wt_10_16], ///
+                [pw = $weight], ///
                 absorb(year indid_2010) ///
                 cluster(district_iid) 
       
@@ -421,12 +421,12 @@ keep if emp_16_10 == 1
         qui replace smpl=1 if e(sample)==1
         * Then I partial out all variables
       foreach y in `outcome' $dep_var_wp  $controls {
-        qui reghdfe `y' [pw=panel_wt_10_16] if smpl==1, absorb(year indid_2010) residuals(`y'_c2wr)
+        qui reghdfe `y' [pw = $weight] if smpl==1, absorb(year indid_2010) residuals(`y'_c2wr)
         rename `y' o_`y'
         rename `y'_c2wr `y'
       }
       
-      qui reg `outcome' $dep_var_wp $controls [pw=panel_wt_10_16], cluster(district_iid) robust
+      qui reg `outcome' $dep_var_wp $controls [pw = $weight], cluster(district_iid) robust
       estimates store WPOLS_YI_`outcome', title(Model `outcome')
 
       drop `outcome' $controls $dep_var_wp smpl
@@ -441,7 +441,7 @@ restore
 foreach outcome of global outcomes_uncond {
     qui xi: ivreg2  `outcome' i.year i.district_iid $controls ///
                 ($dep_var_wp = $iv_wp) ///
-                [pweight = panel_wt_10_16], ///
+                [pw = $weight], ///
                 cluster(district_iid) robust ///
                 partial(i.district_iid) ///
                 first
@@ -453,7 +453,7 @@ keep if emp_16_10 == 1
  foreach outcome of global outcomes_cond {
     qui xi: ivreg2  `outcome' i.year i.district_iid $controls ///
                 ($dep_var_wp = $iv_wp) ///
-                [pweight = panel_wt_10_16], ///
+                [pw = $weight], ///
                 cluster(district_iid) robust ///
                 partial(i.district_iid) ///
                 first
@@ -467,7 +467,7 @@ preserve
        qui xi: ivreghdfe `outcome' ///
                     $controls  ///
                     ($dep_var_wp = $iv_wp) ///
-                    [pweight = panel_wt_10_16], ///
+                    [pw = $weight], ///
                     absorb(year indid_2010) ///
                     cluster(district_iid) 
 
@@ -475,14 +475,14 @@ preserve
         qui replace smpl=1 if e(sample)==1
         * Then I partial out all variables
         foreach y in `outcome' $controls $dep_var_wp $iv_wp { 
-          qui reghdfe `y' [pw=panel_wt_10_16] if smpl==1, absorb(year indid_2010) residuals(`y'_c2wr)
+          qui reghdfe `y' [pw = $weight] if smpl==1, absorb(year indid_2010) residuals(`y'_c2wr)
           qui rename `y' o_`y'
           qui rename `y'_c2wr `y'
         }
         qui ivreg2 `outcome' ///
                $controls  ///
                ($dep_var_wp = $iv_wp) ///
-               [pweight = panel_wt_10_16], ///
+               [pw = $weight], ///
                cluster(district_iid) robust ///
                first 
       estimates store WPIV_YI_`outcome', title(Model `outcome')
@@ -499,7 +499,7 @@ keep if emp_16_10 == 1
        qui xi: ivreghdfe `outcome' ///
                     $controls  ///
                     ($dep_var_wp = $iv_wp) ///
-                    [pweight = panel_wt_10_16], ///
+                    [pw = $weight], ///
                     absorb(year indid_2010) ///
                     cluster(district_iid) 
 
@@ -507,14 +507,14 @@ keep if emp_16_10 == 1
         qui replace smpl=1 if e(sample)==1
         * Then I partial out all variables
         foreach y in `outcome' $controls $dep_var_wp $iv_wp { 
-          qui reghdfe `y' [pw=panel_wt_10_16] if smpl==1, absorb(year indid_2010) residuals(`y'_c2wr)
+          qui reghdfe `y' [pw = $weight] if smpl==1, absorb(year indid_2010) residuals(`y'_c2wr)
           qui rename `y' o_`y'
           qui rename `y'_c2wr `y'
         }
         qui ivreg2 `outcome' ///
                $controls  ///
                ($dep_var_wp = $iv_wp) ///
-               [pweight = panel_wt_10_16], ///
+               [pw = $weight], ///
                cluster(district_iid) robust ///
                first 
       estimates store WPIV_YI_`outcome', title(Model `outcome')
@@ -584,10 +584,95 @@ restore
             levels(99.9 99 95) ciopts(lwidth(*1) lcolor(*.6)) xla(none) xtitle("") xsc(noline)
 
 
-graph export "$out_analysis\SR_Combined_Graph_WP.png", as(png) replace
+graph export "$out_analysis\SR_Combined_Graph_WP.pdf", as(pdf) replace
 
 
           *    note("* p<0.1, ** p<0.05, *** p<0.01", size(vsmall)) ///
+
+    coefplot (WPOLS_YD_employed_olf_3m, label(Employed))  ///
+             (WPOLS_YD_unemployed_olf_3m, label(Unemployed))  ///
+             (WPOLS_YD_lfp_3m_empl, label(Type: Wage Worker))  ///
+             (WPOLS_YD_lfp_3m_temp, label(Type: Temporary))  ///
+             (WPOLS_YD_lfp_3m_employer, label(Type: Employer))  ///
+             (WPOLS_YD_lfp_3m_se, label(Type: SE))  ///
+             (WPOLS_YD_lfp_3m_unpaid, label(Type: Unpaid)) ///
+             (WPOLS_YD_ln_total_rwage_3m, label(Total Wage (ln))) ///
+             (WPOLS_YD_ln_hourly_rwage, label(Hourly Wage (ln))) ///
+             (WPOLS_YD_ln_whpw_3m, label(Work Hours p.w.)) ///
+             (WPOLS_YD_formal, label(Formal)) , bylabel("OLS District Year") ///
+             || (WPIV_YD_employed_olf_3m, label(Employed)) ///
+             (WPIV_YD_unemployed_olf_3m, label(Unemployed))  ///
+             (WPIV_YD_lfp_3m_empl, label(Type: Wage Worker))  ///
+             (WPIV_YD_lfp_3m_temp, label(Type: Temporary))  ///
+             (WPIV_YD_lfp_3m_employer, label(Type: Employer))  ///
+             (WPIV_YD_lfp_3m_se, label(Type: SE))  ///
+             (WPIV_YD_lfp_3m_unpaid, label(Type: Unpaid)) ///
+             (WPIV_YD_ln_total_rwage_3m, label(Total Wage (ln))) ///
+             (WPIV_YD_ln_hourly_rwage, label(Hourly Wage (ln))) ///
+             (WPIV_YD_ln_whpw_3m, label(Work Hours p.w.)) ///
+             (WPIV_YD_formal, label(Formal)) , bylabel("IV District Year") ///
+             || , drop(_Iyear_2016 $district _cons $controls) ///
+              xline(0) msymbol(d) ///
+              label subtitle(, size(vsmall) fcolor(white) nobox ) ///
+             xlabel("") ylabel("") ///
+             mlabel(cond(@pval<.01, string(@b,"%9.3f") + "***", ///
+             cond(@pval<.05, string(@b,"%9.3f") + "**", ///
+             cond(@pval<.1, string(@b,"%9.3f") + "*", ///
+             string(@b, "%5.3f")  ) ) ) ) mlabposition(10) mlabsize(tiny) ///
+             byopts(graphregion(color(white)) bgcolor(white) ///
+              title("Effect Sizes", size(small))) ///
+                yscale(noline alt)  xscale(noline alt) legend( nobox ///
+                region(lstyle(none)) size(vsmall) cols(4) ring(0) )  ///
+            levels(99.9 99 95) ciopts(lwidth(*1) lcolor(*.6)) xla(none) xtitle("") xsc(noline)
+
+graph export "$out_analysis\SR_Combined_Graph_WP_YD.pdf", as(pdf) replace
+
+
+    coefplot (WPOLS_YI_employed_olf_3m, label(Employed))  ///
+             (WPOLS_YI_unemployed_olf_3m, label(Unemployed))  ///
+             (WPOLS_YI_lfp_3m_empl, label(Type: Wage Worker))  ///
+             (WPOLS_YI_lfp_3m_temp, label(Type: Temporary))  ///
+             (WPOLS_YI_lfp_3m_employer, label(Type: Employer))  ///
+             (WPOLS_YI_lfp_3m_se, label(Type: SE))  ///
+             (WPOLS_YI_lfp_3m_unpaid, label(Type: Unpaid)) ///
+             (WPOLS_YI_ln_total_rwage_3m, label(Total Wage (ln))) ///
+             (WPOLS_YI_ln_hourly_rwage, label(Hourly Wage (ln))) ///
+             (WPOLS_YI_ln_whpw_3m, label(Work Hours p.w.)) ///
+             (WPOLS_YI_formal, label(Formal)) , bylabel("OLS Indiv Year") ///
+             || (WPIV_YI_employed_olf_3m, label(Employed)) ///
+             (WPIV_YI_unemployed_olf_3m, label(Unemployed))  ///
+             (WPIV_YI_lfp_3m_empl, label(Type: Wage Worker))  ///
+             (WPIV_YI_lfp_3m_temp, label(Type: Temporary))  ///
+             (WPIV_YI_lfp_3m_employer, label(Type: Employer))  ///
+             (WPIV_YI_lfp_3m_se, label(Type: SE))  ///
+             (WPIV_YI_lfp_3m_unpaid, label(Type: Unpaid)) ///
+             (WPIV_YI_ln_total_rwage_3m, label(Total Wage (ln))) ///
+             (WPIV_YI_ln_hourly_rwage, label(Hourly Wage (ln))) ///
+             (WPIV_YI_ln_whpw_3m, label(Work Hours p.w.)) ///
+             (WPIV_YI_formal, label(Formal)) , bylabel("IV Indiv Year") ///
+             || , drop(_Iyear_2016 $district _cons $controls) ///
+              xline(0) msymbol(d) ///
+              label subtitle(, size(vsmall) fcolor(white) nobox ) ///
+             xlabel("") ylabel("") ///
+             mlabel(cond(@pval<.01, string(@b,"%9.3f") + "***", ///
+             cond(@pval<.05, string(@b,"%9.3f") + "**", ///
+             cond(@pval<.1, string(@b,"%9.3f") + "*", ///
+             string(@b, "%5.3f")  ) ) ) ) mlabposition(10) mlabsize(tiny) ///
+             byopts(graphregion(color(white)) bgcolor(white) ///
+              title("Effect Sizes", size(small))) ///
+                yscale(noline alt)  xscale(noline alt) legend( nobox ///
+                region(lstyle(none)) size(vsmall) cols(4) ring(0) )  ///
+            levels(99.9 99 95) ciopts(lwidth(*1) lcolor(*.6)) xla(none) xtitle("") xsc(noline)
+
+
+graph export "$out_analysis\SR_Combined_Graph_WP_YI.pdf", as(pdf) replace
+
+
+
+
+
+
+
 
 
 
@@ -635,7 +720,7 @@ graph export "$out_analysis\SR_Combined_Graph_WP.png", as(png) replace
                 yscale(noline alt)  xscale(noline alt) legend( nobox ///
                 region(lstyle(none)) size(vsmall) )  ///
             levels(99.9 99 95) ciopts(lwidth(*3) lcolor(*.6)) xla(none) xtitle("") xsc(noline)
-graph export "$out_analysis\SR_Combined_Graph.png", as(png) replace
+graph export "$out_analysis\SR_Combined_Graph.pdf", as(pdf) replace
 
 
 
@@ -652,7 +737,7 @@ graph export "$out_analysis\SR_Combined_Graph.png", as(png) replace
 foreach outcome of global outcomes_uncond {
     qui xi: reg `outcome' $dep_var_wp ///
             i.district_iid i.year $controls  ///
-            [pweight = panel_wt_10_16],  ///
+            [pw = $weight],  ///
             cluster(district_iid) robust 
     estimates store m_OLS_Y_D_`outcome'
 } 
@@ -662,7 +747,7 @@ keep if emp_16_10 == 1
 foreach outcome of global outcomes_cond {
     qui xi: reg `outcome' $dep_var_wp ///
             i.district_iid i.year $controls  ///
-            [pweight = panel_wt_10_16],  ///
+            [pw = $weight],  ///
             cluster(district_iid) robust 
     estimates store m_OLS_Y_D_`outcome'
 } 
@@ -698,7 +783,7 @@ restore
  foreach outcome of global outcomes_uncond {
     qui xi: ivreg2  `outcome' i.year i.district_iid $controls ///
                 ($dep_var_wp = $iv_wp) ///
-                [pweight = panel_wt_10_16], ///
+                [pw = $weight], ///
                 cluster(district_iid) robust ///
                 partial(i.district_iid)
     estimates store m_IV_Y_D_`outcome', title(Model `outcome')
@@ -709,7 +794,7 @@ keep if emp_16_10 == 1
  foreach outcome of global outcomes_cond {
     qui xi: ivreg2  `outcome' i.year i.district_iid $controls ///
                 ($dep_var_wp = $iv_wp) ///
-                [pweight = panel_wt_10_16], ///
+                [pw = $weight], ///
                 cluster(district_iid) robust ///
                 partial(i.district_iid) 
     estimates store m_IV_Y_D_`outcome', title(Model `outcome')
@@ -793,7 +878,7 @@ center c 0
   foreach outcome of global outcomes_uncond {
 
     xi: reg `outcome' $dep_var_wp ///
-            [pweight = panel_wt_10_16],  ///
+            [pw = $weight],  ///
             cluster(district_iid) robust 
     codebook employed_olf_3m, c
     estimates table, k($dep_var_wp) star(.1 .05 .01) b(%7.4f) 
@@ -819,14 +904,14 @@ center c 0
 
   foreach outcome of global outcomes_uncond {
        qui xi: reg `outcome' $dep_var_wp i.district_iid i.year $controls ///
-               [pweight = panel_wt_10_16],  ///
+              [pw = $weight],  ///
                cluster(district_iid) robust 
        estimates store Jordan_`outcome'
    }
 
   foreach outcome of global outcomes_uncond {
        qui xi: reg `outcome' $dep_var_wp i.district_iid i.year $controls  ///
-               [pweight = panel_wt_10_16],  ///
+              [pw = $weight],  ///
                cluster(district_iid) robust 
        estimates store Uganda_`outcome'
    }
@@ -862,6 +947,45 @@ coefplot    (Jordan_employed_olf_3m), bylabel(Jordan) ///
 
 ****** GRAPH FOR HETERO g 
 
+use "$data_final/07_IV_Ref_WP.dta", clear
+
+tab nationality_cl year 
+drop if nationality_cl != 1
+*keep if gender == 1 
+
+drop if age > 64 & year == 2016
+drop if age > 60 & year == 2010 //60 in 2010 so 64 in 2016
+
+drop if age < 15 & year == 2016 
+drop if age < 11 & year == 2010 //11 in 2010 so 15 in 2016
+
+
+/*ONLY THOSE WHO WERE SURVEYED IN BOTH PERIODS?*/
+
+/*
+distinct indid_2010 
+duplicates tag indid_2010, gen(dup)
+bys year: tab dup
+drop if dup == 0
+drop dup
+tab year
+*/
+
+xtset, clear 
+xtset indid_2010 year 
+
+
+
+**** OTHER TRIES WITH TWO MODELS 
+
+******* REFUGEE INFLOW ********
+
+
+
+
+ ***************
+ ** GENDER **
+ ***************
 
 codebook gender
 tab gender
@@ -877,17 +1001,229 @@ lab var inter_gender "Nbr Ref x Gender"
     qui xi: reg `outcome' $dep_var_ref inter_gender gender ///
                 age age2 ///
                 i.district_iid i.year  ///
-            [pweight = panel_wt_10_16],  ///
+            [pw = $weight],  ///
             cluster(district_iid) robust 
-    codebook `outcome', c
-    estimates table, k($dep_var_ref inter_gender gender) star(.1 .05 .01) b(%7.4f) 
-    estimates table, b(%7.4f) se(%7.4f) stats(N r2_a) k($dep_var_ref inter_gender gender) 
-    estimates store m_`outcome', title(Model `outcome')
+    estimates store REFGEN_YD_`outcome', title(Model `outcome')
   }
 
+preserve
+keep if emp_16_10 == 1 
+  foreach outcome of global outcomes_cond {
+    qui xi: reg `outcome' $dep_var_ref inter_gender gender ///
+                age age2 ///
+                i.district_iid i.year  ///
+            [pw = $weight],  ///
+            cluster(district_iid) robust 
+    estimates store REFGEN_YD_`outcome', title(Model `outcome')
+  }
+restore 
+
+
+     coefplot (REFGEN_YD_employed_olf_3m), bylabel(Employed)  ///
+             || (REFGEN_YD_unemployed_olf_3m), bylabel(Unemployed)  ///
+             || (REFGEN_YD_lfp_3m_empl), bylabel(Type: Wage Worker)  ///
+             || (REFGEN_YD_lfp_3m_temp), bylabel(Type: Temporary)  ///
+             || (REFGEN_YD_lfp_3m_employer), bylabel(Type: Employer)  ///
+             || (REFGEN_YD_lfp_3m_se), bylabel(Type: SE) ///
+             || (REFGEN_YD_lfp_3m_unpaid), bylabel(Type: Unpaid) ///
+             || (REFGEN_YD_ln_total_rwage_3m), bylabel(Total Wage (ln)) ///
+             || (REFGEN_YD_ln_hourly_rwage), bylabel(Hourly Wage (ln)) ///
+             || (REFGEN_YD_ln_whpw_3m), bylabel(Work Hours p.w.) ///
+             || (REFGEN_YD_formal), bylabel(Formal) ///
+             || , drop(_Iyear_2016 $district _cons $controls) ///
+              xline(0) msymbol(d) ///
+              label subtitle(, size(vsmall) fcolor(white) nobox ) ///
+             xlabel("") ylabel(1 "Treat" 2 "Inter") ///
+             mlabel(cond(@pval<.01, string(@b,"%9.3f") + "***", ///
+             cond(@pval<.05, string(@b,"%9.3f") + "**", ///
+             cond(@pval<.1, string(@b,"%9.3f") + "*", ///
+             string(@b, "%5.3f")  ) ) ) ) mlabposition(10) mlabsize(tiny) ///
+             byopts(graphregion(color(white)) bgcolor(white) ///
+              title("Effect Sizes: Gender", size(small))) ///
+                yscale(noline alt)  xscale(noline alt) legend(nobox ///
+                region(lstyle(none)) size(vsmall) cols(4) ring(0) )  ///
+            levels(99.9 99 95) ciopts(lwidth(*1) lcolor(*.6)) xla(none) xtitle("") xsc(noline) ///
+            keep($dep_var_ref inter_gender)
+
+
+graph export "$out_analysis\SR_HET_GENDER_Combined_Graph_REF.pdf", as(pdf) replace
 
 
 
+
+
+ ***************
+ ** RURAL **
+ ***************
+
+replace urban = 0 if urban == 2  
+lab def urban 0 "Rural" 1 "Urban", modify
+lab val urban urban 
+
+tab urban, m 
+codebook urban  
+
+
+codebook urban
+tab urban
+lab var urban "Urban"
+
+gen inter_urban = urban*$dep_var_ref
+*gen inter_formal_IV = urban*$IV_var_ref
+lab var inter_urban "Nbr Ref x urban"
+
+
+**** OLS *****
+  foreach outcome of global outcomes_uncond {
+    qui xi: reg `outcome' $dep_var_ref inter_urban urban ///
+                age age2 ///
+                i.district_iid i.year  ///
+            [pw = $weight],  ///
+            cluster(district_iid) robust 
+    estimates store REFURB_YD_`outcome', title(Model `outcome')
+  }
+
+preserve
+keep if emp_16_10 == 1 
+  foreach outcome of global outcomes_cond {
+    qui xi: reg `outcome' $dep_var_ref inter_urban urban ///
+                age age2 ///
+                i.district_iid i.year  ///
+            [pw = $weight],  ///
+            cluster(district_iid) robust 
+    estimates store REFURB_YD_`outcome', title(Model `outcome')
+  }
+restore 
+
+
+     coefplot (REFURB_YD_employed_olf_3m), bylabel(Employed)  ///
+             || (REFURB_YD_unemployed_olf_3m), bylabel(Unemployed)  ///
+             || (REFURB_YD_lfp_3m_empl), bylabel(Type: Wage Worker)  ///
+             || (REFURB_YD_lfp_3m_temp), bylabel(Type: Temporary)  ///
+             || (REFURB_YD_lfp_3m_employer), bylabel(Type: Employer)  ///
+             || (REFURB_YD_lfp_3m_se), bylabel(Type: SE) ///
+             || (REFURB_YD_lfp_3m_unpaid), bylabel(Type: Unpaid) ///
+             || (REFURB_YD_ln_total_rwage_3m), bylabel(Total Wage (ln)) ///
+             || (REFURB_YD_ln_hourly_rwage), bylabel(Hourly Wage (ln)) ///
+             || (REFURB_YD_ln_whpw_3m), bylabel(Work Hours p.w.) ///
+             || (REFURB_YD_formal), bylabel(Formal) ///
+             || , drop(_Iyear_2016 $district _cons $controls) ///
+              xline(0) msymbol(d) ///
+              label subtitle(, size(vsmall) fcolor(white) nobox ) ///
+             xlabel("") ylabel(1 "Treat" 2 "Inter") ///
+             mlabel(cond(@pval<.01, string(@b,"%9.3f") + "***", ///
+             cond(@pval<.05, string(@b,"%9.3f") + "**", ///
+             cond(@pval<.1, string(@b,"%9.3f") + "*", ///
+             string(@b, "%5.3f")  ) ) ) ) mlabposition(10) mlabsize(tiny) ///
+             byopts(graphregion(color(white)) bgcolor(white) ///
+              title("Effect Sizes: Urban", size(small))) ///
+                yscale(noline alt)  xscale(noline alt) legend(nobox ///
+                region(lstyle(none)) size(vsmall) cols(4) ring(0) )  ///
+            levels(99.9 99 95) ciopts(lwidth(*1) lcolor(*.6)) xla(none) xtitle("") xsc(noline) ///
+            keep($dep_var_ref inter_urban)
+
+
+graph export "$out_analysis\SR_HET_URBAN_Combined_Graph_REF.pdf", as(pdf) replace
+
+
+
+
+
+
+ ***************
+ ** EDUCATION **
+ ***************
+
+tab bi_education, m 
+codebook bi_education  
+
+
+codebook bi_education
+tab bi_education
+lab var bi_education "Education"
+
+gen inter_educ = bi_education*$dep_var_ref
+*gen inter_formal_IV = bi_education*$IV_var_ref
+lab var inter_educ "Nbr Ref x education"
+
+
+
+
+
+
+**** OLS *****
+  foreach outcome of global outcomes_uncond {
+    qui xi: reg `outcome' $dep_var_ref inter_educ bi_education ///
+                age age2 ///
+                i.district_iid i.year  ///
+            [pw = $weight],  ///
+            cluster(district_iid) robust 
+    estimates store REFEDU_YD_`outcome', title(Model `outcome')
+  }
+
+preserve
+keep if emp_16_10 == 1 
+  foreach outcome of global outcomes_cond {
+    qui xi: reg `outcome' $dep_var_ref inter_educ bi_education ///
+                age age2 ///
+                i.district_iid i.year  ///
+            [pw = $weight],  ///
+            cluster(district_iid) robust 
+    estimates store REFEDU_YD_`outcome', title(Model `outcome')
+  }
+restore 
+
+
+     coefplot (REFEDU_YD_employed_olf_3m), bylabel(Employed)  ///
+             || (REFEDU_YD_unemployed_olf_3m), bylabel(Unemployed)  ///
+             || (REFEDU_YD_lfp_3m_empl), bylabel(Type: Wage Worker)  ///
+             || (REFEDU_YD_lfp_3m_temp), bylabel(Type: Temporary)  ///
+             || (REFEDU_YD_lfp_3m_employer), bylabel(Type: Employer)  ///
+             || (REFEDU_YD_lfp_3m_se), bylabel(Type: SE) ///
+             || (REFEDU_YD_lfp_3m_unpaid), bylabel(Type: Unpaid) ///
+             || (REFEDU_YD_ln_total_rwage_3m), bylabel(Total Wage (ln)) ///
+             || (REFEDU_YD_ln_hourly_rwage), bylabel(Hourly Wage (ln)) ///
+             || (REFEDU_YD_ln_whpw_3m), bylabel(Work Hours p.w.) ///
+             || (REFEDU_YD_formal), bylabel(Formal) ///
+             || , drop(_Iyear_2016 $district _cons $controls) ///
+              xline(0) msymbol(d) ///
+              label subtitle(, size(vsmall) fcolor(white) nobox ) ///
+             xlabel("") ylabel(1 "Treat" 2 "Inter") ///
+             mlabel(cond(@pval<.01, string(@b,"%9.3f") + "***", ///
+             cond(@pval<.05, string(@b,"%9.3f") + "**", ///
+             cond(@pval<.1, string(@b,"%9.3f") + "*", ///
+             string(@b, "%5.3f")  ) ) ) ) mlabposition(10) mlabsize(tiny) ///
+             byopts(graphregion(color(white)) bgcolor(white) ///
+              title("Effect Sizes: Education", size(small))) ///
+                yscale(noline alt)  xscale(noline alt) legend(nobox ///
+                region(lstyle(none)) size(vsmall) cols(4) ring(0) )  ///
+            levels(99.9 99 95) ciopts(lwidth(*1) lcolor(*.6)) xla(none) xtitle("") xsc(noline) ///
+            keep($dep_var_ref inter_educ)
+
+
+graph export "$out_analysis\SR_HET_EDUC_Combined_Graph_REF.pdf", as(pdf) replace
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+*** COMBINED WITH ug and jor
 
 
 
@@ -902,7 +1238,7 @@ lab var inter_gender "Nbr Ref x Gender"
              || (m_unemployed_olf_3m, label("Unemployed"))  ///
              , bylabel(Uganda)  ///
             ||  ,  drop(age age2 _Iyear_2016   $district ///
-        _cons ) xline(0) 
+        _cons ) xline(0) keep($dep_var_ref inter_gender)
 
   coefplot  (m_employed_olf_3m, label("Employed") ) ///
                , bylabel(Jordan) mlabel(string(@b, "%5.2f")) mlabposition(12) mlabsize(vsmall) ///

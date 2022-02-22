@@ -157,7 +157,7 @@ xtset indid_2010 year
   foreach outcome of global outcomes_uncond {
     qui xi: reg `outcome' $dep_var_ref ///
              i.district_iid i.year $controls ///
-            [pweight = panel_wt_10_16],  ///
+            [pw = $weight],  ///
             cluster(district_iid) robust 
     codebook `outcome', c
     estimates table, k($dep_var_ref) star(.1 .05 .01) b(%7.4f) 
@@ -210,7 +210,7 @@ estimates drop m_employed_olf_3m m_unemployed_olf_3m m_lfp_3m_empl ///
 preserve
   foreach outcome of global outcomes_uncond {
        qui reghdfe `outcome' $dep_var_ref $controls  ///
-                [pw=panel_wt_10_16], ///
+                [pw = $weight], ///
                 absorb(year indid_2010) ///
                 cluster(district_iid) 
       
@@ -218,12 +218,12 @@ preserve
         qui replace smpl=1 if e(sample)==1
         * Then I partial out all variables
       foreach y in `outcome' $dep_var_ref  $controls {
-        qui reghdfe `y' [pw=panel_wt_10_16] if smpl==1, absorb(year indid_2010) residuals(`y'_c2wr)
+        qui reghdfe `y' [pw = $weight] if smpl==1, absorb(year indid_2010) residuals(`y'_c2wr)
         rename `y' o_`y'
         rename `y'_c2wr `y'
       }
       
-      qui reg `outcome' $dep_var_ref $controls [pw=panel_wt_10_16], cluster(district_iid) robust
+      qui reg `outcome' $dep_var_ref $controls [pw = $weight], cluster(district_iid) robust
       codebook `outcome', c
       estimates table,  k($dep_var_ref) star(.1 .05 .01) 
       estimates table, b(%7.4f) se(%7.4f) stats(N r2_a) k($dep_var_ref) 
@@ -292,7 +292,7 @@ estimates drop m_employed_olf_3m m_unemployed_olf_3m m_lfp_3m_empl ///
  foreach outcome of global outcomes_uncond {
       xi: ivreg2  `outcome' i.year i.district_iid $controls ///
                 ($dep_var_ref = $iv_ref) ///
-                [pweight = panel_wt_10_16], ///
+                [pw = $weight], ///
                 cluster(district_iid) robust ///
                 partial(i.district_iid) ///
                 first
@@ -346,7 +346,7 @@ preserve
        qui xi: ivreghdfe `outcome' ///
                     $controls  ///
                     ($dep_var_ref = $iv_ref) ///
-                    [pweight = panel_wt_10_16], ///
+                    [pw = $weight], ///
                     absorb(year indid_2010) ///
                     cluster(district_iid) 
 
@@ -354,14 +354,14 @@ preserve
         qui replace smpl=1 if e(sample)==1
         * Then I partial out all variables
         foreach y in `outcome' $controls $dep_var_ref $iv_ref { 
-          qui reghdfe `y' [pw=panel_wt_10_16] if smpl==1, absorb(year indid_2010) residuals(`y'_c2wr)
+          qui reghdfe `y' [pw = $weight] if smpl==1, absorb(year indid_2010) residuals(`y'_c2wr)
           qui rename `y' o_`y'
           qui rename `y'_c2wr `y'
         }
         qui ivreg2 `outcome' ///
                $controls  ///
                ($dep_var_ref = $iv_ref) ///
-               [pweight = panel_wt_10_16], ///
+               [pw = $weight], ///
                cluster(district_iid) robust ///
                first 
       estimates table, k($dep_var_ref) star(.1 .05 .01) b(%7.4f) 
@@ -459,7 +459,7 @@ tab year
   foreach outcome of global outcomes_cond {
     qui xi: reg `outcome' $dep_var_ref ///
              i.district_iid i.year $controls ///
-            [pweight = panel_wt_10_16],  ///
+            [pw = $weight],  ///
             cluster(district_iid) robust 
     codebook `outcome', c
     estimates table, k($dep_var_ref) star(.1 .05 .01) b(%7.4f) 
@@ -511,7 +511,7 @@ estimates drop  m_ln_total_rwage_3m m_ln_hourly_rwage m_ln_whpw_3m ///
 preserve
   foreach outcome of global outcomes_cond {
        qui reghdfe `outcome' $dep_var_ref $controls  ///
-                [pw=panel_wt_10_16], ///
+               [pw = $weight], ///
                 absorb(year indid_2010) ///
                 cluster(district_iid) 
       
@@ -519,12 +519,12 @@ preserve
         qui replace smpl=1 if e(sample)==1
         * Then I partial out all variables
       foreach y in `outcome' $dep_var_ref  $controls {
-        qui reghdfe `y' [pw=panel_wt_10_16] if smpl==1, absorb(year indid_2010) residuals(`y'_c2wr)
+        qui reghdfe `y' [pw = $weight] if smpl==1, absorb(year indid_2010) residuals(`y'_c2wr)
         rename `y' o_`y'
         rename `y'_c2wr `y'
       }
       
-      qui reg `outcome' $dep_var_ref $controls [pw=panel_wt_10_16], cluster(district_iid) robust
+      qui reg `outcome' $dep_var_ref $controls [pw = $weight], cluster(district_iid) robust
       codebook `outcome', c
       estimates table,  k($dep_var_ref) star(.1 .05 .01) 
       estimates table, b(%7.4f) se(%7.4f) stats(N r2_a) k($dep_var_ref) 
@@ -594,7 +594,7 @@ cls
  foreach outcome of global outcomes_cond {
       qui xi: ivreg2  `outcome'  i.year i.district_iid $controls ///
                 ($dep_var_ref = $iv_ref) ///
-                [pweight = panel_wt_10_16], ///
+                [pw = $weight], ///
                 cluster(district_iid) robust ///
                 partial(i.district_iid) ///
                 first
@@ -647,7 +647,7 @@ preserve
        qui xi: ivreghdfe `outcome' ///
                     $controls  ///
                     ($dep_var_ref = $iv_ref) ///
-                    [pweight = panel_wt_10_16], ///
+                    [pw = $weight], ///
                     absorb(year indid_2010) ///
                     cluster(district_iid) 
 
@@ -655,14 +655,14 @@ preserve
         qui replace smpl=1 if e(sample)==1
         * Then I partial out all variables
         foreach y in `outcome' $controls $dep_var_ref $iv_ref { 
-          qui reghdfe `y' [pw=panel_wt_10_16] if smpl==1, absorb(year indid_2010) residuals(`y'_c2wr)
+          qui reghdfe `y' [pw = $weight] if smpl==1, absorb(year indid_2010) residuals(`y'_c2wr)
           qui rename `y' o_`y'
           qui rename `y'_c2wr `y'
         }
         qui ivreg2 `outcome' ///
                $controls  ///
                ($dep_var_ref = $iv_ref) ///
-               [pweight = panel_wt_10_16], ///
+               [pw = $weight], ///
                cluster(district_iid) robust ///
                first 
       estimates table, k($dep_var_ref) star(.1 .05 .01) b(%7.4f) 

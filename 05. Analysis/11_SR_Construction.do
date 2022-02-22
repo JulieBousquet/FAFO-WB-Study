@@ -156,10 +156,27 @@ lab var agg_wp_orig "Nb WP"
 
 *Wage Employment: 
 *reference period 3 months, defined as share of WAP that is employed  
-tab uswrkstsr1 // From crwrkstsr1 - mkt def, search req; 7d, 2 empl - 1 unemp&OLF
+tab uswrkstsr1, m // From crwrkstsr1 - mkt def, search req; 7d, 2 empl - 1 unemp&OLF
 codebook uswrkstsr1
 
 tab employed_olf_3m, m 
+
+*INCLUDE SE in employed 
+ tab uswrkstsr1 usempstp, m
+ tab employed_olf_3m usempstp, m
+
+ /* Work status during |
+     ref. 3-month, |    employment status in prim job (ref. 3
+       market def. |                   months)
+ (search required) | Waged emp   Employer  Self-empl  Unpaid fa |     Total
+-------------------+--------------------------------------------+----------
+          Employed |    10,390        634      1,184        105 |    12,313 
+        Unemployed |         0          0          0         15 |        15 
+Out of Labor Force |         0          0          0        256 |       256 
+-------------------+--------------------------------------------+----------
+             Total |    10,390        634      1,184        376 |    12,584 
+
+*/
 
 /*7 DAYS
 gen employed_olf_7d = 0 if crwrkstsr1 == 2 | crwrkstsr1 == 3 

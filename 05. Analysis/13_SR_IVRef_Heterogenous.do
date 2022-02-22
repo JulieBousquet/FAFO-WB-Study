@@ -136,7 +136,7 @@ lab var inter_gender "Nbr Ref x gender"
     qui xi: reg `outcome' $dep_var_ref inter_gender gender ///
                 age age2 ///
                 i.district_iid i.year  ///
-            [pweight = panel_wt_10_16],  ///
+            [pw = $weight],  ///
             cluster(district_iid) robust 
     codebook `outcome', c
     estimates table, k($dep_var_ref inter_gender gender) star(.1 .05 .01) b(%7.4f) 
@@ -191,7 +191,7 @@ preserve
   foreach outcome of global outcomes_uncond {
        qui reghdfe `outcome' $dep_var_ref inter_gender gender ///
                 age age2 ///  
-                [pw=panel_wt_10_16], ///
+                [pw = $weight], ///
                 absorb(year indid_2010) ///
                 cluster(district_iid) 
       
@@ -200,13 +200,13 @@ preserve
         * Then I partial out all variables
       foreach y in `outcome' $dep_var_ref  inter_gender gender ///
                 age age2  {
-        qui reghdfe `y' [pw=panel_wt_10_16] if smpl==1, absorb(year indid_2010) residuals(`y'_c2wr)
+        qui reghdfe `y' [pw = $weight] if smpl==1, absorb(year indid_2010) residuals(`y'_c2wr)
         rename `y' o_`y'
         rename `y'_c2wr `y'
       }
       
       qui reg `outcome' $dep_var_ref inter_gender gender  age age2 /// 
-       [pw=panel_wt_10_16], cluster(district_iid) robust
+       [pw = $weight], cluster(district_iid) robust
       codebook `outcome', c
       estimates table,  k($dep_var_ref  inter_gender gender) star(.1 .05 .01) 
       estimates table, b(%7.4f) se(%7.4f) stats(N r2_a) k($dep_var_ref  inter_gender gender) 
@@ -291,7 +291,7 @@ tab year
     qui xi: reg `outcome' $dep_var_ref inter_gender gender ///
                 age age2 ///
              i.district_iid i.year ///
-            [pweight = panel_wt_10_16],  ///
+            [pw = $weight],  ///
             cluster(district_iid) robust 
     codebook `outcome', c
     estimates table, k($dep_var_ref inter_gender gender) star(.1 .05 .01) b(%7.4f) 
@@ -344,7 +344,7 @@ preserve
   foreach outcome of global outcomes_cond {
        qui reghdfe `outcome' $dep_var_ref inter_gender gender ///
                 age age2 ///  
-                [pw=panel_wt_10_16], ///
+                [pw = $weight], ///
                 absorb(year indid_2010) ///
                 cluster(district_iid) 
       
@@ -352,12 +352,12 @@ preserve
         qui replace smpl=1 if e(sample)==1
         * Then I partial out all variables
       foreach y in `outcome' $dep_var_ref inter_gender gender age age2 {
-        qui reghdfe `y' [pw=panel_wt_10_16] if smpl==1, absorb(year indid_2010) residuals(`y'_c2wr)
+        qui reghdfe `y' [pw = $weight] if smpl==1, absorb(year indid_2010) residuals(`y'_c2wr)
         rename `y' o_`y'
         rename `y'_c2wr `y'
       }
       
-      qui reg `outcome' $dep_var_ref inter_gender gender age age2  [pw=panel_wt_10_16], cluster(district_iid) robust
+      qui reg `outcome' $dep_var_ref inter_gender gender age age2  [pw = $weight], cluster(district_iid) robust
       codebook `outcome', c
       estimates table,  k($dep_var_ref inter_gender gender ) star(.1 .05 .01) 
       estimates table, b(%7.4f) se(%7.4f) stats(N r2_a) k($dep_var_ref inter_gender gender ) 
@@ -505,7 +505,7 @@ lab var inter_urban "Nbr Ref x urban"
     qui xi: reg `outcome' $dep_var_ref inter_urban urban ///
                 $controls  ///
                 i.district_iid i.year  ///
-            [pweight = panel_wt_10_16],  ///
+            [pw = $weight],  ///
             cluster(district_iid) robust 
     codebook `outcome', c
     estimates table, k($dep_var_ref inter_urban urban) star(.1 .05 .01) b(%7.4f) 
@@ -560,7 +560,7 @@ preserve
   foreach outcome of global outcomes_uncond {
        qui reghdfe `outcome' $dep_var_ref inter_urban urban ///
                 $controls ///  
-                [pw=panel_wt_10_16], ///
+                [pw = $weight], ///
                 absorb(year indid_2010) ///
                 cluster(district_iid) 
       
@@ -569,13 +569,13 @@ preserve
         * Then I partial out all variables
       foreach y in `outcome' $dep_var_ref  inter_urban urban ///
                 $controls {
-        qui reghdfe `y' [pw=panel_wt_10_16] if smpl==1, absorb(year indid_2010) residuals(`y'_c2wr)
+        qui reghdfe `y' [pw = $weight] if smpl==1, absorb(year indid_2010) residuals(`y'_c2wr)
         rename `y' o_`y'
         rename `y'_c2wr `y'
       }
       
       qui reg `outcome' $dep_var_ref inter_urban urban $controls /// 
-       [pw=panel_wt_10_16], cluster(district_iid) robust
+       [pw = $weight], cluster(district_iid) robust
       codebook `outcome', c
       estimates table,  k($dep_var_ref  inter_urban urban) star(.1 .05 .01) 
       estimates table, b(%7.4f) se(%7.4f) stats(N r2_a) k($dep_var_ref  inter_urban urban) 
@@ -660,7 +660,7 @@ tab year
     qui xi: reg `outcome' $dep_var_ref inter_urban urban ///
                 $controls ///
              i.district_iid i.year ///
-            [pweight = panel_wt_10_16],  ///
+            [pw = $weight],  ///
             cluster(district_iid) robust 
     codebook `outcome', c
     estimates table, k($dep_var_ref inter_urban urban) star(.1 .05 .01) b(%7.4f) 
@@ -713,7 +713,7 @@ preserve
   foreach outcome of global outcomes_cond {
        qui reghdfe `outcome' $dep_var_ref inter_urban urban ///
                 $controls ///  
-                [pw=panel_wt_10_16], ///
+                [pw = $weight], ///
                 absorb(year indid_2010) ///
                 cluster(district_iid) 
       
@@ -721,12 +721,12 @@ preserve
         qui replace smpl=1 if e(sample)==1
         * Then I partial out all variables
       foreach y in `outcome' $dep_var_ref inter_urban urban $controls {
-        qui reghdfe `y' [pw=panel_wt_10_16] if smpl==1, absorb(year indid_2010) residuals(`y'_c2wr)
+        qui reghdfe `y' [pw = $weight] if smpl==1, absorb(year indid_2010) residuals(`y'_c2wr)
         rename `y' o_`y'
         rename `y'_c2wr `y'
       }
       
-      qui reg `outcome' $dep_var_ref inter_urban urban $controls [pw=panel_wt_10_16], cluster(district_iid) robust
+      qui reg `outcome' $dep_var_ref inter_urban urban $controls [pw = $weight], cluster(district_iid) robust
       codebook `outcome', c
       estimates table,  k($dep_var_ref inter_urban urban) star(.1 .05 .01) 
       estimates table, b(%7.4f) se(%7.4f) stats(N r2_a) k($dep_var_ref inter_urban urban) 
@@ -864,7 +864,7 @@ lab var inter_educ "Nbr Ref x education"
     qui xi: reg `outcome' $dep_var_ref inter_educ bi_education ///
                 $controls  ///
                 i.district_iid i.year  ///
-            [pweight = panel_wt_10_16],  ///
+            [pw = $weight],  ///
             cluster(district_iid) robust 
     codebook `outcome', c
     estimates table, k($dep_var_ref inter_educ bi_education) star(.1 .05 .01) b(%7.4f) 
@@ -919,7 +919,7 @@ preserve
   foreach outcome of global outcomes_uncond {
        qui reghdfe `outcome' $dep_var_ref inter_educ bi_education ///
                 $controls ///  
-                [pw=panel_wt_10_16], ///
+                [pw = $weight], ///
                 absorb(year indid_2010) ///
                 cluster(district_iid) 
       
@@ -928,13 +928,13 @@ preserve
         * Then I partial out all variables
       foreach y in `outcome' $dep_var_ref  inter_educ bi_education ///
                 $controls {
-        qui reghdfe `y' [pw=panel_wt_10_16] if smpl==1, absorb(year indid_2010) residuals(`y'_c2wr)
+        qui reghdfe `y' [pw = $weight] if smpl==1, absorb(year indid_2010) residuals(`y'_c2wr)
         rename `y' o_`y'
         rename `y'_c2wr `y'
       }
       
       qui reg `outcome' $dep_var_ref inter_educ bi_education $controls /// 
-       [pw=panel_wt_10_16], cluster(district_iid) robust
+       [pw = $weight], cluster(district_iid) robust
       codebook `outcome', c
       estimates table,  k($dep_var_ref  inter_educ bi_education) star(.1 .05 .01) 
       estimates table, b(%7.4f) se(%7.4f) stats(N r2_a) k($dep_var_ref  inter_educ bi_education) 
@@ -1018,7 +1018,7 @@ tab year
     qui xi: reg `outcome' $dep_var_ref inter_educ bi_education ///
                 $controls ///
              i.district_iid i.year ///
-            [pweight = panel_wt_10_16],  ///
+            [pw = $weight],  ///
             cluster(district_iid) robust 
     codebook `outcome', c
     estimates table, k($dep_var_ref inter_educ bi_education) star(.1 .05 .01) b(%7.4f) 
@@ -1071,7 +1071,7 @@ preserve
   foreach outcome of global outcomes_cond {
        qui reghdfe `outcome' $dep_var_ref inter_educ bi_education ///
                 $controls ///  
-                [pw=panel_wt_10_16], ///
+                [pw = $weight], ///
                 absorb(year indid_2010) ///
                 cluster(district_iid) 
       
@@ -1079,12 +1079,12 @@ preserve
         qui replace smpl=1 if e(sample)==1
         * Then I partial out all variables
       foreach y in `outcome' $dep_var_ref inter_educ bi_education $controls {
-        qui reghdfe `y' [pw=panel_wt_10_16] if smpl==1, absorb(year indid_2010) residuals(`y'_c2wr)
+        qui reghdfe `y' [pw = $weight] if smpl==1, absorb(year indid_2010) residuals(`y'_c2wr)
         rename `y' o_`y'
         rename `y'_c2wr `y'
       }
       
-      qui reg `outcome' $dep_var_ref inter_educ bi_education $controls [pw=panel_wt_10_16], cluster(district_iid) robust
+      qui reg `outcome' $dep_var_ref inter_educ bi_education $controls [pw = $weight], cluster(district_iid) robust
       codebook `outcome', c
       estimates table,  k($dep_var_ref inter_educ bi_education) star(.1 .05 .01) 
       estimates table, b(%7.4f) se(%7.4f) stats(N r2_a) k($dep_var_ref inter_educ bi_education) 
@@ -1233,7 +1233,7 @@ lab var inter_educ "Nbr Ref x education"
     qui xi: reg `outcome' $dep_var_ref inter_educ bi_education ///
                 $controls  ///
                 i.district_iid i.year  ///
-            [pweight = panel_wt_10_16],  ///
+            [pw = $weight],  ///
             cluster(district_iid) robust 
     codebook `outcome', c
     estimates table, k($dep_var_ref inter_educ bi_education) star(.1 .05 .01) b(%7.4f) 
@@ -1288,7 +1288,7 @@ preserve
   foreach outcome of global outcomes_uncond {
        qui reghdfe `outcome' $dep_var_ref inter_educ bi_education ///
                 $controls ///  
-                [pw=panel_wt_10_16], ///
+                [pw = $weight], ///
                 absorb(year indid_2010) ///
                 cluster(district_iid) 
       
@@ -1297,13 +1297,13 @@ preserve
         * Then I partial out all variables
       foreach y in `outcome' $dep_var_ref  inter_educ bi_education ///
                 $controls {
-        qui reghdfe `y' [pw=panel_wt_10_16] if smpl==1, absorb(year indid_2010) residuals(`y'_c2wr)
+        qui reghdfe `y' [pw = $weight] if smpl==1, absorb(year indid_2010) residuals(`y'_c2wr)
         rename `y' o_`y'
         rename `y'_c2wr `y'
       }
       
       qui reg `outcome' $dep_var_ref inter_educ bi_education $controls /// 
-       [pw=panel_wt_10_16], cluster(district_iid) robust
+       [pw = $weight], cluster(district_iid) robust
       codebook `outcome', c
       estimates table,  k($dep_var_ref  inter_educ bi_education) star(.1 .05 .01) 
       estimates table, b(%7.4f) se(%7.4f) stats(N r2_a) k($dep_var_ref  inter_educ bi_education) 
@@ -1388,7 +1388,7 @@ tab year
     qui xi: reg `outcome' $dep_var_ref inter_educ bi_education ///
                 $controls ///
              i.district_iid i.year ///
-            [pweight = panel_wt_10_16],  ///
+            [pw = $weight],  ///
             cluster(district_iid) robust 
     codebook `outcome', c
     estimates table, k($dep_var_ref inter_educ bi_education) star(.1 .05 .01) b(%7.4f) 
@@ -1441,7 +1441,7 @@ preserve
   foreach outcome of global outcomes_cond {
        qui reghdfe `outcome' $dep_var_ref inter_educ bi_education ///
                 $controls ///  
-                [pw=panel_wt_10_16], ///
+                [pw = $weight], ///
                 absorb(year indid_2010) ///
                 cluster(district_iid) 
       
@@ -1449,12 +1449,12 @@ preserve
         qui replace smpl=1 if e(sample)==1
         * Then I partial out all variables
       foreach y in `outcome' $dep_var_ref inter_educ bi_education $controls {
-        qui reghdfe `y' [pw=panel_wt_10_16] if smpl==1, absorb(year indid_2010) residuals(`y'_c2wr)
+        qui reghdfe `y' [pw = $weight] if smpl==1, absorb(year indid_2010) residuals(`y'_c2wr)
         rename `y' o_`y'
         rename `y'_c2wr `y'
       }
       
-      qui reg `outcome' $dep_var_ref inter_educ bi_education $controls [pw=panel_wt_10_16], cluster(district_iid) robust
+      qui reg `outcome' $dep_var_ref inter_educ bi_education $controls [pw = $weight], cluster(district_iid) robust
       codebook `outcome', c
       estimates table,  k($dep_var_ref inter_educ bi_education) star(.1 .05 .01) 
       estimates table, b(%7.4f) se(%7.4f) stats(N r2_a) k($dep_var_ref inter_educ bi_education) 
