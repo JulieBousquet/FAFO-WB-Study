@@ -161,6 +161,11 @@ codebook uswrkstsr1
 
 tab employed_olf_3m, m 
 
+codebook employed_olf_3m
+codebook usempstp
+replace employed_olf_3m = 2 if usempstp == 4 //Incldue the unpaid family workers
+*in the employed category
+
 *INCLUDE SE in employed 
  tab uswrkstsr1 usempstp, m
  tab employed_olf_3m usempstp, m
@@ -178,17 +183,50 @@ Out of Labor Force |         0          0          0        256 |       256
 
 */
 
-/*7 DAYS
-gen employed_olf_7d = 0 if crwrkstsr1 == 2 | crwrkstsr1 == 3 
+*7 DAYS
+/*gen employed_olf_7d = 0 if crwrkstsr1 == 2 | crwrkstsr1 == 3 
 replace employed_olf_7d = 1 if crwrkstsr1 == 1
 tab employed_olf_7d 
 lab def employed_olf_7d 0 "Unemployed OLF" 1 "Employed", modify 
-lab var employed_olf_7d employed_olf_7d
-*/
+lab var employed_olf_7d employed_olf_7d*/
 
+
+*** OLF AS UNEMPLOYED ***
+gen employed_olf_7d = 2 if crwrkstsr1 == 1 & (crempstp != 4) //EMPLOYED BUT NO SUBS WORK
+replace employed_olf_7d = 2 if crwrkstsr1 == 1 & crempstp == 3 //SE EMPLOYED
+replace employed_olf_7d = 1 if crwrkstsr1 == 2 // UNEMP
+replace employed_olf_7d = 1 if crwrkstsr1 == 1 & (crempstp == 4) //EMPLOYED IN SUBS WORK
+replace employed_olf_7d = 1 if crwrkstsr1 == 3 //OLF MISS
+replace employed_olf_7d = 2 if crempstp == 4 //Incldue the unpaid family workers
+tab employed_olf_7d, m 
+lab def employed_olf_7d 2 "Employed (no subs)" 1 "Unemployed or OLF (&subs)", modify 
+lab val employed_olf_7d employed_olf_3m
+lab var employed_olf_7d "From uswrkstsr1 - mkt def, search req; 7d, 2 empl - 1 unemp&OLF"
+
+ tab employed_olf_7d crempstp, m
+
+
+
+**** WAGE ****
+
+
+*Bonuses and incentives (3-month)
+tab bonuses3, m 
+*Overtime Wage (3-month)
+tab ovrtime3, m 
+*Other Wage (3-month)
+tab otherwg3, m 
+*Profit Sharing (3-month)
+tab prftshr3, m 
+
+
+*Total Wages (3-month)
+*tab ttmonwg3, m 
 tab ln_total_rwage_3m , m
 
-/*
+
+*** 7 days ref period 
+
 *Wage from main job (ln): 
 *7 days reference period – on employed only 
 tab mnthwg , m 
@@ -201,6 +239,19 @@ tab mnthwg , m
       gen ln_rmthly_wage_main = ln(1+rmthly_wage_main) 
       lab var ln_rmthly_wage_main "LOG Monthly Wage primary job - CONDITIONAL - UNEMPLOYED & OLF: WAGE MISSING"
 */
+
+
+gen tot_rwage_7d = mnthwg / 4 
+
+      *Corrected from inflation
+      gen rtot_wage_7d = tot_rwage_7d / CPIin17
+      lab var rtot_wage_7d "CORRECTED INFLATION - Wage primary job 7d"
+
+      *LN: Conditional wage: EMPLOYED ONLY
+      gen ln_total_rwage_7d = ln(1+rtot_wage_7d) 
+      lab var ln_total_rwage_7d "LOG Wage primary job 7d - CONDITIONAL - UNEMPLOYED & OLF: WAGE MISSING"
+
+tab ln_total_rwage_7d, m 
 
 tab ln_hourly_rwage, m 
 
@@ -225,7 +276,7 @@ gen ln_whpw_3m = ln(1+work_hours_pweek_3m_w)
 
 
 
-/*
+
 *usual Number of Hours per Week, reference 7 days, 
 *corrected for outliers (i.e., cannot work 24h 7d/w). 
 *Can convert ‘days worked per week’ to hours if 
@@ -240,7 +291,8 @@ su wh_pw_7d, d
 winsor2 wh_pw_7d, s(_w) c(0 98)
 su wh_pw_7d_w
 lab var wh_pw_7d_w "Work Hours per Week - 7d - Market Work - winsorized"
-*/
+gen ln_whpw_7d = ln(1+wh_pw_7d_w)
+
 
 *LFP (12 months UG/ETH and 3 months JOR/COL): Employer, 
 *Wage employment, Self Employed (non ag), unpaid labor 
@@ -278,52 +330,140 @@ gen lfp_3m = 1 if usempstp == 1 //wage employee - permanent
 replace lfp_3m = 2 if usstablp == 2 | usstablp == 3 | usstablp == 4 //any temp job
 replace lfp_3m = 3 if usempstp == 2 //Employer
 replace lfp_3m = 4 if usempstp == 3 //Self Employed
-replace lfp_3m = 5 if usempstp == 4 //Unpaid Labor
+replace lfp_3m = 4 if usempstp == 4 //Unpaid Labor
+*replace lfp_3m = 5 if usempstp == 4 //Unpaid Labor
 lab def lfp_3m  1 "Wage Employee" ///
                 2 "Temporary Worker" ///
                 3 "Employer" ///
                 4 "Self Employed" ///
-                5 "Unpaid Labor" ///
                 , modify
+          *  5 "Unpaid Labor"       
 lab val lfp_3m lfp_3m
 lab var lfp_3m "Labor Force Participation - 3month"
 tab lfp_3m, m 
 
-gen     lfp_3m_empl = 0 if !mi(lfp_3m) 
-replace lfp_3m_empl = 1 if lfp_3m == 1 
-tab     lfp_3m_empl, m 
-lab def lfp_3m_empl 0 "Else" 1 "Wage Employee", modify  
-lab val lfp_3m_empl lfp_3m_empl
-lab var lfp_3m_empl "Wage Employee"
+gen     lfp_empl_3m = 0 if !mi(lfp_3m) 
+replace lfp_empl_3m = 1 if lfp_3m == 1 
+tab     lfp_empl_3m, m 
+lab def lfp_empl_3m 0 "Else" 1 "Wage Employee", modify  
+lab val lfp_empl_3m lfp_empl_3m
+lab var lfp_empl_3m "Wage Employee"
 
-gen     lfp_3m_temp = 0 if !mi(lfp_3m) 
-replace lfp_3m_temp = 1 if lfp_3m == 2 
-tab     lfp_3m_temp, m 
-lab def lfp_3m_temp 0 "Else" 1 "Temporary Worker", modify  
-lab val lfp_3m_temp lfp_3m_temp
-lab var lfp_3m_temp "Temporary Worker"
+gen     lfp_temp_3m = 0 if !mi(lfp_3m) 
+replace lfp_temp_3m = 1 if lfp_3m == 2 
+tab     lfp_temp_3m, m 
+lab def lfp_temp_3m 0 "Else" 1 "Temporary Worker", modify  
+lab val lfp_temp_3m lfp_temp_3m
+lab var lfp_temp_3m "Temporary Worker"
 
-gen     lfp_3m_employer = 0 if !mi(lfp_3m) 
-replace lfp_3m_employer = 1 if lfp_3m == 3 
-tab     lfp_3m_employer, m 
-lab def lfp_3m_employer 0 "Else" 1 "Employer", modify  
-lab val lfp_3m_employer lfp_3m_employer
-lab var lfp_3m_employer "Employer"
+gen     lfp_employer_3m = 0 if !mi(lfp_3m) 
+replace lfp_employer_3m = 1 if lfp_3m == 3 
+tab     lfp_employer_3m, m 
+lab def lfp_employer_3m 0 "Else" 1 "Employer", modify  
+lab val lfp_employer_3m lfp_employer_3m
+lab var lfp_employer_3m "Employer"
 
-gen     lfp_3m_se = 0 if !mi(lfp_3m) 
-replace lfp_3m_se = 1 if lfp_3m == 4 
-tab     lfp_3m_se, m 
-lab def lfp_3m_se 0 "Else" 1 "Self Employed", modify  
-lab val lfp_3m_se lfp_3m_se
-lab var lfp_3m_se "Self Employed"
+gen     lfp_se_3m = 0 if !mi(lfp_3m) 
+replace lfp_se_3m = 1 if lfp_3m == 4 
+tab     lfp_se_3m, m 
+lab def lfp_se_3m 0 "Else" 1 "Self Employed", modify  
+lab val lfp_se_3m lfp_se_3m
+lab var lfp_se_3m "Self Employed"
 
+/*
 gen     lfp_3m_unpaid = 0 if !mi(lfp_3m) 
 replace lfp_3m_unpaid = 1 if lfp_3m == 5
 tab     lfp_3m_unpaid, m 
 lab def lfp_3m_unpaid 0 "Else" 1 "Unpaid Labor", modify  
 lab val lfp_3m_unpaid lfp_3m_unpaid
 lab var lfp_3m_unpaid "Unpaid Labor"
+*/
 
+
+
+**** 7d ****
+
+*LFP: Employer, 
+*Wage employment, Self Employed (non ag), unpaid labor 
+*(incl family worker) , temporary labor
+tab crempstp 
+codebook crempstp 
+/* 1  Waged employee
+   2  Employer
+   3  Self-employed
+   4  Unpaid family worker */
+tab crstablp
+codebook crstablp 
+/* 1  permanent
+   2  temporary
+   3  seasonal
+   4  casual */
+tab crstablp crempstp
+/*
+       Job |
+ stability |
+  in prim. |    employment status in prim job (ref. 3
+ job (ref. |                   months)
+  3-mnths) | Waged emp   Employer  Self-empl  Unpaid fa |     Total
+-----------+--------------------------------------------+----------
+ permanent |     4,940        230        426        209 |     5,805 
+ temporary |       325          8         15         10 |       358 
+  seasonal |        43          9         20          2 |        74 
+    casual |       242         27        145          7 |       421 
+-----------+--------------------------------------------+----------
+     Total |     5,550        274        606        228 |     6,658 
+*/
+
+gen lfp_7d = 1 if crempstp == 1 //wage employee - permanent 
+replace lfp_7d = 2 if crstablp == 2 | crstablp == 3 | crstablp == 4 //any temp job
+replace lfp_7d = 3 if crempstp == 2 //Employer
+replace lfp_7d = 4 if crempstp == 3 //Self Employed
+replace lfp_7d = 4 if crempstp == 4 //Unpaid Labor
+lab def lfp_7d  1 "Wage Employee" ///
+                2 "Temporary Worker" ///
+                3 "Employer" ///
+                4 "Self Employed" ///
+                , modify
+lab val lfp_7d lfp_7d
+lab var lfp_7d "Labor Force Participation - 7days"
+tab lfp_7d, m 
+
+gen     lfp_empl_7d = 0 if !mi(lfp_7d) 
+replace lfp_empl_7d = 1 if lfp_7d == 1 
+tab     lfp_empl_7d, m 
+lab def lfp_empl_7d 0 "Else" 1 "Wage Employee", modify  
+lab val lfp_empl_7d lfp_empl_7d
+lab var lfp_empl_7d "Wage Employee"
+
+gen     lfp_temp_7d = 0 if !mi(lfp_7d) 
+replace lfp_temp_7d = 1 if lfp_7d == 2 
+tab     lfp_temp_7d, m 
+lab def lfp_temp_7d 0 "Else" 1 "Temporary Worker", modify  
+lab val lfp_temp_7d lfp_temp_7d
+lab var lfp_temp_7d "Temporary Worker"
+
+gen     lfp_employer_7d = 0 if !mi(lfp_7d) 
+replace lfp_employer_7d = 1 if lfp_7d == 3 
+tab     lfp_employer_7d, m 
+lab def lfp_employer_7d 0 "Else" 1 "Employer", modify  
+lab val lfp_employer_7d lfp_employer_7d
+lab var lfp_employer_7d "Employer"
+
+gen     lfp_se_7d = 0 if !mi(lfp_7d) 
+replace lfp_se_7d = 1 if lfp_7d == 4 
+tab     lfp_se_7d, m 
+lab def lfp_se_7d 0 "Else" 1 "Self Employed", modify  
+lab val lfp_se_7d lfp_se_7d
+lab var lfp_se_7d "Self Employed"
+
+/*
+gen     lfp_7d_unpaid = 0 if !mi(lfp_7d) 
+replace lfp_7d_unpaid = 1 if lfp_7d == 5
+tab     lfp_7d_unpaid, m 
+lab def lfp_7d_unpaid 0 "Else" 1 "Unpaid Labor", modify  
+lab val lfp_7d_unpaid lfp_7d_unpaid
+lab var lfp_7d_unpaid "Unpaid Labor"
+*/
 
 *Unemployed: 
 

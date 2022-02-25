@@ -135,24 +135,11 @@ xtset indid_2010 year
                                 * REFUGEE INFLOW  *
                                 *******************
 
-
-                           ***************************
-                           ***************************
-                           *       FULL SAMPLE       *
-                           ***************************
-                           ***************************
-
-
-                              ************************
-                              ***        OLS       ***
-                              ************************
-
                         ***********************************
                         **           OLS                 **
                         **        UNCONDITIONAL          **
 ************************** DISTRICT + YEAR FIXED EFFECTS ***************************************
                         ***********************************
-
 
   foreach outcome of global outcomes_uncond {
     qui xi: reg `outcome' $dep_var_ref ///
@@ -168,8 +155,7 @@ xtset indid_2010 year
 
 ereturn list
 mat list e(b)
-estout m_employed_olf_3m m_unemployed_olf_3m m_lfp_3m_empl ///
-         m_lfp_3m_temp m_lfp_3m_employer m_lfp_3m_se m_lfp_3m_unpaid  /// 
+estout $outreg_uncond  /// 
       , cells(b(star fmt(%9.3f)) se(par fmt(%9.3f)) F(par fmt(%9.3f))) ///
         drop(age age2 gender _Iyear_2016  $district ///
         _cons $controls_SR)   ///
@@ -180,21 +166,19 @@ estout m_employed_olf_3m m_unemployed_olf_3m m_lfp_3m_empl ///
 *(95%) [90%] level. Based
 
 *erase "$out/reg_infra_access.tex"
-esttab m_employed_olf_3m m_unemployed_olf_3m m_lfp_3m_empl ///
-         m_lfp_3m_temp m_lfp_3m_employer m_lfp_3m_se m_lfp_3m_unpaid   /// 
+esttab $outreg_uncond  /// 
       using "$out_analysis/SR_REF_reg_OLS_Uncond_FE_DIS_YEAR.tex", se label replace booktabs ///
       cells(b(star fmt(%9.3f)) se(par fmt(%9.3f))) ///
-mtitles("Employed" "Unemployed" "LFP Employee" "LFP Temp" "LFP Employer" "LFP SE" "LFP Unpaid") ///
-        drop(age age2 gender  _Iyear_2016  $district ///
-        _cons $controls_SR)   ///
+mtitles("Employed" "Unemployed" "LFP Employee" "LFP Temp" "LFP Employer" "LFP SE") ///
+        drop( _Iyear_2016  $district _cons $controls_SR)   ///
 starlevels(* 0.1 ** 0.05 *** 0.01) ///
    title("REF - Results OLS Regression with time and district FE - UNCOND"\label{tab1}) nofloat ///
    stats(N r2_a, labels("Obs" "Adj. R-Squared")) ///
     nonotes ///
     addnotes("Standard errors clustered at the district level. Significance levels: *p $<$ 0.1, ** p $<$ 0.05, *** p $<$ 0.01") 
 
-estimates drop m_employed_olf_3m m_unemployed_olf_3m m_lfp_3m_empl ///
-         m_lfp_3m_temp m_lfp_3m_employer m_lfp_3m_se m_lfp_3m_unpaid  
+estimates drop $outreg_uncond 
+
 ************
 
 
@@ -240,8 +224,7 @@ restore
 
 ereturn list
 mat list e(b)
-estout m_employed_olf_3m m_unemployed_olf_3m m_lfp_3m_empl ///
-         m_lfp_3m_temp m_lfp_3m_employer m_lfp_3m_se m_lfp_3m_unpaid  /// 
+estout $outreg_uncond   /// 
       , cells(b(star fmt(%9.3f)) se(par fmt(%9.3f)) F(par fmt(%9.3f))) ///
         drop(age age2 gender ///
         _cons $controls_SR)   ///
@@ -252,11 +235,10 @@ estout m_employed_olf_3m m_unemployed_olf_3m m_lfp_3m_empl ///
 *(95%) [90%] level. Based
 
 *erase "$out/reg_infra_access.tex"
-esttab m_employed_olf_3m m_unemployed_olf_3m m_lfp_3m_empl ///
-         m_lfp_3m_temp m_lfp_3m_employer m_lfp_3m_se m_lfp_3m_unpaid   /// 
+esttab $outreg_uncond   /// 
       using "$out_analysis/SR_REF_reg_OLS_Uncond_FE_INDIV_YEAR.tex", se label replace booktabs ///
       cells(b(star fmt(%9.3f)) se(par fmt(%9.3f))) ///
-mtitles("Employed" "Unemployed" "LFP Employee" "LFP Temp" "LFP Employer" "LFP SE" "LFP Unpaid") ///
+mtitles("Employed" "Unemployed" "LFP Employee" "LFP Temp" "LFP Employer" "LFP SE") ///
         drop(age age2 gender  ///
         _cons $controls_SR)   ///
 starlevels(* 0.1 ** 0.05 *** 0.01) ///
@@ -265,8 +247,8 @@ starlevels(* 0.1 ** 0.05 *** 0.01) ///
     nonotes ///
     addnotes("Standard errors clustered at the district level. Significance levels: *p $<$ 0.1, ** p $<$ 0.05, *** p $<$ 0.01") 
 
-estimates drop m_employed_olf_3m m_unemployed_olf_3m m_lfp_3m_empl ///
-         m_lfp_3m_temp m_lfp_3m_employer m_lfp_3m_se m_lfp_3m_unpaid  
+estimates drop $outreg_uncond 
+
 ************
 
 
@@ -304,8 +286,7 @@ estimates drop m_employed_olf_3m m_unemployed_olf_3m m_lfp_3m_empl ///
 
 ereturn list
 mat list e(b)
-estout m_employed_olf_3m m_unemployed_olf_3m m_lfp_3m_empl ///
-         m_lfp_3m_temp m_lfp_3m_employer m_lfp_3m_se m_lfp_3m_unpaid ///
+estout $outreg_uncond  ///
       , cells(b(star fmt(%9.3f)) se(par fmt(%9.3f))) ///
   drop(age age2 gender _Iyear_2016 ///
          $controls_SR)   ///
@@ -316,11 +297,10 @@ estout m_employed_olf_3m m_unemployed_olf_3m m_lfp_3m_empl ///
 *(95%) [90%] level. Based
 
 *erase "$out/reg_infra_access.tex"
-esttab m_employed_olf_3m m_unemployed_olf_3m m_lfp_3m_empl ///
-         m_lfp_3m_temp m_lfp_3m_employer m_lfp_3m_se m_lfp_3m_unpaid /// 
+esttab $outreg_uncond  /// 
       using "$out_analysis/SR_REF_reg_IV_Uncond_FE_DIS_YEAR.tex", se label replace booktabs ///
       cells(b(star fmt(%9.3f)) se(par fmt(%9.3f))) ///
-mtitles("Employed" "Unemployed" "LFP Employee" "LFP Temp" "LFP Employer" "LFP SE" "LFP Unpaid") ///
+mtitles("Employed" "Unemployed" "LFP Employee" "LFP Temp" "LFP Employer" "LFP SE") ///
   drop(age age2 gender _Iyear_2016 ///
          $controls_SR) starlevels(* 0.1 ** 0.05 *** 0.01) ///
    title("REF - Results IV with District and Year FE - UNCOND"\label{tab1}) nofloat ///
@@ -328,8 +308,7 @@ mtitles("Employed" "Unemployed" "LFP Employee" "LFP Temp" "LFP Employer" "LFP SE
     nonotes ///
     addnotes("Standard errors clustered at the district level. Significance levels: *p $<$ 0.1, ** p $<$ 0.05, *** p $<$ 0.01") 
 
-estimates drop m_employed_olf_3m m_unemployed_olf_3m m_lfp_3m_empl ///
-         m_lfp_3m_temp m_lfp_3m_employer m_lfp_3m_se m_lfp_3m_unpaid  
+estimates drop $outreg_uncond   
 
 
 
@@ -376,8 +355,7 @@ restore
 
 ereturn list
 mat list e(b)
-estout m_employed_olf_3m m_unemployed_olf_3m m_lfp_3m_empl ///
-         m_lfp_3m_temp m_lfp_3m_employer m_lfp_3m_se m_lfp_3m_unpaid  /// 
+estout $outreg_uncond   /// 
       , cells(b(star fmt(%9.3f)) se(par fmt(%9.3f)) F(par fmt(%9.3f))) ///
         drop(age age2 gender ///
         _cons $controls_SR)   ///
@@ -388,11 +366,10 @@ estout m_employed_olf_3m m_unemployed_olf_3m m_lfp_3m_empl ///
 *(95%) [90%] level. Based
 
 *erase "$out/reg_infra_access.tex"
-esttab m_employed_olf_3m m_unemployed_olf_3m m_lfp_3m_empl ///
-         m_lfp_3m_temp m_lfp_3m_employer m_lfp_3m_se m_lfp_3m_unpaid   /// 
+esttab $outreg_uncond    /// 
       using "$out_analysis/SR_REF_reg_IV_Uncond_FE_INDIV_YEAR.tex", se label replace booktabs ///
       cells(b(star fmt(%9.3f)) se(par fmt(%9.3f))) ///
-mtitles("Employed" "Unemployed" "LFP Employee" "LFP Temp" "LFP Employer" "LFP SE" "LFP Unpaid") ///
+mtitles("Employed" "Unemployed" "LFP Employee" "LFP Temp" "LFP Employer" "LFP SE") ///
         drop(age age2 gender  ///
         _cons $controls_SR)   ///
 starlevels(* 0.1 ** 0.05 *** 0.01) ///
@@ -401,8 +378,7 @@ starlevels(* 0.1 ** 0.05 *** 0.01) ///
     nonotes ///
     addnotes("Standard errors clustered at the district level. Significance levels: *p $<$ 0.1, ** p $<$ 0.05, *** p $<$ 0.01") 
 
-estimates drop m_employed_olf_3m m_unemployed_olf_3m m_lfp_3m_empl ///
-         m_lfp_3m_temp m_lfp_3m_employer m_lfp_3m_se m_lfp_3m_unpaid  
+estimates drop $outreg_uncond 
 
 
 
@@ -430,7 +406,16 @@ estimates drop m_employed_olf_3m m_unemployed_olf_3m m_lfp_3m_empl ///
                ***************************
                ***************************
 
-keep if emp_16_10 == 1 
+drop if miss_16_10 == 1
+drop if unemp_16_10 == 1
+drop if olf_16_10 == 1
+drop if emp_16_miss_10 == 1
+drop if emp_10_miss_16 == 1
+drop if unemp_16_miss_10 == 1
+drop if unemp_10_miss_16 == 1
+drop if olf_16_miss_10 == 1
+drop if olf_10_miss_16 == 1 
+
 
 /*ONLY THOSE WHO WERE SURVEYED IN BOTH PERIODS?*/
 
@@ -469,8 +454,7 @@ tab year
 
 ereturn list
 mat list e(b)
-estout m_ln_total_rwage_3m m_ln_hourly_rwage m_ln_whpw_3m  ///
-         m_formal /// 
+estout $outreg_cond /// 
       , cells(b(star fmt(%9.3f)) se(par fmt(%9.3f))) ///
         drop(age age2 gender _Iyear_2016  $district ///
         _cons $controls_SR)   ///
@@ -481,8 +465,7 @@ estout m_ln_total_rwage_3m m_ln_hourly_rwage m_ln_whpw_3m  ///
 *(95%) [90%] level. Based
 
 *erase "$out/reg_infra_access.tex"
-esttab m_ln_total_rwage_3m m_ln_hourly_rwage m_ln_whpw_3m ///
-         m_formal   /// 
+esttab $outreg_cond   /// 
       using "$out_analysis/SR_REF_reg_OLS_Cond_FE_DIS_YEAR.tex", se label replace booktabs ///
       cells(b(star fmt(%9.3f)) se(par fmt(%9.3f))) ///
 mtitles("Total Wage (ln)" "Hrly Wage (ln)" "Work Hours p.w." "Formal") ///
@@ -494,8 +477,7 @@ starlevels(* 0.1 ** 0.05 *** 0.01) ///
     nonotes ///
     addnotes("Standard errors clustered at the district level. Significance levels: *p $<$ 0.1, ** p $<$ 0.05, *** p $<$ 0.01") 
 
-estimates drop  m_ln_total_rwage_3m m_ln_hourly_rwage m_ln_whpw_3m ///
-                m_formal  
+estimates drop  $outreg_cond  
 
 
 
@@ -541,8 +523,7 @@ restore
 
 ereturn list
 mat list e(b)
-estout m_ln_total_rwage_3m m_ln_hourly_rwage m_ln_whpw_3m ///
-         m_formal   /// 
+estout $outreg_cond /// 
       , cells(b(star fmt(%9.3f)) se(par fmt(%9.3f)) F(par fmt(%9.3f))) ///
         drop(age age2 gender ///
         _cons $controls_SR)   ///
@@ -553,8 +534,7 @@ estout m_ln_total_rwage_3m m_ln_hourly_rwage m_ln_whpw_3m ///
 *(95%) [90%] level. Based
 
 *erase "$out/reg_infra_access.tex"
-esttab m_ln_total_rwage_3m m_ln_hourly_rwage m_ln_whpw_3m ///
-         m_formal   /// 
+esttab $outreg_cond  /// 
       using "$out_analysis/SR_REF_reg_OLS_Cond_FE_INDIV_YEAR.tex", se label replace booktabs ///
       cells(b(star fmt(%9.3f)) se(par fmt(%9.3f))) ///
 mtitles("Total Wage (ln)" "Hrly Wage (ln)" "Work Hours p.w." "Formal") ///
@@ -566,8 +546,7 @@ starlevels(* 0.1 ** 0.05 *** 0.01) ///
     nonotes ///
     addnotes("Standard errors clustered at the district level. Significance levels: *p $<$ 0.1, ** p $<$ 0.05, *** p $<$ 0.01") 
 
-estimates drop m_ln_total_rwage_3m m_ln_hourly_rwage m_ln_whpw_3m ///
-         m_formal   
+estimates drop $outreg_cond  
 ************
 
 
@@ -606,8 +585,7 @@ cls
 
 ereturn list
 mat list e(b)
-estout m_ln_total_rwage_3m m_ln_hourly_rwage m_ln_whpw_3m  ///
-         m_formal  ///
+estout $outreg_cond ///
       , cells(b(star fmt(%9.3f)) se(par fmt(%9.3f))) ///
   drop(age age2 gender _Iyear_2016 ///
          $controls_SR)   ///
@@ -618,8 +596,7 @@ estout m_ln_total_rwage_3m m_ln_hourly_rwage m_ln_whpw_3m  ///
 *(95%) [90%] level. Based
 
 *erase "$out/reg_infra_access.tex"
-esttab m_ln_total_rwage_3m m_ln_hourly_rwage m_ln_whpw_3m  ///
-         m_formal  /// 
+esttab $outreg_cond /// 
       using "$out_analysis/SR_REF_reg_IV_Cond_FE_DIS_YEAR.tex", se label replace booktabs ///
       cells(b(star fmt(%9.3f)) se(par fmt(%9.3f))) ///
 mtitles("Total Wage (ln)" "Hrly Wage (ln)" "Work Hours p.w." "Formal") ///
@@ -631,8 +608,7 @@ mtitles("Total Wage (ln)" "Hrly Wage (ln)" "Work Hours p.w." "Formal") ///
     addnotes("Standard errors clustered at the district level. Significance levels: *p $<$ 0.1, ** p $<$ 0.05, *** p $<$ 0.01") 
 
 
-estimates drop  m_ln_total_rwage_3m m_ln_hourly_rwage m_ln_whpw_3m ///
-                m_formal  
+estimates drop  $outreg_cond  
 
 
                         ***********************************
@@ -677,8 +653,7 @@ restore
 
 ereturn list
 mat list e(b)
-estout  m_ln_total_rwage_3m m_ln_hourly_rwage m_ln_whpw_3m ///
-                m_formal ///
+estout  $outreg_cond ///
       , cells(b(star fmt(%9.3f)) se(par fmt(%9.3f)) F(par fmt(%9.3f))) ///
         drop(age age2 gender ///
         _cons $controls_SR)   ///
@@ -689,8 +664,7 @@ estout  m_ln_total_rwage_3m m_ln_hourly_rwage m_ln_whpw_3m ///
 *(95%) [90%] level. Based
 
 *erase "$out/reg_infra_access.tex"
-esttab  m_ln_total_rwage_3m m_ln_hourly_rwage m_ln_whpw_3m ///
-                m_formal   /// 
+esttab $outreg_cond   /// 
       using "$out_analysis/SR_REF_reg_IV_Cond_FE_INDIV_YEAR.tex", se label replace booktabs ///
       cells(b(star fmt(%9.3f)) se(par fmt(%9.3f))) ///
 mtitles("Total Wage (ln)" "Hrly Wage (ln)" "Work Hours p.w." "Formal") ///
@@ -702,8 +676,7 @@ starlevels(* 0.1 ** 0.05 *** 0.01) ///
     nonotes ///
     addnotes("Standard errors clustered at the district level. Significance levels: *p $<$ 0.1, ** p $<$ 0.05, *** p $<$ 0.01") 
 
-estimates drop  m_ln_total_rwage_3m m_ln_hourly_rwage m_ln_whpw_3m ///
-                m_formal 
+estimates drop  $outreg_cond
 
 
 
