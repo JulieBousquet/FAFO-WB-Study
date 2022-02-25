@@ -160,7 +160,7 @@ estout $outreg_uncond  ///
 esttab $outreg_uncond   /// 
       using "$out_analysis/SR_REF_reg_HET_GENDER_OLS_Uncond_FE_DIS_YEAR.tex", se label replace booktabs ///
       cells(b(star fmt(%9.3f)) se(par fmt(%9.3f))) ///
-mtitles("Employed" "Unemployed" "LFP Employee" "LFP Temp" "LFP Employer" "LFP SE") ///
+mtitles("Employed" "Unemployed" "Employee" "Temp" "Employer" "SE" "Ag" "Manuf" "Commerce" "Services") ///
         drop(age age2 _Iyear_2016 $district _cons)   ///
 starlevels(* 0.1 ** 0.05 *** 0.01) ///
    title("REF - HET GENDER - Results OLS Regression with time and district FE - UNCOND"\label{tab1}) nofloat ///
@@ -232,7 +232,7 @@ estout $outreg_uncond ///
 esttab $outreg_uncond /// 
       using "$out_analysis/SR_REF_reg_HET_GENDER_OLS_Uncond_FE_INDIV_YEAR.tex", se label replace booktabs ///
       cells(b(star fmt(%9.3f)) se(par fmt(%9.3f))) ///
-mtitles("Employed" "Unemployed" "LFP Employee" "LFP Temp" "LFP Employer" "LFP SE") ///
+mtitles("Employed" "Unemployed" "Employee" "Temp" "Employer" "SE" "Ag" "Manuf" "Commerce" "Services") ///
         drop(age age2  _cons )   ///
 starlevels(* 0.1 ** 0.05 *** 0.01) ///
    title("REF - HET GENDER - Results OLS Regression with time and Individual FE - UNCOND"\label{tab1}) nofloat ///
@@ -518,7 +518,7 @@ estout $outreg_uncond ///
 esttab $outreg_uncond  /// 
       using "$out_analysis/SR_REF_reg_HET_URBAN_OLS_Uncond_FE_DIS_YEAR.tex", se label replace booktabs ///
       cells(b(star fmt(%9.3f)) se(par fmt(%9.3f))) ///
-mtitles("Employed" "Unemployed" "LFP Employee" "LFP Temp" "LFP Employer" "LFP SE") ///
+mtitles("Employed" "Unemployed" "Employee" "Temp" "Employer" "SE" "Ag" "Manuf" "Commerce" "Services") ///
         drop( _Iyear_2016  $district  _cons $controls_SR)   ///
 starlevels(* 0.1 ** 0.05 *** 0.01) ///
    title("REF - HET URBAN - Results OLS Regression with time and district FE - UNCOND"\label{tab1}) nofloat ///
@@ -590,7 +590,7 @@ estout $outreg_uncond  ///
 esttab $outreg_uncond  /// 
       using "$out_analysis/SR_REF_reg_HET_URBAN_OLS_Uncond_FE_INDIV_YEAR.tex", se label replace booktabs ///
       cells(b(star fmt(%9.3f)) se(par fmt(%9.3f))) ///
-mtitles("Employed" "Unemployed" "LFP Employee" "LFP Temp" "LFP Employer" "LFP SE") ///
+mtitles("Employed" "Unemployed" "Employee" "Temp" "Employer" "SE" "Ag" "Manuf" "Commerce" "Services") ///
         drop(  _cons $controls_SR)   ///
 starlevels(* 0.1 ** 0.05 *** 0.01) ///
    title("REF - HET URBAN - Results OLS Regression with time and Individual FE - UNCOND"\label{tab1}) nofloat ///
@@ -867,7 +867,7 @@ estout $outreg_uncond ///
 esttab $outreg_uncond  /// 
       using "$out_analysis/SR_REF_reg_HET_EDUC_OLS_Uncond_FE_DIS_YEAR.tex", se label replace booktabs ///
       cells(b(star fmt(%9.3f)) se(par fmt(%9.3f))) ///
-mtitles("Employed" "Unemployed" "LFP Employee" "LFP Temp" "LFP Employer" "LFP SE") ///
+mtitles("Employed" "Unemployed" "Employee" "Temp" "Employer" "SE" "Ag" "Manuf" "Commerce" "Services") ///
         drop( _Iyear_2016  $district _cons $controls_SR)   ///
 starlevels(* 0.1 ** 0.05 *** 0.01) ///
    title("REF - HET EDUC - Results OLS Regression with time and district FE - UNCOND"\label{tab1}) nofloat ///
@@ -939,7 +939,7 @@ estout $outreg_uncond ///
 esttab $outreg_uncond   /// 
       using "$out_analysis/SR_REF_reg_HET_EDUC_OLS_Uncond_FE_INDIV_YEAR.tex", se label replace booktabs ///
       cells(b(star fmt(%9.3f)) se(par fmt(%9.3f))) ///
-mtitles("Employed" "Unemployed" "LFP Employee" "LFP Temp" "LFP Employer" "LFP SE") ///
+mtitles("Employed" "Unemployed" "Employee" "Temp" "Employer" "SE" "Ag" "Manuf" "Commerce" "Services") ///
         drop( _cons $controls_SR)   ///
 starlevels(* 0.1 ** 0.05 *** 0.01) ///
    title("REF - HET EDUC - Results OLS Regression with time and Individual FE - UNCOND"\label{tab1}) nofloat ///
@@ -1110,7 +1110,7 @@ estimates drop $outreg_cond
 
 
 
-
+/*
 
 
  *********
@@ -1128,7 +1128,7 @@ tab lfp_se_7d
 
               *****************************************************************
               *****************************************************************
-              ************************ EDUCATION ******************************
+              ************************ LFP ******************************
               *****************************************************************
               *****************************************************************
 
@@ -1226,7 +1226,7 @@ estout $outreg_uncond  ///
 esttab $outreg_uncond    /// 
       using "$out_analysis/SR_REF_reg_HET_EDUC_OLS_Uncond_FE_DIS_YEAR.tex", se label replace booktabs ///
       cells(b(star fmt(%9.3f)) se(par fmt(%9.3f))) ///
-mtitles("Employed" "Unemployed" "LFP Employee" "LFP Temp" "LFP Employer" "LFP SE") ///
+mtitles("Employed" "Unemployed" "Employee" "Temp" "Employer" "SE" "Ag" "Manuf" "Commerce" "Services") ///
         drop( _Iyear_2016  $district _cons $controls_SR)   ///
 starlevels(* 0.1 ** 0.05 *** 0.01) ///
    title("REF - HET EDUC - Results OLS Regression with time and district FE - UNCOND"\label{tab1}) nofloat ///
@@ -1298,7 +1298,7 @@ estout $outreg_uncond  ///
 esttab $outreg_uncond   /// 
       using "$out_analysis/SR_REF_reg_HET_EDUC_OLS_Uncond_FE_INDIV_YEAR.tex", se label replace booktabs ///
       cells(b(star fmt(%9.3f)) se(par fmt(%9.3f))) ///
-mtitles("Employed" "Unemployed" "LFP Employee" "LFP Temp" "LFP Employer" "LFP SE") ///
+mtitles("Employed" "Unemployed" "Employee" "Temp" "Employer" "SE" "Ag" "Manuf" "Commerce" "Services") ///
         drop( _cons $controls_SR)   ///
 starlevels(* 0.1 ** 0.05 *** 0.01) ///
    title("REF - HET EDUC - Results OLS Regression with time and Individual FE - UNCOND"\label{tab1}) nofloat ///
@@ -1460,3 +1460,4 @@ estimates drop $outreg_cond
 ************
 
 
+*/

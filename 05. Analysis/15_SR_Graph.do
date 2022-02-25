@@ -270,6 +270,10 @@ restore
              (REFOLS_YD_lfp_temp_$rp, label(Type: Temporary))  ///
              (REFOLS_YD_lfp_employer_$rp, label(Type: Employer))  ///
              (REFOLS_YD_lfp_se_$rp, label(Type: SE))  ///
+             (REFOLS_YD_act_ag_$rp, label(Activity: Agricultural))  ///
+             (REFOLS_YD_act_manuf_$rp, label(Activity: Manufacturing))  ///
+             (REFOLS_YD_act_com_$rp, label(Activity: Commerce))  ///
+             (REFOLS_YD_act_serv_$rp, label(Activity: Services))  ///
              (REFOLS_YD_ln_total_rwage_$rp, label(Total Wage (ln))) ///
              (REFOLS_YD_ln_hourly_rwage, label(Hourly Wage (ln))) ///
              (REFOLS_YD_ln_whpw_$rp, label(Work Hours p.w.)) ///
@@ -280,6 +284,10 @@ restore
              (REFIV_YD_lfp_temp_$rp, label(Type: Temporary))  ///
              (REFIV_YD_lfp_employer_$rp, label(Type: Employer))  ///
              (REFIV_YD_lfp_se_$rp, label(Type: SE))  ///
+             (REFIV_YD_act_ag_$rp, label(Activity: Agricultural))  ///
+             (REFIV_YD_act_manuf_$rp, label(Activity: Manufacturing))  ///
+             (REFIV_YD_act_com_$rp, label(Activity: Commerce))  ///
+             (REFIV_YD_act_serv_$rp, label(Activity: Services))  ///
              (REFIV_YD_ln_total_rwage_$rp, label(Total Wage (ln))) ///
              (REFIV_YD_ln_hourly_rwage, label(Hourly Wage (ln))) ///
              (REFIV_YD_ln_whpw_$rp, label(Work Hours p.w.)) ///
@@ -290,6 +298,10 @@ restore
              (REFOLS_YI_lfp_temp_$rp, label(Type: Temporary))  ///
              (REFOLS_YI_lfp_employer_$rp, label(Type: Employer))  ///
              (REFOLS_YI_lfp_se_$rp, label(Type: SE))  ///
+             (REFOLS_YI_act_ag_$rp, label(Activity: Agricultural))  ///
+             (REFOLS_YI_act_manuf_$rp, label(Activity: Manufacturing))  ///
+             (REFOLS_YI_act_com_$rp, label(Activity: Commerce))  ///
+             (REFOLS_YI_act_serv_$rp, label(Activity: Services))  ///
              (REFOLS_YI_ln_total_rwage_$rp, label(Total Wage (ln))) ///
              (REFOLS_YI_ln_hourly_rwage, label(Hourly Wage (ln))) ///
              (REFOLS_YI_ln_whpw_$rp, label(Work Hours p.w.)) ///
@@ -300,6 +312,10 @@ restore
              (REFIV_YI_lfp_temp_$rp, label(Type: Temporary))  ///
              (REFIV_YI_lfp_employer_$rp, label(Type: Employer))  ///
              (REFIV_YI_lfp_se_$rp, label(Type: SE))  ///
+             (REFIV_YI_act_ag_$rp, label(Activity: Agricultural))  ///
+             (REFIV_YI_act_manuf_$rp, label(Activity: Manufacturing))  ///
+             (REFIV_YI_act_com_$rp, label(Activity: Commerce))  ///
+             (REFIV_YI_act_serv_$rp, label(Activity: Services))  ///
              (REFIV_YI_ln_total_rwage_$rp, label(Total Wage (ln))) ///
              (REFIV_YI_ln_hourly_rwage, label(Hourly Wage (ln))) ///
              (REFIV_YI_ln_whpw_$rp, label(Work Hours p.w.)) ///
@@ -539,6 +555,10 @@ restore
              (WPOLS_YD_lfp_temp_$rp, label(Type: Temporary))  ///
              (WPOLS_YD_lfp_employer_$rp, label(Type: Employer))  ///
              (WPOLS_YD_lfp_se_$rp, label(Type: SE))  ///
+             (WPOLS_YD_act_ag_$rp, label(Activity: Agricultural))  ///
+             (WPOLS_YD_act_manuf_$rp, label(Activity: Manufacturing))  ///
+             (WPOLS_YD_act_com_$rp, label(Activity: Commerce))  ///
+             (WPOLS_YD_act_serv_$rp, label(Activity: Services))  ///
              (WPOLS_YD_ln_total_rwage_$rp, label(Total Wage (ln))) ///
              (WPOLS_YD_ln_hourly_rwage, label(Hourly Wage (ln))) ///
              (WPOLS_YD_ln_whpw_$rp, label(Work Hours p.w.)) ///
@@ -549,6 +569,10 @@ restore
              (WPIV_YD_lfp_temp_$rp, label(Type: Temporary))  ///
              (WPIV_YD_lfp_employer_$rp, label(Type: Employer))  ///
              (WPIV_YD_lfp_se_$rp, label(Type: SE))  ///
+             (WPIV_YD_act_ag_$rp, label(Activity: Agricultural))  ///
+             (WPIV_YD_act_manuf_$rp, label(Activity: Manufacturing))  ///
+             (WPIV_YD_act_com_$rp, label(Activity: Commerce))  ///
+             (WPIV_YD_act_serv_$rp, label(Activity: Services))  ///
              (WPIV_YD_ln_total_rwage_$rp, label(Total Wage (ln))) ///
              (WPIV_YD_ln_hourly_rwage, label(Hourly Wage (ln))) ///
              (WPIV_YD_ln_whpw_$rp, label(Work Hours p.w.)) ///
@@ -559,6 +583,10 @@ restore
              (WPOLS_YI_lfp_temp_$rp, label(Type: Temporary))  ///
              (WPOLS_YI_lfp_employer_$rp, label(Type: Employer))  ///
              (WPOLS_YI_lfp_se_$rp, label(Type: SE))  ///
+             (WPOLS_YI_act_ag_$rp, label(Activity: Agricultural))  ///
+             (WPOLS_YI_act_manuf_$rp, label(Activity: Manufacturing))  ///
+             (WPOLS_YI_act_com_$rp, label(Activity: Commerce))  ///
+             (WPOLS_YI_act_serv_$rp, label(Activity: Services))  ///
              (WPOLS_YI_ln_total_rwage_$rp, label(Total Wage (ln))) ///
              (WPOLS_YI_ln_hourly_rwage, label(Hourly Wage (ln))) ///
              (WPOLS_YI_ln_whpw_$rp, label(Work Hours p.w.)) ///
@@ -569,6 +597,10 @@ restore
              (WPIV_YI_lfp_temp_$rp, label(Type: Temporary))  ///
              (WPIV_YI_lfp_employer_$rp, label(Type: Employer))  ///
              (WPIV_YI_lfp_se_$rp, label(Type: SE))  ///
+             (WPIV_YI_act_ag_$rp, label(Activity: Agricultural))  ///
+             (WPIV_YI_act_manuf_$rp, label(Activity: Manufacturing))  ///
+             (WPIV_YI_act_com_$rp, label(Activity: Commerce))  ///
+             (WPIV_YI_act_serv_$rp, label(Activity: Services))  ///
              (WPIV_YI_ln_total_rwage_$rp, label(Total Wage (ln))) ///
              (WPIV_YI_ln_hourly_rwage, label(Hourly Wage (ln))) ///
              (WPIV_YI_ln_whpw_$rp, label(Work Hours p.w.)) ///
@@ -694,6 +726,10 @@ restore
              || (REFGEN_YD_lfp_temp_$rp), bylabel(Type: Temporary)  ///
              || (REFGEN_YD_lfp_employer_$rp), bylabel(Type: Employer)  ///
              || (REFGEN_YD_lfp_se_$rp), bylabel(Type: SE) ///
+             || (REFGEN_YD_act_ag_$rp), bylabel(Activity: Agricultural)  ///
+             || (REFGEN_YD_act_manuf_$rp), bylabel(Activity: Manufacturing)  ///
+             || (REFGEN_YD_act_com_$rp), bylabel(Activity: Commerce)  ///
+             || (REFGEN_YD_act_serv_$rp), bylabel(Activity: Services)  ///
              || (REFGEN_YD_ln_total_rwage_$rp), bylabel(Total Wage (ln)) ///
              || (REFGEN_YD_ln_hourly_rwage), bylabel(Hourly Wage (ln)) ///
              || (REFGEN_YD_ln_whpw_$rp), bylabel(Work Hours p.w.) ///
@@ -780,6 +816,10 @@ restore
              || (REFURB_YD_lfp_temp_$rp), bylabel(Type: Temporary)  ///
              || (REFURB_YD_lfp_employer_$rp), bylabel(Type: Employer)  ///
              || (REFURB_YD_lfp_se_$rp), bylabel(Type: SE) ///
+             || (REFURB_YD_act_ag_$rp), bylabel(Activity: Agricultural)  ///
+             || (REFURB_YD_act_manuf_$rp), bylabel(Activity: Manufacturing)  ///
+             || (REFURB_YD_act_com_$rp), bylabel(Activity: Commerce)  ///
+             || (REFURB_YD_act_serv_$rp), bylabel(Activity: Services)  ///
              || (REFURB_YD_ln_total_rwage_$rp), bylabel(Total Wage (ln)) ///
              || (REFURB_YD_ln_hourly_rwage), bylabel(Hourly Wage (ln)) ///
              || (REFURB_YD_ln_whpw_$rp), bylabel(Work Hours p.w.) ///
@@ -867,6 +907,10 @@ restore
              || (REFEDU_YD_lfp_temp_$rp), bylabel(Type: Temporary)  ///
              || (REFEDU_YD_lfp_employer_$rp), bylabel(Type: Employer)  ///
              || (REFEDU_YD_lfp_se_$rp), bylabel(Type: SE) ///
+             || (REFEDU_YD_act_ag_$rp), bylabel(Activity: Agricultural) ///
+             || (REFEDU_YD_act_manuf_$rp), bylabel(Activity: Manufacturing)  ///
+             || (REFEDU_YD_act_com_$rp), bylabel(Activity: Commerce)  ///
+             || (REFEDU_YD_act_serv_$rp), bylabel(Activity: Services)  ///
              || (REFEDU_YD_ln_total_rwage_$rp), bylabel(Total Wage (ln)) ///
              || (REFEDU_YD_ln_hourly_rwage), bylabel(Hourly Wage (ln)) ///
              || (REFEDU_YD_ln_whpw_$rp), bylabel(Work Hours p.w.) ///
@@ -927,13 +971,13 @@ graph export "$out_analysis\SR_HET_EDUC_Combined_Graph_REF.pdf", as(pdf) replace
 
 
 
-**********************************
-**********************************
+                                **********************************
+                                **********************************
 
-            /* ELSE */
+                                            /* ELSE */
 
-**********************************
-**********************************
+                                **********************************
+                                **********************************
 
     coefplot (m_OLS_Y_D_employed_olf_3m, label(Employed))  ///
              (m_OLS_Y_D_unemployed_olf_3m, label(Unemployed))  ///

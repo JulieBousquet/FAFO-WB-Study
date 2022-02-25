@@ -116,7 +116,7 @@ estout $outreg_uncond ///
 esttab $outreg_uncond  /// 
       using "$out_analysis/SR_WP_reg_OLS_Uncond_FE_DIS_YEAR.tex", se label replace booktabs ///
       cells(b(star fmt(%9.3f)) se(par fmt(%9.3f))) ///
-mtitles("Employed" "Unemployed" "LFP Employee" "LFP Temp" "LFP Employer" "LFP SE") ///
+mtitles("Employed" "Unemployed" "Employee" "Temp" "Employer" "SE" "Ag" "Manuf" "Commerce" "Services") ///
         drop( _Iyear_2016  $district _cons $controls_SR)   ///
 starlevels(* 0.1 ** 0.05 *** 0.01) ///
    title("WP - Results OLS Regression with time and district FE - UNCOND"\label{tab1}) nofloat ///
@@ -183,7 +183,7 @@ estout $outreg_uncond  ///
 esttab $outreg_uncond   /// 
       using "$out_analysis/SR_WP_reg_OLS_Uncond_FE_INDIV_YEAR.tex", se label replace booktabs ///
       cells(b(star fmt(%9.3f)) se(par fmt(%9.3f))) ///
-mtitles("Employed" "Unemployed" "LFP Employee" "LFP Temp" "LFP Employer" "LFP SE") ///
+mtitles("Employed" "Unemployed" "Employee" "Temp" "Employer" "SE" "Ag" "Manuf" "Commerce" "Services") ///
         drop( _cons $controls_SR)   ///
 starlevels(* 0.1 ** 0.05 *** 0.01) ///
    title("WP - Results OLS Regression with time and Individual FE - UNCOND"\label{tab1}) nofloat ///
@@ -242,7 +242,7 @@ estout $outreg_uncond ///
 esttab $outreg_uncond /// 
       using "$out_analysis/SR_WP_reg_IV_Uncond_FE_DIS_YEAR.tex", se label replace booktabs ///
       cells(b(star fmt(%9.3f)) se(par fmt(%9.3f))) ///
-mtitles("Employed" "Unemployed" "LFP Employee" "LFP Temp" "LFP Employer" "LFP SE" "LFP Unpaid") ///
+mtitles("Employed" "Unemployed" "Employee" "Temp" "Employer" "SE" "Ag" "Manuf" "Commerce" "Services") ///
   drop( _Iyear_2016 $controls_SR) starlevels(* 0.1 ** 0.05 *** 0.01) ///
    title("WP - Results IV with District and Year FE - UNCOND"\label{tab1}) nofloat ///
    stats(N r2_a rkf, labels("Obs" "Adj. R-Squared" "KP Stat")) ///
@@ -309,7 +309,7 @@ estout $outreg_uncond ///
 esttab $outreg_uncond  /// 
       using "$out_analysis/SR_WP_reg_IV_Uncond_FE_INDIV_YEAR.tex", se label replace booktabs ///
       cells(b(star fmt(%9.3f)) se(par fmt(%9.3f))) ///
-mtitles("Employed" "Unemployed" "LFP Employee" "LFP Temp" "LFP Employer" "LFP SE" "LFP Unpaid") ///
+mtitles("Employed" "Unemployed" "Employee" "Temp" "Employer" "SE" "Ag" "Manuf" "Commerce" "Services") ///
         drop( _cons $controls_SR)   ///
 starlevels(* 0.1 ** 0.05 *** 0.01) ///
    title("WP - Results IV Regression with time and Individual FE - UNCOND"\label{tab1}) nofloat ///

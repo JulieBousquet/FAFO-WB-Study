@@ -28,7 +28,7 @@ use "$data_final/06_IV_JLMPS_Construct_Outcomes.dta", clear
 *tab nb_refugees_bygov
 *tab IV_SS_ref_inflow
 
-tab tot_nb_ref_2016
+tab tot_nb_ref_2016 // EARLY 2016
                             *****************
                             * IV VARIABLES  *
                             ***************** 
@@ -456,7 +456,7 @@ lab def lfp_se_7d 0 "Else" 1 "Self Employed", modify
 lab val lfp_se_7d lfp_se_7d
 lab var lfp_se_7d "Self Employed"
 
-/*
+*/*
 gen     lfp_7d_unpaid = 0 if !mi(lfp_7d) 
 replace lfp_7d_unpaid = 1 if lfp_7d == 5
 tab     lfp_7d_unpaid, m 
@@ -481,6 +481,166 @@ ren unempsr1 unemployed_olf_7d
 *Formal: 
 *define as holding a social security or a formal contract 
 tab formal
+
+
+
+*Economic activity of crr. job (Sections(1digit), based on ISIC4, ref. 1-week)
+tab crecac1d, m
+codebook crecac1d
+lab list ecac1d 
+ 
+*******Agriculture
+*0 A:Agriculture, forestry and fishing
+
+*******Manufacturing (construction, mining, other industry)
+*1 B:Mining and quarrying
+*2 C:Manufacturing
+*5 F:Construction
+
+******* Commerce 
+*6 G:Wholesale and retail trade; repair of motor vehicles and motorcycles
+*7 H:Transportation and storage
+*9 J:Information and communication
+*10 K:Financial and insurance activities
+
+******* Other services
+*3 D:Electricity,gas,steam and air conditioning supply
+*4 E:Water supply;sewage,waste management and remediation activities
+*8 I:Accomodation and food service activities
+*11 L:Real estate activities
+*12 M:Professional, scientific and technical activities
+*13 N:Administrative and support service activities
+*14 O:Public administration and defense; compulsory social security
+*15 P:Education
+*16 Q:Human health and social work activities
+*17 R:Arts, entertainment and recreation
+*18 S:other service activities
+*19 T:Activities of households as employers
+*20 U:Activities of extraterritorial organizations and bodies
+
+*******Agriculture
+gen     activity_7d = 1 if  crecac1d == 0 //AGRICULTURE
+*******Manufacturing (construction, mining, other industry)
+replace activity_7d = 2 if  crecac1d == 1 | /// MINING
+                            crecac1d == 2 | /// MANUF
+                            crecac1d == 5 // CONSTR
+******* Commerce 
+replace activity_7d = 3 if  crecac1d == 6 | /// WHOLESALE 
+                            crecac1d == 7 | /// TRANSP
+                            crecac1d == 9 | /// INFO
+                            crecac1d == 10  // FINANCE
+******* Other services
+replace activity_7d = 4 if  crecac1d == 3 | /// ELECT
+                            crecac1d == 4 | /// WATE
+                            crecac1d == 8 | /// FOOD
+                            crecac1d == 11 | /// REAL ESTATE
+                            crecac1d == 12 | /// PRO
+                            crecac1d == 13 | /// ADMIN
+                            crecac1d == 14 | /// PUBLIC
+                            crecac1d == 15 | /// EDUC
+                            crecac1d == 16 | /// HEALTH
+                            crecac1d == 17 | /// ARTS
+                            crecac1d == 18 // OTHER SERV
+lab def activity    1 "Agriculture" ///
+                    2 "Manufacturing" ///
+                    3 "Commerce" ///
+                    4 "Other Services", ///
+                    modify
+lab val activity_7d activity 
+lab var activity_7d "Sector of Activity - 7d reference period"
+
+tab activity_7d, m 
+
+gen     act_ag_7d = 0 if !mi(activity_7d)
+replace act_ag_7d = 1 if activity_7d == 1 
+lab def act_ag 1 "Agriculture" 0 "Else", modify
+lab val act_ag_7d activity_ag 
+lab var act_ag_7d "Sector: AG" 
+tab     act_ag_7d, m 
+
+gen     act_manuf_7d = 0 if !mi(activity_7d)
+replace act_manuf_7d = 1 if activity_7d == 2
+lab def act_manuf 1 "Manufacturing" 0 "Else", modify
+lab val act_manuf_7d activity_manuf 
+lab var act_manuf_7d "Sector: MANUF" 
+tab     act_manuf_7d, m 
+
+gen     act_com_7d = 0 if !mi(activity_7d)
+replace act_com_7d = 1 if activity_7d == 3 
+lab def act_com 1 "Commerce" 0 "Else", modify
+lab val act_com_7d activity_ag 
+lab var act_com_7d "Sector: COM" 
+tab     act_com_7d, m 
+
+gen     act_serv_7d = 0 if !mi(activity_7d)
+replace act_serv_7d = 1 if activity_7d == 4 
+lab def act_serv 1 "Services" 0 "Else", modify
+lab val act_serv_7d activity_ag 
+lab var act_serv_7d "Sector: SERV" 
+tab     act_serv_7d, m 
+
+*******Agriculture
+gen     activity_3m = 1 if  usecac1d == 0 //AGRICULTURE
+*******Manufacturing (construction, mining, other industry)
+replace activity_3m = 2 if  usecac1d == 1 | /// MINING
+                            usecac1d == 2 | /// MANUF
+                            usecac1d == 5 // CONSTR
+******* Commerce  
+replace activity_3m = 3 if  usecac1d == 6 | /// WHOLESALE 
+                            usecac1d == 7 | /// TRANSP
+                            usecac1d == 9 | /// INFO
+                            usecac1d == 10  // FINANCE
+******* Other services
+replace activity_3m = 4 if  usecac1d == 3 | /// ELECT
+                            usecac1d == 4 | /// WATE
+                            usecac1d == 8 | /// FOOD
+                            usecac1d == 11 | /// REAL ESTATE
+                            usecac1d == 12 | /// PRO
+                            usecac1d == 13 | /// ADMIN
+                            usecac1d == 14 | /// PUBLIC
+                            usecac1d == 15 | /// EDUC
+                            usecac1d == 16 | /// HEALTH
+                            usecac1d == 17 | /// ARTS
+                            usecac1d == 18  // OTHER SERV
+lab def activity    1 "Agriculture" ///
+                    2 "Manufacturing" ///
+                    3 "Commerce" ///
+                    4 "Other Services", ///
+                    modify
+lab val activity_3m activity 
+lab var activity_3m "Sector of Activity - 3m reference period"
+tab activity_3m, m 
+
+
+gen     act_ag_3m = 0 if !mi(activity_3m)
+replace act_ag_3m = 1 if activity_3m == 1 
+lab def act_ag 1 "Agriculture" 0 "Else", modify
+lab val act_ag_3m activity_ag 
+lab var act_ag_3m "Sector: AG" 
+tab     act_ag_3m, m 
+
+gen     act_manuf_3m = 0 if !mi(activity_3m)
+replace act_manuf_3m = 1 if activity_3m == 2
+lab def act_manuf 1 "Manufacturing" 0 "Else", modify
+lab val act_manuf_3m activity_manuf 
+lab var act_manuf_3m "Sector: MANUF" 
+tab     act_manuf_3m, m 
+
+gen     act_com_3m = 0 if !mi(activity_3m)
+replace act_com_3m = 1 if activity_3m == 3 
+lab def act_com 1 "Commerce" 0 "Else", modify
+lab val act_com_3m activity_ag 
+lab var act_com_3m "Sector: COM" 
+tab     act_com_3m, m 
+
+gen     act_serv_3m = 0 if !mi(activity_3m)
+replace act_serv_3m = 1 if activity_3m == 4 
+lab def act_serv 1 "Services" 0 "Else", modify
+lab val act_serv_3m activity_ag 
+lab var act_serv_3m "Sector: SERV" 
+tab     act_serv_3m, m 
+
+
 
                       **********************
                       * CONTROL VARIABLES  *

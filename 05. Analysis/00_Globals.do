@@ -190,6 +190,9 @@ global dep_var_wp ln_agg_wp_orig
 
 global iv_wp      IV_WP_DIST 
 
+*REFERENCE PERIOD
+global rp 7d 
+*3m
 
 *7days
 global outcomes_uncond  employed_olf_7d ///
@@ -197,7 +200,11 @@ global outcomes_uncond  employed_olf_7d ///
                         lfp_empl_7d ///
                         lfp_temp_7d ///
                         lfp_employer_7d ///
-                        lfp_se_7d 
+                        lfp_se_7d ///
+                        act_ag_7d ///
+                        act_manuf_7d ///
+                        act_com_7d ///
+                        act_serv_7d
 
 global outcomes_cond  ln_total_rwage_7d ///
                       ln_hourly_rwage ///
@@ -223,6 +230,41 @@ global outcomes_cond  ln_total_rwage_3m ///
 *ln_rmthly_wage_main 
 *ln_rhourly_wage_main 
  *wh_pw_7d_w formal 
+
+*7days
+global outreg_uncond    m_employed_olf_7d ///
+                        m_unemployed_olf_7d ///
+                        m_lfp_empl_7d ///
+                        m_lfp_temp_7d ///
+                        m_lfp_employer_7d ///
+                        m_lfp_se_7d ///
+                        m_act_ag_7d ///
+                        m_act_manuf_7d ///
+                        m_act_com_7d ///
+                        m_act_serv_7d
+
+global outreg_cond  m_ln_total_rwage_7d ///
+                    m_ln_hourly_rwage ///
+                    m_ln_whpw_7d ///
+                    m_formal
+
+/*
+*3monhts 
+global outreg_uncond ////
+            m_employed_olf_3m ///
+            m_unemployed_olf_3m ///
+            m_lfp_empl_3m ///
+            m_lfp_temp_3m ///
+            m_lfp_employer_3m ///
+            m_lfp_se_3m 
+            * m_lfp_unpaid_3m    
+
+global outreg_cond ///
+            m_ln_total_rwage_3m ///
+            m_ln_hourly_rwage ///
+            m_ln_whpw_3m ///
+            m_formal 
+*/
 
 global controls_SR age age2 gender 
 
@@ -250,41 +292,6 @@ global   district      ///
 
 
 
-*7days
-global outreg_uncond    m_employed_olf_7d ///
-                        m_unemployed_olf_7d ///
-                        m_lfp_empl_7d ///
-                        m_lfp_temp_7d ///
-                        m_lfp_employer_7d ///
-                        m_lfp_se_7d 
-
-global outreg_cond  m_ln_total_rwage_7d ///
-                    m_ln_hourly_rwage ///
-                    m_ln_whpw_7d ///
-                    m_formal
-
-/*
-*3monhts 
-global outreg_uncond ////
-            m_employed_olf_3m ///
-            m_unemployed_olf_3m ///
-            m_lfp_empl_3m ///
-            m_lfp_temp_3m ///
-            m_lfp_employer_3m ///
-            m_lfp_se_3m 
-            * m_lfp_unpaid_3m    
-
-global outreg_cond ///
-            m_ln_total_rwage_3m ///
-            m_ln_hourly_rwage ///
-            m_ln_whpw_3m ///
-            m_formal 
-*/
-
-
-*REFERENCE PERIOD
-global rp 7d 
-*3m
 
 
 
