@@ -1760,10 +1760,10 @@ save "$data_final/03_ShiftShare_IV_2", replace
 
 
 /**************
-THE INSTRUMENT : IV3
+THE INSTRUMENT : IV2
 **************/
 
-/* IV3: [Nbr_refugees_ot* 1/dist_od] * [1/Dist_camp_d* Nbr WP_t]
+/* IV2: [Nbr_refugees_ot* 1/dist_od] * [1/Dist_camp_d* Nbr WP_t]
 Layman term: Expected demand for work P at destination
 
 Story: Augmented by the number of refugees by destination district since it will affect the demand for work permits
@@ -1804,13 +1804,13 @@ lab var wp_2016 "WP 2016 in Jordan by industry"
 sort district_iid
 
 *WORKING MODELS
-*gen IV_SS_3 = (ln_nb_refugees_bygov/distance_dis_gov) * (wp_2016/distance_dis_camp)  
-gen IV_SS_3 = (nb_ref_syr_bygov_2015/distance_dis_gov) * (wp_2016/distance_dis_camp)  
+*gen IV_SS_2 = (ln_nb_refugees_bygov/distance_dis_gov) * (wp_2016/distance_dis_camp)  
+gen IV_SS_2 = (nb_ref_syr_bygov_2016/distance_dis_gov) * (wp_2016/distance_dis_camp)  
 
-tab IV_SS_3, m 
+tab IV_SS_2, m 
 
-collapse (sum) IV_SS_3, by(district_en)
-lab var IV_SS_3 "IV3: Shift Share"
+collapse (sum) IV_SS_2, by(district_en)
+lab var IV_SS_2 "IV2: Shift Share"
 
 tab district_en
 sort district_en
@@ -1821,7 +1821,7 @@ distinct district_iid
 
 
 
-save "$data_final/03_ShiftShare_IV_3", replace 
+save "$data_final/03_ShiftShare_IV_2", replace 
 
 
 
@@ -1839,11 +1839,11 @@ save "$data_final/03_ShiftShare_IV_3", replace
 
 
 /**************
-THE INSTRUMENT : IV4
+THE INSTRUMENT : IV3
 **************/
 
 /*
-IV4: [Nbr_refugees_ot* 1/dist_od] * [1/Dist_camp_d* Nbr WP_t] * [Nbr WP_st * (Txemploi_s,d)]
+IV3: [Nbr_refugees_ot* 1/dist_od] * [1/Dist_camp_d* Nbr WP_t] * [Nbr WP_st * (Txemploi_s,d)]
 Story: Augmented by the number of refugees by destination district since it will affect the demand 
 for work permits and the sector composition at destination to approximate for expected supply of WP
 Advantage using Jordanian sector
@@ -1888,13 +1888,13 @@ lab var wp_2016_total "WP 2016 in Jordan by industry"
 sort district_iid
 
 *WORKING MODELS
-*gen IV_SS_4 = (ln_nb_refugees_bygov/distance_dis_gov) * (wp_2016_total/distance_dis_camp) * inter_wp_empl 
-gen IV_SS_4 = (nb_ref_syr_bygov_2015/distance_dis_gov) * (1/distance_dis_camp) * inter_wp_empl 
+*gen IV_SS_3 = (ln_nb_refugees_bygov/distance_dis_gov) * (wp_2016_total/distance_dis_camp) * inter_wp_empl 
+gen IV_SS_3 = (nb_ref_syr_bygov_2016/distance_dis_gov) * (1/distance_dis_camp) * inter_wp_empl 
 
-tab IV_SS_4, m 
+tab IV_SS_3, m 
 
-collapse (sum) IV_SS_4, by(district_en)
-lab var IV_SS_4 "IV4: Shift Share"
+collapse (sum) IV_SS_3, by(district_en)
+lab var IV_SS_3 "IV3: Shift Share"
 
 tab district_en
 sort district_en
@@ -1905,7 +1905,7 @@ distinct district_iid
 
 
 
-save "$data_final/03_ShiftShare_IV_4", replace 
+save "$data_final/03_ShiftShare_IV_3", replace 
 
 
 
@@ -1915,11 +1915,11 @@ save "$data_final/03_ShiftShare_IV_4", replace
 
 
 /**************
-THE INSTRUMENT : IV5
+THE INSTRUMENT : IV4
 **************/
 
 /*
-IV5: [Nbr_refugees_ot* 1/dist_od] * [1/Dist_camp_d* Nbr WP_t] * 
+IV4: [Nbr_refugees_ot* 1/dist_od] * [1/Dist_camp_d* Nbr WP_t] * 
 [Nbr WP_st * (Txemploi_s,o- Txemploi_s,d)^0.5]]
 
 Layman term: Expected demand for work augmented with expected skill matching between origin 
@@ -2009,24 +2009,24 @@ sort district_iid
 
 *WORKING MODELS
 **ORIG GOOD 
-gen IV_SS_5 = (nb_ref_syr_bygov_2015/distance_dis_gov) * (1/distance_dis_camp) * wp_2016 * diff_share  
+gen IV_SS_4 = (nb_ref_syr_bygov_2016/distance_dis_gov) * (1/distance_dis_camp) * wp_2016 * diff_share  
 **ORIG GOOD
 
 **TRIALS
-*gen IV_SS_5 = (ln_nb_refugees_bygov/distance_dis_gov) * (wp_2016_total/distance_dis_camp) * wp_2016 * diff_share 
-*gen IV_SS_5 = (ln_nb_refugees_bygov/distance_dis_gov) * wp_2016_total * diff_share 
+*gen IV_SS_4 = (ln_nb_refugees_bygov/distance_dis_gov) * (wp_2016_total/distance_dis_camp) * wp_2016 * diff_share 
+*gen IV_SS_4 = (ln_nb_refugees_bygov/distance_dis_gov) * wp_2016_total * diff_share 
 
-*gen IV_SS_5 =  (nb_ref_syr_bygov_2015/distance_dis_gov) * wp_2016_total * diff_share 
-*gen IV_SS_5 =  (1/distance_dis_camp) * wp_2016 * (1/diff_share) 
+*gen IV_SS_4 =  (nb_ref_syr_bygov_2015/distance_dis_gov) * wp_2016_total * diff_share 
+*gen IV_SS_4 =  (1/distance_dis_camp) * wp_2016 * (1/diff_share) 
 
-*gen IV_SS_5 = (nb_ref_syr_bygov_2015/distance_dis_gov) * (1/distance_dis_camp) * wp_2016 * diff_share  
+*gen IV_SS_4 = (nb_ref_syr_bygov_2015/distance_dis_gov) * (1/distance_dis_camp) * wp_2016 * diff_share  
 *(1/distance_dis_camp) * wp_2016 * diff_share  
 
 
-tab IV_SS_5, m 
+tab IV_SS_4, m 
 
-collapse (sum) IV_SS_5, by(district_en)
-lab var IV_SS_5 "IV5: Shift Share"
+collapse (sum) IV_SS_4, by(district_en)
+lab var IV_SS_4 "IV4: Shift Share"
 
 tab district_en
 sort district_en
@@ -2035,7 +2035,7 @@ egen district_iid = group(district_en)
 drop if district_en == "Husseiniyyeh District"
 distinct district_iid
 
-save "$data_final/03_ShiftShare_IV_5", replace 
+save "$data_final/03_ShiftShare_IV_4", replace 
 
 
 

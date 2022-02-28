@@ -81,7 +81,7 @@ global heterogenous gender urb_rural_camps lfp_3m bi_education
 
 
 
-use "$data_final/07_IV_Ref_WP.dta", clear
+use "$data_final/06_IV_JLMPS_Construct_Outcomes.dta", clear
 
 tab ln_hh_syrians_bydis year 
 tab ln_IV_Ref_NETW year 
@@ -160,7 +160,7 @@ estout $outreg_uncond  ///
         drop(age age2 gender _Iyear_2016  $district ///
         _cons $controls_SR)   ///
    legend label varlabels(_cons constant) starlevels(* 0.1 ** 0.05 *** 0.01)  ///
-   stats(r2 df_r, fmt(3 0 1) label(R-sqr dfres))
+   stats(N r2 df_r, fmt(0 3 0) label(N R-sqr dfres))
 
 *** (**) [*] indicates significance at the 99%
 *(95%) [90%] level. Based
@@ -173,7 +173,7 @@ mtitles("Employed" "Unemployed" "Employee" "Temp" "Employer" "SE" "Ag" "Manuf" "
         drop( _Iyear_2016  $district _cons $controls_SR)   ///
 starlevels(* 0.1 ** 0.05 *** 0.01) ///
    title("REF - Results OLS Regression with time and district FE - UNCOND"\label{tab1}) nofloat ///
-   stats(N r2_a, labels("Obs" "Adj. R-Squared")) ///
+   stats(N,  fmt(0 2)  labels("Obs")) ///
     nonotes ///
     addnotes("Standard errors clustered at the district level. Significance levels: *p $<$ 0.1, ** p $<$ 0.05, *** p $<$ 0.01") 
 
@@ -243,7 +243,7 @@ mtitles("Employed" "Unemployed" "Employee" "Temp" "Employer" "SE" "Ag" "Manuf" "
         _cons $controls_SR)   ///
 starlevels(* 0.1 ** 0.05 *** 0.01) ///
    title("REF - Results OLS Regression with time and Individual FE - UNCOND"\label{tab1}) nofloat ///
-   stats(N r2_a, labels("Obs" "Adj. R-Squared")) ///
+   stats(N, fmt(0) labels("Obs")) ///
     nonotes ///
     addnotes("Standard errors clustered at the district level. Significance levels: *p $<$ 0.1, ** p $<$ 0.05, *** p $<$ 0.01") 
 
@@ -304,7 +304,7 @@ mtitles("Employed" "Unemployed" "Employee" "Temp" "Employer" "SE" "Ag" "Manuf" "
   drop(age age2 gender _Iyear_2016 ///
          $controls_SR) starlevels(* 0.1 ** 0.05 *** 0.01) ///
    title("REF - Results IV with District and Year FE - UNCOND"\label{tab1}) nofloat ///
-   stats(N r2_a rkf, labels("Obs" "Adj. R-Squared" "KP Stat")) ///
+   stats(N rkf, fmt(0 0) labels("Obs" "KP Stat")) ///
     nonotes ///
     addnotes("Standard errors clustered at the district level. Significance levels: *p $<$ 0.1, ** p $<$ 0.05, *** p $<$ 0.01") 
 
@@ -374,7 +374,7 @@ mtitles("Employed" "Unemployed" "Employee" "Temp" "Employer" "SE" "Ag" "Manuf" "
         _cons $controls_SR)   ///
 starlevels(* 0.1 ** 0.05 *** 0.01) ///
    title("REF - Results IV Regression with time and Individual FE - UNCOND"\label{tab1}) nofloat ///
-   stats(N r2_a rkf, labels("Obs" "Adj. R-Squared" "KP Stat")) ///
+   stats(N rkf, fmt(0 0) labels("Obs" "KP Stat")) ///
     nonotes ///
     addnotes("Standard errors clustered at the district level. Significance levels: *p $<$ 0.1, ** p $<$ 0.05, *** p $<$ 0.01") 
 
@@ -473,7 +473,7 @@ mtitles("Total Wage (ln)" "Hrly Wage (ln)" "Work Hours p.w." "Formal") ///
         _cons $controls_SR)   ///
 starlevels(* 0.1 ** 0.05 *** 0.01) ///
    title("REF - Results OLS Regression with time and district FE - COND"\label{tab1}) nofloat ///
-   stats(N r2_a, labels("Obs" "Adj. R-Squared")) ///
+   stats(N, fmt(0) labels("Obs")) ///
     nonotes ///
     addnotes("Standard errors clustered at the district level. Significance levels: *p $<$ 0.1, ** p $<$ 0.05, *** p $<$ 0.01") 
 
@@ -542,7 +542,7 @@ mtitles("Total Wage (ln)" "Hrly Wage (ln)" "Work Hours p.w." "Formal") ///
         _cons $controls_SR)   ///
 starlevels(* 0.1 ** 0.05 *** 0.01) ///
    title("REF - Results OLS Regression with time and Individual FE - COND"\label{tab1}) nofloat ///
-   stats(N r2_a, labels("Obs" "Adj. R-Squared")) ///
+   stats(N, fmt(0) labels("Obs")) ///
     nonotes ///
     addnotes("Standard errors clustered at the district level. Significance levels: *p $<$ 0.1, ** p $<$ 0.05, *** p $<$ 0.01") 
 
@@ -603,7 +603,7 @@ mtitles("Total Wage (ln)" "Hrly Wage (ln)" "Work Hours p.w." "Formal") ///
   drop(age age2 gender _Iyear_2016 ///
          $controls_SR) starlevels(* 0.1 ** 0.05 *** 0.01) ///
    title("REF - Results IV with District and Year FE - COND"\label{tab1}) nofloat ///
-   stats(N r2_a rkf, labels("Obs" "Adj. R-Squared" "KP Stat")) ///
+   stats(N rkf, fmt(0 0) labels("Obs" "KP Stat")) ///
     nonotes ///
     addnotes("Standard errors clustered at the district level. Significance levels: *p $<$ 0.1, ** p $<$ 0.05, *** p $<$ 0.01") 
 
@@ -672,7 +672,7 @@ mtitles("Total Wage (ln)" "Hrly Wage (ln)" "Work Hours p.w." "Formal") ///
         _cons $controls_SR)   ///
 starlevels(* 0.1 ** 0.05 *** 0.01) ///
    title("REF - Results IV Regression with time and Individual FE - COND"\label{tab1}) nofloat ///
-   stats(N r2_a rkf, labels("Obs" "Adj. R-Squared" "KP-Stat")) ///
+   stats(N rkf, fmt(0 0) labels("Obs" "KP Stat")) ///
     nonotes ///
     addnotes("Standard errors clustered at the district level. Significance levels: *p $<$ 0.1, ** p $<$ 0.05, *** p $<$ 0.01") 
 

@@ -125,7 +125,7 @@ lab var inter_open "Agg WP x Open"
        first
     codebook `outcome', c
     estimates table,  k($dep_var inter_open wp_industry_jlmps_3m) star(.1 .05 .01) b(%7.4f)
-    estimates table, b(%7.4f) se(%7.4f) stats(N r2_a) k($dep_var inter_open wp_industry_jlmps_3m) 
+    estimates table, b(%7.4f) se(%7.4f) stats(N r2_a rkf) k($dep_var inter_open wp_industry_jlmps_3m) 
     estimates store m_`outcome', title(Model `outcome')
   } 
 
@@ -144,7 +144,7 @@ estout m_job_stable_3m m_formal m_private m_wp_industry_jlmps_3m ///
         _Iftempst_6  _Iyear_2016  ///
          $controls )   ///
    legend label varlabels(_cons constant) starlevels(* 0.1 ** 0.05 *** 0.01)           ///
-   stats(r2 df_r bic, fmt(3 0 1) label(R-sqr dfres BIC))
+   stats(r2 df_r rkf, fmt(3 0 1) label(R-sqr dfres rkf))
 
 *** (**) [*] indicates significance at the 99%
 *(95%) [90%] level. Based
@@ -154,7 +154,7 @@ esttab m_job_stable_3m m_formal m_private m_wp_industry_jlmps_3m ///
       m_member_union_3m m_skills_required_pjob  ///
       m_ln_total_rwage_3m  m_ln_hourly_rwage ///
       m_work_hours_pweek_3m_w m_work_days_pweek_3m /// 
-      using "$out_analysis/reg_hetero_open_close.tex", se label replace booktabs ///
+      using "$out_analysis/HETERO_reg_open_close.tex", se label replace booktabs ///
       cells(b(star fmt(%9.3f)) se(par fmt(%9.3f))) ///
 mtitles("Stable" "Formal" "Private" "Open" "Union" "Skills" "Total W"  "Hourly W" "WH week" "WD pweek") ///
   drop(age age2 gender hhsize _Ieduc1d_2 _Ieduc1d_3 _Ieduc1d_4 _Ieduc1d_5 ///
@@ -165,7 +165,7 @@ mtitles("Stable" "Formal" "Private" "Open" "Union" "Skills" "Total W"  "Hourly W
         _Iftempst_6  _Iyear_2016  ///
          $controls) starlevels(* 0.1 ** 0.05 *** 0.01) ///
    title("Heterogenous INDUSTRY - IV Regression, District, Year FE"\label{tab1}) nofloat ///
-   stats(N r2_a , labels("Obs" "Adj. R-Squared" "Control Mean")) ///
+   stats(N r2_a rkf, fmt(0 2 0) labels("Obs" "Adj. R-Squared" "KP Stat")) ///
     nonotes ///
     addnotes("Standard errors clustered at the district level. Significance levels: *p $<$ 0.1, ** p $<$ 0.05, *** p $<$ 0.01") 
 
@@ -202,7 +202,7 @@ lab var inter_gender "Agg WP x Male"
        first
     codebook `outcome', c
     estimates table,  k($dep_var inter_gender gender) star(.1 .05 .01) b(%7.4f)
-    estimates table, b(%7.4f) se(%7.4f) stats(N r2_a) k($dep_var inter_gender gender) 
+    estimates table, b(%7.4f) se(%7.4f) stats(N r2_a rkf) k($dep_var inter_gender gender) 
     estimates store m_`outcome', title(Model `outcome')
   } 
 
@@ -222,7 +222,7 @@ estout m_job_stable_3m m_formal m_private m_wp_industry_jlmps_3m ///
         _Iftempst_6  _Iyear_2016 ///
         age age2 hhsize)   ///
    legend label varlabels(_cons constant) starlevels(* 0.1 ** 0.05 *** 0.01)           ///
-   stats(r2 df_r bic, fmt(3 0 1) label(R-sqr dfres BIC))
+   stats(r2 df_r rkf, fmt(3 0 1) label(R-sqr dfres rkf))
 
 *** (**) [*] indicates significance at the 99%
 *(95%) [90%] level. Based
@@ -232,7 +232,7 @@ esttab m_job_stable_3m m_formal m_private m_wp_industry_jlmps_3m ///
       m_member_union_3m m_skills_required_pjob  ///
       m_ln_total_rwage_3m  m_ln_hourly_rwage ///
       m_work_hours_pweek_3m_w m_work_days_pweek_3m /// 
-      using "$out_analysis/reg_hetero_gender.tex", se label replace booktabs ///
+      using "$out_analysis/HETERO_reg_gender.tex", se label replace booktabs ///
       cells(b(star fmt(%9.3f)) se(par fmt(%9.3f))) ///
 mtitles("Stable" "Formal" "Private" "Open" "Union" "Skills" "Total W"  "Hourly W" "WH pday" "WD pweek") ///
   drop(age age2 hhsize _Ieduc1d_2 _Ieduc1d_3 _Ieduc1d_4 _Ieduc1d_5 ///
@@ -243,7 +243,7 @@ mtitles("Stable" "Formal" "Private" "Open" "Union" "Skills" "Total W"  "Hourly W
         _Iftempst_6  _Iyear_2016 ///
          age age2 hhsize) starlevels(* 0.1 ** 0.05 *** 0.01) ///
    title("Heterogenous GENDER - IV Regression, District, Year FE"\label{tab1}) nofloat ///
-   stats(N r2_a , labels("Obs" "Adj. R-Squared" "Control Mean")) ///
+   stats(N r2_a rkf, fmt(0 2 0) labels("Obs" "Adj. R-Squared" "KP Stat")) ///
     nonotes ///
     addnotes("Standard errors clustered at the district level. Significance levels: *p $<$ 0.1, ** p $<$ 0.05, *** p $<$ 0.01") 
 
@@ -282,7 +282,7 @@ lab var inter_bi_education "Agg WP x High Education"
        first
     codebook `outcome', c
     estimates table,  k($dep_var inter_bi_education bi_education) star(.1 .05 .01) b(%7.4f)
-    estimates table, b(%7.4f) se(%7.4f) stats(N r2_a) k($dep_var inter_bi_education bi_education) 
+    estimates table, b(%7.4f) se(%7.4f) stats(N r2_a rkf) k($dep_var inter_bi_education bi_education) 
     estimates store m_`outcome', title(Model `outcome')
   } 
 
@@ -300,7 +300,7 @@ estout m_job_stable_3m m_formal m_private m_wp_industry_jlmps_3m ///
         _Iftempst_6  _Iyear_2016 ///
          $controls)   ///
    legend label varlabels(_cons constant) starlevels(* 0.1 ** 0.05 *** 0.01)           ///
-   stats(r2 df_r bic, fmt(3 0 1) label(R-sqr dfres BIC))
+   stats(r2 df_r rkf, fmt(3 0 1) label(R-sqr dfres rkf))
 
 *** (**) [*] indicates significance at the 99%
 *(95%) [90%] level. Based
@@ -310,7 +310,7 @@ esttab m_job_stable_3m m_formal m_private m_wp_industry_jlmps_3m ///
       m_member_union_3m m_skills_required_pjob  ///
       m_ln_total_rwage_3m  m_ln_hourly_rwage ///
       m_work_hours_pweek_3m_w m_work_days_pweek_3m /// 
-      using "$out_analysis/reg_hetero_educ.tex", se label replace booktabs ///
+      using "$out_analysis/HETERO_reg_educ.tex", se label replace booktabs ///
       cells(b(star fmt(%9.3f)) se(par fmt(%9.3f))) ///
 mtitles("Stable" "Formal" "Private" "Open" "Union" "Skills" "Total W"  "Hourly W" "WH pday" "WD pweek") ///
   drop(age age2 gender hhsize _Ifteducst_2 ///
@@ -320,7 +320,7 @@ mtitles("Stable" "Formal" "Private" "Open" "Union" "Skills" "Total W"  "Hourly W
         _Iftempst_6  _Iyear_2016 ///
          $controls) starlevels(* 0.1 ** 0.05 *** 0.01) ///
    title("Heterogenous EDUCATION - IV Regression, District, Year FE"\label{tab1}) nofloat ///
-   stats(N r2_a , labels("Obs" "Adj. R-Squared" "Control Mean")) ///
+   stats(N r2_a rkf, fmt(0 2 0) labels("Obs" "Adj. R-Squared" "KP Stat")) ///
     nonotes ///
     addnotes("Standard errors clustered at the district level. Significance levels: *p $<$ 0.1, ** p $<$ 0.05, *** p $<$ 0.01") 
 
@@ -356,7 +356,7 @@ lab var inter_formal "Agg WP x Formal"
        first
     codebook `outcome', c
     estimates table,  k($dep_var inter_formal formal) star(.1 .05 .01) b(%7.4f)
-    estimates table, b(%7.4f) se(%7.4f) stats(N r2_a) k($dep_var inter_formal formal) 
+    estimates table, b(%7.4f) se(%7.4f) stats(N r2_a rkf) k($dep_var inter_formal formal) 
     estimates store m_`outcome', title(Model `outcome')
   } 
 
@@ -376,7 +376,7 @@ estout m_job_stable_3m m_formal m_private m_wp_industry_jlmps_3m ///
         _Iftempst_6  _Iyear_2016 ///
          $controls)   ///
    legend label varlabels(_cons constant) starlevels(* 0.1 ** 0.05 *** 0.01)           ///
-   stats(r2 df_r bic, fmt(3 0 1) label(R-sqr dfres BIC))
+   stats(r2 df_r rkf, fmt(3 0 1) label(R-sqr dfres rkf))
 
 *** (**) [*] indicates significance at the 99%
 *(95%) [90%] level. Based
@@ -386,7 +386,7 @@ esttab m_job_stable_3m m_formal m_private m_wp_industry_jlmps_3m ///
       m_member_union_3m m_skills_required_pjob  ///
       m_ln_total_rwage_3m  m_ln_hourly_rwage ///
       m_work_hours_pweek_3m_w m_work_days_pweek_3m /// 
-      using "$out_analysis/reg_hetero_formal.tex", se label replace booktabs ///
+      using "$out_analysis/HETERO_reg_formal.tex", se label replace booktabs ///
       cells(b(star fmt(%9.3f)) se(par fmt(%9.3f))) ///
 mtitles("Stable" "Formal" "Private" "Open" "Union" "Skills" "Total W"  "Hourly W" "WH pday" "WD pweek") ///
   drop(age age2 gender hhsize  _Ieduc1d_2 _Ieduc1d_3 _Ieduc1d_4 _Ieduc1d_5 ///
@@ -397,7 +397,7 @@ mtitles("Stable" "Formal" "Private" "Open" "Union" "Skills" "Total W"  "Hourly W
         _Iftempst_6  _Iyear_2016 ///
          $controls) starlevels(* 0.1 ** 0.05 *** 0.01) ///
    title("Heterogenous FORMAL - IV Regression, District, Year FE"\label{tab1}) nofloat ///
-   stats(N r2_a , labels("Obs" "Adj. R-Squared" "Control Mean")) ///
+   stats(N r2_a rkf, fmt(0 2 0) labels("Obs" "Adj. R-Squared" "KP Stat")) ///
     nonotes ///
     addnotes("Standard errors clustered at the district level. Significance levels: *p $<$ 0.1, ** p $<$ 0.05, *** p $<$ 0.01") 
 
@@ -434,7 +434,7 @@ lab var inter_private "Agg WP x Private"
        first
     codebook `outcome', c
     estimates table,  k($dep_var inter_private private) star(.1 .05 .01) b(%7.4f)
-    estimates table, b(%7.4f) se(%7.4f) stats(N r2_a) k($dep_var inter_private private) 
+    estimates table, b(%7.4f) se(%7.4f) stats(N r2_a rkf) k($dep_var inter_private private) 
     estimates store m_`outcome', title(Model `outcome')
   } 
 
@@ -454,7 +454,7 @@ estout m_job_stable_3m m_formal m_private m_wp_industry_jlmps_3m ///
         _Iftempst_6  _Iyear_2016 ///
          $controls)   ///
    legend label varlabels(_cons constant) starlevels(* 0.1 ** 0.05 *** 0.01)           ///
-   stats(r2 df_r bic, fmt(3 0 1) label(R-sqr dfres BIC))
+   stats(r2 df_r rkf, fmt(3 0 1) label(R-sqr dfres rkf))
 
 *** (**) [*] indicates significance at the 99%
 *(95%) [90%] level. Based
@@ -464,7 +464,7 @@ esttab m_job_stable_3m m_formal m_private m_wp_industry_jlmps_3m ///
       m_member_union_3m m_skills_required_pjob  ///
       m_ln_total_rwage_3m  m_ln_hourly_rwage ///
       m_work_hours_pweek_3m_w m_work_days_pweek_3m /// 
-      using "$out_analysis/reg_hetero_private.tex", se label replace booktabs ///
+      using "$out_analysis/HETERO_reg_private.tex", se label replace booktabs ///
       cells(b(star fmt(%9.3f)) se(par fmt(%9.3f))) ///
 mtitles("Stable" "Formal" "Private" "Open" "Union" "Skills" "Total W"  "Hourly W" "WH pday" "WD pweek") ///
   drop(age age2 gender hhsize  _Ieduc1d_2 _Ieduc1d_3 _Ieduc1d_4 _Ieduc1d_5 ///
@@ -475,7 +475,7 @@ mtitles("Stable" "Formal" "Private" "Open" "Union" "Skills" "Total W"  "Hourly W
         _Iftempst_6  _Iyear_2016 ///
          $controls) starlevels(* 0.1 ** 0.05 *** 0.01) ///
    title("Heterogenous PRIVATE - IV Regression, District, Year FE"\label{tab1}) nofloat ///
-   stats(N r2_a , labels("Obs" "Adj. R-Squared" "Control Mean")) ///
+   stats(N r2_a rkf, fmt(0 2 0) labels("Obs" "Adj. R-Squared" "KP Stat")) ///
     nonotes ///
     addnotes("Standard errors clustered at the district level. Significance levels: *p $<$ 0.1, ** p $<$ 0.05, *** p $<$ 0.01") 
 
@@ -569,7 +569,7 @@ cls
                 partial(i.district_iid) 
     codebook `outcome', c
     estimates table, k($dep_var) star(.1 .05 .01) b(%7.4f) 
-    estimates table, b(%7.4f) se(%7.4f) stats(N r2_a) k($dep_var) 
+    estimates table, b(%7.4f) se(%7.4f) stats(N r2_a rkf) k($dep_var) 
     estimates store m_`outcome', title(Model `outcome')
   }
 
@@ -590,7 +590,7 @@ estout m_job_stable_3m m_formal m_private m_wp_industry_jlmps_3m ///
         _Iftempst_6 _Iyear_2016 ///
          $controls)   ///
    legend label varlabels(_cons constant) starlevels(* 0.1 ** 0.05 *** 0.01)           ///
-   stats(r2 df_r bic, fmt(3 0 1) label(R-sqr dfres BIC))
+   stats(r2 df_r rkf, fmt(3 0 1) label(R-sqr dfres rkf))
 
 *** (**) [*] indicates significance at the 99%
 *(95%) [90%] level. Based
@@ -611,7 +611,7 @@ mtitles("Stable" "Formal" "Private" "Open" "Union" "Skills" "Total W"  "Hourly W
         _Iftempst_6 _Iyear_2016 ///
          $controls) starlevels(* 0.1 ** 0.05 *** 0.01) ///
    title("Results IV Regression with District and Year FE"\label{tab1}) nofloat ///
-   stats(N r2_a , labels("Obs" "Adj. R-Squared" "Control Mean")) ///
+   stats(N r2_a rkf, fmt(0 2 0) labels("Obs" "Adj. R-Squared" "KP Stat")) ///
     nonotes ///
     addnotes("Standard errors clustered at the district level. Significance levels: *p $<$ 0.1, ** p $<$ 0.05, *** p $<$ 0.01") 
 
@@ -714,7 +714,7 @@ lab var inter_open "Agg WP x Open"
        first
     codebook `outcome', c
     estimates table,  k($dep_var inter_open wp_industry_jlmps_3m) star(.1 .05 .01) b(%7.4f)
-    estimates table, b(%7.4f) se(%7.4f) stats(N r2_a) k($dep_var inter_open wp_industry_jlmps_3m) 
+    estimates table, b(%7.4f) se(%7.4f) stats(N r2_a rkf) k($dep_var inter_open wp_industry_jlmps_3m) 
     estimates store m_`outcome', title(Model `outcome')
   } 
 
@@ -733,7 +733,7 @@ estout m_job_stable_3m m_formal m_private m_wp_industry_jlmps_3m ///
         _Iftempst_6  _Iyear_2016  ///
          $controls )   ///
    legend label varlabels(_cons constant) starlevels(* 0.1 ** 0.05 *** 0.01)           ///
-   stats(r2 df_r bic, fmt(3 0 1) label(R-sqr dfres BIC))
+   stats(r2 df_r rkf, fmt(3 0 1) label(R-sqr dfres rkf))
 
 *** (**) [*] indicates significance at the 99%
 *(95%) [90%] level. Based
@@ -743,7 +743,7 @@ esttab m_job_stable_3m m_formal m_private m_wp_industry_jlmps_3m ///
       m_member_union_3m m_skills_required_pjob  ///
       m_ln_total_rwage_3m  m_ln_hourly_rwage ///
       m_work_hours_pweek_3m_w m_work_days_pweek_3m /// 
-      using "$out_analysis/reg_hetero_open_close.tex", se label replace booktabs ///
+      using "$out_analysis/HETERO_reg_open_close.tex", se label replace booktabs ///
       cells(b(star fmt(%9.3f)) se(par fmt(%9.3f))) ///
 mtitles("Stable" "Formal" "Private" "Open" "Union" "Skills" "Total W"  "Hourly W" "WH week" "WD pweek") ///
   drop(age age2 gender hhsize _Ieduc1d_2 _Ieduc1d_3 _Ieduc1d_4 _Ieduc1d_5 ///
@@ -754,7 +754,7 @@ mtitles("Stable" "Formal" "Private" "Open" "Union" "Skills" "Total W"  "Hourly W
         _Iftempst_6  _Iyear_2016  ///
          $controls) starlevels(* 0.1 ** 0.05 *** 0.01) ///
    title("Heterogenous INDUSTRY - IV Regression, District, Year FE"\label{tab1}) nofloat ///
-   stats(N r2_a , labels("Obs" "Adj. R-Squared" "Control Mean")) ///
+   stats(N r2_a rkf, fmt(0 2 0) labels("Obs" "Adj. R-Squared" "KP Stat")) ///
     nonotes ///
     addnotes("Standard errors clustered at the district level. Significance levels: *p $<$ 0.1, ** p $<$ 0.05, *** p $<$ 0.01") 
 

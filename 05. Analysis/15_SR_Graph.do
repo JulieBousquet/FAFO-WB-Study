@@ -23,7 +23,7 @@ set mem 100m
 
                   
 
-use "$data_final/07_IV_Ref_WP.dta", clear
+use "$data_final/06_IV_JLMPS_Construct_Outcomes.dta", clear
 
 tab nationality_cl year 
 drop if nationality_cl != 1
@@ -638,7 +638,7 @@ graph export "$out_analysis\SR_Combined_Graph_WP.pdf", as(pdf) replace
 **********************************************
 **********************************************
 
-use "$data_final/07_IV_Ref_WP.dta", clear
+use "$data_final/06_IV_JLMPS_Construct_Outcomes.dta", clear
 
 tab nationality_cl year 
 drop if nationality_cl != 1

@@ -243,7 +243,7 @@ tab prop_hh_syrians,m
                 first
     codebook `outcome', c
     estimates table, k($dep_var prop_hh_syrians) star(.1 .05 .01) b(%7.4f) 
-    estimates table, b(%7.4f) se(%7.4f) stats(N r2_a) k($dep_var prop_hh_syrians) 
+    estimates table, b(%7.4f) se(%7.4f) stats(N r2_a rkf) k($dep_var prop_hh_syrians) 
     estimates store m_`outcome', title(Model `outcome')
 	}
 
@@ -262,7 +262,7 @@ estout m_job_stable_3m m_formal m_private m_wp_industry_jlmps_3m ///
         _Iftempst_6 _Iyear_2016 ///
          $controls)   ///
    legend label varlabels(_cons constant) starlevels(* 0.1 ** 0.05 *** 0.01)           ///
-   stats(r2 df_r bic, fmt(3 0 1) label(R-sqr dfres BIC))
+   stats(r2 df_r rkf, fmt(3 0 1) label(R-sqr dfres rkf))
 
 *** (**) [*] indicates significance at the 99%
 *(95%) [90%] level. Based
@@ -283,7 +283,7 @@ mtitles("Stable" "Formal" "Industry" "Union" "Skills" "Total W"  "Hourly W" "WH 
         _Iftempst_6  _Iyear_2016 ///
          $controls) starlevels(* 0.1 ** 0.05 *** 0.01) ///
    title("Results IV Nb Refugee and WP Regression with District and Year FE"\label{tab1}) nofloat ///
-   stats(N r2_a , labels("Obs" "Adj. R-Squared" "Control Mean")) ///
+   stats(N r2_a rkf, fmt(0 2 0) labels("Obs" "Adj. R-Squared" "KP Stat")) ///
     nonotes ///
     addnotes("Standard errors clustered at the district level. Significance levels: *p $<$ 0.1, ** p $<$ 0.05, *** p $<$ 0.01") 
 
@@ -342,7 +342,7 @@ tab ln_IV_SS_ref_inflow
                 partial(i.district_iid) 
     codebook `outcome', c
     estimates table, k($dep_var) star(.1 .05 .01) b(%7.4f) 
-    estimates table, b(%7.4f) se(%7.4f) stats(N r2_a) k($dep_var) 
+    estimates table, b(%7.4f) se(%7.4f) stats(N r2_a rkf) k($dep_var) 
     estimates store m_`outcome', title(Model `outcome')
   }
 
@@ -362,7 +362,7 @@ estout m_job_stable_3m m_formal m_private m_wp_industry_jlmps_3m ///
         _Iftempst_6 _Iyear_2016 ///
          $controls)   ///
    legend label varlabels(_cons constant) starlevels(* 0.1 ** 0.05 *** 0.01)           ///
-   stats(r2 df_r bic, fmt(3 0 1) label(R-sqr dfres BIC))
+   stats(r2 df_r rkf, fmt(3 0 1) label(R-sqr dfres rkf))
 
 *** (**) [*] indicates significance at the 99%
 *(95%) [90%] level. Based
@@ -383,7 +383,7 @@ mtitles("Stable" "Formal" "Industry" "Union" "Skills" "Total W"  "Hourly W" "WH 
         _Iftempst_6 _Iyear_2016 ///
          $controls) starlevels(* 0.1 ** 0.05 *** 0.01) ///
    title("Results IV Regression with District and Year FE"\label{tab1}) nofloat ///
-   stats(N r2_a , labels("Obs" "Adj. R-Squared" "Control Mean")) ///
+   stats(N r2_a rkf, fmt(0 2 0) labels("Obs" "Adj. R-Squared" "KP Stat")) ///
     nonotes ///
     addnotes("Standard errors clustered at the district level. Significance levels: *p $<$ 0.1, ** p $<$ 0.05, *** p $<$ 0.01") 
 
@@ -474,7 +474,7 @@ tab dist_year, m
                 partial(i.district_iid) 
    codebook `outcome', c
     estimates table, k($dep_var dist_year) star(.1 .05 .01) b(%7.4f) 
-    estimates table, b(%7.4f) se(%7.4f) stats(N r2_a) k($dep_var dist_year) 
+    estimates table, b(%7.4f) se(%7.4f) stats(N r2_a rkf) k($dep_var dist_year) 
     estimates store m_`outcome', title(Model `outcome')
  }
 
@@ -495,7 +495,7 @@ estout m_job_stable_3m m_formal m_private m_wp_industry_jlmps_3m ///
         _Iftempst_6 _Iyear_2016 ///
          $controls)   ///
    legend label varlabels(_cons constant) starlevels(* 0.1 ** 0.05 *** 0.01)           ///
-   stats(r2 df_r bic, fmt(3 0 1) label(R-sqr dfres BIC))
+   stats(r2 df_r rkf, fmt(3 0 1) label(R-sqr dfres rkf))
 
 *** (**) [*] indicates significance at the 99%
 *(95%) [90%] level. Based
@@ -516,7 +516,7 @@ mtitles("Stable" "Formal" "Private" "Open" "Union" "Skills" "Total W"  "Hourly W
         _Iftempst_6 _Iyear_2016 ///
          $controls) starlevels(* 0.1 ** 0.05 *** 0.01) ///
    title("Results IV Regression with District, Year and Sector FE"\label{tab1}) nofloat ///
-   stats(N r2_a , labels("Obs" "Adj. R-Squared" "Control Mean")) ///
+   stats(N r2_a rkf, fmt(0 2 0) labels("Obs" "Adj. R-Squared" "KP Stat")) ///
     nonotes ///
     addnotes("Standard errors clustered at the district level. Significance levels: *p $<$ 0.1, ** p $<$ 0.05, *** p $<$ 0.01") 
 
@@ -700,7 +700,7 @@ foreach outcome of global outcome_cond {
                 partial(i.district_iid) 
     codebook `outcome', c
     estimates table, k($dep_var ln_inter_dist_confl_dt) star(.1 .05 .01) b(%7.4f) 
-    estimates table, b(%7.4f) se(%7.4f) stats(N r2_a) k($dep_var ln_inter_dist_confl_dt) 
+    estimates table, b(%7.4f) se(%7.4f) stats(N r2_a rkf) k($dep_var ln_inter_dist_confl_dt) 
     estimates store m_`outcome', title(Model `outcome')
   }
 
@@ -720,7 +720,7 @@ estout m_job_stable_3m m_formal m_private m_wp_industry_jlmps_3m ///
         _Iftempst_6 _Iyear_2016 ///
          $controls)   ///
    legend label varlabels(_cons constant) starlevels(* 0.1 ** 0.05 *** 0.01)           ///
-   stats(r2 df_r bic, fmt(3 0 1) label(R-sqr dfres BIC))
+   stats(r2 df_r rkf, fmt(3 0 1) label(R-sqr dfres rkf))
 
 *** (**) [*] indicates significance at the 99%
 *(95%) [90%] level. Based
@@ -741,7 +741,7 @@ mtitles("Stable" "Formal" "Private" "Open" "Union" "Skills" "Total W"  "Hourly W
         _Iftempst_6 _Iyear_2016 ///
          $controls) starlevels(* 0.1 ** 0.05 *** 0.01) ///
    title("Results IV Regression with District, Year and Sector FE"\label{tab1}) nofloat ///
-   stats(N r2_a , labels("Obs" "Adj. R-Squared" "Control Mean")) ///
+   stats(N r2_a rkf, fmt(0 2 0) labels("Obs" "Adj. R-Squared" "KP Stat")) ///
     nonotes ///
     addnotes("Standard errors clustered at the district level. Significance levels: *p $<$ 0.1, ** p $<$ 0.05, *** p $<$ 0.01") 
 
@@ -798,7 +798,7 @@ tab private_dt year
                 partial(i.district_iid) 
     codebook `outcome', c
     estimates table, k($dep_var _Iprivate_d_1) star(.1 .05 .01) b(%7.4f) 
-    estimates table, b(%7.4f) se(%7.4f) stats(N r2_a) k($dep_var _Iprivate_d_1) 
+    estimates table, b(%7.4f) se(%7.4f) stats(N r2_a rkf) k($dep_var _Iprivate_d_1) 
     estimates store m_`outcome', title(Model `outcome')
   }
 
@@ -818,7 +818,7 @@ estout m_job_stable_3m m_formal m_private m_wp_industry_jlmps_3m ///
         _Iftempst_6 _Iyear_2016 ///
          $controls)   ///
    legend label varlabels(_cons constant) starlevels(* 0.1 ** 0.05 *** 0.01)           ///
-   stats(r2 df_r bic, fmt(3 0 1) label(R-sqr dfres BIC))
+   stats(r2 df_r rkf, fmt(3 0 1) label(R-sqr dfres rkf))
 
 *** (**) [*] indicates significance at the 99%
 *(95%) [90%] level. Based
@@ -839,7 +839,7 @@ mtitles("Stable" "Formal" "Private" "Open" "Union" "Skills" "Total W"  "Hourly W
         _Iftempst_6 _Iyear_2016 ///
          $controls) starlevels(* 0.1 ** 0.05 *** 0.01) ///
    title("Results IV Regression with District, Year and Sector FE"\label{tab1}) nofloat ///
-   stats(N r2_a , labels("Obs" "Adj. R-Squared" "Control Mean")) ///
+   stats(N r2_a rkf, fmt(0 2 0) labels("Obs" "Adj. R-Squared" "KP Stat")) ///
     nonotes ///
     addnotes("Standard errors clustered at the district level. Significance levels: *p $<$ 0.1, ** p $<$ 0.05, *** p $<$ 0.01") 
 
@@ -899,7 +899,7 @@ cls
     codebook `outcome', c
     *estimates table, star(.1 .05 .01) b(%7.4f) 
     estimates table, k($dep_var) star(.1 .05 .01) b(%7.4f) 
-    estimates table, b(%7.4f) se(%7.4f) stats(N r2_a) k($dep_var ) 
+    estimates table, b(%7.4f) se(%7.4f) stats(N r2_a rkf) k($dep_var ) 
     estimates store m_`outcome', title(Model `outcome')
 
   }
@@ -919,7 +919,7 @@ estout m_job_stable_3m m_formal m_private m_wp_industry_jlmps_3m ///
         _Iftempst_6 _Iyear_2016 ///
          $controls)   ///
    legend label varlabels(_cons constant) starlevels(* 0.1 ** 0.05 *** 0.01)           ///
-   stats(r2 df_r bic, fmt(3 0 1) label(R-sqr dfres BIC))
+   stats(r2 df_r rkf, fmt(3 0 1) label(R-sqr dfres rkf))
 
 *** (**) [*] indicates significance at the 99%
 *(95%) [90%] level. Based
@@ -940,7 +940,7 @@ mtitles("Stable" "Formal" "Private" "Open" "Union" "Skills" "Total W"  "Hourly W
         _Iftempst_6 _Iyear_2016 ///
          $controls) starlevels(* 0.1 ** 0.05 *** 0.01) ///
    title("Results IV Regression with District, Year and Sector FE"\label{tab1}) nofloat ///
-   stats(N r2_a , labels("Obs" "Adj. R-Squared" "Control Mean")) ///
+   stats(N r2_a rkf, fmt(0 2 0) labels("Obs" "Adj. R-Squared" "KP Stat")) ///
     nonotes ///
     addnotes("Standard errors clustered at the district level. Significance levels: *p $<$ 0.1, ** p $<$ 0.05, *** p $<$ 0.01") 
 

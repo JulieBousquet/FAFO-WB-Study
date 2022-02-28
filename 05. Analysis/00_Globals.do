@@ -29,10 +29,10 @@ global    dep_var   ln_agg_wp_orig
 *global    dep_var   share_wp_100
 
 *IV VARIABLE
-global    IV_var    resc_IV_SS_5
+global    IV_var    resc_IV_SS_4
 
 *IV VARIABLE LIST
-global IVs  IV_1 IV_3 IV_4 IV_5
+global IVs  IV_1 IV_2 IV_3 IV_4
 
 *OUTCOME CONDITIONAL ON EMPLOYEMENT
 global    outcome_cond ///
@@ -46,6 +46,18 @@ global    outcome_cond ///
               ln_hourly_rwage  /// LOG Hourly Wage (Prim.& Second. Jobs)
               work_hours_pweek_3m_w  /// Winsorized - Usual No. of Hours/Week, Market Work, (Ref. 3-month)
               work_days_pweek_3m  // Avg. num. of wrk. days per week during 3 mnth.
+             
+global    m_cond ///
+              m_job_stable_3m ///  From usstablp - Stability of employement (3m) - 1 permanent - 0 temp, seas, cas
+              m_formal  /// 0 Informal - 1 Formal - Informal if no contract (uscontrp=0) OR no insurance (ussocinsp=0)
+              m_private /// Economic Sector of Primary Job  3m - 0 Public 1 Private
+              m_wp_industry_jlmps_3m  /// Industries with work permits for refugees - Economic Activity of prim. job 3m
+              m_member_union_3m /// Member of a syndicate/trade union (ref. 3-mnths)
+              m_skills_required_pjob ///  Does primary job require any skill
+              m_ln_total_rwage_3m  /// LOG Total Wage (3-month) - CONDITIONAL - UNEMPLOYED & OLF: WAGE MISSING
+              m_ln_hourly_rwage  /// LOG Hourly Wage (Prim.& Second. Jobs)
+              m_work_hours_pweek_3m_w  /// Winsorized - Usual No. of Hours/Week, Market Work, (Ref. 3-month)
+              m_work_days_pweek_3m  // Avg. num. of wrk. days per week during 3 mnth.
              
              *work_hours_pday_3m_w  /// Winsorized - No. of Hours/Day (Ref. 3 mnths) Market Work
 
@@ -89,6 +101,19 @@ global    outcome_uncond ///
               employed_olf_3m /// From uswrkstsr1 - mkt def, search req; 3m, 2 empl - 1 unemp&OLF
               unemployed_olf_3m /// From unempsr1 - mrk def, search req; 3m, empl or unemp&OLF
               unemployed_3m // From unempsr1m - mrk def, search req; 3m, empl or unemp, OLF is miss
+
+global    m_uncond ///
+              m_job_stable_3m_unolf ///  UNCONDITIONAL - UNEMPLOYED & OLF: 0  : From usstablp - Stability of employement (3m) - 1 permanent - 0 temp, seas, cas
+              m_member_union_3m_unolf /// UNCONDITIONAL - UNEMPLOYED & OLF: 0  : Member of a syndicate/trade union (ref. 3-mnths)
+              m_skills_required_pjob_unolf /// UNCONDITIONAL - UNEMPLOYED & OLF: 0 : Does primary job require any skill
+              m_ln_t_rwage_unolf /// UNCONDITIONAL - UNEMPLOYED & OLF: WAGE 0 - LOG - Total Wage (3-month)
+              m_ln_hourly_rwage_unolf /// UNCONDITIONAL - UNEMPLOYED & OLF: WAGE 0 - LOG - Hourly Wage (3-month)
+              m_work_hours_pday_3m_w_unolf /// UNCONDITIONAL - UNEMPLOYED & OLF: 0 - work hours (3-month)
+              m_work_days_pweek_3m_unolf /// UNCONDITIONAL - UNEMPLOYED & OLF: 0 - work day per week (3-month)
+              m_employed_olf_3m /// From uswrkstsr1 - mkt def, search req; 3m, 2 empl - 1 unemp&OLF
+              m_unemployed_olf_3m /// From unempsr1 - mrk def, search req; 3m, empl or unemp&OLF
+              m_unemployed_3m // From unempsr1m - mrk def, search req; 3m, empl or unemp, OLF is miss
+
 
 global    globals_list ///
             outcome_cond outcome_uncond
@@ -146,6 +171,13 @@ global controls ///
           gender ///  Gender - 1 Male 0 Female
           hhsize //  Total No. of Individuals in the Household
      *     ln_invdistance_dis_camp //  LOG Distance (km) between JORD districts and ZAATARI CAMP in 2016
+
+global fe       _Ieduc1d_2 _Ieduc1d_3 _Ieduc1d_4 _Ieduc1d_5 ///
+                _Ieduc1d_6 _Ieduc1d_7 _Ifteducst_2 ///
+                _Ifteducst_3 _Ifteducst_4 _Ifteducst_5 _Ifteducst_6 ///
+                _Imteducst_2 _Imteducst_3 _Imteducst_4 _Imteducst_5 ///
+                _Imteducst_6 _Iftempst_2 _Iftempst_3 _Iftempst_4 _Iftempst_5 ///
+                _Iftempst_6  
 
 /*SPECIAL TREATMENTS
           ln_nb_refugees_bygov /// LOG Number of refugees out of camps by governorate in 2016
