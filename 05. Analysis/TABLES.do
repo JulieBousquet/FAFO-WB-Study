@@ -243,30 +243,32 @@ drop($fe $controls  _cons $district ln_nb_refugees_bygov _Iyear_2016)   ///
     nonotes nonumber label   append  booktabs not
 
 
+*& b (se) & b (se) & b (se) & b (se) & b (se) & b (se) & b (se) & b (se) & b (se) & b (se) \\
 
 esttab $m1_cond   /// 
       using "$out_analysis/TRY.tex",  ///
       prehead(" \begin{tabular}{l*{10}{c}} \toprule ") ///
-      posthead("& & & & & & & & & & \\ \midrule \midrule \multicolumn{11}{l}{\textbf{\textit{PANEL A: OLS}}} \\ [-1ex]") ///
+      posthead("& & & & & & & & & & \\ & b (se) & b (se) & b (se) & b (se) & b (se) & b (se) & b (se) & b (se) & b (se) & b (se) \\ \midrule \midrule \multicolumn{11}{l}{\textbf{\textit{PANEL A: OLS}}} \\ ") ///
       fragment replace label ///
     drop($fe $controls  _cons ln_nb_refugees_bygov )   ///
       mtitles("\multirow{2}{*}{Stable}" "\multirow{2}{*}{Formal}" "\multirow{2}{*}{Private}" "\multirow{2}{*}{Open}" "\multirow{2}{*}{Union}" "\multirow{2}{*}{Skills}" "\multirow{2}{*}{\shortstack[c]{Total\\ Wage (ln)}}" "\multirow{2}{*}{\shortstack[c]{Hourly\\ Wage (ln)}}" "\multirow{2}{*}{\shortstack[c]{Work Hours\\ Per Week}}" "\multirow{2}{*}{\shortstack[c]{Working Days \\ Per Week}}") ///
-      stats(N r2_a, fmt(0 2) labels("Obs" "Adj. R-Squared")) ///
-      b(%8.3f) se(%8.3f)
+      stats(N r2_a, fmt(0 2) labels("\\\\[-0.5cm] N" "Adj. $ R^{2} $ \\\\[-0.6cm]")) ///
+      b(%8.3f) se(%8.3f) starlevels(* 0.1 ** 0.05 *** 0.01) ///
+      prefoot("\\\\[-0.5cm] \hline") ///
+
 
 
 esttab $m2_cond   /// 
       using "$out_analysis/TRY.tex",  ///
-      posthead("\midrule \midrule \multicolumn{11}{l}{\textbf{\textit{PANEL B: OLS}}} \\ [-1ex]") ///
+      posthead("\midrule \midrule \multicolumn{11}{l}{\textbf{\textit{PANEL B: OLS}}} \\ ") ///
       fragment label ///
       drop($fe $controls  _cons $district ln_nb_refugees_bygov _Iyear_2016)   ///
-      append stats(N r2_a, fmt(0 2) labels("Obs" "Adj. R-Squared"))  ///
+      append stats(N r2_a, fmt(0 2) labels("\\\\[-0.5cm] N" "Adj. $ R^{2} $ \\\\[-0.6cm]"))  ///
       r2 b(%8.3f) se(%8.3f) ///
-      nomtitles nonumbers  ///
-      prefoot("\hline") ///
-      postfoot("\bottomrule \multicolumn{11}{l}{\footnotesize Standard errors clustered at the district level. Significance levels: *p $<$ 0.1, ** p $<$ 0.05, *** p $<$ 0.01}\\   \end{tabular} ")
+      nomtitles nonumbers starlevels(* 0.1 ** 0.05 *** 0.01) ///
+      prefoot("\\\\[-0.5cm] \hline") ///
+      postfoot("\bottomrule  \\\\[-0.6cm] \multicolumn{11}{l}{\footnotesize Standard errors clustered at the district level. Significance levels: *p $<$ 0.1, ** p $<$ 0.05, *** p $<$ 0.01}\\   \end{tabular} ")
 
-replace
 
 
 

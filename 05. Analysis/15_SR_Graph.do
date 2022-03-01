@@ -57,10 +57,10 @@ xtset indid_2010 year
 ******* REFUGEE INFLOW ********
 
 *OLS_Y_D
-foreach outcome of global outcomes_uncond {
+foreach outcome of global SR_outcome_uncond {
     qui xi: reg `outcome' $dep_var_ref ///
-            i.district_iid i.year $controls_SR  ///
-            [pw = $weight],  ///
+            i.district_iid i.year $SR_controls  ///
+            [pw = $SR_weight],  ///
             cluster(district_iid) robust 
     estimates store REFOLS_YD_`outcome'
 } 
@@ -78,10 +78,10 @@ drop if unemp_10_miss_16 == 1
 drop if olf_16_miss_10 == 1
 drop if olf_10_miss_16 == 1 
 
-foreach outcome of global outcomes_cond {
+foreach outcome of global SR_outcome_cond {
     qui xi: reg `outcome' $dep_var_ref ///
-            i.district_iid i.year $controls_SR  ///
-            [pw = $weight],  ///
+            i.district_iid i.year $SR_controls  ///
+            [pw = $SR_weight],  ///
             cluster(district_iid) robust 
     estimates store REFOLS_YD_`outcome'
 } 
@@ -89,27 +89,27 @@ restore
 
 *OLS_Y_I
 preserve
-  foreach outcome of global outcomes_uncond {
-       qui reghdfe `outcome' $dep_var_ref $controls_SR  ///
-                [pw = $weight], ///
+  foreach outcome of global SR_outcome_uncond {
+       qui reghdfe `outcome' $dep_var_ref $SR_controls  ///
+                [pw = $SR_weight], ///
                 absorb(year indid_2010) ///
                 cluster(district_iid) 
       
         qui gen smpl=0
         qui replace smpl=1 if e(sample)==1
         * Then I partial out all variables
-      foreach y in `outcome' $dep_var_ref  $controls_SR {
-        qui reghdfe `y' [pw = $weight] if smpl==1, absorb(year indid_2010) residuals(`y'_c2wr)
+      foreach y in `outcome' $dep_var_ref  $SR_controls {
+        qui reghdfe `y' [pw = $SR_weight] if smpl==1, absorb(year indid_2010) residuals(`y'_c2wr)
         rename `y' o_`y'
         rename `y'_c2wr `y'
       }
       
-      qui reg `outcome' $dep_var_ref $controls_SR [pw = $weight], cluster(district_iid) robust
+      qui reg `outcome' $dep_var_ref $SR_controls [pw = $SR_weight], cluster(district_iid) robust
       estimates store REFOLS_YI_`outcome', title(Model `outcome')
 
-      drop `outcome' $controls_SR $dep_var_ref smpl
+      drop `outcome' $SR_controls $dep_var_ref smpl
       
-      foreach y in `outcome' $controls_SR $dep_var_ref  {
+      foreach y in `outcome' $SR_controls $dep_var_ref  {
         rename o_`y' `y' 
       } 
     }
@@ -127,37 +127,37 @@ drop if unemp_10_miss_16 == 1
 drop if olf_16_miss_10 == 1
 drop if olf_10_miss_16 == 1 
 
-  foreach outcome of global outcomes_cond {
-       qui reghdfe `outcome' $dep_var_ref $controls_SR  ///
-                [pw = $weight], ///
+  foreach outcome of global SR_outcome_cond {
+       qui reghdfe `outcome' $dep_var_ref $SR_controls  ///
+                [pw = $SR_weight], ///
                 absorb(year indid_2010) ///
                 cluster(district_iid) 
       
         qui gen smpl=0
         qui replace smpl=1 if e(sample)==1
         * Then I partial out all variables
-      foreach y in `outcome' $dep_var_ref  $controls_SR {
-        qui reghdfe `y' [pw = $weight] if smpl==1, absorb(year indid_2010) residuals(`y'_c2wr)
+      foreach y in `outcome' $dep_var_ref  $SR_controls {
+        qui reghdfe `y' [pw = $SR_weight] if smpl==1, absorb(year indid_2010) residuals(`y'_c2wr)
         rename `y' o_`y'
         rename `y'_c2wr `y'
       }
       
-      qui reg `outcome' $dep_var_ref $controls_SR [pw = $weight], cluster(district_iid) robust
+      qui reg `outcome' $dep_var_ref $SR_controls [pw = $SR_weight], cluster(district_iid) robust
       estimates store REFOLS_YI_`outcome', title(Model `outcome')
 
-      drop `outcome' $controls_SR $dep_var_ref smpl
+      drop `outcome' $SR_controls $dep_var_ref smpl
       
-      foreach y in `outcome' $controls_SR $dep_var_ref  {
+      foreach y in `outcome' $SR_controls $dep_var_ref  {
         rename o_`y' `y' 
       } 
     }
 restore
 
 *IV Y D 
-foreach outcome of global outcomes_uncond {
-    qui xi: ivreg2  `outcome' i.year i.district_iid $controls_SR ///
+foreach outcome of global SR_outcome_uncond {
+    qui xi: ivreg2  `outcome' i.year i.district_iid $SR_controls ///
                 ($dep_var_ref = $iv_ref) ///
-                [pw = $weight], ///
+                [pw = $SR_weight], ///
                 cluster(district_iid) robust ///
                 partial(i.district_iid) ///
                 first
@@ -177,10 +177,10 @@ drop if unemp_10_miss_16 == 1
 drop if olf_16_miss_10 == 1
 drop if olf_10_miss_16 == 1 
 
- foreach outcome of global outcomes_cond {
-    qui xi: ivreg2  `outcome' i.year i.district_iid $controls_SR ///
+ foreach outcome of global SR_outcome_cond {
+    qui xi: ivreg2  `outcome' i.year i.district_iid $SR_controls ///
                 ($dep_var_ref = $iv_ref) ///
-                [pw = $weight], ///
+                [pw = $SR_weight], ///
                 cluster(district_iid) robust ///
                 partial(i.district_iid) ///
                 first
@@ -190,31 +190,31 @@ restore
 
 *IV Y I
 preserve
-  foreach outcome of global outcomes_uncond {     
+  foreach outcome of global SR_outcome_uncond {     
        qui xi: ivreghdfe `outcome' ///
-                    $controls_SR  ///
+                    $SR_controls  ///
                     ($dep_var_ref = $iv_ref) ///
-                    [pw = $weight], ///
+                    [pw = $SR_weight], ///
                     absorb(year indid_2010) ///
                     cluster(district_iid) 
 
         qui gen smpl=0
         qui replace smpl=1 if e(sample)==1
         * Then I partial out all variables
-        foreach y in `outcome' $controls_SR $dep_var_ref $iv_ref { 
-          qui reghdfe `y' [pw = $weight] if smpl==1, absorb(year indid_2010) residuals(`y'_c2wr)
+        foreach y in `outcome' $SR_controls $dep_var_ref $iv_ref { 
+          qui reghdfe `y' [pw = $SR_weight] if smpl==1, absorb(year indid_2010) residuals(`y'_c2wr)
           qui rename `y' o_`y'
           qui rename `y'_c2wr `y'
         }
         qui ivreg2 `outcome' ///
-               $controls_SR  ///
+               $SR_controls  ///
                ($dep_var_ref = $iv_ref) ///
-               [pw = $weight], ///
+               [pw = $SR_weight], ///
                cluster(district_iid) robust ///
                first 
       estimates store REFIV_YI_`outcome', title(Model `outcome')
-        qui drop `outcome' $dep_var_ref $iv_ref $controls_SR smpl
-        foreach y in `outcome' $dep_var_ref $iv_ref $controls_SR {
+        qui drop `outcome' $dep_var_ref $iv_ref $SR_controls smpl
+        foreach y in `outcome' $dep_var_ref $iv_ref $SR_controls {
           qui rename o_`y' `y' 
         }
     }
@@ -233,31 +233,31 @@ drop if unemp_10_miss_16 == 1
 drop if olf_16_miss_10 == 1
 drop if olf_10_miss_16 == 1 
 
-  foreach outcome of global outcomes_cond {     
+  foreach outcome of global SR_outcome_cond {     
        qui xi: ivreghdfe `outcome' ///
-                    $controls_SR  ///
+                    $SR_controls  ///
                     ($dep_var_ref = $iv_ref) ///
-                    [pw = $weight], ///
+                    [pw = $SR_weight], ///
                     absorb(year indid_2010) ///
                     cluster(district_iid) 
 
         qui gen smpl=0
         qui replace smpl=1 if e(sample)==1
         * Then I partial out all variables
-        foreach y in `outcome' $controls_SR $dep_var_ref $iv_ref { 
-          qui reghdfe `y' [pw = $weight] if smpl==1, absorb(year indid_2010) residuals(`y'_c2wr)
+        foreach y in `outcome' $SR_controls $dep_var_ref $iv_ref { 
+          qui reghdfe `y' [pw = $SR_weight] if smpl==1, absorb(year indid_2010) residuals(`y'_c2wr)
           qui rename `y' o_`y'
           qui rename `y'_c2wr `y'
         }
         qui ivreg2 `outcome' ///
-               $controls_SR  ///
+               $SR_controls  ///
                ($dep_var_ref = $iv_ref) ///
-               [pw = $weight], ///
+               [pw = $SR_weight], ///
                cluster(district_iid) robust ///
                first 
       estimates store REFIV_YI_`outcome', title(Model `outcome')
-        qui drop `outcome' $dep_var_ref $iv_ref $controls_SR smpl
-        foreach y in `outcome' $dep_var_ref $iv_ref $controls_SR {
+        qui drop `outcome' $dep_var_ref $iv_ref $SR_controls smpl
+        foreach y in `outcome' $dep_var_ref $iv_ref $SR_controls {
           qui rename o_`y' `y' 
         }
     }
@@ -320,7 +320,7 @@ restore
              (REFIV_YI_ln_hourly_rwage, label(Hourly Wage (ln))) ///
              (REFIV_YI_ln_whpw_$rp, label(Work Hours p.w.)) ///
              (REFIV_YI_formal, label(Formal)) , bylabel("IV Indiv Year") ///
-             || , drop(_Iyear_2016 $district _cons $controls_SR) ///
+             || , drop(_Iyear_2016 $district _cons $SR_controls) ///
               xline(0) msymbol(d) ///
               label subtitle(, size(vsmall) fcolor(white) nobox ) ///
              xlabel("") ylabel("") ///
@@ -340,10 +340,10 @@ graph export "$out_analysis\SR_Combined_Graph_REF.pdf", as(pdf) replace
 ******* WORK PERMITS *******
 
 *OLS_Y_D
-foreach outcome of global outcomes_uncond {
+foreach outcome of global SR_outcome_uncond {
     qui xi: reg `outcome' $dep_var_wp ///
-             i.district_iid i.year $controls_SR ///
-            [pw = $weight],  ///
+             i.district_iid i.year $SR_controls ///
+            [pw = $SR_weight],  ///
             cluster(district_iid) robust 
     estimates store WPOLS_YD_`outcome'
 } 
@@ -361,10 +361,10 @@ drop if unemp_10_miss_16 == 1
 drop if olf_16_miss_10 == 1
 drop if olf_10_miss_16 == 1 
  
-foreach outcome of global outcomes_cond {
+foreach outcome of global SR_outcome_cond {
     qui xi: reg `outcome' $dep_var_wp ///
-            i.district_iid i.year $controls_SR  ///
-            [pw = $weight],  ///
+            i.district_iid i.year $SR_controls  ///
+            [pw = $SR_weight],  ///
             cluster(district_iid) robust 
     estimates store WPOLS_YD_`outcome'
 } 
@@ -372,28 +372,28 @@ restore
 
 *OLS_Y_I
 preserve
-  foreach outcome of global outcomes_uncond {
+  foreach outcome of global SR_outcome_uncond {
        qui reghdfe `outcome' $dep_var_wp   ///
-                $controls_SR  ///
-                [pw = $weight], ///
+                $SR_controls  ///
+                [pw = $SR_weight], ///
                 absorb(year indid_2010) ///
                 cluster(district_iid) 
       
         qui gen smpl=0
         qui replace smpl=1 if e(sample)==1
         * Then I partial out all variables
-      foreach y in `outcome' $dep_var_wp  $controls_SR {
-        qui reghdfe `y' [pw = $weight] if smpl==1, absorb(year indid_2010) residuals(`y'_c2wr)
+      foreach y in `outcome' $dep_var_wp  $SR_controls {
+        qui reghdfe `y' [pw = $SR_weight] if smpl==1, absorb(year indid_2010) residuals(`y'_c2wr)
         rename `y' o_`y'
         rename `y'_c2wr `y'
       }
       
-      qui reg `outcome' $dep_var_wp $controls_SR [pw = $weight], cluster(district_iid) robust
+      qui reg `outcome' $dep_var_wp $SR_controls [pw = $SR_weight], cluster(district_iid) robust
       estimates store WPOLS_YI_`outcome', title(Model `outcome')
 
-      drop `outcome' $controls_SR $dep_var_wp smpl
+      drop `outcome' $SR_controls $dep_var_wp smpl
       
-      foreach y in `outcome' $controls_SR $dep_var_wp  {
+      foreach y in `outcome' $SR_controls $dep_var_wp  {
         rename o_`y' `y' 
       } 
     }
@@ -413,37 +413,37 @@ drop if unemp_10_miss_16 == 1
 drop if olf_16_miss_10 == 1
 drop if olf_10_miss_16 == 1 
 
-  foreach outcome of global outcomes_cond {
-       qui reghdfe `outcome' $dep_var_wp $controls_SR  ///
-                [pw = $weight], ///
+  foreach outcome of global SR_outcome_cond {
+       qui reghdfe `outcome' $dep_var_wp $SR_controls  ///
+                [pw = $SR_weight], ///
                 absorb(year indid_2010) ///
                 cluster(district_iid) 
       
         qui gen smpl=0
         qui replace smpl=1 if e(sample)==1
         * Then I partial out all variables
-      foreach y in `outcome' $dep_var_wp  $controls_SR {
-        qui reghdfe `y' [pw = $weight] if smpl==1, absorb(year indid_2010) residuals(`y'_c2wr)
+      foreach y in `outcome' $dep_var_wp  $SR_controls {
+        qui reghdfe `y' [pw = $SR_weight] if smpl==1, absorb(year indid_2010) residuals(`y'_c2wr)
         rename `y' o_`y'
         rename `y'_c2wr `y'
       }
       
-      qui reg `outcome' $dep_var_wp $controls_SR [pw = $weight], cluster(district_iid) robust
+      qui reg `outcome' $dep_var_wp $SR_controls [pw = $SR_weight], cluster(district_iid) robust
       estimates store WPOLS_YI_`outcome', title(Model `outcome')
 
-      drop `outcome' $controls_SR $dep_var_wp smpl
+      drop `outcome' $SR_controls $dep_var_wp smpl
       
-      foreach y in `outcome' $controls_SR $dep_var_wp  {
+      foreach y in `outcome' $SR_controls $dep_var_wp  {
         rename o_`y' `y' 
       } 
     }
 restore
 
 *IV Y D 
-foreach outcome of global outcomes_uncond {
-    qui xi: ivreg2  `outcome' i.year i.district_iid $controls_SR ///
+foreach outcome of global SR_outcome_uncond {
+    qui xi: ivreg2  `outcome' i.year i.district_iid $SR_controls ///
                 ($dep_var_wp = $iv_wp) ///
-                [pw = $weight], ///
+                [pw = $SR_weight], ///
                 cluster(district_iid) robust ///
                 partial(i.district_iid) ///
                 first
@@ -463,10 +463,10 @@ drop if unemp_10_miss_16 == 1
 drop if olf_16_miss_10 == 1
 drop if olf_10_miss_16 == 1 
 
- foreach outcome of global outcomes_cond {
-    qui xi: ivreg2  `outcome' i.year i.district_iid $controls_SR ///
+ foreach outcome of global SR_outcome_cond {
+    qui xi: ivreg2  `outcome' i.year i.district_iid $SR_controls ///
                 ($dep_var_wp = $iv_wp) ///
-                [pw = $weight], ///
+                [pw = $SR_weight], ///
                 cluster(district_iid) robust ///
                 partial(i.district_iid) ///
                 first
@@ -476,31 +476,31 @@ restore
 
 *IV Y I
 preserve
-  foreach outcome of global outcomes_uncond {     
+  foreach outcome of global SR_outcome_uncond {     
        qui xi: ivreghdfe `outcome' ///
-                    $controls_SR  ///
+                    $SR_controls  ///
                     ($dep_var_wp = $iv_wp) ///
-                    [pw = $weight], ///
+                    [pw = $SR_weight], ///
                     absorb(year indid_2010) ///
                     cluster(district_iid) 
 
         qui gen smpl=0
         qui replace smpl=1 if e(sample)==1
         * Then I partial out all variables
-        foreach y in `outcome' $controls_SR $dep_var_wp $iv_wp { 
-          qui reghdfe `y' [pw = $weight] if smpl==1, absorb(year indid_2010) residuals(`y'_c2wr)
+        foreach y in `outcome' $SR_controls $dep_var_wp $iv_wp { 
+          qui reghdfe `y' [pw = $SR_weight] if smpl==1, absorb(year indid_2010) residuals(`y'_c2wr)
           qui rename `y' o_`y'
           qui rename `y'_c2wr `y'
         }
         qui ivreg2 `outcome' ///
-               $controls_SR  ///
+               $SR_controls  ///
                ($dep_var_wp = $iv_wp) ///
-               [pw = $weight], ///
+               [pw = $SR_weight], ///
                cluster(district_iid) robust ///
                first 
       estimates store WPIV_YI_`outcome', title(Model `outcome')
-        qui drop `outcome' $dep_var_wp $iv_wp $controls_SR smpl
-        foreach y in `outcome' $dep_var_wp $iv_wp $controls_SR {
+        qui drop `outcome' $dep_var_wp $iv_wp $SR_controls smpl
+        foreach y in `outcome' $dep_var_wp $iv_wp $SR_controls {
           qui rename o_`y' `y' 
         }
     }
@@ -519,31 +519,31 @@ drop if unemp_10_miss_16 == 1
 drop if olf_16_miss_10 == 1
 drop if olf_10_miss_16 == 1 
 
-  foreach outcome of global outcomes_cond {     
+  foreach outcome of global SR_outcome_cond {     
        qui xi: ivreghdfe `outcome' ///
-                    $controls_SR  ///
+                    $SR_controls  ///
                     ($dep_var_wp = $iv_wp) ///
-                    [pw = $weight], ///
+                    [pw = $SR_weight], ///
                     absorb(year indid_2010) ///
                     cluster(district_iid) 
 
         qui gen smpl=0
         qui replace smpl=1 if e(sample)==1
         * Then I partial out all variables
-        foreach y in `outcome' $controls_SR $dep_var_wp $iv_wp { 
-          qui reghdfe `y' [pw = $weight] if smpl==1, absorb(year indid_2010) residuals(`y'_c2wr)
+        foreach y in `outcome' $SR_controls $dep_var_wp $iv_wp { 
+          qui reghdfe `y' [pw = $SR_weight] if smpl==1, absorb(year indid_2010) residuals(`y'_c2wr)
           qui rename `y' o_`y'
           qui rename `y'_c2wr `y'
         }
         qui ivreg2 `outcome' ///
-               $controls_SR  ///
+               $SR_controls  ///
                ($dep_var_wp = $iv_wp) ///
-               [pw = $weight], ///
+               [pw = $SR_weight], ///
                cluster(district_iid) robust ///
                first 
       estimates store WPIV_YI_`outcome', title(Model `outcome')
-        qui drop `outcome' $dep_var_wp $iv_wp $controls_SR smpl
-        foreach y in `outcome' $dep_var_wp $iv_wp $controls_SR {
+        qui drop `outcome' $dep_var_wp $iv_wp $SR_controls smpl
+        foreach y in `outcome' $dep_var_wp $iv_wp $SR_controls {
           qui rename o_`y' `y' 
         }
     }
@@ -605,7 +605,7 @@ restore
              (WPIV_YI_ln_hourly_rwage, label(Hourly Wage (ln))) ///
              (WPIV_YI_ln_whpw_$rp, label(Work Hours p.w.)) ///
              (WPIV_YI_formal, label(Formal)) , bylabel("IV Indiv Year") ///
-             || , drop(_Iyear_2016 $district _cons $controls_SR) ///
+             || , drop(_Iyear_2016 $district _cons $SR_controls) ///
               xline(0) msymbol(d) ///
               label subtitle(, size(vsmall) fcolor(white) nobox ) ///
              xlabel("") ylabel("") ///
@@ -688,11 +688,11 @@ lab var inter_gender "Nbr Ref x Gender"
 
 
 **** OLS *****
-  foreach outcome of global outcomes_uncond {
+  foreach outcome of global SR_outcome_uncond {
     qui xi: reg `outcome' $dep_var_ref inter_gender gender ///
                 age age2 ///
                 i.district_iid i.year  ///
-            [pw = $weight],  ///
+            [pw = $SR_weight],  ///
             cluster(district_iid) robust 
     estimates store REFGEN_YD_`outcome', title(Model `outcome')
   }
@@ -709,11 +709,11 @@ drop if unemp_10_miss_16 == 1
 drop if olf_16_miss_10 == 1
 drop if olf_10_miss_16 == 1 
 
-  foreach outcome of global outcomes_cond {
+  foreach outcome of global SR_outcome_cond {
     qui xi: reg `outcome' $dep_var_ref inter_gender gender ///
                 age age2 ///
                 i.district_iid i.year  ///
-            [pw = $weight],  ///
+            [pw = $SR_weight],  ///
             cluster(district_iid) robust 
     estimates store REFGEN_YD_`outcome', title(Model `outcome')
   }
@@ -734,7 +734,7 @@ restore
              || (REFGEN_YD_ln_hourly_rwage), bylabel(Hourly Wage (ln)) ///
              || (REFGEN_YD_ln_whpw_$rp), bylabel(Work Hours p.w.) ///
              || (REFGEN_YD_formal), bylabel(Formal) ///
-             || , drop( _Iyear_2016 $district _cons $controls_SR) ///
+             || , drop( _Iyear_2016 $district _cons $SR_controls) ///
               xline(0) msymbol(d) ///
               label subtitle(, size(vsmall) fcolor(white) nobox ) ///
              xlabel("") ylabel(1 "Treat" 2 "Inter") ///
@@ -778,11 +778,11 @@ lab var inter_urban "Nbr Ref x urban"
 
 
 **** OLS *****
-  foreach outcome of global outcomes_uncond {
+  foreach outcome of global SR_outcome_uncond {
     qui xi: reg `outcome' $dep_var_ref inter_urban urban ///
                 age age2 ///
                 i.district_iid i.year  ///
-            [pw = $weight],  ///
+            [pw = $SR_weight],  ///
             cluster(district_iid) robust 
     estimates store REFURB_YD_`outcome', title(Model `outcome')
   }
@@ -799,11 +799,11 @@ drop if unemp_10_miss_16 == 1
 drop if olf_16_miss_10 == 1
 drop if olf_10_miss_16 == 1 
 
-  foreach outcome of global outcomes_cond {
+  foreach outcome of global SR_outcome_cond {
     qui xi: reg `outcome' $dep_var_ref inter_urban urban ///
                 age age2 ///
                 i.district_iid i.year  ///
-            [pw = $weight],  ///
+            [pw = $SR_weight],  ///
             cluster(district_iid) robust 
     estimates store REFURB_YD_`outcome', title(Model `outcome')
   }
@@ -824,7 +824,7 @@ restore
              || (REFURB_YD_ln_hourly_rwage), bylabel(Hourly Wage (ln)) ///
              || (REFURB_YD_ln_whpw_$rp), bylabel(Work Hours p.w.) ///
              || (REFURB_YD_formal), bylabel(Formal) ///
-             || , drop( _Iyear_2016 $district _cons $controls_SR) ///
+             || , drop( _Iyear_2016 $district _cons $SR_controls) ///
               xline(0) msymbol(d) ///
               label subtitle(, size(vsmall) fcolor(white) nobox ) ///
              xlabel("") ylabel(1 "Treat" 2 "Inter") ///
@@ -869,11 +869,11 @@ lab var inter_educ "Nbr Ref x education"
 
 
 **** OLS *****
-  foreach outcome of global outcomes_uncond {
+  foreach outcome of global SR_outcome_uncond {
     qui xi: reg `outcome' $dep_var_ref inter_educ bi_education ///
                 age age2 ///
                 i.district_iid i.year  ///
-            [pw = $weight],  ///
+            [pw = $SR_weight],  ///
             cluster(district_iid) robust 
     estimates store REFEDU_YD_`outcome', title(Model `outcome')
   }
@@ -890,11 +890,11 @@ drop if unemp_10_miss_16 == 1
 drop if olf_16_miss_10 == 1
 drop if olf_10_miss_16 == 1 
 
-  foreach outcome of global outcomes_cond {
+  foreach outcome of global SR_outcome_cond {
     qui xi: reg `outcome' $dep_var_ref inter_educ bi_education ///
                 age age2 ///
                 i.district_iid i.year  ///
-            [pw = $weight],  ///
+            [pw = $SR_weight],  ///
             cluster(district_iid) robust 
     estimates store REFEDU_YD_`outcome', title(Model `outcome')
   }
@@ -915,7 +915,7 @@ restore
              || (REFEDU_YD_ln_hourly_rwage), bylabel(Hourly Wage (ln)) ///
              || (REFEDU_YD_ln_whpw_$rp), bylabel(Work Hours p.w.) ///
              || (REFEDU_YD_formal), bylabel(Formal) ///
-             || , drop(_Iyear_2016 $district _cons $controls_SR) ///
+             || , drop(_Iyear_2016 $district _cons $SR_controls) ///
               xline(0) msymbol(d) ///
               label subtitle(, size(vsmall) fcolor(white) nobox ) ///
              xlabel("") ylabel(1 "Treat" 2 "Inter") ///
@@ -1001,7 +1001,7 @@ graph export "$out_analysis\SR_HET_EDUC_Combined_Graph_REF.pdf", as(pdf) replace
              (m_IV_Y_D_ln_hourly_rwage, label(Hourly Wage (ln))) ///
              (m_IV_Y_D_ln_whpw_3m, label(Work Hours p.w.)) ///
              (m_IV_Y_D_formal, label(Formal)) , bylabel("IV District Year") ///
-             || , drop(_Iyear_2016 $district _cons $controls_SR) ///
+             || , drop(_Iyear_2016 $district _cons $SR_controls) ///
               xline(0) msymbol(d) ///
               label subtitle(, size(small) fcolor(white)) ///
              xlabel("") ylabel("") ///
@@ -1029,20 +1029,20 @@ graph export "$out_analysis\SR_Combined_Graph.pdf", as(pdf) replace
 
 
 
-foreach outcome of global outcomes_uncond {
+foreach outcome of global SR_outcome_uncond {
     qui xi: reg `outcome' $dep_var_wp ///
-            i.district_iid i.year $controls_SR  ///
-            [pw = $weight],  ///
+            i.district_iid i.year $SR_controls  ///
+            [pw = $SR_weight],  ///
             cluster(district_iid) robust 
     estimates store m_OLS_Y_D_`outcome'
 } 
 
 preserve
 keep if emp_16_10 == 1 
-foreach outcome of global outcomes_cond {
+foreach outcome of global SR_outcome_cond {
     qui xi: reg `outcome' $dep_var_wp ///
-            i.district_iid i.year $controls_SR  ///
-            [pw = $weight],  ///
+            i.district_iid i.year $SR_controls  ///
+            [pw = $SR_weight],  ///
             cluster(district_iid) robust 
     estimates store m_OLS_Y_D_`outcome'
 } 
@@ -1059,7 +1059,7 @@ restore
              (m_OLS_Y_D_ln_hourly_rwage, label(Hourly Wage (ln))) ///
              (m_OLS_Y_D_ln_whpw_3m, label(Work Hours p.w.)) ///
              (m_OLS_Y_D_formal, label(Formal)) ///
-             , drop(_Iyear_2016 $district _cons $controls_SR) ///
+             , drop(_Iyear_2016 $district _cons $SR_controls) ///
               xline(0) msymbol(D) ///
              graphregion(color(white)) bgcolor(white) label ///
              xlabel("") ylabel("") ///
@@ -1075,10 +1075,10 @@ restore
              name(a, replace)
 
 
- foreach outcome of global outcomes_uncond {
-    qui xi: ivreg2  `outcome' i.year i.district_iid $controls_SR ///
+ foreach outcome of global SR_outcome_uncond {
+    qui xi: ivreg2  `outcome' i.year i.district_iid $SR_controls ///
                 ($dep_var_wp = $iv_wp) ///
-                [pw = $weight], ///
+                [pw = $SR_weight], ///
                 cluster(district_iid) robust ///
                 partial(i.district_iid)
     estimates store m_IV_Y_D_`outcome', title(Model `outcome')
@@ -1086,10 +1086,10 @@ restore
 
 preserve
 keep if emp_16_10 == 1 
- foreach outcome of global outcomes_cond {
-    qui xi: ivreg2  `outcome' i.year i.district_iid $controls_SR ///
+ foreach outcome of global SR_outcome_cond {
+    qui xi: ivreg2  `outcome' i.year i.district_iid $SR_controls ///
                 ($dep_var_wp = $iv_wp) ///
-                [pw = $weight], ///
+                [pw = $SR_weight], ///
                 cluster(district_iid) robust ///
                 partial(i.district_iid) 
     estimates store m_IV_Y_D_`outcome', title(Model `outcome')
@@ -1107,7 +1107,7 @@ restore
              (m_IV_Y_D_ln_hourly_rwage, label(Hourly Wage (ln))) ///
              (m_IV_Y_D_ln_whpw_3m, label(Work Hours p.w.)) ///
              (m_IV_Y_D_formal, label(Formal)) ///
-             , drop(_Iyear_2016 $district _cons $controls_SR) ///
+             , drop(_Iyear_2016 $district _cons $SR_controls) ///
               xline(0) msymbol(d) ///
              graphregion(color(white)) bgcolor(white) label ///
              xlabel("") ylabel("") ///
@@ -1133,7 +1133,7 @@ restore
              (m_IV_Y_D_ln_hourly_rwage, label(Hourly Wage (ln))) ///
              (m_IV_Y_D_ln_whpw_3m, label(Work Hours p.w.)) ///
              (m_IV_Y_D_formal, label(Formal)) ///
-             , drop(_Iyear_2016 $district _cons $controls_SR) ///
+             , drop(_Iyear_2016 $district _cons $SR_controls) ///
               xline(0) msymbol(d) ///
              graphregion(color(white)) bgcolor(white) label ///
              xlabel("") ylabel("") ///
@@ -1170,10 +1170,10 @@ center c 0
 
 **** GRAAPH WITH MANY COUNTRIES 
 
-  foreach outcome of global outcomes_uncond {
+  foreach outcome of global SR_outcome_uncond {
 
     xi: reg `outcome' $dep_var_wp ///
-            [pw = $weight],  ///
+            [pw = $SR_weight],  ///
             cluster(district_iid) robust 
     codebook employed_olf_3m, c
     estimates table, k($dep_var_wp) star(.1 .05 .01) b(%7.4f) 
@@ -1192,21 +1192,21 @@ center c 0
              || , bylabel(Uganda)  ///
          || ,  drop(age age2 gender _Iyear_2016 ///
         $district ///
-        _cons $controls_SR) xline(0)  msymbol(S) 
+        _cons $SR_controls) xline(0)  msymbol(S) 
 
 
 
 
-  foreach outcome of global outcomes_uncond {
-       qui xi: reg `outcome' $dep_var_wp i.district_iid i.year $controls_SR ///
-              [pw = $weight],  ///
+  foreach outcome of global SR_outcome_uncond {
+       qui xi: reg `outcome' $dep_var_wp i.district_iid i.year $SR_controls ///
+              [pw = $SR_weight],  ///
                cluster(district_iid) robust 
        estimates store Jordan_`outcome'
    }
 
-  foreach outcome of global outcomes_uncond {
-       qui xi: reg `outcome' $dep_var_wp i.district_iid i.year $controls_SR  ///
-              [pw = $weight],  ///
+  foreach outcome of global SR_outcome_uncond {
+       qui xi: reg `outcome' $dep_var_wp i.district_iid i.year $SR_controls  ///
+              [pw = $SR_weight],  ///
                cluster(district_iid) robust 
        estimates store Uganda_`outcome'
    }
@@ -1226,7 +1226,7 @@ coefplot    (Jordan_employed_olf_3m), bylabel(Jordan) ///
          || (Uganda_lfp_3m_se), bylabel(Uganda)   ///
          || (Jordan_lfp_3m_unpaid), bylabel(Jordan)  ///
          || (Uganda_lfp_3m_unpaid), bylabel(Uganda)  ///
-         ||   , drop($controls_SR _Iyear_2016 $district _cons) xline(0) ///
+         ||   , drop($SR_controls _Iyear_2016 $district _cons) xline(0) ///
      bycoefs  ///
      ytick( 2.5 4.5 6.5 8.5 10.5 12.5,  glpattern(dash) glwidth(*0.5) glcolor(gray)) ///
      grid(glpattern(dash) glwidth(*2) glcolor(gray)) ///

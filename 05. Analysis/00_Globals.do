@@ -36,6 +36,44 @@ global IVs  IV_1 IV_2 IV_3 IV_4
 
 *OUTCOME CONDITIONAL ON EMPLOYEMENT
 global    outcome_cond ///
+              formal  /// 0 Informal - 1 Formal - Informal if no contract (uscontrp=0) OR no insurance (ussocinsp=0)
+              private /// Economic Sector of Primary Job  3m - 0 Public 1 Private
+              wp_ind_3m  /// Industries with work permits for refugees - Economic Activity of prim. job 3m
+              stable_3m ///  From usstablp - Stability of employement (3m) - 1 permanent - 0 temp, seas, cas
+              union_3m /// Member of a syndicate/trade union (ref. 3-mnths)
+              skilled ///  Does primary job require any skill
+              ln_trwage_3m  /// LOG Total Wage (3-month) - CONDITIONAL - UNEMPLOYED & OLF: WAGE MISSING
+              ln_hrwage  /// LOG Hourly Wage (Prim.& Second. Jobs)
+              whpw_w_3m  /// Winsorized - Usual No. of Hours/Week, Market Work, (Ref. 3-month)
+              wdpw_3m  // Avg. num. of wrk. days per week during 3 mnth.
+
+global models OLS OLS_YD IV_YD IV_YDS IV_YI FST IV_1 IV_2 IV_3 IV_4
+
+foreach model of global models {         
+global   `model'_cond ///
+              `model'_formal  /// 0 Informal - 1 Formal - Informal if no contract (uscontrp=0) OR no insurance (ussocinsp=0)
+              `model'_private /// Economic Sector of Primary Job  3m - 0 Public 1 Private
+              `model'_wp_ind_3m  /// Industries with work permits for refugees - Economic Activity of prim. job 3m
+              `model'_stable_3m ///  From usstablp - Stability of employement (3m) - 1 permanent - 0 temp, seas, cas
+              `model'_union_3m /// Member of a syndicate/trade union (ref. 3-mnths)
+              `model'_skilled ///  Does primary job require any skill
+              `model'_ln_trwage_3m  /// LOG Total Wage (3-month) - CONDITIONAL - UNEMPLOYED & OLF: WAGE MISSING
+              `model'_ln_hrwage  /// LOG Hourly Wage (Prim.& Second. Jobs)
+              `model'_whpw_w_3m  /// Winsorized - Usual No. of Hours/Week, Market Work, (Ref. 3-month)
+              `model'_wdpw_3m  // Avg. num. of wrk. days per week during 3 mnth.
+ }       
+
+
+
+
+
+
+
+
+
+/*
+*OUTCOME CONDITIONAL ON EMPLOYEMENT
+global    outcome_cond ///
               job_stable_3m ///  From usstablp - Stability of employement (3m) - 1 permanent - 0 temp, seas, cas
               formal  /// 0 Informal - 1 Formal - Informal if no contract (uscontrp=0) OR no insurance (ussocinsp=0)
               private /// Economic Sector of Primary Job  3m - 0 Public 1 Private
@@ -46,19 +84,25 @@ global    outcome_cond ///
               ln_hourly_rwage  /// LOG Hourly Wage (Prim.& Second. Jobs)
               work_hours_pweek_3m_w  /// Winsorized - Usual No. of Hours/Week, Market Work, (Ref. 3-month)
               work_days_pweek_3m  // Avg. num. of wrk. days per week during 3 mnth.
-             
-global    m_cond ///
-              m_job_stable_3m ///  From usstablp - Stability of employement (3m) - 1 permanent - 0 temp, seas, cas
-              m_formal  /// 0 Informal - 1 Formal - Informal if no contract (uscontrp=0) OR no insurance (ussocinsp=0)
-              m_private /// Economic Sector of Primary Job  3m - 0 Public 1 Private
-              m_wp_industry_jlmps_3m  /// Industries with work permits for refugees - Economic Activity of prim. job 3m
-              m_member_union_3m /// Member of a syndicate/trade union (ref. 3-mnths)
-              m_skills_required_pjob ///  Does primary job require any skill
-              m_ln_total_rwage_3m  /// LOG Total Wage (3-month) - CONDITIONAL - UNEMPLOYED & OLF: WAGE MISSING
-              m_ln_hourly_rwage  /// LOG Hourly Wage (Prim.& Second. Jobs)
-              m_work_hours_pweek_3m_w  /// Winsorized - Usual No. of Hours/Week, Market Work, (Ref. 3-month)
-              m_work_days_pweek_3m  // Avg. num. of wrk. days per week during 3 mnth.
-             
+
+global models OLS OLS_YD IV_YD IV_YDS IV_YI
+
+foreach model of global models {         
+global   `model'_cond ///
+              `model'_job_stable_3m ///  From usstablp - Stability of employement (3m) - 1 permanent - 0 temp, seas, cas
+              `model'_formal  /// 0 Informal - 1 Formal - Informal if no contract (uscontrp=0) OR no insurance (ussocinsp=0)
+              `model'_private /// Economic Sector of Primary Job  3m - 0 Public 1 Private
+              `model'_wp_industry_jlmps_3m  /// Industries with work permits for refugees - Economic Activity of prim. job 3m
+              `model'_member_union_3m /// Member of a syndicate/trade union (ref. 3-mnths)
+              `model'_skills_required_pjob ///  Does primary job require any skill
+              `model'_ln_total_rwage_3m  /// LOG Total Wage (3-month) - CONDITIONAL - UNEMPLOYED & OLF: WAGE MISSING
+              `model'_ln_hourly_rwage  /// LOG Hourly Wage (Prim.& Second. Jobs)
+              `model'_work_hours_pweek_3m_w  /// Winsorized - Usual No. of Hours/Week, Market Work, (Ref. 3-month)
+              `model'_work_days_pweek_3m  // Avg. num. of wrk. days per week during 3 mnth.
+ }   
+ */
+
+
              *work_hours_pday_3m_w  /// Winsorized - No. of Hours/Day (Ref. 3 mnths) Market Work
 
 /*              ln_monthly_rwage  /// LOG Monthly Wage (Prim.& Second. Jobs)
@@ -91,18 +135,18 @@ global    m_cond ///
               employed_olf_3m /// From uswrkstsr1 - mkt def, search req; 3m, 2 empl - 1 unemp&OLF
 */ 
 global    outcome_uncond ///
-              job_stable_3m_unolf ///  UNCONDITIONAL - UNEMPLOYED & OLF: 0  : From usstablp - Stability of employement (3m) - 1 permanent - 0 temp, seas, cas
-              member_union_3m_unolf /// UNCONDITIONAL - UNEMPLOYED & OLF: 0  : Member of a syndicate/trade union (ref. 3-mnths)
-              skills_required_pjob_unolf /// UNCONDITIONAL - UNEMPLOYED & OLF: 0 : Does primary job require any skill
-              ln_t_rwage_unolf /// UNCONDITIONAL - UNEMPLOYED & OLF: WAGE 0 - LOG - Total Wage (3-month)
-              ln_hourly_rwage_unolf /// UNCONDITIONAL - UNEMPLOYED & OLF: WAGE 0 - LOG - Hourly Wage (3-month)
-              work_hours_pday_3m_w_unolf /// UNCONDITIONAL - UNEMPLOYED & OLF: 0 - work hours (3-month)
-              work_days_pweek_3m_unolf /// UNCONDITIONAL - UNEMPLOYED & OLF: 0 - work day per week (3-month)
+              stable_3m_unolf ///  UNCONDITIONAL - UNEMPLOYED & OLF: 0  : From usstablp - Stability of employement (3m) - 1 permanent - 0 temp, seas, cas
+              union_3m_unolf /// UNCONDITIONAL - UNEMPLOYED & OLF: 0  : Member of a syndicate/trade union (ref. 3-mnths)
+              skilled_unolf /// UNCONDITIONAL - UNEMPLOYED & OLF: 0 : Does primary job require any skill
+              ln_trwage_3m_unolf /// UNCONDITIONAL - UNEMPLOYED & OLF: WAGE 0 - LOG - Total Wage (3-month)
+              ln_hrwage_main_unolf /// UNCONDITIONAL - UNEMPLOYED & OLF: WAGE 0 - LOG - Hourly Wage (3-month)
+              whpd_w_3m_unolf /// UNCONDITIONAL - UNEMPLOYED & OLF: 0 - work hours (3-month)
+              wdpw_3m_unolf /// UNCONDITIONAL - UNEMPLOYED & OLF: 0 - work day per week (3-month)
               employed_olf_3m /// From uswrkstsr1 - mkt def, search req; 3m, 2 empl - 1 unemp&OLF
               unemployed_olf_3m /// From unempsr1 - mrk def, search req; 3m, empl or unemp&OLF
               unemployed_3m // From unempsr1m - mrk def, search req; 3m, empl or unemp, OLF is miss
 
-global    m_uncond ///
+/*global    m_uncond ///
               m_job_stable_3m_unolf ///  UNCONDITIONAL - UNEMPLOYED & OLF: 0  : From usstablp - Stability of employement (3m) - 1 permanent - 0 temp, seas, cas
               m_member_union_3m_unolf /// UNCONDITIONAL - UNEMPLOYED & OLF: 0  : Member of a syndicate/trade union (ref. 3-mnths)
               m_skills_required_pjob_unolf /// UNCONDITIONAL - UNEMPLOYED & OLF: 0 : Does primary job require any skill
@@ -113,7 +157,7 @@ global    m_uncond ///
               m_employed_olf_3m /// From uswrkstsr1 - mkt def, search req; 3m, 2 empl - 1 unemp&OLF
               m_unemployed_olf_3m /// From unempsr1 - mrk def, search req; 3m, empl or unemp&OLF
               m_unemployed_3m // From unempsr1m - mrk def, search req; 3m, empl or unemp, OLF is miss
-
+*/
 
 global    globals_list ///
             outcome_cond outcome_uncond
@@ -179,6 +223,23 @@ global fe       _Ieduc1d_2 _Ieduc1d_3 _Ieduc1d_4 _Ieduc1d_5 ///
                 _Imteducst_6 _Iftempst_2 _Iftempst_3 _Iftempst_4 _Iftempst_5 ///
                 _Iftempst_6  
 
+*FOR GRAPH SAVING 
+global   district      ///
+        _Idistrict__2 _Idistrict__3 ///
+        _Idistrict__4 _Idistrict__5 _Idistrict__6 _Idistrict__7 ///
+        _Idistrict__8 _Idistrict__9 _Idistrict__10 _Idistrict__11 ///
+        _Idistrict__12 _Idistrict__13 _Idistrict__14 _Idistrict__15 ///
+        _Idistrict__16  _Idistrict__18 _Idistrict__19 ///
+        _Idistrict__20 _Idistrict__21 _Idistrict__22 _Idistrict__23 ///
+        _Idistrict__24 _Idistrict__25 _Idistrict__26 _Idistrict__27 ///
+        _Idistrict__28 _Idistrict__29 _Idistrict__30 _Idistrict__31 ///
+        _Idistrict__32 _Idistrict__33 _Idistrict__34 _Idistrict__35 ///
+        _Idistrict__36 _Idistrict__37 _Idistrict__38 _Idistrict__39 ///
+        _Idistrict__40 _Idistrict__41 _Idistrict__42 _Idistrict__43 ///
+        _Idistrict__44 _Idistrict__45 _Idistrict__46 _Idistrict__47 ///
+        _Idistrict__48 _Idistrict__49 _Idistrict__50 _Idistrict__51 
+
+
 /*SPECIAL TREATMENTS
           ln_nb_refugees_bygov /// LOG Number of refugees out of camps by governorate in 2016
           educ1d ///  Education Levels (1-digit)
@@ -227,7 +288,7 @@ global rp 7d
 *3m
 
 *7days
-global outcomes_uncond  employed_olf_7d ///
+global SR_outcome_uncond  employed_olf_7d ///
                         unemployed_olf_7d ///
                         lfp_empl_7d ///
                         lfp_temp_7d ///
@@ -238,10 +299,38 @@ global outcomes_uncond  employed_olf_7d ///
                         act_com_7d ///
                         act_serv_7d
 
-global outcomes_cond  ln_total_rwage_7d ///
-                      ln_hourly_rwage ///
-                      ln_whpw_7d ///
+global SR_outcome_cond  ln_trwage_7d ///
+                      ln_hrwage_main ///
+                      ln_whpw_w_7d ///
                       formal
+
+
+global SR_models  REFOLS_YD REFIV_YD REFOLS_YI REFIV_YI ///
+                  WPOLS_YD WPIV_YD WPOLS_YI WPIV_YI ///
+                  REFGEN_YD REFGEN_YI ///
+                  REFURB_YD REFURB_YI ///
+                  REFEDU_YD REFEDU_YI
+
+foreach model of global SR_models {         
+   global   `model'_uncond ///
+                 `model'_employed_olf_7d ///
+                 `model'_unemployed_olf_7d ///
+                 `model'_lfp_empl_7d ///
+                 `model'_lfp_temp_7d ///
+                 `model'_lfp_employer_7d ///
+                 `model'_lfp_se_7d ///
+                 `model'_act_ag_7d ///
+                 `model'_act_manuf_7d ///
+                 `model'_act_com_7d ///
+                 `model'_act_serv_7d 
+   
+   global   `model'_cond ///
+                 `model'_ln_trwage_7d  ///
+                 `model'_ln_hrwage_main  ///
+                 `model'_ln_whpw_w_7d  ///
+                 `model'_formal  
+ }       
+
 
 *3monhts
 /*
@@ -263,6 +352,7 @@ global outcomes_cond  ln_total_rwage_3m ///
 *ln_rhourly_wage_main 
  *wh_pw_7d_w formal 
 
+/*
 *7days
 global outreg_uncond    m_employed_olf_7d ///
                         m_unemployed_olf_7d ///
@@ -276,9 +366,10 @@ global outreg_uncond    m_employed_olf_7d ///
                         m_act_serv_7d
 
 global outreg_cond  m_ln_total_rwage_7d ///
-                    m_ln_hourly_rwage ///
+                    m_ln_hrwage_main ///
                     m_ln_whpw_7d ///
                     m_formal
+*/
 
 /*
 *3monhts 
@@ -293,34 +384,18 @@ global outreg_uncond ////
 
 global outreg_cond ///
             m_ln_total_rwage_3m ///
-            m_ln_hourly_rwage ///
+            m_ln_hrwage_main ///
             m_ln_whpw_3m ///
             m_formal 
 */
 
-global controls_SR age age2 gender 
+global SR_controls age age2 gender 
 
-global heterogenous gender urb_rural_camps lfp_3m bi_education
+*global SR_heterogenous gender urb_rural_camps lfp_3m bi_education
 
-global weight expan_indiv
+global SR_weight expan_indiv
 *panel_wt_10_16
      
-
-*FOR GRAPH SAVING 
-global   district      ///
-        _Idistrict__2 _Idistrict__3 ///
-        _Idistrict__4 _Idistrict__5 _Idistrict__6 _Idistrict__7 ///
-        _Idistrict__8 _Idistrict__9 _Idistrict__10 _Idistrict__11 ///
-        _Idistrict__12 _Idistrict__13 _Idistrict__14 _Idistrict__15 ///
-        _Idistrict__16  _Idistrict__18 _Idistrict__19 ///
-        _Idistrict__20 _Idistrict__21 _Idistrict__22 _Idistrict__23 ///
-        _Idistrict__24 _Idistrict__25 _Idistrict__26 _Idistrict__27 ///
-        _Idistrict__28 _Idistrict__29 _Idistrict__30 _Idistrict__31 ///
-        _Idistrict__32 _Idistrict__33 _Idistrict__34 _Idistrict__35 ///
-        _Idistrict__36 _Idistrict__37 _Idistrict__38 _Idistrict__39 ///
-        _Idistrict__40 _Idistrict__41 _Idistrict__42 _Idistrict__43 ///
-        _Idistrict__44 _Idistrict__45 _Idistrict__46 _Idistrict__47 ///
-        _Idistrict__48 _Idistrict__49 _Idistrict__50 _Idistrict__51 
 
 
 

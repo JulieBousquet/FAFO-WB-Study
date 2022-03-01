@@ -850,16 +850,16 @@ lab var employed_olf_3m "From uswrkstsr1 - mkt def, search req; 3m, 2 empl - 1 u
 *Job stability in prim. job (ref. 3-mnths)
 tab usstablp, m 
 codebook usstablp
-gen job_stable_3m = 1 if usstablp == 1 
-replace job_stable_3m = 0 if usstablp != 1 & !mi(usstablp)
-lab var job_stable_3m "From usstablp - Stability of employement (3m) - 1 permanent - 0 temp, seas, cas"
-tab job_stable_3m, m
+gen stable_3m = 1 if usstablp == 1 
+replace stable_3m = 0 if usstablp != 1 & !mi(usstablp)
+lab var stable_3m "From usstablp - Stability of employement (3m) - 1 permanent - 0 temp, seas, cas"
+tab stable_3m, m
 
             *Unconditional : IF UNEMPLOYED & OLF: IS 0
-            gen job_stable_3m_unolf = job_stable_3m if employed_3cat_3m == 2
-            replace job_stable_3m_unolf = 0 if employed_3cat_3m  == 1 | employed_3cat_3m  == 0 
-            tab job_stable_3m_unolf
-            lab var job_stable_3m_unolf "UNCONDITIONAL - UNEMPLOYED & OLF: 0 - job_stable_3m"
+            gen stable_3m_unolf = stable_3m if employed_3cat_3m == 2
+            replace stable_3m_unolf = 0 if employed_3cat_3m  == 1 | employed_3cat_3m  == 0 
+            tab stable_3m_unolf
+            lab var stable_3m_unolf "UNCONDITIONAL - UNEMPLOYED & OLF: 0 - stable_3m"
 
 *LABOR FORCE PARTICIPATION
 *The labor force participation rate indicates the percentage of all people of working age who 
@@ -914,8 +914,8 @@ tab crecac1d, m
 tab usecac1d, m 
 codebook usecac1d
 lab list ecac1d
-gen wp_industry_jlmps_3m = 0 if !mi(usecac1d)
-replace wp_industry_jlmps_3m = 1 if   usecac1d == 0 | /// Agriculture, forestry and fishing
+gen wp_ind_3m = 0 if !mi(usecac1d)
+replace wp_ind_3m = 1 if   usecac1d == 0 | /// Agriculture, forestry and fishing
                                       usecac1d == 2 | /// Manufacturing
                                       usecac1d == 5 | /// Construction
                                       usecac1d == 6 | /// Wholesale and retail trade; repair of motor vehicles and motorcycles
@@ -924,19 +924,19 @@ replace wp_industry_jlmps_3m = 1 if   usecac1d == 0 | /// Agriculture, forestry 
                                       usecac1d == 14 | /// Public administration and defense; compulsory social security
                                       usecac1d == 18 // Other service activities 
 /*       ORIGINAL                               
-replace wp_industry_jlmps_3m = 1 if   usecac1d == 0 | /// 
+replace wp_ind_3m = 1 if   usecac1d == 0 | /// 
                                       usecac1d == 2 | ///
                                       usecac1d == 5 | ///
                                       usecac1d == 8 | ///
                                       usecac1d == 16 
                                       */
-tab wp_industry_jlmps_3m, m 
-lab var wp_industry_jlmps_3m "Industries with work permits for refugees - Economic Activity of prim. job 3m"
-lab def wp_industry_jlmps_3m 0 "Close sector" 1 "Open Sector", modify
-lab val wp_industry_jlmps_3m wp_industry_jlmps_3m
+tab wp_ind_3m, m 
+lab var wp_ind_3m "Industries with work permits for refugees - Economic Activity of prim. job 3m"
+lab def wp_ind_3m 0 "Close sector" 1 "Open Sector", modify
+lab val wp_ind_3m wp_ind_3m
 
 *Where are the OLF/UNEMPL ?
-tab wp_industry_jlmps_3m uswrkstsr2, m
+tab wp_ind_3m uswrkstsr2, m
 
 
 
@@ -948,31 +948,31 @@ tab wp_industry_jlmps_3m uswrkstsr2, m
 
 preserve 
 
-keep wp_industry_jlmps_3m indid_2010 year 
-reshape wide wp_industry_jlmps_3m, i(indid_2010) j(year)
+keep wp_ind_3m indid_2010 year 
+reshape wide wp_ind_3m, i(indid_2010) j(year)
 format indid_2010 %12.0g
 
 *br indid_2010 employed_3m2016 employed_3m2010
 
 *MISS 2016 - MISS 2010
-gen open_10_16 = 1 if  wp_industry_jlmps_3m2010 == 1  & wp_industry_jlmps_3m2016 == 1
-gen close_10_16 = 1 if wp_industry_jlmps_3m2010 == 0 & wp_industry_jlmps_3m2016 == 0
-gen open_10_close_16 = 1 if  wp_industry_jlmps_3m2010 == 1  & wp_industry_jlmps_3m2016 == 0
-gen close_10_open_16 = 1 if wp_industry_jlmps_3m2010 == 0 & wp_industry_jlmps_3m2016 == 1
+gen open_10_16 = 1 if  wp_ind_3m2010 == 1  & wp_ind_3m2016 == 1
+gen close_10_16 = 1 if wp_ind_3m2010 == 0 & wp_ind_3m2016 == 0
+gen open_10_close_16 = 1 if  wp_ind_3m2010 == 1  & wp_ind_3m2016 == 0
+gen close_10_open_16 = 1 if wp_ind_3m2010 == 0 & wp_ind_3m2016 == 1
 
 tab open_10_16, m
 tab close_10_16, m
 tab open_10_close_16, m
 tab close_10_open_16, m
 
-reshape long wp_industry_jlmps_3m, i(indid_2010) j(year)
+reshape long wp_ind_3m, i(indid_2010) j(year)
 format indid_2010 %12.0g
 
 tempfile data_empl
 save `data_empl'
 restore 
 
-drop wp_industry_jlmps_3m 
+drop wp_ind_3m 
 merge 1:1 indid_2010 year using  `data_empl'
 drop _merge
 
@@ -1481,22 +1481,22 @@ ren crnumdys work_days_pweek_1w
 
 *Avg. num. of wrk. days per week during 3 mnth.
 tab usnumdys, m 
-ren usnumdys work_days_pweek_3m
-tab work_days_pweek_3m , m
-replace work_days_pweek_3m = . if work_days_pweek_3m == 0
+ren usnumdys wdpw_3m
+tab wdpw_3m , m
+replace wdpw_3m = . if wdpw_3m == 0
 
             *Unconditional work hours per day: IF UNEMPLOYED & OLF: WAGE IS 0
-            gen work_days_pweek_3m_unolf = work_days_pweek_3m if employed_3cat_3m == 2
-            replace work_days_pweek_3m_unolf = 0 if employed_3cat_3m  == 1 | employed_3cat_3m  == 0 
-            tab work_days_pweek_3m_unolf
-            lab var work_days_pweek_3m_unolf "UNCONDITIONAL - UNEMPLOYED & OLF: 0 - work day per week (3-month)"
+            gen wdpw_3m_unolf = wdpw_3m if employed_3cat_3m == 2
+            replace wdpw_3m_unolf = 0 if employed_3cat_3m  == 1 | employed_3cat_3m  == 0 
+            tab wdpw_3m_unolf
+            lab var wdpw_3m_unolf "UNCONDITIONAL - UNEMPLOYED & OLF: 0 - work day per week (3-month)"
 
             *Unconditional work hours per day: IF UNEMPLOYED : WAGE IS 0 / IF OLF: WAGE IS MISSING
-            gen work_days_pweek_3m_unemp = work_days_pweek_3m if employed_3cat_3m == 2
-            replace work_days_pweek_3m_unemp = 0 if employed_3cat_3m == 1 //UNEMP
-            replace work_days_pweek_3m_unemp = . if employed_3cat_3m == 0 //OLF
-            tab work_days_pweek_3m_unemp
-            lab var work_days_pweek_3m_unemp "UNCONDITIONAL - UNEMPLOYED work day per week 0 / OLF work day pweek MISSING - work day pw (3m)"
+            gen wdpw_3m_unemp = wdpw_3m if employed_3cat_3m == 2
+            replace wdpw_3m_unemp = 0 if employed_3cat_3m == 1 //UNEMP
+            replace wdpw_3m_unemp = . if employed_3cat_3m == 0 //OLF
+            tab wdpw_3m_unemp
+            lab var wdpw_3m_unemp "UNCONDITIONAL - UNEMPLOYED work day per week 0 / OLF work day pweek MISSING - work day pw (3m)"
 
                                  *******************************
                                  ****    HOURS OF WORK      ****
@@ -1550,20 +1550,22 @@ replace work_hours_pweek_3m = crnumhrs1 if work_hours_pweek_3m == 0
 tab work_hours_pweek_3m
 su work_hours_pweek_3m, d
 winsor2 work_hours_pweek_3m, s(_w) c(0 99)
-su work_hours_pweek_3m_w
+ren work_hours_pweek_3m_w whpw_w_3m
+su whpw_w_3m
+lab var whpw_w_3m "Work Hours per week - winsorized"
 
             *Unconditional work hours per day: IF UNEMPLOYED & OLF: WAGE IS 0
-            gen work_hours_pw_3m_w_unolf = work_hours_pweek_3m if employed_3cat_3m == 2
-            replace work_hours_pw_3m_w_unolf = 0 if employed_3cat_3m  == 1 | employed_3cat_3m  == 0 
-            tab work_hours_pw_3m_w_unolf
-            lab var work_hours_pw_3m_w_unolf "UNCONDITIONAL - UNEMPLOYED & OLF: 0 - work hours week (3-month)"
+            gen whpw_w_3m_unolf = whpw_w_3m if employed_3cat_3m == 2
+            replace whpw_w_3m_unolf = 0 if employed_3cat_3m  == 1 | employed_3cat_3m  == 0 
+            tab whpw_w_3m_unolf
+            lab var whpw_w_3m_unolf "UNCONDITIONAL - UNEMPLOYED & OLF: 0 - work hours week (3-month)"
 
             *Unconditional work hours per day: IF UNEMPLOYED : WAGE IS 0 / IF OLF: WAGE IS MISSING
-            gen work_hours_pw_3m_w_unemp = work_hours_pweek_3m if employed_3cat_3m == 2
-            replace work_hours_pw_3m_w_unemp = 0 if employed_3cat_3m == 1 //UNEMP
-            replace work_hours_pw_3m_w_unemp = . if employed_3cat_3m == 0 //OLF
-            tab work_hours_pw_3m_w_unemp
-            lab var work_hours_pw_3m_w_unemp "UNCONDITIONAL - UNEMPLOYED work hours week 0 / OLF work hours MISSING - work hours (3m)"
+            gen whpw_w_3m_unemp = whpw_w_3m if employed_3cat_3m == 2
+            replace whpw_w_3m_unemp = 0 if employed_3cat_3m == 1 //UNEMP
+            replace whpw_w_3m_unemp = . if employed_3cat_3m == 0 //OLF
+            tab whpw_w_3m_unemp
+            lab var whpw_w_3m_unemp "UNCONDITIONAL - UNEMPLOYED work hours week 0 / OLF work hours MISSING - work hours (3m)"
 
 
 *Usual No. of Hours/Week, Market & Subsistence Work, (Ref. 3-month)
@@ -1718,47 +1720,47 @@ tab prftshr3, m
 
 *Total Wages (3-month)
 tab ttmonwg3, m 
-ren ttmonwg3 total_wage_3m
+ren ttmonwg3 twage_3m
 
-tab total_wage_3m
+tab twage_3m
 
       *Corrected from inflation
-      gen real_total_wage_3m = total_wage_3m / CPIin17
-      lab var real_total_wage_3m "CORRECTED INFLATION - Total Wage (3-month)"
+      gen trwage_3m = twage_3m / CPIin17
+      lab var trwage_3m "CORRECTED INFLATION - Total Wage (3-month)"
 
       *LN
-      gen ln_total_rwage_3m = ln(1+real_total_wage_3m)
-      lab var ln_total_rwage_3m "LOG Total Wage (3-month) - CONDITIONAL - UNEMPLOYED & OLF: WAGE MISSING"
+      gen ln_trwage_3m = ln(1+trwage_3m)
+      lab var ln_trwage_3m "LOG Total Wage (3-month) - CONDITIONAL - UNEMPLOYED & OLF: WAGE MISSING"
 
       *IHS
-      gen IHS_total_rwage_3m = log(real_total_wage_3m+((real_total_wage_3m^2+1)^0.5))
-      lab var IHS_total_rwage_3m "IHS Total Wage (3-month) - CONDITIONAL - UNEMPLOYED & OLF: WAGE MISSING"
+      gen IHS_trwage_3m = log(trwage_3m+((trwage_3m^2+1)^0.5))
+      lab var IHS_trwage_3m "IHS Total Wage (3-month) - CONDITIONAL - UNEMPLOYED & OLF: WAGE MISSING"
 
       *Unconditional wage: IF UNEMPLOYED & OLF: WAGE IS 0
-      gen IHS_t_rwage_unolf = IHS_total_rwage_3m if employed_3cat_3m == 2
-      replace IHS_t_rwage_unolf = 0 if employed_3cat_3m  == 1 | employed_3cat_3m  == 0 
-      tab IHS_t_rwage_unolf
-      lab var IHS_t_rwage_unolf "UNCONDITIONAL - UNEMPLOYED & OLF: WAGE 0 - IHS - Total Wage (3-month)"
+      gen IHS_trwage_unolf = IHS_trwage_3m if employed_3cat_3m == 2
+      replace IHS_trwage_unolf = 0 if employed_3cat_3m  == 1 | employed_3cat_3m  == 0 
+      tab IHS_trwage_unolf
+      lab var IHS_trwage_unolf "UNCONDITIONAL - UNEMPLOYED & OLF: WAGE 0 - IHS - Total Wage (3-month)"
 
      *Unconditional wage: IF UNEMPLOYED & OLF: WAGE IS 0
-      gen ln_t_rwage_unolf = ln_total_rwage_3m if employed_3cat_3m == 2
-      replace ln_t_rwage_unolf = 0 if employed_3cat_3m  == 1 | employed_3cat_3m  == 0 
-      tab ln_t_rwage_unolf
-      lab var ln_t_rwage_unolf "UNCONDITIONAL - UNEMPLOYED & OLF: WAGE 0 - LOG - Total Wage (3-month)"
+      gen ln_trwage_3m_unolf = ln_trwage_3m if employed_3cat_3m == 2
+      replace ln_trwage_3m_unolf = 0 if employed_3cat_3m  == 1 | employed_3cat_3m  == 0 
+      tab ln_trwage_3m_unolf
+      lab var ln_trwage_3m_unolf "UNCONDITIONAL - UNEMPLOYED & OLF: WAGE 0 - LOG - Total Wage (3-month)"
 
       *Unconditional wage: IF UNEMPLOYED : WAGE IS 0 / IF OLF: WAGE IS MISSING
-      gen IHS_t_rwage_unemp = IHS_total_rwage_3m if employed_3cat_3m == 2
+      gen IHS_t_rwage_unemp = IHS_trwage_3m if employed_3cat_3m == 2
       replace IHS_t_rwage_unemp = 0 if employed_3cat_3m == 1 //UNEMP
       replace IHS_t_rwage_unemp = . if employed_3cat_3m == 0 //OLF
       tab IHS_t_rwage_unemp
       lab var IHS_t_rwage_unemp "UNCONDITIONAL - UNEMPLOYED WAGE 0 / OLF WAGE MISSING - IHS Total (3m)"
 
       *Unconditional wage: IF UNEMPLOYED : WAGE IS 0 / IF OLF: WAGE IS MISSING
-      gen ln_t_rwage_unemp = ln_total_rwage_3m if employed_3cat_3m == 2
-      replace ln_t_rwage_unemp = 0 if employed_3cat_3m == 1 //UNEMP
-      replace ln_t_rwage_unemp = . if employed_3cat_3m == 0 //OLF
-      tab ln_t_rwage_unemp
-      lab var ln_t_rwage_unemp "UNCONDITIONAL - UNEMPLOYED WAGE 0 / OLF WAGE MISSING - LOG Total (3m)"
+      gen ln_trwage_3m_unemp = ln_trwage_3m if employed_3cat_3m == 2
+      replace ln_trwage_3m_unemp = 0 if employed_3cat_3m == 1 //UNEMP
+      replace ln_trwage_3m_unemp = . if employed_3cat_3m == 0 //OLF
+      tab ln_trwage_3m_unemp
+      lab var ln_trwage_3m_unemp "UNCONDITIONAL - UNEMPLOYED WAGE 0 / OLF WAGE MISSING - LOG Total (3m)"
 
          *** PRIMARY ***
 
@@ -1793,21 +1795,21 @@ su hourly_wage
       lab var real_hourly_wage "CORRECTED INFLATION - Hourly Wage (Prim.& Second. Jobs)"
 
          *LOG
-         gen ln_hourly_rwage = ln(1 + real_hourly_wage)
-         lab var ln_hourly_rwage "LOG Hourly Wage (Prim.& Second. Jobs)"
+         gen ln_hrwage = ln(1 + real_hourly_wage)
+         lab var ln_hrwage "LOG Hourly Wage (Prim.& Second. Jobs)"
 
            *Unconditional hourly wage: IF UNEMPLOYED & OLF: WAGE IS 0
-            gen ln_hourly_rwage_unolf = ln_hourly_rwage if employed_3cat_3m == 2
-            replace ln_hourly_rwage_unolf = 0 if employed_3cat_3m  == 1 | employed_3cat_3m  == 0 
-            tab ln_hourly_rwage_unolf
-            lab var ln_hourly_rwage_unolf "UNCONDITIONAL - UNEMPLOYED & OLF: WAGE 0 - LOG - Hourly Wage (3-month)"
+            gen ln_hrwage_unolf = ln_hrwage if employed_3cat_3m == 2
+            replace ln_hrwage_unolf = 0 if employed_3cat_3m  == 1 | employed_3cat_3m  == 0 
+            tab ln_hrwage_unolf
+            lab var ln_hrwage_unolf "UNCONDITIONAL - UNEMPLOYED & OLF: WAGE 0 - LOG - Hourly Wage (3-month)"
 
             *Unconditional hourly wage: IF UNEMPLOYED : WAGE IS 0 / IF OLF: WAGE IS MISSING
-            gen ln_hourly_rwage_unemp = ln_hourly_rwage if employed_3cat_3m == 2
-            replace ln_hourly_rwage_unemp = 0 if employed_3cat_3m == 1 //UNEMP
-            replace ln_hourly_rwage_unemp = . if employed_3cat_3m == 0 //OLF
-            tab ln_hourly_rwage_unemp
-            lab var ln_hourly_rwage_unemp "UNCONDITIONAL - UNEMPLOYED WAGE 0 / OLF WAGE MISSING - LOG Hourly Wage (3m)"
+            gen ln_hrwage_unemp = ln_hrwage if employed_3cat_3m == 2
+            replace ln_hrwage_unemp = 0 if employed_3cat_3m == 1 //UNEMP
+            replace ln_hrwage_unemp = . if employed_3cat_3m == 0 //OLF
+            tab ln_hrwage_unemp
+            lab var ln_hrwage_unemp "UNCONDITIONAL - UNEMPLOYED WAGE 0 / OLF WAGE MISSING - LOG Hourly Wage (3m)"
 
          *IHS
          gen IHS_hourly_rwage = log(real_hourly_wage + ((real_hourly_wage^2 + 1)^0.5))
@@ -1840,7 +1842,7 @@ su monthly_wage
             lab var ln_monthly_rwage_unolf "UNCONDITIONAL - UNEMPLOYED & OLF: WAGE 0 - LOG - monthly Wage (3-month)"
 
             *Unconditional hourly wage: IF UNEMPLOYED : WAGE IS 0 / IF OLF: WAGE IS MISSING
-            gen ln_monthly_rwage_unemp = ln_hourly_rwage if employed_3cat_3m == 2
+            gen ln_monthly_rwage_unemp = ln_monthly_rwage if employed_3cat_3m == 2
             replace ln_monthly_rwage_unemp = 0 if employed_3cat_3m == 1 //UNEMP
             replace ln_monthly_rwage_unemp = . if employed_3cat_3m == 0 //OLF
             tab ln_monthly_rwage_unemp
@@ -1881,13 +1883,13 @@ replace daily_wage_irregular = `r(mean)' if daily_wage_irregular > `r(max)' & !m
 
 *Member of a syndicate/trade union (ref. 3-mnths)
 tab unionont
-ren unionont member_union_3m
+ren unionont union_3m
 
             *Unconditional : IF UNEMPLOYED & OLF: IS 0
-            gen member_union_3m_unolf = member_union_3m if employed_3cat_3m == 2
-            replace member_union_3m_unolf = 0 if employed_3cat_3m  == 1 | employed_3cat_3m  == 0 
-            tab member_union_3m_unolf
-            lab var member_union_3m_unolf "UNCONDITIONAL - UNEMPLOYED & OLF: 0 - member_union_3m"
+            gen union_3m_unolf = union_3m if employed_3cat_3m == 2
+            replace union_3m_unolf = 0 if employed_3cat_3m  == 1 | employed_3cat_3m  == 0 
+            tab union_3m_unolf
+            lab var union_3m_unolf "UNCONDITIONAL - UNEMPLOYED & OLF: 0 - union_3m"
 
 
                                     *******************************
@@ -1897,13 +1899,13 @@ ren unionont member_union_3m
 codebook skilreq edreq skillev 
 *Does primary job require any skill
 tab skilreq 
-ren skilreq skills_required_pjob 
+ren skilreq skilled 
 
             *Unconditional : IF UNEMPLOYED & OLF: IS 0
-            gen skills_required_pjob_unolf = skills_required_pjob if employed_3cat_3m == 2
-            replace skills_required_pjob_unolf = 0 if employed_3cat_3m  == 1 | employed_3cat_3m  == 0 
-            tab skills_required_pjob_unolf
-            lab var skills_required_pjob_unolf "UNCONDITIONAL - UNEMPLOYED & OLF: 0 - skills_required_pjob"
+            gen skilled_unolf = skilled if employed_3cat_3m == 2
+            replace skilled_unolf = 0 if employed_3cat_3m  == 1 | employed_3cat_3m  == 0 
+            tab skilled_unolf
+            lab var skilled_unolf "UNCONDITIONAL - UNEMPLOYED & OLF: 0 - skilled"
 
 
 *Minimum education requirements for job
@@ -2499,7 +2501,7 @@ tab prftshr3, m
 
 *Total Wages (3-month)
 *tab ttmonwg3, m 
-tab ln_total_rwage_3m , m
+tab ln_trwage_3m , m
 
 
 *** 7 days ref period 
@@ -2518,39 +2520,42 @@ tab mnthwg , m
 */
 
 
-gen tot_rwage_7d = mnthwg / 4 
+gen twage_7d = mnthwg / 4 
 
       *Corrected from inflation
-      gen rtot_wage_7d = tot_rwage_7d / CPIin17
-      lab var rtot_wage_7d "CORRECTED INFLATION - Wage primary job 7d"
+      gen trwage_7d = twage_7d / CPIin17
+      lab var trwage_7d "CORRECTED INFLATION - Wage primary job 7d"
 
       *LN: Conditional wage: EMPLOYED ONLY
-      gen ln_total_rwage_7d = ln(1+rtot_wage_7d) 
-      lab var ln_total_rwage_7d "LOG Wage primary job 7d - CONDITIONAL - UNEMPLOYED & OLF: WAGE MISSING"
+      gen ln_trwage_7d = ln(1+trwage_7d) 
+      lab var ln_trwage_7d "LOG Wage primary job 7d - CONDITIONAL - UNEMPLOYED & OLF: WAGE MISSING"
 
-tab ln_total_rwage_7d, m 
+tab ln_trwage_7d, m 
 
-tab ln_hourly_rwage, m 
+tab ln_trwage_3m, m 
 
-/*
+
 *Hourly wage (ln): 
 *7 days reference period – on employed only 
+
 tab hrwg , m 
 
       *Corrected from inflation
-      gen rhourly_wage_main = hrwg / CPIin17
-      lab var rhourly_wage_main "CORRECTED INFLATION - Hourly Wage primary job"
+      gen rhwage_main = hrwg / CPIin17
+      lab var rhwage_main "CORRECTED INFLATION - Hourly Wage primary job"
 
       *LN: Conditional wage: EMPLOYED ONLY
-      gen ln_rhourly_wage_main = ln(1+rhourly_wage_main) 
-      lab var ln_rhourly_wage_main "LOG Hourly Wage primary job - CONDITIONAL - UNEMPLOYED & OLF: WAGE MISSING"
-*/
+      gen ln_hrwage_main = ln(1+rhwage_main) 
+      lab var ln_hrwage_main "LOG Hourly Wage primary job - CONDITIONAL - UNEMPLOYED & OLF: WAGE MISSING"
+
+tab ln_hrwage_main
 
 *Work hours per week: 
 
-tab work_hours_pweek_3m_w, m 
-gen ln_whpw_3m = ln(1+work_hours_pweek_3m_w)
+tab whpw_w_3m, m 
+gen ln_whpw_w_3m = ln(1+whpw_w_3m)
 
+lab var ln_whpw_w_3m "Work Hours per Week - 3m - Market Work - winsorized"
 
 
 
@@ -2562,13 +2567,14 @@ gen ln_whpw_3m = ln(1+work_hours_pweek_3m_w)
 tab crnumhrs1, m //Crr. No. of Hours/Week, Market Work, (Ref. 1 Week).
 *tab crnumhrs2, m //Crr. No. of Hours/Week, Market & Subsistence Work, (Ref. 1 Week)
 
-gen wh_pw_7d = crnumhrs1
-tab wh_pw_7d
-su wh_pw_7d, d
-winsor2 wh_pw_7d, s(_w) c(0 98)
-su wh_pw_7d_w
-lab var wh_pw_7d_w "Work Hours per Week - 7d - Market Work - winsorized"
-gen ln_whpw_7d = ln(1+wh_pw_7d_w)
+gen whpw_7d = crnumhrs1
+tab whpw_7d
+su whpw_7d, d
+winsor2 whpw_7d, s(_w) c(0 98)
+ren whpw_7d_w whpw_w_7d
+su whpw_w_7d
+lab var whpw_w_7d "Work Hours per Week - 7d - Market Work - winsorized"
+gen ln_whpw_w_7d = ln(1+whpw_w_7d)
 
 
 *LFP (12 months UG/ETH and 3 months JOR/COL): Employer, 

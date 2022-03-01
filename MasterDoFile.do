@@ -179,16 +179,33 @@ if inlist(c(username), "u0131185", "julie") == 1 {
 	*****************************
 	qui do "$do_analysis/00_Globals.do"
 
-	*qui do "$do_analysis/05_JLMPS_Analysis_WiP.do"
-	*qui do "$do_analysis/06_Robsutness.do"
-	*qui do "$do_analysis/07_Heterogenous.do"
+	*qui do "$do_analysis/01_SR_JLMPS_Ref_Inflow.do"
+	*qui do "$do_analysis/02_JLMPS_Comp_10_16.do"
+	*qui do "$do_analysis/03_IV_WiP.do"
+	*qui do "$do_analysis/04_JLMPS_Construct.do"
+	*qui do "$do_analysis/05_JLMPS_SummaryStats.do"
+	*qui do "$do_analysis/06_JLMPS_Analysis_WiP.do"
+	*qui do "$do_analysis/07_JLMPS_Robsutness.do"
+	*qui do "$do_analysis/08_JLMPS_Heterogenous.do"
+	*qui do "$do_analysis/09_JLMPS_Sample_Check.do"
 	*qui do "$do_analysis/10_JLMPS_Analysis_EM.do"
+	*qui do "$do_analysis/11_JLMPS_Analysis_onIVs.do"
 	*qui do "$do_analysis/.do"
 
 
 
 
+/*
+ren job_stable_3m stable_3m 
+ren wp_industry_jlmps_3m wp_ind_3m
+ren member_union_3m union_3m
+ren skills_required_pjob skilled 
+ren ln_total_rwage_3m ln_trwage_3m 
+ren ln_hourly_rwage ln_hrwage_3m 
+ren work_hours_pweek_3m_w whpw_3m 
+ren work_days_pweek_3m wdpw_3m 
 
+*/
 
 
 
