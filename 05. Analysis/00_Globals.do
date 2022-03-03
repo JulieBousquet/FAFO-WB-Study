@@ -63,10 +63,229 @@ global   `model'_cond ///
               `model'_wdpw_3m  // Avg. num. of wrk. days per week during 3 mnth.
  }       
 
+global    globals_list ///
+            outcome_cond outcome_uncond
+global    outcome_uncond ///
+              stable_3m_unolf ///  UNCONDITIONAL - UNEMPLOYED & OLF: 0  : From usstablp - Stability of employement (3m) - 1 permanent - 0 temp, seas, cas
+              union_3m_unolf /// UNCONDITIONAL - UNEMPLOYED & OLF: 0  : Member of a syndicate/trade union (ref. 3-mnths)
+              skilled_unolf /// UNCONDITIONAL - UNEMPLOYED & OLF: 0 : Does primary job require any skill
+              ln_trwage_3m_unolf /// UNCONDITIONAL - UNEMPLOYED & OLF: WAGE 0 - LOG - Total Wage (3-month)
+              ln_hrwage_main_unolf /// UNCONDITIONAL - UNEMPLOYED & OLF: WAGE 0 - LOG - Hourly Wage (3-month)
+              whpd_w_3m_unolf /// UNCONDITIONAL - UNEMPLOYED & OLF: 0 - work hours (3-month)
+              wdpw_3m_unolf /// UNCONDITIONAL - UNEMPLOYED & OLF: 0 - work day per week (3-month)
+              employed_olf_3m /// From uswrkstsr1 - mkt def, search req; 3m, 2 empl - 1 unemp&OLF
+              unemployed_olf_3m /// From unempsr1 - mrk def, search req; 3m, empl or unemp&OLF
+              unemployed_3m // From unempsr1m - mrk def, search req; 3m, empl or unemp, OLF is miss
+
+*CONTROL VARIABLES
+global controls ///
+          age  /// Age
+          age2 /// Age square
+          gender ///  Gender - 1 Male 0 Female
+          hhsize //  Total No. of Individuals in the Household
+     *     ln_invdistance_dis_camp //  LOG Distance (km) between JORD districts and ZAATARI CAMP in 2016
+
+global fe       _Ieduc1d_2 _Ieduc1d_3 _Ieduc1d_4 _Ieduc1d_5 ///
+                _Ieduc1d_6 _Ieduc1d_7 _Ifteducst_2 ///
+                _Ifteducst_3 _Ifteducst_4 _Ifteducst_5 _Ifteducst_6 ///
+                _Imteducst_2 _Imteducst_3 _Imteducst_4 _Imteducst_5 ///
+                _Imteducst_6 _Iftempst_2 _Iftempst_3 _Iftempst_4 _Iftempst_5 ///
+                _Iftempst_6  
+
+*FOR GRAPH SAVING 
+global   district      ///
+        _Idistrict__2 _Idistrict__3 ///
+        _Idistrict__4 _Idistrict__5 _Idistrict__6 _Idistrict__7 ///
+        _Idistrict__8 _Idistrict__9 _Idistrict__10 _Idistrict__11 ///
+        _Idistrict__12 _Idistrict__13 _Idistrict__14 _Idistrict__15 ///
+        _Idistrict__16  _Idistrict__18 _Idistrict__19 ///
+        _Idistrict__20 _Idistrict__21 _Idistrict__22 _Idistrict__23 ///
+        _Idistrict__24 _Idistrict__25 _Idistrict__26 _Idistrict__27 ///
+        _Idistrict__28 _Idistrict__29 _Idistrict__30 _Idistrict__31 ///
+        _Idistrict__32 _Idistrict__33 _Idistrict__34 _Idistrict__35 ///
+        _Idistrict__36 _Idistrict__37 _Idistrict__38 _Idistrict__39 ///
+        _Idistrict__40 _Idistrict__41 _Idistrict__42 _Idistrict__43 ///
+        _Idistrict__44 _Idistrict__45 _Idistrict__46 _Idistrict__47 ///
+        _Idistrict__48 _Idistrict__49 _Idistrict__50 _Idistrict__51 
 
 
 
 
+
+
+
+*********************************************************************
+*********************************************************************
+
+                              ************
+                              *  GLOBALS *
+                              ************
+
+              ********************
+              * SYTHESIS REPORT  *
+              ********************
+
+*Sampling weights.  
+
+*SEs clustered one admin level above treatment variation, 
+*unless variation is available only at highly aggregated level 
+*(e.g. district). 
+
+*Robust SEs  
+*Sample:  
+*hosts/natives 
+*Working Age 15-64 
+*Individual-level analysis for most variables  
+
+global SR_treat_var_ref  ln_hh_syrians_bydis 
+*ln_prop_hh_syrians
+global SR_IV_ref         ln_IV_Ref_NETW
+
+global SR_treat_var_wp   ln_agg_wp_orig
+*global iv_wp      IV_WP_DIST //GOOD ORIG
+
+global SR_IV_wp      IV_WP_DIST 
+
+*REFERENCE PERIOD
+global rp 7d 
+*3m
+
+*7days
+global SR_outcome employed_olf_7d ///
+                  unemployed_olf_7d ///
+                  lfp_empl_7d ///
+                  lfp_temp_7d ///
+                  lfp_employer_7d ///
+                  lfp_se_7d ///
+                  act_ag_7d ///
+                  act_manuf_7d ///
+                  act_com_7d ///
+                  act_serv_7d ///
+                  ln_trwage_7d ///
+                  ln_hrwage_main ///
+                  ln_whpw_w_7d ///
+                  formal
+
+
+global SR_models  REFOLS_YD REFIV_YD REFOLS_YI REFIV_YI ///
+                  WPOLS_YD WPIV_YD WPOLS_YI WPIV_YI ///
+                  REFGEN_YD REFGEN_YI ///
+                  REFURB_YD REFURB_YI ///
+                  REFEDU_YD REFEDU_YI
+
+foreach model of global SR_models {         
+   global   `model'_p1 ///
+                 `model'_employed_olf_7d ///
+                 `model'_unemployed_olf_7d ///
+                 `model'_ln_trwage_7d  ///
+                 `model'_ln_hrwage_main  ///
+                 `model'_ln_whpw_w_7d  ///
+                 `model'_formal  
+   
+   global   `model'_p2 ///
+                 `model'_lfp_empl_7d ///
+                 `model'_lfp_temp_7d ///
+                 `model'_lfp_employer_7d ///
+                 `model'_lfp_se_7d ///
+                 `model'_act_ag_7d ///
+                 `model'_act_manuf_7d ///
+                 `model'_act_com_7d ///
+                 `model'_act_serv_7d 
+ }       
+
+
+global SR_controls age age2 gender 
+
+*global SR_heterogenous gender urb_rural_camps lfp_3m bi_education
+
+global SR_weight expan_indiv
+*panel_wt_10_16
+     
+
+*3monhts
+/*
+global outcomes_uncond  employed_olf_3m   ///
+                        unemployed_olf_3m ///
+                        lfp_empl_3m ///
+                        lfp_temp_3m ///
+                        lfp_employer_3m ///
+                        lfp_se_3m 
+*employed_olf_7d 
+*unemployed_olf_7d
+
+global outcomes_cond  ln_total_rwage_3m ///
+                      ln_hourly_rwage ///
+                      ln_whpw_3m ///
+                      formal
+*/
+*ln_rmthly_wage_main 
+*ln_rhourly_wage_main 
+ *wh_pw_7d_w formal 
+
+/*
+*7days
+global outreg_uncond    m_employed_olf_7d ///
+                        m_unemployed_olf_7d ///
+                        m_lfp_empl_7d ///
+                        m_lfp_temp_7d ///
+                        m_lfp_employer_7d ///
+                        m_lfp_se_7d ///
+                        m_act_ag_7d ///
+                        m_act_manuf_7d ///
+                        m_act_com_7d ///
+                        m_act_serv_7d
+
+global outreg_cond  m_ln_total_rwage_7d ///
+                    m_ln_hrwage_main ///
+                    m_ln_whpw_7d ///
+                    m_formal
+*/
+
+/*
+*3monhts 
+global outreg_uncond ////
+            m_employed_olf_3m ///
+            m_unemployed_olf_3m ///
+            m_lfp_empl_3m ///
+            m_lfp_temp_3m ///
+            m_lfp_employer_3m ///
+            m_lfp_se_3m 
+            * m_lfp_unpaid_3m    
+
+global outreg_cond ///
+            m_ln_total_rwage_3m ///
+            m_ln_hrwage_main ///
+            m_ln_whpw_3m ///
+            m_formal 
+*/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+********************* MAIN EXTRAS **********************
 
 
 
@@ -134,17 +353,7 @@ global   `model'_cond ///
               employed_3m /// From uswrkstsr1 - mkt def, search req; 3m, 2 empl - 1 unemp - OLF miss
               employed_olf_3m /// From uswrkstsr1 - mkt def, search req; 3m, 2 empl - 1 unemp&OLF
 */ 
-global    outcome_uncond ///
-              stable_3m_unolf ///  UNCONDITIONAL - UNEMPLOYED & OLF: 0  : From usstablp - Stability of employement (3m) - 1 permanent - 0 temp, seas, cas
-              union_3m_unolf /// UNCONDITIONAL - UNEMPLOYED & OLF: 0  : Member of a syndicate/trade union (ref. 3-mnths)
-              skilled_unolf /// UNCONDITIONAL - UNEMPLOYED & OLF: 0 : Does primary job require any skill
-              ln_trwage_3m_unolf /// UNCONDITIONAL - UNEMPLOYED & OLF: WAGE 0 - LOG - Total Wage (3-month)
-              ln_hrwage_main_unolf /// UNCONDITIONAL - UNEMPLOYED & OLF: WAGE 0 - LOG - Hourly Wage (3-month)
-              whpd_w_3m_unolf /// UNCONDITIONAL - UNEMPLOYED & OLF: 0 - work hours (3-month)
-              wdpw_3m_unolf /// UNCONDITIONAL - UNEMPLOYED & OLF: 0 - work day per week (3-month)
-              employed_olf_3m /// From uswrkstsr1 - mkt def, search req; 3m, 2 empl - 1 unemp&OLF
-              unemployed_olf_3m /// From unempsr1 - mrk def, search req; 3m, empl or unemp&OLF
-              unemployed_3m // From unempsr1m - mrk def, search req; 3m, empl or unemp, OLF is miss
+
 
 /*global    m_uncond ///
               m_job_stable_3m_unolf ///  UNCONDITIONAL - UNEMPLOYED & OLF: 0  : From usstablp - Stability of employement (3m) - 1 permanent - 0 temp, seas, cas
@@ -159,8 +368,7 @@ global    outcome_uncond ///
               m_unemployed_3m // From unempsr1m - mrk def, search req; 3m, empl or unemp, OLF is miss
 */
 
-global    globals_list ///
-            outcome_cond outcome_uncond
+
 
 /*
 global    outcome_var_empl ///
@@ -208,36 +416,6 @@ global    globals_list ///
 
 */
 
-*CONTROL VARIABLES
-global controls ///
-          age  /// Age
-          age2 /// Age square
-          gender ///  Gender - 1 Male 0 Female
-          hhsize //  Total No. of Individuals in the Household
-     *     ln_invdistance_dis_camp //  LOG Distance (km) between JORD districts and ZAATARI CAMP in 2016
-
-global fe       _Ieduc1d_2 _Ieduc1d_3 _Ieduc1d_4 _Ieduc1d_5 ///
-                _Ieduc1d_6 _Ieduc1d_7 _Ifteducst_2 ///
-                _Ifteducst_3 _Ifteducst_4 _Ifteducst_5 _Ifteducst_6 ///
-                _Imteducst_2 _Imteducst_3 _Imteducst_4 _Imteducst_5 ///
-                _Imteducst_6 _Iftempst_2 _Iftempst_3 _Iftempst_4 _Iftempst_5 ///
-                _Iftempst_6  
-
-*FOR GRAPH SAVING 
-global   district      ///
-        _Idistrict__2 _Idistrict__3 ///
-        _Idistrict__4 _Idistrict__5 _Idistrict__6 _Idistrict__7 ///
-        _Idistrict__8 _Idistrict__9 _Idistrict__10 _Idistrict__11 ///
-        _Idistrict__12 _Idistrict__13 _Idistrict__14 _Idistrict__15 ///
-        _Idistrict__16  _Idistrict__18 _Idistrict__19 ///
-        _Idistrict__20 _Idistrict__21 _Idistrict__22 _Idistrict__23 ///
-        _Idistrict__24 _Idistrict__25 _Idistrict__26 _Idistrict__27 ///
-        _Idistrict__28 _Idistrict__29 _Idistrict__30 _Idistrict__31 ///
-        _Idistrict__32 _Idistrict__33 _Idistrict__34 _Idistrict__35 ///
-        _Idistrict__36 _Idistrict__37 _Idistrict__38 _Idistrict__39 ///
-        _Idistrict__40 _Idistrict__41 _Idistrict__42 _Idistrict__43 ///
-        _Idistrict__44 _Idistrict__45 _Idistrict__46 _Idistrict__47 ///
-        _Idistrict__48 _Idistrict__49 _Idistrict__50 _Idistrict__51 
 
 
 /*SPECIAL TREATMENTS
@@ -248,155 +426,7 @@ global   district      ///
           ftempst ///  Father's Employment Status (When Resp. 15)
 
 */
-
-
-
-*********************************************************************
-*********************************************************************
-
-                              ************
-                              *  GLOBALS *
-                              ************
-
-              ********************
-              * SYTHESIS REPORT  *
-              ********************
-
-*Sampling weights.  
-
-*SEs clustered one admin level above treatment variation, 
-*unless variation is available only at highly aggregated level 
-*(e.g. district). 
-
-*Robust SEs  
-*Sample:  
-*hosts/natives 
-*Working Age 15-64 
-*Individual-level analysis for most variables  
-
-global dep_var_ref  ln_hh_syrians_bydis 
-*ln_prop_hh_syrians
-global iv_ref       ln_IV_Ref_NETW
-
-global dep_var_wp ln_agg_wp_orig
-*global iv_wp      IV_WP_DIST //GOOD ORIG
-
-global iv_wp      IV_WP_DIST 
-
-*REFERENCE PERIOD
-global rp 7d 
-*3m
-
-*7days
-global SR_outcome_uncond  employed_olf_7d ///
-                        unemployed_olf_7d ///
-                        lfp_empl_7d ///
-                        lfp_temp_7d ///
-                        lfp_employer_7d ///
-                        lfp_se_7d ///
-                        act_ag_7d ///
-                        act_manuf_7d ///
-                        act_com_7d ///
-                        act_serv_7d
-
-global SR_outcome_cond  ln_trwage_7d ///
-                      ln_hrwage_main ///
-                      ln_whpw_w_7d ///
-                      formal
-
-
-global SR_models  REFOLS_YD REFIV_YD REFOLS_YI REFIV_YI ///
-                  WPOLS_YD WPIV_YD WPOLS_YI WPIV_YI ///
-                  REFGEN_YD REFGEN_YI ///
-                  REFURB_YD REFURB_YI ///
-                  REFEDU_YD REFEDU_YI
-
-foreach model of global SR_models {         
-   global   `model'_uncond ///
-                 `model'_employed_olf_7d ///
-                 `model'_unemployed_olf_7d ///
-                 `model'_lfp_empl_7d ///
-                 `model'_lfp_temp_7d ///
-                 `model'_lfp_employer_7d ///
-                 `model'_lfp_se_7d ///
-                 `model'_act_ag_7d ///
-                 `model'_act_manuf_7d ///
-                 `model'_act_com_7d ///
-                 `model'_act_serv_7d 
-   
-   global   `model'_cond ///
-                 `model'_ln_trwage_7d  ///
-                 `model'_ln_hrwage_main  ///
-                 `model'_ln_whpw_w_7d  ///
-                 `model'_formal  
- }       
-
-
-*3monhts
-/*
-global outcomes_uncond  employed_olf_3m   ///
-                        unemployed_olf_3m ///
-                        lfp_empl_3m ///
-                        lfp_temp_3m ///
-                        lfp_employer_3m ///
-                        lfp_se_3m 
-*employed_olf_7d 
-*unemployed_olf_7d
-
-global outcomes_cond  ln_total_rwage_3m ///
-                      ln_hourly_rwage ///
-                      ln_whpw_3m ///
-                      formal
-*/
-*ln_rmthly_wage_main 
-*ln_rhourly_wage_main 
- *wh_pw_7d_w formal 
-
-/*
-*7days
-global outreg_uncond    m_employed_olf_7d ///
-                        m_unemployed_olf_7d ///
-                        m_lfp_empl_7d ///
-                        m_lfp_temp_7d ///
-                        m_lfp_employer_7d ///
-                        m_lfp_se_7d ///
-                        m_act_ag_7d ///
-                        m_act_manuf_7d ///
-                        m_act_com_7d ///
-                        m_act_serv_7d
-
-global outreg_cond  m_ln_total_rwage_7d ///
-                    m_ln_hrwage_main ///
-                    m_ln_whpw_7d ///
-                    m_formal
-*/
-
-/*
-*3monhts 
-global outreg_uncond ////
-            m_employed_olf_3m ///
-            m_unemployed_olf_3m ///
-            m_lfp_empl_3m ///
-            m_lfp_temp_3m ///
-            m_lfp_employer_3m ///
-            m_lfp_se_3m 
-            * m_lfp_unpaid_3m    
-
-global outreg_cond ///
-            m_ln_total_rwage_3m ///
-            m_ln_hrwage_main ///
-            m_ln_whpw_3m ///
-            m_formal 
-*/
-
-global SR_controls age age2 gender 
-
-*global SR_heterogenous gender urb_rural_camps lfp_3m bi_education
-
-global SR_weight expan_indiv
-*panel_wt_10_16
-     
-
+*****************************************************************************************************************
 
 
 

@@ -2320,7 +2320,8 @@ tab pct_hh_syr_eg_2004,m
 tab pct_hh_syr_eg_2004_bydis, m 
 
 *gen ref_2016_total = 513032
-gen IV_Ref_NETW = tot_nb_ref_2016 * pct_hh_syr_eg_2004_bydis
+*gen IV_Ref_NETW = tot_nb_ref_2016 * pct_hh_syr_eg_2004_bydis
+gen IV_Ref_NETW =  pct_hh_syr_eg_2004_bydis
 *gen IV_Ref_NETW =  pct_hh_syr_eg_2004
 replace IV_Ref_NETW = 0 if year == 2010
 lab var IV_Ref_NETW "SS IV for refugee inflow based on historical network"
@@ -2336,7 +2337,8 @@ tab IV_Ref_NETW district_iid
   *su resc_IV_Ref_NETW
 
 *Distance based IV Refugee Inflow 
-gen IV_Ref_DIST = tot_nb_ref_2016* (1/ distance_dis_camp)
+*gen IV_Ref_DIST = tot_nb_ref_2016* (1/ distance_dis_camp)
+gen IV_Ref_DIST = (1/ distance_dis_camp)
 replace IV_Ref_DIST = 0 if year == 2010
 lab var IV_Ref_DIST "SS IV for refugee inflow based on distance"
 

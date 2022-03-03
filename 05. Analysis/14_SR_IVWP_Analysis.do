@@ -90,24 +90,24 @@ xtset indid_2010 year
                         ***********************************
 
 
-  foreach outcome of global SR_outcome_uncond {
-    qui xi: reg `outcome' $dep_var_wp ///
+  foreach outcome of global SR_outcome {
+    qui xi: reg `outcome' $SR_treat_var_wp ///
              i.district_iid i.year $SR_controls ///
             [pw = $SR_weight],  ///
             cluster(district_iid) robust 
     codebook `outcome', c
-    estimates table, k($dep_var_wp) star(.1 .05 .01) b(%7.4f) 
-    estimates table, b(%7.4f) se(%7.4f) stats(N r2_a) k($dep_var_wp) 
+    estimates table, k($SR_treat_var_wp) star(.1 .05 .01) b(%7.4f) 
+    estimates table, b(%7.4f) se(%7.4f) stats(N r2_a) k($SR_treat_var_wp) 
     estimates store WPOLS_YD_`outcome', title(Model `outcome')
   }
 
 ereturn list
 mat list e(b)
-estout $WPOLS_YD_uncond /// 
+estout $WPOLS_YD_p1 $WPOLS_YD_p2 /// 
       , cells(b(star fmt(%9.3f)) se(par fmt(%9.3f)) F(par fmt(%9.3f))) ///
         drop( _Iyear_2016  $district _cons $SR_controls)   ///
    legend label varlabels(_cons constant) starlevels(* 0.1 ** 0.05 *** 0.01)  ///
-   stats(r2 df_r, fmt(3 0 1) label(R-sqr dfres))
+   stats(N r2, fmt(0 2) label(N R-sqr))
 
 *** (**) [*] indicates significance at the 99%
 *(95%) [90%] level. Based
@@ -139,8 +139,8 @@ starlevels(* 0.1 ** 0.05 *** 0.01) ///
 *as regressing y on residuals from a regression of x1 on x2.
 
 preserve
-  foreach outcome of global SR_outcome_uncond {
-       qui reghdfe `outcome' $dep_var_wp $SR_controls  ///
+  foreach outcome of global SR_outcome {
+       qui reghdfe `outcome' $SR_treat_var_wp $SR_controls  ///
                 [pw = $SR_weight], ///
                 absorb(year indid_2010) ///
                 cluster(district_iid) 
@@ -148,21 +148,21 @@ preserve
         qui gen smpl=0
         qui replace smpl=1 if e(sample)==1
         * Then I partial out all variables
-      foreach y in `outcome' $dep_var_wp  $SR_controls {
+      foreach y in `outcome' $SR_treat_var_wp  $SR_controls {
         qui reghdfe `y' [pw = $SR_weight] if smpl==1, absorb(year indid_2010) residuals(`y'_c2wr)
         rename `y' o_`y'
         rename `y'_c2wr `y'
       }
       
-      qui reg `outcome' $dep_var_wp $SR_controls [pw = $SR_weight], cluster(district_iid) robust
+      qui reg `outcome' $SR_treat_var_wp $SR_controls [pw = $SR_weight], cluster(district_iid) robust
       codebook `outcome', c
-      estimates table,  k($dep_var_wp) star(.1 .05 .01) 
-      estimates table, b(%7.4f) se(%7.4f) stats(N r2_a) k($dep_var_wp) 
+      estimates table,  k($SR_treat_var_wp) star(.1 .05 .01) 
+      estimates table, b(%7.4f) se(%7.4f) stats(N r2_a) k($SR_treat_var_wp) 
       estimates store WPOLS_YI_`outcome', title(Model `outcome')
 
-      drop `outcome' $SR_controls $dep_var_wp smpl
+      drop `outcome' $SR_controls $SR_treat_var_wp smpl
       
-      foreach y in `outcome' $SR_controls $dep_var_wp  {
+      foreach y in `outcome' $SR_controls $SR_treat_var_wp  {
         rename o_`y' `y' 
       } 
     }
@@ -171,11 +171,11 @@ restore
 
 ereturn list
 mat list e(b)
-estout $WPOLS_YI_uncond  /// 
+estout $WPOLS_YI_p1 $WPOLS_YI_p2  /// 
       , cells(b(star fmt(%9.3f)) se(par fmt(%9.3f)) F(par fmt(%9.3f))) ///
         drop( _cons $SR_controls)   ///
    legend label varlabels(_cons constant) starlevels(* 0.1 ** 0.05 *** 0.01)  ///
-   stats(r2 df_r, fmt(3 0 1) label(R-sqr dfres))
+   stats(N r2, fmt(0 2) label(N R-sqr))
 
 *** (**) [*] indicates significance at the 99%
 *(95%) [90%] level. Based
@@ -215,26 +215,26 @@ starlevels(* 0.1 ** 0.05 *** 0.01) ///
                         ***********************************
 
 
- foreach outcome of global SR_outcome_uncond {
+ foreach outcome of global SR_outcome {
     qui xi: ivreg2  `outcome' i.year i.district_iid $SR_controls ///
-                ($dep_var_wp = $iv_wp) ///
+                ($SR_treat_var_wp = $SR_IV_wp) ///
                 [pw = $SR_weight], ///
                 cluster(district_iid) robust ///
                 partial(i.district_iid) ///
                 first
     codebook `outcome', c
-    estimates table, k($dep_var_wp) star(.1 .05 .01) b(%7.4f) 
-    estimates table, b(%7.4f) se(%7.4f) stats(N r2_a rkf) k($dep_var_wp) 
+    estimates table, k($SR_treat_var_wp) star(.1 .05 .01) b(%7.4f) 
+    estimates table, b(%7.4f) se(%7.4f) stats(N r2_a rkf) k($SR_treat_var_wp) 
     estimates store WPIV_YD_`outcome', title(Model `outcome')
   }
 
 ereturn list
 mat list e(b)
-estout $WPIV_YD_uncond ///
+estout $WPIV_YD_p1 $WPIV_YD_p2 ///
       , cells(b(star fmt(%9.3f)) se(par fmt(%9.3f))) ///
   drop( _Iyear_2016 $SR_controls)   ///
    legend label varlabels(_cons constant) starlevels(* 0.1 ** 0.05 *** 0.01)           ///
-   stats(r2 df_r rkf, fmt(3 0 1) label(R-sqr dfres rkf))
+   stats(N r2 rkf, fmt(0 2 0) label(N R-sqr KP-Stat))
 
 *** (**) [*] indicates significance at the 99%
 *(95%) [90%] level. Based
@@ -262,11 +262,11 @@ mtitles("Employed" "Unemployed" "Employee" "Temp" "Employer" "SE" "Ag" "Manuf" "
                         ***********************************
 
 preserve
-  foreach outcome of global SR_outcome_uncond {     
+  foreach outcome of global SR_outcome {     
       codebook `outcome', c
        qui xi: ivreghdfe `outcome' ///
                     $SR_controls  ///
-                    ($dep_var_wp = $iv_wp) ///
+                    ($SR_treat_var_wp = $SR_IV_wp) ///
                     [pw = $SR_weight], ///
                     absorb(year indid_2010) ///
                     cluster(district_iid) 
@@ -274,22 +274,22 @@ preserve
         qui gen smpl=0
         qui replace smpl=1 if e(sample)==1
         * Then I partial out all variables
-        foreach y in `outcome' $SR_controls $dep_var_wp $iv_wp { 
+        foreach y in `outcome' $SR_controls $SR_treat_var_wp $SR_IV_wp { 
           qui reghdfe `y' [pw = $SR_weight] if smpl==1, absorb(year indid_2010) residuals(`y'_c2wr)
           qui rename `y' o_`y'
           qui rename `y'_c2wr `y'
         }
         qui ivreg2 `outcome' ///
                $SR_controls  ///
-               ($dep_var_wp = $iv_wp) ///
+               ($SR_treat_var_wp = $SR_IV_wp) ///
                [pw = $SR_weight], ///
                cluster(district_iid) robust ///
                first 
-      estimates table, k($dep_var_wp) star(.1 .05 .01) b(%7.4f) 
-      estimates table, b(%7.4f) se(%7.4f) stats(N r2_a) k($dep_var_wp) 
+      estimates table, k($SR_treat_var_wp) star(.1 .05 .01) b(%7.4f) 
+      estimates table, b(%7.4f) se(%7.4f) stats(N r2_a) k($SR_treat_var_wp) 
       estimates store WPIV_YI_`outcome', title(Model `outcome')
-        qui drop `outcome' $dep_var_wp $iv_wp $SR_controls smpl
-        foreach y in `outcome' $dep_var_wp $iv_wp $SR_controls {
+        qui drop `outcome' $SR_treat_var_wp $SR_IV_wp $SR_controls smpl
+        foreach y in `outcome' $SR_treat_var_wp $SR_IV_wp $SR_controls {
           qui rename o_`y' `y' 
         }
     }
@@ -297,11 +297,11 @@ restore
 
 ereturn list
 mat list e(b)
-estout $WPIV_YI_uncond /// 
+estout $WPIV_YI_p1 $WPIV_YI_p2 /// 
       , cells(b(star fmt(%9.3f)) se(par fmt(%9.3f)) F(par fmt(%9.3f))) ///
         drop( _cons $SR_controls)   ///
    legend label varlabels(_cons constant) starlevels(* 0.1 ** 0.05 *** 0.01)  ///
-   stats(r2 df_r rkf, fmt(3 0 1) label(R-sqr dfres rkf))
+   stats(N r2 rkf, fmt(0 2 0) label(N R-sqr KP-Stat))
 
 *** (**) [*] indicates significance at the 99%
 *(95%) [90%] level. Based
@@ -330,20 +330,20 @@ starlevels(* 0.1 ** 0.05 *** 0.01) ///
 *********************************************
 
 
-esttab $WPOLS_YD_uncond   /// 
-      using "$out_analysis/SR_WP_reg_uncond_MERGE.tex",  ///
-      prehead("\begin{tabular}{l*{10}{c}} \toprule ") ///
-      posthead("& & & & & & & & & & \\ & b (se) & b (se) & b (se) & b (se) & b (se) & b (se) & b (se) & b (se) & b (se) & b (se) \\ \midrule \midrule \multicolumn{11}{c}{\textit{District and Year Fixed Effects}} \\ \multicolumn{11}{c}{\textbf{\textit{PANEL A: OLS}}} \\ \midrule ") ///
+esttab $WPOLS_YD_p1   /// 
+      using "$out_analysis/SR_WP_reg_MERGE_p1.tex",  ///
+      prehead("\begin{tabular}{l*{6}{c}} \toprule ") ///
+      posthead("& & & & & & \\ & b (se) & b (se) & b (se) & b (se) & b (se) & b (se)  \\ \midrule \midrule \multicolumn{7}{c}{\textit{District and Year Fixed Effects}} \\ \multicolumn{7}{c}{\textbf{\textit{PANEL A: OLS}}} \\ \midrule ") ///
       fragment replace label ///
-    drop($SR_controls _cons _Iyear_2016  $district)   ///
-      mtitles("\multirow{2}{*}{Employed}" "\multirow{2}{*}{Unemployed}" "\multirow{2}{*}{Employee}" "\multirow{2}{*}{Temporary}" "\multirow{2}{*}{Employer}" "\multirow{2}{*}{SE}" "\multirow{2}{*}{Agriculture}" "\multirow{2}{*}{Manufacturing}" "\multirow{2}{*}{Commerce}" "\multirow{2}{*}{Services}") ///
+    drop($SR_controls $district _cons _Iyear_2016)   ///
+      mtitles("\multirow{2}{*}{Employed}" "\multirow{2}{*}{Unemployed}" "\multirow{2}{*}{Total Wage (ln)}" "\multirow{2}{*}{Hourly Wage (ln)}" "\multirow{2}{*}{Work Hours per Week}" "\multirow{2}{*}{Formal}") ///
       stats(N r2_a, fmt(0 2) labels("\\\\[-0.5cm] N" "Adj. $ R^{2} $ \\\\[-0.6cm]")) ///
       b(%8.3f) se(%8.3f) starlevels(* 0.1 ** 0.05 *** 0.01) ///
       prefoot("\\\\[-0.5cm] \hline") //
 
-esttab $WPIV_YD_uncond   /// 
-      using "$out_analysis/SR_WP_reg_uncond_MERGE.tex",  ///
-      posthead("\midrule \midrule \multicolumn{11}{c}{\textbf{\textit{PANEL B: IV}}} \\ \midrule  ") ///
+esttab $WPIV_YD_p1  /// 
+      using "$out_analysis/SR_WP_reg_MERGE_p1.tex",  ///
+      posthead("\midrule  \multicolumn{7}{c}{\textbf{\textit{PANEL B: IV}}} \\ \midrule  ") ///
       fragment append label ///
       drop($SR_controls _Iyear_2016)   ///
       stats(N r2_a rkf, fmt(0 2 0) labels("\\\\[-0.5cm] N" "Adj. $ R^{2} $" "KP-Stat \\\\[-0.6cm]"))  ///
@@ -351,19 +351,19 @@ esttab $WPIV_YD_uncond   ///
       nomtitles nonumbers starlevels(* 0.1 ** 0.05 *** 0.01) ///
       prefoot("\\\\[-0.5cm] \hline") //
 
-esttab $WPOLS_YI_uncond    /// 
-      using "$out_analysis/SR_WP_reg_uncond_MERGE.tex",  ///
-      posthead("\midrule \midrule \multicolumn{11}{c}{\textit{Individual and Year Fixed Effects}} \\ \multicolumn{11}{c}{\textbf{\textit{PANEL C: OLS}}} \\ \midrule  ") ///
+esttab $WPOLS_YI_p1    /// 
+      using "$out_analysis/SR_WP_reg_MERGE_p1.tex",  ///
+      posthead("\midrule \midrule \multicolumn{7}{c}{\textit{Individual and Year Fixed Effects}} \\ \multicolumn{7}{c}{\textbf{\textit{PANEL C: OLS}}} \\ \midrule  ") ///
       fragment append label ///
-      drop($SR_controls _cons )   ///
+      drop($SR_controls _cons)   ///
       stats(N r2_a, fmt(0 2) labels("\\\\[-0.5cm] N" "Adj. $ R^{2} $ \\\\[-0.6cm]"))  ///
       r2 b(%8.3f) se(%8.3f) ///
       nomtitles nonumbers starlevels(* 0.1 ** 0.05 *** 0.01) ///
       prefoot("\\\\[-0.5cm] \hline") //
 
-esttab $WPIV_YI_uncond   /// 
-      using "$out_analysis/SR_WP_reg_uncond_MERGE.tex",  ///
-      posthead("\midrule \midrule \multicolumn{11}{c}{\textbf{\textit{PANEL D: IV}}} \\ \midrule  ") ///
+esttab $WPIV_YI_p1  /// 
+      using "$out_analysis/SR_WP_reg_MERGE_p1.tex",  ///
+      posthead("\midrule  \multicolumn{7}{c}{\textbf{\textit{PANEL D: IV}}} \\ \midrule  ") ///
       fragment append label ///
       drop($SR_controls _cons)   ///
       stats(N r2_a rkf, fmt(0 2 0) labels("\\\\[-0.5cm] N" "Adj. $ R^{2} $" "KP-Stat \\\\[-0.6cm]"))  ///
@@ -375,314 +375,20 @@ esttab $WPIV_YI_uncond   ///
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-               ***************************
-               ***************************
-               *     EMPLOYED ONLY       *
-               ***************************
-               ***************************
-
-
-drop if miss_16_10 == 1
-drop if unemp_16_10 == 1
-drop if olf_16_10 == 1
-drop if emp_16_miss_10 == 1
-drop if emp_10_miss_16 == 1
-drop if unemp_16_miss_10 == 1
-drop if unemp_10_miss_16 == 1
-drop if olf_16_miss_10 == 1
-drop if olf_10_miss_16 == 1 
-
-/*ONLY THOSE WHO WERE SURVEYED IN BOTH PERIODS?*/
-/*
-distinct indid_2010 
-duplicates tag indid_2010, gen(dup)
-bys year: tab dup
-drop if dup == 0
-drop dup
-tab year
-*/
-
-
-                            ************************
-                            ***        OLS       ***
-                            ************************
-
-                        ***********************************
-                        **           OLS                 **
-                        **        CONDITIONAL            **
-************************** DISTRICT + YEAR FIXED EFFECTS ***************************************
-                        ***********************************
-
-
-
-  foreach outcome of global SR_outcome_cond {
-    qui xi: reg `outcome' $dep_var_wp ///
-             i.district_iid i.year $SR_controls ///
-           [pw = $SR_weight],  ///
-            cluster(district_iid) robust 
-    codebook `outcome', c
-    estimates table, k($dep_var_wp) star(.1 .05 .01) b(%7.4f) 
-    estimates table, b(%7.4f) se(%7.4f) stats(N r2_a) k($dep_var_wp) 
-    estimates store WPOLS_YD_`outcome', title(Model `outcome')
-  }
-
-ereturn list
-mat list e(b)
-estout $WPOLS_YD_cond /// 
-      , cells(b(star fmt(%9.3f)) se(par fmt(%9.3f))) ///
-        drop( _Iyear_2016 $district _cons $SR_controls)   ///
-   legend label varlabels(_cons constant) starlevels(* 0.1 ** 0.05 *** 0.01)  ///
-   stats(r2 df_r, fmt(3 0 1) label(R-sqr dfres))
-
-*** (**) [*] indicates significance at the 99%
-*(95%) [90%] level. Based
-/*
-*erase "$out/reg_infra_access.tex"
-esttab $WPOLS_YD_cond   /// 
-      using "$out_analysis/SR_WP_reg_OLS_Cond_FE_DIS_YEAR.tex", se label replace booktabs ///
-      cells(b(star fmt(%9.3f)) se(par fmt(%9.3f))) ///
-mtitles("Total Wage (ln)" "Hrly Wage (ln)" "Work Hours p.w." "Formal") ///
-        drop( _Iyear_2016  $district _cons $SR_controls)   ///
-starlevels(* 0.1 ** 0.05 *** 0.01) ///
-   title("WP - Results OLS Regression with time and district FE - COND"\label{tab1}) nofloat ///
-   stats(N, fmt(0) labels("Obs")) ///
-    nonotes ///
-    addnotes("Standard errors clustered at the district level. Significance levels: *p $<$ 0.1, ** p $<$ 0.05, *** p $<$ 0.01") 
-*/
-*estimates drop  $outreg_cond
-
-
-
-                        ***********************************
-                        **           OLS                 **
-                        **        CONDITIONAL            **
-************************** INDIVIDUAL + YEAR FIXED EFFECTS ***************************************
-                        ***********************************
-
-*"Partialling Out" Previous equation implies that regressing y on x1 and x2 gives same effect of x1 
-*as regressing y on residuals from a regression of x1 on x2.
-
-preserve
-  foreach outcome of global SR_outcome_cond {
-       qui reghdfe `outcome' $dep_var_wp $SR_controls  ///
-                [pw = $SR_weight], ///
-                absorb(year indid_2010) ///
-                cluster(district_iid) 
-      
-        qui gen smpl=0
-        qui replace smpl=1 if e(sample)==1
-        * Then I partial out all variables
-      foreach y in `outcome' $dep_var_wp  $SR_controls {
-        qui reghdfe `y' [pw = $SR_weight] if smpl==1, absorb(year indid_2010) residuals(`y'_c2wr)
-        rename `y' o_`y'
-        rename `y'_c2wr `y'
-      }
-      
-      qui reg `outcome' $dep_var_wp $SR_controls [pw = $SR_weight], cluster(district_iid) robust
-      codebook `outcome', c
-      estimates table,  k($dep_var_wp) star(.1 .05 .01) 
-      estimates table, b(%7.4f) se(%7.4f) stats(N r2_a) k($dep_var_wp) 
-      estimates store WPOLS_YI_`outcome', title(Model `outcome')
-
-      drop `outcome' $SR_controls $dep_var_wp smpl
-      
-      foreach y in `outcome' $SR_controls $dep_var_wp  {
-        rename o_`y' `y' 
-      } 
-    }
-restore
-
-
-ereturn list
-mat list e(b)
-estout $WPOLS_YI_cond   /// 
-      , cells(b(star fmt(%9.3f)) se(par fmt(%9.3f)) F(par fmt(%9.3f))) ///
-        drop( _cons $SR_controls)   ///
-   legend label varlabels(_cons constant) starlevels(* 0.1 ** 0.05 *** 0.01)  ///
-   stats(r2 df_r, fmt(3 0 1) label(R-sqr dfres))
-
-*** (**) [*] indicates significance at the 99%
-*(95%) [90%] level. Based
-/*
-*erase "$out/reg_infra_access.tex"
-esttab $WPOLS_YI_cond /// 
-      using "$out_analysis/SR_WP_reg_OLS_Cond_FE_INDIV_YEAR.tex", se label replace booktabs ///
-      cells(b(star fmt(%9.3f)) se(par fmt(%9.3f))) ///
-mtitles("Total Wage (ln)" "Hrly Wage (ln)" "Work Hours p.w." "Formal") ///
-        drop( _cons $SR_controls)   ///
-starlevels(* 0.1 ** 0.05 *** 0.01) ///
-   title("WP - Results OLS Regression with time and Individual FE - COND"\label{tab1}) nofloat ///
-   stats(N, fmt(0) labels("Obs")) ///
-    nonotes ///
-    addnotes("Standard errors clustered at the district level. Significance levels: *p $<$ 0.1, ** p $<$ 0.05, *** p $<$ 0.01") 
-*/
-*estimates drop $outreg_cond  
-************
-
-
-
-
-
-
-
-
-
-
-                            ***********************
-                            ***        IV       ***
-                            ***********************
-
-
-                        ***********************************
-                        **           IV                  **
-                        **        CONDITIONAL            **
-************************** DISTRICT + YEAR FIXED EFFECTS ***************************************
-                        ***********************************
-
-cls
- foreach outcome of global SR_outcome_cond {
-     qui xi: ivreg2  `outcome'  i.year i.district_iid $SR_controls ///
-                ($dep_var_wp = $iv_wp) ///
-                [pw = $SR_weight], ///
-                cluster(district_iid) robust ///
-                partial(i.district_iid) ///
-                first
-    codebook `outcome', c
-    estimates table, k($dep_var_wp) star(.1 .05 .01) b(%7.4f) 
-    estimates table, b(%7.4f) se(%7.4f) stats(N r2_a rkf) k($dep_var_wp) 
-    estimates store WPIV_YD_`outcome', title(Model `outcome')
-  }
-
-ereturn list
-mat list e(b)
-estout $WPIV_YD_cond ///
-      , cells(b(star fmt(%9.3f)) se(par fmt(%9.3f))) ///
-  drop( _Iyear_2016 $SR_controls)   ///
-   legend label varlabels(_cons constant) starlevels(* 0.1 ** 0.05 *** 0.01)           ///
-   stats(r2 df_r rkf, fmt(3 0 1) label(R-sqr dfres KP-Stat))
-
-*** (**) [*] indicates significance at the 99%
-*(95%) [90%] level. Based
-/*
-*erase "$out/reg_infra_access.tex"
-esttab $WPIV_YD_cond  /// 
-      using "$out_analysis/SR_WP_reg_IV_Cond_FE_DIS_YEAR.tex", se label replace booktabs ///
-      cells(b(star fmt(%9.3f)) se(par fmt(%9.3f))) ///
-mtitles("Total Wage (ln)" "Hrly Wage (ln)" "Work Hours p.w." "Formal") ///
-  drop( _Iyear_2016 $SR_controls) starlevels(* 0.1 ** 0.05 *** 0.01) ///
-   title("WP - Results IV with District and Year FE - COND"\label{tab1}) nofloat ///
-   stats(N rkf, fmt(0 0) labels("Obs" "KP Stat")) ///
-    nonotes ///
-    addnotes("Standard errors clustered at the district level. Significance levels: *p $<$ 0.1, ** p $<$ 0.05, *** p $<$ 0.01") 
-*/
-
-*estimates drop  $outreg_cond
-
-
-                        ***********************************
-                        **           IV                  **
-                        **        CONDITIONAL            **
-************************** INDIVIDUAL + YEAR FIXED EFFECTS ***************************************
-                        ***********************************
-
-preserve
-  foreach outcome of global SR_outcome_cond {     
-      codebook `outcome', c
-       qui xi: ivreghdfe `outcome' ///
-                    $SR_controls  ///
-                    ($dep_var_wp = $iv_wp) ///
-                    [pw = $SR_weight], ///
-                    absorb(year indid_2010) ///
-                    cluster(district_iid) 
-
-        qui gen smpl=0
-        qui replace smpl=1 if e(sample)==1
-        * Then I partial out all variables
-        foreach y in `outcome' $SR_controls $dep_var_wp $iv_wp { 
-          qui reghdfe `y' [pw = $SR_weight] if smpl==1, absorb(year indid_2010) residuals(`y'_c2wr)
-          qui rename `y' o_`y'
-          qui rename `y'_c2wr `y'
-        }
-        qui ivreg2 `outcome' ///
-               $SR_controls  ///
-               ($dep_var_wp = $iv_wp) ///
-               [pw = $SR_weight], ///
-               cluster(district_iid) robust ///
-               first 
-      estimates table, k($dep_var_wp) star(.1 .05 .01) b(%7.4f) 
-      estimates table, b(%7.4f) se(%7.4f) stats(N r2_a rkf) k($dep_var_wp) 
-      estimates store WPIV_YI_`outcome', title(Model `outcome')
-        qui drop `outcome' $dep_var_wp $iv_wp $SR_controls smpl
-        foreach y in `outcome' $dep_var_wp $iv_wp $SR_controls {
-          qui rename o_`y' `y' 
-        }
-    }
-restore                
-
-ereturn list
-mat list e(b)
-estout  $WPIV_YI_cond ///
-      , cells(b(star fmt(%9.3f)) se(par fmt(%9.3f)) F(par fmt(%9.3f))) ///
-        drop( _cons $SR_controls)   ///
-   legend label varlabels(_cons constant) starlevels(* 0.1 ** 0.05 *** 0.01)  ///
-   stats(r2 df_r rkf, fmt(3 0 1) label(R-sqr dfres F))
-
-*** (**) [*] indicates significance at the 99%
-*(95%) [90%] level. Based
-/*
-*erase "$out/reg_infra_access.tex"
-esttab  $WPIV_YI_cond /// 
-      using "$out_analysis/SR_WP_reg_IV_Cond_FE_INDIV_YEAR.tex", se label replace booktabs ///
-      cells(b(star fmt(%9.3f)) se(par fmt(%9.3f))) ///
-mtitles("Total Wage (ln)" "Hrly Wage (ln)" "Work Hours p.w." "Formal") ///
-        drop( _cons $SR_controls)   ///
-starlevels(* 0.1 ** 0.05 *** 0.01) ///
-   title("WP - Results IV Regression with time and Individual FE - COND"\label{tab1}) nofloat ///
-   stats(N rkf, fmt(0 0) labels("Obs" "KP Stat")) ///
-    nonotes ///
-    addnotes("Standard errors clustered at the district level. Significance levels: *p $<$ 0.1, ** p $<$ 0.05, *** p $<$ 0.01") 
-*/
-*estimates drop  $outreg_cond
-
-
-
-
-*********************************************
-*********************************************
-********* MERGE TABLES **********************
-*********************************************
-*********************************************
-
-
-esttab $WPOLS_YD_cond   /// 
-      using "$out_analysis/SR_WP_reg_cond_MERGE.tex",  ///
-      prehead("\begin{tabular}{l*{4}{c}} \toprule ") ///
-      posthead("& & & &  \\ & b (se) & b (se) & b (se) & b (se)  \\ \midrule \midrule \multicolumn{5}{c}{\textit{District and Year Fixed Effects}} \\ \multicolumn{5}{c}{\textbf{\textit{PANEL A: OLS}}} \\ \midrule ") ///
+esttab $WPOLS_YD_p2   /// 
+      using "$out_analysis/SR_WP_reg_MERGE_p2.tex",  ///
+      prehead("\begin{tabular}{l*{8}{c}} \toprule ") ///
+      posthead("& & & & & & & & \\ & b (se) & b (se) & b (se) & b (se) & b (se) & b (se) & b (se) & b (se)  \\ \midrule \midrule \multicolumn{9}{c}{\textit{District and Year Fixed Effects}} \\ \multicolumn{9}{c}{\textbf{\textit{PANEL A: OLS}}} \\ \midrule ") ///
       fragment replace label ///
     drop($SR_controls $district _cons _Iyear_2016)   ///
-      mtitles("\multirow{2}{*}{Total Wage (ln)}" "\multirow{2}{*}{Hourly Wage (ln)}" "\multirow{2}{*}{\shortstack[l]{Work Hours\\ per Week}}" "\multirow{2}{*}{Formal}") ///
+      mtitles("\multirow{2}{*}{Employee}" "\multirow{2}{*}{Temporary}" "\multirow{2}{*}{Employer}" "\multirow{2}{*}{SE}" "\multirow{2}{*}{Agriculture}" "\multirow{2}{*}{Manufacturing}" "\multirow{2}{*}{Commerce}" "\multirow{2}{*}{Services}") ///
       stats(N r2_a, fmt(0 2) labels("\\\\[-0.5cm] N" "Adj. $ R^{2} $ \\\\[-0.6cm]")) ///
       b(%8.3f) se(%8.3f) starlevels(* 0.1 ** 0.05 *** 0.01) ///
       prefoot("\\\\[-0.5cm] \hline") //
 
-esttab $WPIV_YD_cond   /// 
-      using "$out_analysis/SR_WP_reg_cond_MERGE.tex",  ///
-      posthead("\midrule \midrule \multicolumn{5}{c}{\textbf{\textit{PANEL B: IV}}} \\ \midrule  ") ///
+esttab $WPIV_YD_p2  /// 
+      using "$out_analysis/SR_WP_reg_MERGE_p2.tex",  ///
+      posthead("\midrule  \multicolumn{9}{c}{\textbf{\textit{PANEL B: IV}}} \\ \midrule  ") ///
       fragment append label ///
       drop($SR_controls _Iyear_2016)   ///
       stats(N r2_a rkf, fmt(0 2 0) labels("\\\\[-0.5cm] N" "Adj. $ R^{2} $" "KP-Stat \\\\[-0.6cm]"))  ///
@@ -690,9 +396,9 @@ esttab $WPIV_YD_cond   ///
       nomtitles nonumbers starlevels(* 0.1 ** 0.05 *** 0.01) ///
       prefoot("\\\\[-0.5cm] \hline") //
 
-esttab $WPOLS_YI_cond    /// 
-      using "$out_analysis/SR_WP_reg_cond_MERGE.tex",  ///
-      posthead("\midrule \midrule \multicolumn{5}{c}{\textit{Individual and Year Fixed Effects}} \\ \multicolumn{5}{c}{\textbf{\textit{PANEL C: OLS}}} \\ \midrule  ") ///
+esttab $WPOLS_YI_p2    /// 
+      using "$out_analysis/SR_WP_reg_MERGE_p2.tex",  ///
+      posthead("\midrule \midrule \multicolumn{9}{c}{\textit{Individual and Year Fixed Effects}} \\ \multicolumn{9}{c}{\textbf{\textit{PANEL C: OLS}}} \\ \midrule  ") ///
       fragment append label ///
       drop($SR_controls _cons)   ///
       stats(N r2_a, fmt(0 2) labels("\\\\[-0.5cm] N" "Adj. $ R^{2} $ \\\\[-0.6cm]"))  ///
@@ -700,9 +406,9 @@ esttab $WPOLS_YI_cond    ///
       nomtitles nonumbers starlevels(* 0.1 ** 0.05 *** 0.01) ///
       prefoot("\\\\[-0.5cm] \hline") //
 
-esttab $WPIV_YI_cond   /// 
-      using "$out_analysis/SR_WP_reg_cond_MERGE.tex",  ///
-      posthead("\midrule \midrule \multicolumn{5}{c}{\textbf{\textit{PANEL D: IV}}} \\ \midrule  ") ///
+esttab $WPIV_YI_p2  /// 
+      using "$out_analysis/SR_WP_reg_MERGE_p2.tex",  ///
+      posthead("\midrule  \multicolumn{9}{c}{\textbf{\textit{PANEL D: IV}}} \\ \midrule  ") ///
       fragment append label ///
       drop($SR_controls _cons)   ///
       stats(N r2_a rkf, fmt(0 2 0) labels("\\\\[-0.5cm] N" "Adj. $ R^{2} $" "KP-Stat \\\\[-0.6cm]"))  ///
