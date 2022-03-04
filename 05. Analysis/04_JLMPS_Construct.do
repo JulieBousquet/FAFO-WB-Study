@@ -2853,14 +2853,14 @@ tab     act_manuf_7d, m
 gen     act_com_7d = 0 if !mi(activity_7d)
 replace act_com_7d = 1 if activity_7d == 3 
 lab def act_com 1 "Commerce" 0 "Else", modify
-lab val act_com_7d activity_ag 
+lab val act_com_7d act_com 
 lab var act_com_7d "Sector: COM" 
 tab     act_com_7d, m 
 
 gen     act_serv_7d = 0 if !mi(activity_7d)
 replace act_serv_7d = 1 if activity_7d == 4 
 lab def act_serv 1 "Services" 0 "Else", modify
-lab val act_serv_7d activity_ag 
+lab val act_serv_7d act_serv 
 lab var act_serv_7d "Sector: SERV" 
 tab     act_serv_7d, m 
 
@@ -2914,14 +2914,14 @@ tab     act_manuf_3m, m
 gen     act_com_3m = 0 if !mi(activity_3m)
 replace act_com_3m = 1 if activity_3m == 3 
 lab def act_com 1 "Commerce" 0 "Else", modify
-lab val act_com_3m activity_ag 
+lab val act_com_3m act_com 
 lab var act_com_3m "Sector: COM" 
 tab     act_com_3m, m 
 
 gen     act_serv_3m = 0 if !mi(activity_3m)
 replace act_serv_3m = 1 if activity_3m == 4 
 lab def act_serv 1 "Services" 0 "Else", modify
-lab val act_serv_3m activity_ag 
+lab val act_serv_3m act_serv 
 lab var act_serv_3m "Sector: SERV" 
 tab     act_serv_3m, m 
 

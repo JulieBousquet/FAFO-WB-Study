@@ -171,7 +171,8 @@ global SR_models  REFOLS_YD REFIV_YD REFOLS_YI REFIV_YI ///
                   WPOLS_YD WPIV_YD WPOLS_YI WPIV_YI ///
                   REFGEN_YD REFGEN_YI ///
                   REFURB_YD REFURB_YI ///
-                  REFEDU_YD REFEDU_YI
+                  REFEDU_YD REFEDU_YI ///
+                  WEMP_YD WEMP_YI
 
 foreach model of global SR_models {         
    global   `model'_p1 ///
@@ -201,6 +202,72 @@ global SR_controls age age2 gender
 global SR_weight expan_indiv
 *panel_wt_10_16
      
+
+
+
+
+                    *************************************
+                    ******** HETEROGENOUS ***************
+                    *************************************
+
+
+global SR_outcome_HET_LFP   act_ag_7d ///
+                            act_manuf_7d ///
+                            act_com_7d ///
+                            act_serv_7d ///
+                            ln_trwage_7d ///
+                            ln_hrwage_main ///
+                            ln_whpw_w_7d ///
+                            formal
+
+global SR_models_HET_LFP    WEMP_YD WEMP_YI ///
+                            TEMP_YD TEMP_YI ///
+                            SE_YD SE_YI
+
+
+
+foreach model of global SR_models_HET_LFP {     
+    global SR_outcome_`model'   `model'_act_ag_7d ///
+                                `model'_act_manuf_7d ///
+                                `model'_act_com_7d ///
+                                `model'_act_serv_7d ///
+                                `model'_ln_trwage_7d ///
+                                `model'_ln_hrwage_main ///
+                                `model'_ln_whpw_w_7d ///
+                                `model'_formal
+}
+
+
+global SR_outcome_HET_ACT   lfp_empl_7d ///
+                            lfp_temp_7d ///
+                            lfp_employer_7d ///
+                            lfp_se_7d ///
+                            ln_trwage_7d ///
+                            ln_hrwage_main ///
+                            ln_whpw_w_7d ///
+                            formal
+
+global SR_models_HET_ACT    AG_YD AG_YI ///
+                            MANUF_YD MANUF_YI ///
+                            COM_YD COM_YI ///
+                            SERV_YD SERV_YI
+
+foreach model of global SR_models_HET_ACT {     
+    global SR_outcome_`model'   `model'_lfp_empl_7d ///
+                                `model'_lfp_temp_7d ///
+                                `model'_lfp_employer_7d ///
+                                `model'_lfp_se_7d ///
+                                `model'_ln_trwage_7d ///
+                                `model'_ln_hrwage_main ///
+                                `model'_ln_whpw_w_7d ///
+                                `model'_formal
+}
+
+
+
+
+
+
 
 *3monhts
 /*

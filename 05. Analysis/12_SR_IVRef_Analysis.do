@@ -38,48 +38,6 @@ set mem 100m
 *Working Age 15-64 
 *Individual-level analysis for most variables  
 
-/*
-global dep_var_ref  ln_hh_syrians_bydis 
-*ln_prop_hh_syrians
-global iv_ref       ln_IV_Ref_NETW
-
-global dep_var_wp ln_agg_wp_orig
-global iv_wp      IV_WP_DIST
-  
-global SRoutcome_uncond  employed_olf_3m   ///
-                        unemployed_olf_3m ///
-                        lfp_3m_empl ///
-                        lfp_3m_temp ///
-                        lfp_3m_employer ///
-                        lfp_3m_se ///
-                        lfp_3m_unpaid
-*employed_olf_7d 
-*unemployed_olf_7d
-
-
-global SR_outcome_cond  ln_total_rwage_3m ///
-                      ln_hourly_rwage ///
-                      m_ln_whpw_3m ///
-                      formal
-*ln_rmthly_wage_main 
-*ln_rhourly_wage_main 
- *wh_pw_7d_w formal 
-
-global SR_controls age age2 gender 
-
-global heterogenous gender urb_rural_camps lfp_3m bi_education
-*/
-
-/* CHANGE
-- use the 3 month ref period for all outcomes 
-- do the individual analysis on restricted sample
-- change the treat var to have the number of refugee and not the share
-+ check what it means at the loc or distr level
-- make sure i did the cpi correction correctly
-- use total wage and hourly wage
-*/
-
-
 
 use "$data_final/06_IV_JLMPS_Construct_Outcomes.dta", clear
 
@@ -137,7 +95,6 @@ xtset indid_2010 year
 
                         ***********************************
                         **           OLS                 **
-                        **        UNCONDITIONAL          **
 ************************** DISTRICT + YEAR FIXED EFFECTS ***************************************
                         ***********************************
 
@@ -164,27 +121,11 @@ estout $REFOLS_YD_p1 $REFOLS_YD_p2 ///
 *** (**) [*] indicates significance at the 99%
 *(95%) [90%] level. Based
 
-/*
-*erase "$out/reg_infra_access.tex"
-esttab $OLS_YD_uncond  /// 
-      using "$out_analysis/SR_REF_reg_OLS_Uncond_FE_DIS_YEAR.tex", se label replace booktabs ///
-      cells(b(star fmt(%9.3f)) se(par fmt(%9.3f))) ///
-mtitles("Employed" "Unemployed" "Employee" "Temp" "Employer" "SE" "Ag" "Manuf" "Commerce" "Services") ///
-        drop( _Iyear_2016  $district _cons $SR_controls)   ///
-starlevels(* 0.1 ** 0.05 *** 0.01) ///
-   title("REF - Results OLS Regression with time and district FE - UNCOND"\label{tab1}) nofloat ///
-   stats(N,  fmt(0 2)  labels("Obs")) ///
-    nonotes ///
-    addnotes("Standard errors clustered at the district level. Significance levels: *p $<$ 0.1, ** p $<$ 0.05, *** p $<$ 0.01") 
-*/
-*estimates drop $outreg_uncond 
 
-************
 
 
                         ***********************************
                         **           OLS                 **
-                        **        UNCONDITIONAL          **
 ************************** INDIVIDUAL + YEAR FIXED EFFECTS ***************************************
                         ***********************************
 
@@ -230,32 +171,6 @@ estout $REFOLS_YI_p1 $REFOLS_YI_p2  ///
    legend label varlabels(_cons constant) starlevels(* 0.1 ** 0.05 *** 0.01)  ///
    stats(N r2, fmt(0 2) label(N R-sqr))
 
-*** (**) [*] indicates significance at the 99%
-*(95%) [90%] level. Based
-/*
-*erase "$out/reg_infra_access.tex"
-esttab $OLS_YI_uncond   /// 
-      using "$out_analysis/SR_REF_reg_OLS_Uncond_FE_INDIV_YEAR.tex", se label replace booktabs ///
-      cells(b(star fmt(%9.3f)) se(par fmt(%9.3f))) ///
-mtitles("Employed" "Unemployed" "Employee" "Temp" "Employer" "SE" "Ag" "Manuf" "Commerce" "Services") ///
-        drop(age age2 gender  ///
-        _cons $SR_controls)   ///
-starlevels(* 0.1 ** 0.05 *** 0.01) ///
-   title("REF - Results OLS Regression with time and Individual FE - UNCOND"\label{tab1}) nofloat ///
-   stats(N, fmt(0) labels("Obs")) ///
-    nonotes ///
-    addnotes("Standard errors clustered at the district level. Significance levels: *p $<$ 0.1, ** p $<$ 0.05, *** p $<$ 0.01") 
-*/
-*estimates drop $outreg_uncond 
-
-************
-
-
-
-
-
-
-
 
 
                             ***********************
@@ -265,7 +180,6 @@ starlevels(* 0.1 ** 0.05 *** 0.01) ///
 
                         ***********************************
                         **           IV                  **
-                        **        UNCONDITIONAL          **
 ************************** DISTRICT + YEAR FIXED EFFECTS ***************************************
                         ***********************************
 
@@ -291,29 +205,11 @@ estout $REFIV_YD_p1 $REFIV_YD_p2 ///
    legend label varlabels(_cons constant) starlevels(* 0.1 ** 0.05 *** 0.01)           ///
    stats(N r2 rkf, fmt(0 2 0) label(N R-sqr KP-Stat))
 
-*** (**) [*] indicates significance at the 99%
-*(95%) [90%] level. Based
-/*
-*erase "$out/reg_infra_access.tex"
-esttab $IV_YD_uncond  /// 
-      using "$out_analysis/SR_REF_reg_IV_Uncond_FE_DIS_YEAR.tex", se label replace booktabs ///
-      cells(b(star fmt(%9.3f)) se(par fmt(%9.3f))) ///
-mtitles("Employed" "Unemployed" "Employee" "Temp" "Employer" "SE" "Ag" "Manuf" "Commerce" "Services") ///
-  drop(age age2 gender _Iyear_2016 ///
-         $SR_controls) starlevels(* 0.1 ** 0.05 *** 0.01) ///
-   title("REF - Results IV with District and Year FE - UNCOND"\label{tab1}) nofloat ///
-   stats(N rkf, fmt(0 0) labels("Obs" "KP Stat")) ///
-    nonotes ///
-    addnotes("Standard errors clustered at the district level. Significance levels: *p $<$ 0.1, ** p $<$ 0.05, *** p $<$ 0.01") 
-*/
-*estimates drop $outreg_uncond   
-
 
 
 
                         ***********************************
                         **           IV                  **
-                        **        UNCONDITIONAL          **
 ************************** INDIVIDUAL + YEAR FIXED EFFECTS ***************************************
                         ***********************************
 
@@ -359,27 +255,6 @@ estout $REFIV_YI_p1 $REFIV_YI_p2   ///
    legend label varlabels(_cons constant) starlevels(* 0.1 ** 0.05 *** 0.01)  ///
    stats(N r2 rkf, fmt(0 2 0) label(N R-sqr KP-Stat))
 
-*** (**) [*] indicates significance at the 99%
-*(95%) [90%] level. Based
-/*
-*erase "$out/reg_infra_access.tex"
-esttab $IV_YI_uncond    /// 
-      using "$out_analysis/SR_REF_reg_IV_Uncond_FE_INDIV_YEAR.tex", se label replace booktabs ///
-      cells(b(star fmt(%9.3f)) se(par fmt(%9.3f))) ///
-mtitles("Employed" "Unemployed" "Employee" "Temp" "Employer" "SE" "Ag" "Manuf" "Commerce" "Services") ///
-        drop(age age2 gender  ///
-        _cons $SR_controls)   ///
-starlevels(* 0.1 ** 0.05 *** 0.01) ///
-   title("REF - Results IV Regression with time and Individual FE - UNCOND"\label{tab1}) nofloat ///
-   stats(N rkf, fmt(0 0) labels("Obs" "KP Stat")) ///
-    nonotes ///
-    addnotes("Standard errors clustered at the district level. Significance levels: *p $<$ 0.1, ** p $<$ 0.05, *** p $<$ 0.01") 
-*/
-*estimates drop $outreg_uncond 
-
-
-
-
 
 
 *********************************************
@@ -392,17 +267,17 @@ starlevels(* 0.1 ** 0.05 *** 0.01) ///
 esttab $REFOLS_YD_p1   /// 
       using "$out_analysis/SR_REF_reg_MERGE_p1.tex",  ///
       prehead("\begin{tabular}{l*{6}{c}} \toprule ") ///
-      posthead("& & & & & & \\ & b (se) & b (se) & b (se) & b (se) & b (se) & b (se)  \\ \midrule \midrule \multicolumn{7}{c}{\textit{District and Year Fixed Effects}} \\ \multicolumn{7}{c}{\textbf{\textit{PANEL A: OLS}}} \\ \midrule ") ///
+      posthead("& & & & & & \\ & b (se) & b (se) & b (se) & b (se) & b (se) & b (se)  \\ \midrule \midrule \multicolumn{7}{c}{\textit{\textbf{District and Year Fixed Effects}}} \\ \multicolumn{7}{c}{\textit{PANEL A: OLS}} \\ \midrule ") ///
       fragment replace label ///
     drop($SR_controls $district _cons _Iyear_2016)   ///
-      mtitles("\multirow{2}{*}{Employed}" "\multirow{2}{*}{Unemployed}" "\multirow{2}{*}{Total Wage (ln)}" "\multirow{2}{*}{Hourly Wage (ln)}" "\multirow{2}{*}{Work Hours per Week}" "\multirow{2}{*}{Formal}") ///
+      mtitles("\multirow{2}{*}{Employed}" "\multirow{2}{*}{Unemployed}" "\multirow{2}{*}{\shortstack[c]{Total Wage\\ (ln)}}" "\multirow{2}{*}{\shortstack[c]{Hourly Wage\\ (ln)}}" "\multirow{2}{*}{\shortstack[c]{Work Hours\\ p.w.}}" "\multirow{2}{*}{Formal}") ///
       stats(N r2_a, fmt(0 2) labels("\\\\[-0.5cm] N" "Adj. $ R^{2} $ \\\\[-0.6cm]")) ///
       b(%8.3f) se(%8.3f) starlevels(* 0.1 ** 0.05 *** 0.01) ///
       prefoot("\\\\[-0.5cm] \hline") //
 
 esttab $REFIV_YD_p1  /// 
       using "$out_analysis/SR_REF_reg_MERGE_p1.tex",  ///
-      posthead("\midrule  \multicolumn{7}{c}{\textbf{\textit{PANEL B: IV}}} \\ \midrule  ") ///
+      posthead("\midrule  \multicolumn{7}{c}{\textit{PANEL B: IV}} \\ \midrule  ") ///
       fragment append label ///
       drop($SR_controls _Iyear_2016)   ///
       stats(N r2_a rkf, fmt(0 2 0) labels("\\\\[-0.5cm] N" "Adj. $ R^{2} $" "KP-Stat \\\\[-0.6cm]"))  ///
@@ -412,7 +287,7 @@ esttab $REFIV_YD_p1  ///
 
 esttab $REFOLS_YI_p1    /// 
       using "$out_analysis/SR_REF_reg_MERGE_p1.tex",  ///
-      posthead("\midrule \midrule \multicolumn{7}{c}{\textit{Individual and Year Fixed Effects}} \\ \multicolumn{7}{c}{\textbf{\textit{PANEL C: OLS}}} \\ \midrule  ") ///
+      posthead("\midrule \midrule \multicolumn{7}{c}{\textit{\textbf{Individual and Year Fixed Effects}}} \\ \multicolumn{7}{c}{\textit{PANEL C: OLS}} \\ \midrule  ") ///
       fragment append label ///
       drop($SR_controls _cons)   ///
       stats(N r2_a, fmt(0 2) labels("\\\\[-0.5cm] N" "Adj. $ R^{2} $ \\\\[-0.6cm]"))  ///
@@ -422,7 +297,7 @@ esttab $REFOLS_YI_p1    ///
 
 esttab $REFIV_YI_p1  /// 
       using "$out_analysis/SR_REF_reg_MERGE_p1.tex",  ///
-      posthead("\midrule  \multicolumn{7}{c}{\textbf{\textit{PANEL D: IV}}} \\ \midrule  ") ///
+      posthead("\midrule  \multicolumn{7}{c}{\textit{PANEL D: IV}} \\ \midrule  ") ///
       fragment append label ///
       drop($SR_controls _cons)   ///
       stats(N r2_a rkf, fmt(0 2 0) labels("\\\\[-0.5cm] N" "Adj. $ R^{2} $" "KP-Stat \\\\[-0.6cm]"))  ///
@@ -437,7 +312,7 @@ esttab $REFIV_YI_p1  ///
 esttab $REFOLS_YD_p2   /// 
       using "$out_analysis/SR_REF_reg_MERGE_p2.tex",  ///
       prehead("\begin{tabular}{l*{8}{c}} \toprule ") ///
-      posthead("& & & & & & & & \\ & b (se) & b (se) & b (se) & b (se) & b (se) & b (se) & b (se) & b (se)  \\ \midrule \midrule \multicolumn{9}{c}{\textit{District and Year Fixed Effects}} \\ \multicolumn{9}{c}{\textbf{\textit{PANEL A: OLS}}} \\ \midrule ") ///
+      posthead("& & & & & & & & \\ & b (se) & b (se) & b (se) & b (se) & b (se) & b (se) & b (se) & b (se)  \\ \midrule \midrule \multicolumn{9}{c}{\textit{\textbf{District and Year Fixed Effects}}} \\ \multicolumn{9}{c}{\textit{PANEL A: OLS}} \\ \midrule ") ///
       fragment replace label ///
     drop($SR_controls $district _cons _Iyear_2016)   ///
       mtitles("\multirow{2}{*}{Employee}" "\multirow{2}{*}{Temporary}" "\multirow{2}{*}{Employer}" "\multirow{2}{*}{SE}" "\multirow{2}{*}{Agriculture}" "\multirow{2}{*}{Manufacturing}" "\multirow{2}{*}{Commerce}" "\multirow{2}{*}{Services}") ///
@@ -447,7 +322,7 @@ esttab $REFOLS_YD_p2   ///
 
 esttab $REFIV_YD_p2  /// 
       using "$out_analysis/SR_REF_reg_MERGE_p2.tex",  ///
-      posthead("\midrule  \multicolumn{9}{c}{\textbf{\textit{PANEL B: IV}}} \\ \midrule  ") ///
+      posthead("\midrule  \multicolumn{9}{c}{\textit{PANEL B: IV}} \\ \midrule  ") ///
       fragment append label ///
       drop($SR_controls _Iyear_2016)   ///
       stats(N r2_a rkf, fmt(0 2 0) labels("\\\\[-0.5cm] N" "Adj. $ R^{2} $" "KP-Stat \\\\[-0.6cm]"))  ///
@@ -457,7 +332,7 @@ esttab $REFIV_YD_p2  ///
 
 esttab $REFOLS_YI_p2    /// 
       using "$out_analysis/SR_REF_reg_MERGE_p2.tex",  ///
-      posthead("\midrule \midrule \multicolumn{9}{c}{\textit{Individual and Year Fixed Effects}} \\ \multicolumn{9}{c}{\textbf{\textit{PANEL C: OLS}}} \\ \midrule  ") ///
+      posthead("\midrule \midrule \multicolumn{9}{c}{\textbf{\textit{Individual and Year Fixed Effects}}} \\ \multicolumn{9}{c}{\textbf{\textit{PANEL C: OLS}}} \\ \midrule  ") ///
       fragment append label ///
       drop($SR_controls _cons)   ///
       stats(N r2_a, fmt(0 2) labels("\\\\[-0.5cm] N" "Adj. $ R^{2} $ \\\\[-0.6cm]"))  ///
@@ -467,7 +342,7 @@ esttab $REFOLS_YI_p2    ///
 
 esttab $REFIV_YI_p2  /// 
       using "$out_analysis/SR_REF_reg_MERGE_p2.tex",  ///
-      posthead("\midrule  \multicolumn{9}{c}{\textbf{\textit{PANEL D: IV}}} \\ \midrule  ") ///
+      posthead("\midrule  \multicolumn{9}{c}{\textit{PANEL D: IV}} \\ \midrule  ") ///
       fragment append label ///
       drop($SR_controls _cons)   ///
       stats(N r2_a rkf, fmt(0 2 0) labels("\\\\[-0.5cm] N" "Adj. $ R^{2} $" "KP-Stat \\\\[-0.6cm]"))  ///
@@ -580,6 +455,27 @@ graph export "$out_analysis\SR_Combined_Graph_REF.pdf", as(pdf) replace
 
 
 
+
+
+
+
+*** (**) [*] indicates significance at the 99%
+*(95%) [90%] level. Based
+/*
+*erase "$out/reg_infra_access.tex"
+esttab $IV_YI_uncond    /// 
+      using "$out_analysis/SR_REF_reg_IV_Uncond_FE_INDIV_YEAR.tex", se label replace booktabs ///
+      cells(b(star fmt(%9.3f)) se(par fmt(%9.3f))) ///
+mtitles("Employed" "Unemployed" "Employee" "Temp" "Employer" "SE" "Ag" "Manuf" "Commerce" "Services") ///
+        drop(age age2 gender  ///
+        _cons $SR_controls)   ///
+starlevels(* 0.1 ** 0.05 *** 0.01) ///
+   title("REF - Results IV Regression with time and Individual FE - UNCOND"\label{tab1}) nofloat ///
+   stats(N rkf, fmt(0 0) labels("Obs" "KP Stat")) ///
+    nonotes ///
+    addnotes("Standard errors clustered at the district level. Significance levels: *p $<$ 0.1, ** p $<$ 0.05, *** p $<$ 0.01") 
+*/
+*estimates drop $outreg_uncond 
 
 
 
