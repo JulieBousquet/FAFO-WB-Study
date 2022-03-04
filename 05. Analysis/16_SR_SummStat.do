@@ -83,9 +83,9 @@ foreach out of global SR_outcome {
 	tab `out', m 
 	mdesc `out'
 	bys year: tab `out', m 
-	bys year: su `out', d 
+	bys year: su `out' [aw=$SR_weight], d 
 	bys bi_ref: tab `out', m 
-	bys bi_ref: su `out', d 
+	bys bi_ref: su `out' [aw=$SR_weight], d 
 }
 
 
@@ -113,9 +113,9 @@ lab var ln_hrwage_main "Hourly Wage (ln)"
 lab var ln_whpw_w_7d "Work Hours p.w."
 lab var formal "Formal"
 
-su 		$SR_outcome [pw=expan_indiv]
+su 		$SR_outcome [aw=expan_indiv]
 
-eststo sumstat: 	 estpost su 		$SR_outcome [aw=$SR_weight]
+eststo sumstat: 	 qui estpost su 	$SR_outcome [aw=$SR_weight]
 
 esttab 	sumstat ///
 		using "$out_analysis/SR_REF_SummStat.tex", ///
@@ -125,9 +125,9 @@ esttab 	sumstat ///
 
 
 
-eststo no_ref: 		quietly estpost su 		$SR_outcome  [aw=$SR_weight] if bi_ref == 0
-eststo ref: 		quietly estpost su 		$SR_outcome  [aw=$SR_weight] if bi_ref == 1
-eststo diff_ref: 	quietly estpost ttest 	$SR_outcome  , by(bi_ref) unequal
+eststo no_ref: 		qui estpost su 		$SR_outcome  [aw=$SR_weight] if bi_ref == 0
+eststo ref: 		qui estpost su 		$SR_outcome  [aw=$SR_weight] if bi_ref == 1
+eststo diff_ref: 	qui estpost ttest 	$SR_outcome  , by(bi_ref) unequal
 
 esttab 	no_ref ref diff_ref ///
 		using "$out_analysis/SR_REF_SummStat_RefIntense.tex", ///
@@ -137,9 +137,9 @@ esttab 	no_ref ref diff_ref ///
 		collabels(\multicolumn{1}{c}{{Mean}} \multicolumn{1}{c}{{Std.Dev.}} \multicolumn{1}{l}{{Obs}} \multicolumn{1}{l}{{b}} \multicolumn{1}{l}{{t}} \multicolumn{1}{l}{{Obs}} ) 
 
 
-eststo year2010: 	quietly estpost su 		$SR_outcome  [aw=$SR_weight] if year == 2010
-eststo year2016: 	quietly estpost su 		$SR_outcome  [aw=$SR_weight] if year == 2016
-eststo diff_year: 	quietly estpost ttest 	$SR_outcome  , by(year) unequal
+eststo year2010: 	qui estpost su 		$SR_outcome  [aw=$SR_weight] if year == 2010
+eststo year2016: 	qui estpost su 		$SR_outcome  [aw=$SR_weight] if year == 2016
+eststo diff_year: 	qui estpost ttest 	$SR_outcome  , by(year) unequal
 
 esttab 	year2010 year2016 diff_year ///
 		using "$out_analysis/SR_REF_SummStat_Year.tex", ///

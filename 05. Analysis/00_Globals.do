@@ -65,6 +65,7 @@ global   `model'_cond ///
 
 global    globals_list ///
             outcome_cond outcome_uncond
+
 global    outcome_uncond ///
               stable_3m_unolf ///  UNCONDITIONAL - UNEMPLOYED & OLF: 0  : From usstablp - Stability of employement (3m) - 1 permanent - 0 temp, seas, cas
               union_3m_unolf /// UNCONDITIONAL - UNEMPLOYED & OLF: 0  : Member of a syndicate/trade union (ref. 3-mnths)
