@@ -76,8 +76,11 @@ xtset indid_2010 year
 su $SR_outcome, d 
 
 tab ln_hh_syrians_bydis , m 
-gen 	bi_ref = 0 if ln_hh_syrians_bydis == 0 
-replace bi_ref = 1 if ln_hh_syrians_bydis != 0 
+su hh_syrians_bydis, d
+return list 
+gen 		bi_ref = 0 if hh_syrians_bydis < `r(p50)' & hh_syrians_bydis != 0 
+replace 	bi_ref = 1 if hh_syrians_bydis >= `r(p50)' & hh_syrians_bydis != 0 
+tab 		bi_ref year
 
 foreach out of global SR_outcome {
 	tab `out', m 
@@ -125,9 +128,9 @@ esttab 	sumstat ///
 
 
 
-eststo no_ref: 		qui estpost su 		$SR_outcome  [aw=$SR_weight] if bi_ref == 0
-eststo ref: 		qui estpost su 		$SR_outcome  [aw=$SR_weight] if bi_ref == 1
-eststo diff_ref: 	qui estpost ttest 	$SR_outcome  , by(bi_ref) unequal
+eststo no_ref: 	qui estpost su 		$SR_outcome  [aw=$SR_weight] if bi_ref == 0 & year == 2016
+eststo ref: 		qui estpost su 		$SR_outcome  [aw=$SR_weight] if bi_ref == 1 & year == 2016
+eststo diff_ref: 	 estpost ttest 	$SR_outcome  , by(bi_ref) unequal
 
 esttab 	no_ref ref diff_ref ///
 		using "$out_analysis/SR_REF_SummStat_RefIntense.tex", ///
@@ -137,9 +140,9 @@ esttab 	no_ref ref diff_ref ///
 		collabels(\multicolumn{1}{c}{{Mean}} \multicolumn{1}{c}{{Std.Dev.}} \multicolumn{1}{l}{{Obs}} \multicolumn{1}{l}{{b}} \multicolumn{1}{l}{{t}} \multicolumn{1}{l}{{Obs}} ) 
 
 
-eststo year2010: 	qui estpost su 		$SR_outcome  [aw=$SR_weight] if year == 2010
-eststo year2016: 	qui estpost su 		$SR_outcome  [aw=$SR_weight] if year == 2016
-eststo diff_year: 	qui estpost ttest 	$SR_outcome  , by(year) unequal
+eststo year2010: 	estpost su 		$SR_outcome  [aw=$SR_weight] if year == 2010
+eststo year2016: 	estpost su 		$SR_outcome  [aw=$SR_weight] if year == 2016
+eststo diff_year:  estpost ttest 	$SR_outcome  , by(year) unequal
 
 esttab 	year2010 year2016 diff_year ///
 		using "$out_analysis/SR_REF_SummStat_Year.tex", ///
