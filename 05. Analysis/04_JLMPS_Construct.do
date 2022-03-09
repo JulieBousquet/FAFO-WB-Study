@@ -644,6 +644,7 @@ lab var ln_invdistance_dis_camp "[CTRL] LOG Inverse Distance (km) between JORD d
 tab nb_refugees_bygov
 gen tot_nb_ref_2016 = 513032 if year == 2016
 lab var tot_nb_ref_2016 "Number of Syrian refugee in Jordan in 2016"
+gen tot_nb_ref_2015 = 519041 if year == 2016
 
 *THE INSTRUMENT 
 gen IV_SS_ref_inflow = tot_nb_ref_2016*inv_dist_camp
@@ -2308,6 +2309,8 @@ use "$data_temp/06_IV_JLMPS_Construct_Outcomes_wp_noref.dta", clear
 *tab IV_SS_ref_inflow
 
 tab tot_nb_ref_2016 // EARLY 2016
+tab tot_nb_ref_2015 // EARLY 2015
+
                             *****************
                             * IV VARIABLES  *
                             ***************** 
@@ -2321,7 +2324,7 @@ tab pct_hh_syr_eg_2004_bydis, m
 
 *gen ref_2016_total = 513032
 *gen IV_Ref_NETW = tot_nb_ref_2016 * pct_hh_syr_eg_2004_bydis
-gen IV_Ref_NETW =  pct_hh_syr_eg_2004_bydis
+gen IV_Ref_NETW =  tot_nb_ref_2015*pct_hh_syr_eg_2004_bydis
 *gen IV_Ref_NETW =  pct_hh_syr_eg_2004
 replace IV_Ref_NETW = 0 if year == 2010
 lab var IV_Ref_NETW "SS IV for refugee inflow based on historical network"
@@ -2338,7 +2341,7 @@ tab IV_Ref_NETW district_iid
 
 *Distance based IV Refugee Inflow 
 *gen IV_Ref_DIST = tot_nb_ref_2016* (1/ distance_dis_camp)
-gen IV_Ref_DIST = (1/ distance_dis_camp)
+gen IV_Ref_DIST = tot_nb_ref_2015*(1/ distance_dis_camp)
 replace IV_Ref_DIST = 0 if year == 2010
 lab var IV_Ref_DIST "SS IV for refugee inflow based on distance"
 
@@ -2352,6 +2355,7 @@ lab var IV_Ref_DIST "SS IV for refugee inflow based on distance"
 
 *Network based IV WP 
 gen wp_2016_total = 73580
+
 gen IV_WP_NETW = wp_2016_total * pct_hh_syr_eg_2004_bydis
 replace IV_WP_NETW = 0 if year == 2010
 lab var IV_WP_NETW "SS IV for nb of work permits based on historical network"
@@ -2513,30 +2517,33 @@ tab ln_trwage_3m , m
 tab mnthwg , m 
 
       *Corrected from inflation
-      gen rmthly_wage_main = mnthwg / CPIin17
-      lab var rmthly_wage_main "CORRECTED INFLATION - Monthly Wage primary job"
+      gen mrwage_main = mnthwg / CPIin17
+      lab var mrwage_main "CORRECTED INFLATION - Monthly Wage primary job"
 
       *LN: Conditional wage: EMPLOYED ONLY
-      gen ln_rmthly_wage_main = ln(1+rmthly_wage_main) 
-      lab var ln_rmthly_wage_main "LOG Monthly Wage primary job - CONDITIONAL - UNEMPLOYED & OLF: WAGE MISSING"
-*/
+      gen ln_mrwage_main = ln(1+mrwage_main) 
+      lab var ln_mrwage_main "LOG Monthly Wage primary job - CONDITIONAL - UNEMPLOYED & OLF: WAGE MISSING"
+
+su ln_mrwage_main 
 
 
-gen twage_7d = mnthwg / 4 
+*gen twage_7d = mnthwg / 4  //MONTHLY WAGE BUT FOR 4 DAYS
+
+
+/*
+tab twage_3m
+gen twage_7d = twage_3m / 3  //total wage div by 3 so montlhy total wage
 
       *Corrected from inflation
       gen trwage_7d = twage_7d / CPIin17
-      lab var trwage_7d "CORRECTED INFLATION - Wage primary job 7d"
+      lab var trwage_7d "CORRECTED INFLATION - Monthly Total Wage (3-month)"
 
-      *LN: Conditional wage: EMPLOYED ONLY
-      gen ln_trwage_7d = ln(1+trwage_7d) 
-      lab var ln_trwage_7d "LOG Wage primary job 7d - CONDITIONAL - UNEMPLOYED & OLF: WAGE MISSING"
+      *LN
+      gen ln_trwage_7d = ln(1+trwage_7d)
+      lab var ln_trwage_7d "LOG Total Wage (3-month) - CONDITIONAL - UNEMPLOYED & OLF: WAGE MISSING"
 
-tab ln_trwage_7d, m 
-
-tab ln_trwage_3m, m 
-
-
+gen ln_trwage_7d = ln_trwage_3m / 3
+*/
 *Hourly wage (ln): 
 *7 days reference period – on employed only 
 
@@ -2550,7 +2557,7 @@ tab hrwg , m
       gen ln_hrwage_main = ln(1+rhwage_main) 
       lab var ln_hrwage_main "LOG Hourly Wage primary job - CONDITIONAL - UNEMPLOYED & OLF: WAGE MISSING"
 
-tab ln_hrwage_main
+su ln_hrwage_main
 
 *Work hours per week: 
 
@@ -2615,12 +2622,14 @@ gen lfp_3m = 1 if usempstp == 1 //wage employee - permanent
 replace lfp_3m = 2 if usstablp == 2 | usstablp == 3 | usstablp == 4 //any temp job
 replace lfp_3m = 3 if usempstp == 2 //Employer
 replace lfp_3m = 4 if usempstp == 3 //Self Employed
-replace lfp_3m = 4 if usempstp == 4 //Unpaid Labor
-*replace lfp_3m = 5 if usempstp == 4 //Unpaid Labor
+replace lfp_3m = 4 if usempstp == 4 //Unpaid Labor in SE cat
+replace lfp_3m = 5 if usempstp == 3 & usecac1d == 0 //SE AG
+
 lab def lfp_3m  1 "Wage Employee" ///
                 2 "Temporary Worker" ///
                 3 "Employer" ///
                 4 "Self Employed" ///
+                5 "Self Employed (AG)" ///
                 , modify
           *  5 "Unpaid Labor"       
 lab val lfp_3m lfp_3m
@@ -2655,14 +2664,13 @@ lab def lfp_se_3m 0 "Else" 1 "Self Employed", modify
 lab val lfp_se_3m lfp_se_3m
 lab var lfp_se_3m "Self Employed"
 
-/*
-gen     lfp_3m_unpaid = 0 if !mi(lfp_3m) 
-replace lfp_3m_unpaid = 1 if lfp_3m == 5
-tab     lfp_3m_unpaid, m 
-lab def lfp_3m_unpaid 0 "Else" 1 "Unpaid Labor", modify  
-lab val lfp_3m_unpaid lfp_3m_unpaid
-lab var lfp_3m_unpaid "Unpaid Labor"
-*/
+gen     lfp_seag_3m = 0 if !mi(lfp_3m) 
+replace lfp_seag_3m = 1 if lfp_3m == 5
+tab     lfp_seag_3m, m 
+lab def lfp_seag_3m 0 "Else" 1 "Self Employed (AG)", modify  
+lab val lfp_seag_3m lfp_3m_unpaid
+lab var lfp_seag_3m "Self Employed (AG)"
+
 
 
 
@@ -2703,11 +2711,13 @@ gen lfp_7d = 1 if crempstp == 1 //wage employee - permanent
 replace lfp_7d = 2 if crstablp == 2 | crstablp == 3 | crstablp == 4 //any temp job
 replace lfp_7d = 3 if crempstp == 2 //Employer
 replace lfp_7d = 4 if crempstp == 3 //Self Employed
-replace lfp_7d = 4 if crempstp == 4 //Unpaid Labor
+replace lfp_7d = 4 if crempstp == 4 //Unpaid Labor in SE cat
+replace lfp_7d = 5 if crempstp == 3 & crecac1d == 0 //SE (AG)
 lab def lfp_7d  1 "Wage Employee" ///
                 2 "Temporary Worker" ///
                 3 "Employer" ///
                 4 "Self Employed" ///
+                5 "Self Employed (AG)" ///
                 , modify
 lab val lfp_7d lfp_7d
 lab var lfp_7d "Labor Force Participation - 7days"
@@ -2739,16 +2749,15 @@ replace lfp_se_7d = 1 if lfp_7d == 4
 tab     lfp_se_7d, m 
 lab def lfp_se_7d 0 "Else" 1 "Self Employed", modify  
 lab val lfp_se_7d lfp_se_7d
-lab var lfp_se_7d "Self Employed"
+lab var lfp_se_7d "SE (Non AG)"
 
-*/*
-gen     lfp_7d_unpaid = 0 if !mi(lfp_7d) 
-replace lfp_7d_unpaid = 1 if lfp_7d == 5
-tab     lfp_7d_unpaid, m 
-lab def lfp_7d_unpaid 0 "Else" 1 "Unpaid Labor", modify  
-lab val lfp_7d_unpaid lfp_7d_unpaid
-lab var lfp_7d_unpaid "Unpaid Labor"
-*/
+gen     lfp_seag_7d = 0 if !mi(lfp_7d) 
+replace lfp_seag_7d = 1 if lfp_7d == 5
+tab     lfp_seag_7d, m 
+lab def lfp_seag_7d 0 "Else" 1 "Self Employed (AG)", modify  
+lab val lfp_seag_7d lfp_seag_7d
+lab var lfp_seag_7d "SE (AG)"
+
 
 *Unemployed: 
 
@@ -2762,11 +2771,20 @@ tab unemployed_olf_3m
 *unemployed_7d // From unempsr1m - mrk def, search req; 3m, empl or unemp, OLF is miss
 tab unempsr1, m //Std. unemployed with mrkt.def. (search required), with missing out of the labo
 ren unempsr1 unemployed_olf_7d
+tab unemployed_olf_7d
+
+tab unempsr1m, m 
+ren unempsr1m unemployed_7d 
+tab unemployed_7d 
+lab def unemployed_7d 1 "Unemployed" 0 "Employed", modify
+lab val unemployed_7d unemployed_7d
+lab var unemployed_7d "From unempsr1m - mrk def, search req; 3m, empl or unemp, OLF is miss"
+tab unemployed_7d, m 
 
 *Formal: 
 *define as holding a social security or a formal contract 
 tab formal
-
+tab formal lfp_3m
 
 
 *Economic activity of crr. job (Sections(1digit), based on ISIC4, ref. 1-week)

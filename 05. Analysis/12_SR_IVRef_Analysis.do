@@ -150,7 +150,7 @@ preserve
       
       qui reg `outcome' $SR_treat_var_ref $SR_controls [pw = $SR_weight], cluster(district_iid) robust
       codebook `outcome', c
-      estimates table,  k($SR_reat_var_ref) star(.1 .05 .01) 
+      estimates table,  k($SR_treat_var_ref) star(.1 .05 .01) 
       estimates table, b(%7.4f) se(%7.4f) stats(N r2_a) k($SR_treat_var_ref) 
       estimates store REFOLS_YI_`outcome', title(Model `outcome')
 
@@ -206,8 +206,28 @@ estout $REFIV_YD_p1 $REFIV_YD_p2 ///
    stats(N r2 rkf, fmt(0 2 0) label(N R-sqr KP-Stat))
 
 
+   /* AUTOCORELL
+    xi: ivreg2  employed_olf_7d i.year i.district_iid $SR_controls ///
+                ($SR_treat_var_ref = $SR_IV_ref) ///
+                [pw = $SR_weight], ///
+                cluster(district_iid) robust ///
+                partial(i.district_iid)
+ 
+global SR_treat_var_ref  ln_hh_syrians_bydis 
+*ln_prop_hh_syrians
+global SR_IV_ref         IV_Ref_NETW
+
+    qui xi: reg   $SR_treat_var_ref   $SR_IV_ref  i.district_iid i.year ///
+            [pw = $SR_weight],  robust cluster(district_iid)                
+    vif  
 
 
+
+    codebook `outcome', c
+    estimates table, k($SR_treat_var_ref) star(.1 .05 .01) b(%7.4f) 
+    estimates table, b(%7.4f) se(%7.4f) stats(N r2_a rkf) k($SR_treat_var_ref) 
+    estimates store REFIV_YD_`outcome', title(Model `outcome')
+*/
                         ***********************************
                         **           IV                  **
 ************************** INDIVIDUAL + YEAR FIXED EFFECTS ***************************************
@@ -238,7 +258,7 @@ preserve
                cluster(district_iid) robust ///
                first 
       estimates table, k($SR_treat_var_ref) star(.1 .05 .01) b(%7.4f) 
-      estimates table, b(%7.4f) se(%7.4f) stats(N r2_a rkf) k($SR_reat_var_ref) 
+      estimates table, b(%7.4f) se(%7.4f) stats(N r2_a rkf) k($SR_treat_var_ref) 
       estimates store REFIV_YI_`outcome', title(Model `outcome')
         qui drop `outcome' $SR_treat_var_ref $SR_IV_ref $SR_controls smpl
         foreach y in `outcome' $SR_treat_var_ref $SR_IV_ref $SR_controls {
@@ -270,10 +290,10 @@ esttab $REFOLS_YD_p1   ///
       posthead("& & & & & & \\ & b (se) & b (se) & b (se) & b (se) & b (se) & b (se)  \\ \midrule \midrule \multicolumn{7}{c}{\textit{\textbf{District and Year Fixed Effects}}} \\ \multicolumn{7}{c}{\textit{PANEL A: OLS}} \\ \midrule ") ///
       fragment replace label ///
     drop($SR_controls $district _cons _Iyear_2016)   ///
-      mtitles("\multirow{2}{*}{Employed}" "\multirow{2}{*}{Unemployed}" "\multirow{2}{*}{\shortstack[c]{Total Wage\\ (ln)}}" "\multirow{2}{*}{\shortstack[c]{Hourly Wage\\ (ln)}}" "\multirow{2}{*}{\shortstack[c]{Work Hours\\ p.w.}}" "\multirow{2}{*}{Formal}") ///
+      mtitles("\multirow{2}{*}{Employed}" "\multirow{2}{*}{Unemployed}" "\multirow{2}{*}{\shortstack[c]{Monthly Wage\\ (ln)}}" "\multirow{2}{*}{\shortstack[c]{Hourly Wage\\ (ln)}}" "\multirow{2}{*}{\shortstack[c]{Work Hours\\ p.w. (ln)}}" "\multirow{2}{*}{Formal}") ///
       stats(N r2_a, fmt(0 2) labels("\\\\[-0.5cm] N" "Adj. $ R^{2} $ \\\\[-0.6cm]")) ///
       b(%8.3f) se(%8.3f) starlevels(* 0.1 ** 0.05 *** 0.01) ///
-      prefoot("\\\\[-0.5cm] \hline") //
+      prefoot(" \hline") //
 
 esttab $REFIV_YD_p1  /// 
       using "$out_analysis/SR_REF_reg_MERGE_p1.tex",  ///
@@ -283,7 +303,7 @@ esttab $REFIV_YD_p1  ///
       stats(N r2_a rkf, fmt(0 2 0) labels("\\\\[-0.5cm] N" "Adj. $ R^{2} $" "KP-Stat \\\\[-0.6cm]"))  ///
       r2 b(%8.3f) se(%8.3f) ///
       nomtitles nonumbers starlevels(* 0.1 ** 0.05 *** 0.01) ///
-      prefoot("\\\\[-0.5cm] \hline") //
+      prefoot(" \hline") //
 
 esttab $REFOLS_YI_p1    /// 
       using "$out_analysis/SR_REF_reg_MERGE_p1.tex",  ///
@@ -293,7 +313,7 @@ esttab $REFOLS_YI_p1    ///
       stats(N r2_a, fmt(0 2) labels("\\\\[-0.5cm] N" "Adj. $ R^{2} $ \\\\[-0.6cm]"))  ///
       r2 b(%8.3f) se(%8.3f) ///
       nomtitles nonumbers starlevels(* 0.1 ** 0.05 *** 0.01) ///
-      prefoot("\\\\[-0.5cm] \hline") //
+      prefoot(" \hline") //
 
 esttab $REFIV_YI_p1  /// 
       using "$out_analysis/SR_REF_reg_MERGE_p1.tex",  ///
@@ -303,8 +323,8 @@ esttab $REFIV_YI_p1  ///
       stats(N r2_a rkf, fmt(0 2 0) labels("\\\\[-0.5cm] N" "Adj. $ R^{2} $" "KP-Stat \\\\[-0.6cm]"))  ///
       r2 b(%8.3f) se(%8.3f) ///
       nomtitles nonumbers starlevels(* 0.1 ** 0.05 *** 0.01) ///
-      prefoot("\\\\[-0.5cm] \hline") ///
-      postfoot("\bottomrule  \\\\[-0.6cm]  \end{tabular}  ")
+      prefoot(" \hline") ///
+      postfoot("\bottomrule  \end{tabular}  ")
 
 
 
@@ -316,9 +336,9 @@ esttab $REFOLS_YD_p2   ///
       fragment replace label ///
     drop($SR_controls $district _cons _Iyear_2016)   ///
       mtitles("\multirow{2}{*}{Employee}" "\multirow{2}{*}{Temporary}" "\multirow{2}{*}{Employer}" "\multirow{2}{*}{SE}" "\multirow{2}{*}{Agriculture}" "\multirow{2}{*}{Manufacturing}" "\multirow{2}{*}{Commerce}" "\multirow{2}{*}{Services}") ///
-      stats(N r2_a, fmt(0 2) labels("\\\\[-0.5cm] N" "Adj. $ R^{2} $ \\\\[-0.6cm]")) ///
+      stats(N r2_a, fmt(0 2) labels("\\\\[-0.5cm] N" "Adj. $ R^{2} $ \\\\[-0.6cm]"))  ///
       b(%8.3f) se(%8.3f) starlevels(* 0.1 ** 0.05 *** 0.01) ///
-      prefoot("\\\\[-0.5cm] \hline") //
+      prefoot(" \hline") //
 
 esttab $REFIV_YD_p2  /// 
       using "$out_analysis/SR_REF_reg_MERGE_p2.tex",  ///
@@ -328,7 +348,7 @@ esttab $REFIV_YD_p2  ///
       stats(N r2_a rkf, fmt(0 2 0) labels("\\\\[-0.5cm] N" "Adj. $ R^{2} $" "KP-Stat \\\\[-0.6cm]"))  ///
       r2 b(%8.3f) se(%8.3f) ///
       nomtitles nonumbers starlevels(* 0.1 ** 0.05 *** 0.01) ///
-      prefoot("\\\\[-0.5cm] \hline") //
+      prefoot(" \hline") //
 
 esttab $REFOLS_YI_p2    /// 
       using "$out_analysis/SR_REF_reg_MERGE_p2.tex",  ///
@@ -338,7 +358,7 @@ esttab $REFOLS_YI_p2    ///
       stats(N r2_a, fmt(0 2) labels("\\\\[-0.5cm] N" "Adj. $ R^{2} $ \\\\[-0.6cm]"))  ///
       r2 b(%8.3f) se(%8.3f) ///
       nomtitles nonumbers starlevels(* 0.1 ** 0.05 *** 0.01) ///
-      prefoot("\\\\[-0.5cm] \hline") //
+      prefoot(" \hline") //
 
 esttab $REFIV_YI_p2  /// 
       using "$out_analysis/SR_REF_reg_MERGE_p2.tex",  ///
@@ -348,8 +368,8 @@ esttab $REFIV_YI_p2  ///
       stats(N r2_a rkf, fmt(0 2 0) labels("\\\\[-0.5cm] N" "Adj. $ R^{2} $" "KP-Stat \\\\[-0.6cm]"))  ///
       r2 b(%8.3f) se(%8.3f) ///
       nomtitles nonumbers starlevels(* 0.1 ** 0.05 *** 0.01) ///
-      prefoot("\\\\[-0.5cm] \hline") ///
-      postfoot("\bottomrule  \\\\[-0.6cm]  \end{tabular}  ")
+      prefoot(" \hline") ///
+      postfoot("\bottomrule   \end{tabular}  ")
 
 
 
@@ -360,7 +380,7 @@ esttab $REFIV_YI_p2  ///
 *******************************************
 
     coefplot (REFOLS_YD_employed_olf_$rp, label(Employed))  ///
-             (REFOLS_YD_unemployed_olf_$rp, label(Unemployed))  ///
+             (REFOLS_YD_unemployed_$rp, label(Unemployed))  ///
              (REFOLS_YD_lfp_empl_$rp, label(Type: Wage Worker))  ///
              (REFOLS_YD_lfp_temp_$rp, label(Type: Temporary))  ///
              (REFOLS_YD_lfp_employer_$rp, label(Type: Employer))  ///
@@ -369,12 +389,12 @@ esttab $REFIV_YI_p2  ///
              (REFOLS_YD_act_manuf_$rp, label(Activity: Manufacturing))  ///
              (REFOLS_YD_act_com_$rp, label(Activity: Commerce))  ///
              (REFOLS_YD_act_serv_$rp, label(Activity: Services))  ///
-             (REFOLS_YD_ln_trwage_$rp, label(Total Wage (ln))) ///
+             (REFOLS_YD_ln_mrwage_main, label(Monthly Wage (ln))) ///
              (REFOLS_YD_ln_hrwage_main, label(Hourly Wage (ln))) ///
-             (REFOLS_YD_ln_whpw_w_$rp, label(Work Hours p.w.)) ///
+             (REFOLS_YD_ln_whpw_w_$rp, label(Work Hours p.w. (ln))) ///
              (REFOLS_YD_formal, label(Formal)) , bylabel("OLS District Year") ///
              || (REFIV_YD_employed_olf_$rp, label(Employed)) ///
-             (REFIV_YD_unemployed_olf_$rp, label(Unemployed))  ///
+             (REFIV_YD_unemployed_$rp, label(Unemployed))  ///
              (REFIV_YD_lfp_empl_$rp, label(Type: Wage Worker))  ///
              (REFIV_YD_lfp_temp_$rp, label(Type: Temporary))  ///
              (REFIV_YD_lfp_employer_$rp, label(Type: Employer))  ///
@@ -383,12 +403,12 @@ esttab $REFIV_YI_p2  ///
              (REFIV_YD_act_manuf_$rp, label(Activity: Manufacturing))  ///
              (REFIV_YD_act_com_$rp, label(Activity: Commerce))  ///
              (REFIV_YD_act_serv_$rp, label(Activity: Services))  ///
-             (REFIV_YD_ln_trwage_$rp, label(Total Wage (ln))) ///
+             (REFIV_YD_ln_mrwage_main, label(Monthly Wage (ln))) ///
              (REFIV_YD_ln_hrwage_main, label(Hourly Wage (ln))) ///
-             (REFIV_YD_ln_whpw_w_$rp, label(Work Hours p.w.)) ///
+             (REFIV_YD_ln_whpw_w_$rp, label(Work Hours p.w. (ln))) ///
              (REFIV_YD_formal, label(Formal)) , bylabel("IV District Year") ///
              || (REFOLS_YI_employed_olf_$rp, label(Employed))  ///
-             (REFOLS_YI_unemployed_olf_$rp, label(Unemployed))  ///
+             (REFOLS_YI_unemployed_$rp, label(Unemployed))  ///
              (REFOLS_YI_lfp_empl_$rp, label(Type: Wage Worker))  ///
              (REFOLS_YI_lfp_temp_$rp, label(Type: Temporary))  ///
              (REFOLS_YI_lfp_employer_$rp, label(Type: Employer))  ///
@@ -397,12 +417,12 @@ esttab $REFIV_YI_p2  ///
              (REFOLS_YI_act_manuf_$rp, label(Activity: Manufacturing))  ///
              (REFOLS_YI_act_com_$rp, label(Activity: Commerce))  ///
              (REFOLS_YI_act_serv_$rp, label(Activity: Services))  ///
-             (REFOLS_YI_ln_trwage_$rp, label(Total Wage (ln))) ///
+             (REFOLS_YI_ln_mrwage_main, label(Monthly Wage (ln))) ///
              (REFOLS_YI_ln_hrwage_main, label(Hourly Wage (ln))) ///
-             (REFOLS_YI_ln_whpw_w_$rp, label(Work Hours p.w.)) ///
+             (REFOLS_YI_ln_whpw_w_$rp, label(Work Hours p.w. (ln))) ///
              (REFOLS_YI_formal, label(Formal)) , bylabel("OLS Indiv Year") ///
              || (REFIV_YI_employed_olf_$rp, label(Employed)) ///
-             (REFIV_YI_unemployed_olf_$rp, label(Unemployed))  ///
+             (REFIV_YI_unemployed_$rp, label(Unemployed))  ///
              (REFIV_YI_lfp_empl_$rp, label(Type: Wage Worker))  ///
              (REFIV_YI_lfp_temp_$rp, label(Type: Temporary))  ///
              (REFIV_YI_lfp_employer_$rp, label(Type: Employer))  ///
@@ -411,9 +431,9 @@ esttab $REFIV_YI_p2  ///
              (REFIV_YI_act_manuf_$rp, label(Activity: Manufacturing))  ///
              (REFIV_YI_act_com_$rp, label(Activity: Commerce))  ///
              (REFIV_YI_act_serv_$rp, label(Activity: Services))  ///
-             (REFIV_YI_ln_trwage_$rp, label(Total Wage (ln))) ///
+             (REFIV_YI_ln_mrwage_main, label(Monthly Wage (ln))) ///
              (REFIV_YI_ln_hrwage_main, label(Hourly Wage (ln))) ///
-             (REFIV_YI_ln_whpw_w_$rp, label(Work Hours p.w.)) ///
+             (REFIV_YI_ln_whpw_w_$rp, label(Work Hours p.w. (ln))) ///
              (REFIV_YI_formal, label(Formal)) , bylabel("IV Indiv Year") ///
              || , drop(_Iyear_2016 $district _cons $SR_controls) ///
               xline(0) msymbol(d) ///

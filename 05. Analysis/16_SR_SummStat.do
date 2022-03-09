@@ -102,7 +102,7 @@ foreach out of global SR_outcome {
 
 
 lab var employed_olf_7d "Employed"
-lab var unemployed_olf_7d "Unemployed"
+lab var unemployed_7d "Unemployed"
 lab var lfp_empl_7d "Wage Employee"
 lab var lfp_temp_7d "Daily Labor"
 lab var lfp_employer_7d "Employer"
@@ -111,9 +111,9 @@ lab var act_ag_7d "Agriculture"
 lab var act_manuf_7d "Manufacturing"
 lab var act_com_7d "Commerce"
 lab var act_serv_7d "Services"
-lab var ln_trwage_7d "Total Wage (ln)"
+lab var ln_mrwage_main "Monthly Wage (ln)"
 lab var ln_hrwage_main "Hourly Wage (ln)"
-lab var ln_whpw_w_7d "Work Hours p.w."
+lab var ln_whpw_w_7d "Work Hours p.w. (ln)"
 lab var formal "Formal"
 
 su 		$SR_outcome [aw=expan_indiv]

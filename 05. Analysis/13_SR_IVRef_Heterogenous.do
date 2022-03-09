@@ -213,7 +213,7 @@ estout $REFGEN_YI_p1 $REFGEN_YI_p2 ///
 ****************************************************
 
      coefplot (REFGEN_YD_employed_olf_$rp), bylabel(Employed)  ///
-             || (REFGEN_YD_unemployed_olf_$rp), bylabel(Unemployed)  ///
+             || (REFGEN_YD_unemployed_$rp), bylabel(Unemployed)  ///
              || (REFGEN_YD_lfp_empl_$rp), bylabel(Type: Wage Worker)  ///
              || (REFGEN_YD_lfp_temp_$rp), bylabel(Type: Temporary)  ///
              || (REFGEN_YD_lfp_employer_$rp), bylabel(Type: Employer)  ///
@@ -222,9 +222,9 @@ estout $REFGEN_YI_p1 $REFGEN_YI_p2 ///
              || (REFGEN_YD_act_manuf_$rp), bylabel(Activity: Manufacturing)  ///
              || (REFGEN_YD_act_com_$rp), bylabel(Activity: Commerce)  ///
              || (REFGEN_YD_act_serv_$rp), bylabel(Activity: Services)  ///
-             || (REFGEN_YD_ln_trwage_$rp), bylabel(Total Wage (ln)) ///
+             || (REFGEN_YD_ln_mrwage_main), bylabel(Monthly Wage (ln)) ///
              || (REFGEN_YD_ln_hrwage_main), bylabel(Hourly Wage (ln)) ///
-             || (REFGEN_YD_ln_whpw_w_$rp), bylabel(Work Hours p.w.) ///
+             || (REFGEN_YD_ln_whpw_w_$rp), bylabel(Work Hours p.w. (ln)) ///
              || (REFGEN_YD_formal), bylabel(Formal) ///
              || , drop( _Iyear_2016 $district _cons age age2) ///
               xline(0) msymbol(d) ///
@@ -413,7 +413,7 @@ estout $REFURB_YI_p1 $REFURB_YI_p2 ///
 
 
 coefplot (REFURB_YD_employed_olf_$rp), bylabel(Employed)  ///
-             || (REFURB_YD_unemployed_olf_$rp), bylabel(Unemployed)  ///
+             || (REFURB_YD_unemployed_$rp), bylabel(Unemployed)  ///
              || (REFURB_YD_lfp_empl_$rp), bylabel(Type: Wage Worker)  ///
              || (REFURB_YD_lfp_temp_$rp), bylabel(Type: Temporary)  ///
              || (REFURB_YD_lfp_employer_$rp), bylabel(Type: Employer)  ///
@@ -422,9 +422,9 @@ coefplot (REFURB_YD_employed_olf_$rp), bylabel(Employed)  ///
              || (REFURB_YD_act_manuf_$rp), bylabel(Activity: Manufacturing)  ///
              || (REFURB_YD_act_com_$rp), bylabel(Activity: Commerce)  ///
              || (REFURB_YD_act_serv_$rp), bylabel(Activity: Services)  ///
-             || (REFURB_YD_ln_trwage_$rp), bylabel(Total Wage (ln)) ///
+             || (REFURB_YD_ln_mrwage_main), bylabel(Total Wage (ln)) ///
              || (REFURB_YD_ln_hrwage_main), bylabel(Hourly Wage (ln)) ///
-             || (REFURB_YD_ln_whpw_w_$rp), bylabel(Work Hours p.w.) ///
+             || (REFURB_YD_ln_whpw_w_$rp), bylabel(Work Hours p.w. (ln)) ///
              || (REFURB_YD_formal), bylabel(Formal) ///
              || , drop( _Iyear_2016 $district _cons $SR_controls) ///
               xline(0) msymbol(d) ///
@@ -527,7 +527,7 @@ global inter_het_var    inter_educ
 
 **** OLS *****
   foreach outcome of global SR_outcome {
-    qui xi: reg `outcome' $SR_treat_var_ref $inter_het_var $het_var ///
+     qui xi: reg `outcome' $SR_treat_var_ref $inter_het_var $het_var ///
                 $SR_controls  ///
                 i.district_iid i.year  ///
             [pw = $SR_weight],  ///
@@ -610,7 +610,7 @@ estout $REFEDU_YI_p1 $REFEDU_YI_p2 ///
 
 
     coefplot (REFEDU_YD_employed_olf_$rp), bylabel(Employed)  ///
-             || (REFEDU_YD_unemployed_olf_$rp), bylabel(Unemployed)  ///
+             || (REFEDU_YD_unemployed_$rp), bylabel(Unemployed)  ///
              || (REFEDU_YD_lfp_empl_$rp), bylabel(Type: Wage Worker)  ///
              || (REFEDU_YD_lfp_temp_$rp), bylabel(Type: Temporary)  ///
              || (REFEDU_YD_lfp_employer_$rp), bylabel(Type: Employer)  ///
@@ -619,9 +619,9 @@ estout $REFEDU_YI_p1 $REFEDU_YI_p2 ///
              || (REFEDU_YD_act_manuf_$rp), bylabel(Activity: Manufacturing)  ///
              || (REFEDU_YD_act_com_$rp), bylabel(Activity: Commerce)  ///
              || (REFEDU_YD_act_serv_$rp), bylabel(Activity: Services)  ///
-             || (REFEDU_YD_ln_trwage_$rp), bylabel(Total Wage (ln)) ///
+             || (REFEDU_YD_ln_mrwage_main), bylabel(Total Wage (ln)) ///
              || (REFEDU_YD_ln_hrwage_main), bylabel(Hourly Wage (ln)) ///
-             || (REFEDU_YD_ln_whpw_w_$rp), bylabel(Work Hours p.w.) ///
+             || (REFEDU_YD_ln_whpw_w_$rp), bylabel(Work Hours p.w. (ln)) ///
              || (REFEDU_YD_formal), bylabel(Formal) ///
              || , drop(_Iyear_2016 $district _cons $SR_controls) ///
               xline(0) msymbol(d) ///
@@ -666,11 +666,11 @@ esttab $REFGEN_YD_p1   ///
       posthead("& & & & & &  \\  & b (se) & b (se) & b (se) & b (se) & b (se) & b (se)  \\ \midrule \midrule \multicolumn{7}{c}{\textit{\textbf{GENDER}}} \\ \multicolumn{7}{c}{\textit{PANEL A: District and Year Fixed Effects}} \\  \midrule ") ///
       fragment replace label ///
     drop($district _cons age age2 _Iyear_2016)   ///
-      mtitles("\multirow{2}{*}{Employed}" "\multirow{2}{*}{Unemployed}" "\multirow{2}{*}{Total Wage (ln)}" "\multirow{2}{*}{Hourly Wage (ln)}" "\multirow{2}{*}{Work Hours per Week}" "\multirow{2}{*}{Formal}") ///
+      mtitles("\multirow{2}{*}{Employed}" "\multirow{2}{*}{Unemployed}" "\multirow{2}{*}{Total Wage (ln)}" "\multirow{2}{*}{Hourly Wage (ln)}" "\multirow{2}{*}{\shortstack[c]{Work Hours\\ p.w. (ln)}}" "\multirow{2}{*}{Formal}") ///
       varlabel(inter_gender "Nbr Ref x Gender" gender "Gender (Male)") ///
       stats(N r2_a, fmt(0 2) labels("\\\\[-0.5cm] N" "Adj. $ R^{2} $ \\\\[-0.6cm]")) ///
       b(%8.3f) se(%8.3f) starlevels(* 0.1 ** 0.05 *** 0.01) ///
-      prefoot("\\\\[-0.5cm] \hline") //
+      prefoot(" \hline") //
 
 esttab $REFGEN_YI_p1  /// 
       using "$out_analysis/SR_REF_HET_reg_MERGE_p1.tex",  ///
@@ -681,7 +681,7 @@ esttab $REFGEN_YI_p1  ///
       r2 b(%8.3f) se(%8.3f) ///
       varlabel(inter_gender "Nbr Ref x Gender" gender "Gender (Male)") ///
       nomtitles nonumbers starlevels(* 0.1 ** 0.05 *** 0.01) ///
-      prefoot("\\\\[-0.5cm] \hline") //
+      prefoot(" \hline") //
 
 esttab $REFURB_YD_p1    /// 
       using "$out_analysis/SR_REF_HET_reg_MERGE_p1.tex",  ///
@@ -692,7 +692,7 @@ esttab $REFURB_YD_p1    ///
       varlabel(inter_urban "Nbr Ref x Urban" urban "Urban") ///
       r2 b(%8.3f) se(%8.3f) ///
       nomtitles nonumbers starlevels(* 0.1 ** 0.05 *** 0.01) ///
-      prefoot("\\\\[-0.5cm] \hline") //
+      prefoot(" \hline") //
 
 esttab $REFURB_YI_p1    /// 
       using "$out_analysis/SR_REF_HET_reg_MERGE_p1.tex",  ///
@@ -703,7 +703,7 @@ esttab $REFURB_YI_p1    ///
       varlabel(inter_urban "Nbr Ref x Urban" urban "Urban") ///
       r2 b(%8.3f) se(%8.3f) ///
       nomtitles nonumbers starlevels(* 0.1 ** 0.05 *** 0.01) ///
-      prefoot("\\\\[-0.5cm] \hline") //
+      prefoot(" \hline") //
 
 esttab $REFEDU_YD_p1    /// 
       using "$out_analysis/SR_REF_HET_reg_MERGE_p1.tex",  ///
@@ -714,7 +714,7 @@ esttab $REFEDU_YD_p1    ///
       varlabel(inter_educ "Nbr Ref x Education" bi_education "Education") ///
       r2 b(%8.3f) se(%8.3f) ///
       nomtitles nonumbers starlevels(* 0.1 ** 0.05 *** 0.01) ///
-      prefoot("\\\\[-0.5cm] \hline") //
+      prefoot(" \hline") //
 
 esttab $REFEDU_YI_p1  /// 
       using "$out_analysis/SR_REF_HET_reg_MERGE_p1.tex",  ///
@@ -725,8 +725,8 @@ esttab $REFEDU_YI_p1  ///
       r2 b(%8.3f) se(%8.3f) ///
       varlabel(inter_educ "Nbr Ref x Education" bi_education "Education") ///
       nomtitles nonumbers starlevels(* 0.1 ** 0.05 *** 0.01) ///
-      prefoot("\\\\[-0.5cm] \hline") ///
-      postfoot("\bottomrule  \\\\[-0.6cm]  \end{tabular}  ")
+      prefoot(" \hline") ///
+      postfoot("\bottomrule  \end{tabular}  ")
 
 
 
@@ -754,7 +754,7 @@ esttab $REFGEN_YD_p2   ///
       varlabel(inter_gender "Nbr Ref x Gender" gender "Gender (Male)") ///
       stats(N r2_a, fmt(0 2) labels("\\\\[-0.5cm] N" "Adj. $ R^{2} $ \\\\[-0.6cm]")) ///
       b(%8.3f) se(%8.3f) starlevels(* 0.1 ** 0.05 *** 0.01) ///
-      prefoot("\\\\[-0.5cm] \hline") //
+      prefoot(" \hline") //
 
 esttab $REFGEN_YI_p2  /// 
       using "$out_analysis/SR_REF_HET_reg_MERGE_p2.tex",  ///
@@ -765,7 +765,7 @@ esttab $REFGEN_YI_p2  ///
       r2 b(%8.3f) se(%8.3f) ///
       varlabel(inter_gender "Nbr Ref x Gender" gender "Gender (Male)") ///
       nomtitles nonumbers starlevels(* 0.1 ** 0.05 *** 0.01) ///
-      prefoot("\\\\[-0.5cm] \hline") //
+      prefoot(" \hline") //
 
 esttab $REFURB_YD_p2    /// 
       using "$out_analysis/SR_REF_HET_reg_MERGE_p2.tex",  ///
@@ -776,7 +776,7 @@ esttab $REFURB_YD_p2    ///
       varlabel(inter_urban "Nbr Ref x Urban" urban "Urban") ///
       r2 b(%8.3f) se(%8.3f) ///
       nomtitles nonumbers starlevels(* 0.1 ** 0.05 *** 0.01) ///
-      prefoot("\\\\[-0.5cm] \hline") //
+      prefoot(" \hline") //
 
 esttab $REFURB_YI_p2    /// 
       using "$out_analysis/SR_REF_HET_reg_MERGE_p2.tex",  ///
@@ -787,7 +787,7 @@ esttab $REFURB_YI_p2    ///
       varlabel(inter_urban "Nbr Ref x Urban" urban "Urban") ///
       r2 b(%8.3f) se(%8.3f) ///
       nomtitles nonumbers starlevels(* 0.1 ** 0.05 *** 0.01) ///
-      prefoot("\\\\[-0.5cm] \hline") //
+      prefoot("\hline") //
 
 esttab $REFEDU_YD_p2    /// 
       using "$out_analysis/SR_REF_HET_reg_MERGE_p2.tex",  ///
@@ -798,7 +798,7 @@ esttab $REFEDU_YD_p2    ///
       varlabel(inter_educ "Nbr Ref x Education" bi_education "Education") ///
       r2 b(%8.3f) se(%8.3f) ///
       nomtitles nonumbers starlevels(* 0.1 ** 0.05 *** 0.01) ///
-      prefoot("\\\\[-0.5cm] \hline") //
+      prefoot(" \hline") //
 
 esttab $REFEDU_YI_p2  /// 
       using "$out_analysis/SR_REF_HET_reg_MERGE_p2.tex",  ///
@@ -809,8 +809,8 @@ esttab $REFEDU_YI_p2  ///
       r2 b(%8.3f) se(%8.3f) ///
       varlabel(inter_educ "Nbr Ref x Education" bi_education "Education") ///
       nomtitles nonumbers starlevels(* 0.1 ** 0.05 *** 0.01) ///
-      prefoot("\\\\[-0.5cm] \hline") ///
-      postfoot("\bottomrule  \\\\[-0.6cm]  \end{tabular}  ")
+      prefoot(" \hline") ///
+      postfoot("\bottomrule  \end{tabular}  ")
 
 
 
@@ -970,9 +970,9 @@ coefplot      (WEMP_YD_act_ag_$rp), bylabel(Activity: Agricultural)  ///
              || (WEMP_YD_act_manuf_$rp), bylabel(Activity: Manufacturing)  ///
              || (WEMP_YD_act_com_$rp), bylabel(Activity: Commerce)  ///
              || (WEMP_YD_act_serv_$rp), bylabel(Activity: Services)  ///
-             || (WEMP_YD_ln_trwage_$rp), bylabel(Total Wage (ln)) ///
+             || (WEMP_YD_ln_mrwage_main), bylabel(Total Wage (ln)) ///
              || (WEMP_YD_ln_hrwage_main), bylabel(Hourly Wage (ln)) ///
-             || (WEMP_YD_ln_whpw_w_$rp), bylabel(Work Hours p.w.) ///
+             || (WEMP_YD_ln_whpw_w_$rp), bylabel(Work Hours p.w. (ln)) ///
              || (WEMP_YD_formal), bylabel(Formal) ///
              || , drop( _Iyear_2016 $district _cons $SR_controls) ///
               xline(0) msymbol(d) ///
@@ -1041,11 +1041,11 @@ xtset indid_2010 year
 *Rural/urban 
 tab lfp_7d, m 
 tab lfp_temp_7d, m 
-lab var lfp_temp_7d "Daily Labor"
+lab var lfp_temp_7d "Temporary"
 
 gen inter_lfp_temp_7d = lfp_temp_7d*$SR_treat_var_ref
 *gen inter_formal_IV = urban*$IV_var_ref
-lab var inter_lfp_temp_7d "Nbr Ref x Daily Labor"
+lab var inter_lfp_temp_7d "Nbr Ref x Temporary"
 
 global het_var          lfp_temp_7d
 global inter_het_var    inter_lfp_temp_7d
@@ -1129,7 +1129,7 @@ estout $SR_outcome_TEMP_YI ///
 
 ********************************************************************
 ********************************************************************
-************* GRAPH HETERO WAGE EMPLOYMENT *************************
+************* GRAPH HETERO Temporary *************************
 ********************************************************************
 ********************************************************************
 
@@ -1139,9 +1139,9 @@ coefplot      (TEMP_YD_act_ag_$rp), bylabel(Activity: Agricultural)  ///
              || (TEMP_YD_act_manuf_$rp), bylabel(Activity: Manufacturing)  ///
              || (TEMP_YD_act_com_$rp), bylabel(Activity: Commerce)  ///
              || (TEMP_YD_act_serv_$rp), bylabel(Activity: Services)  ///
-             || (TEMP_YD_ln_trwage_$rp), bylabel(Total Wage (ln)) ///
+             || (TEMP_YD_ln_mrwage_main), bylabel(Total Wage (ln)) ///
              || (TEMP_YD_ln_hrwage_main), bylabel(Hourly Wage (ln)) ///
-             || (TEMP_YD_ln_whpw_w_$rp), bylabel(Work Hours p.w.) ///
+             || (TEMP_YD_ln_whpw_w_$rp), bylabel(Work Hours p.w. (ln)) ///
              || (TEMP_YD_formal), bylabel(Formal) ///
              || , drop( _Iyear_2016 $district _cons $SR_controls) ///
               xline(0) msymbol(d) ///
@@ -1152,7 +1152,7 @@ coefplot      (TEMP_YD_act_ag_$rp), bylabel(Activity: Agricultural)  ///
              cond(@pval<.1, string(@b,"%9.3f") + "*", ///
              string(@b, "%5.3f")  ) ) ) ) mlabposition(10) mlabsize(tiny) ///
              byopts(graphregion(color(white)) bgcolor(white) ///
-              title("Effect Sizes: Daily Labor", size(small))) ///
+              title("Effect Sizes: Temporary", size(small))) ///
                 yscale(noline alt)  xscale(noline alt) legend(nobox ///
                 region(lstyle(none)) size(vsmall) cols(4) ring(0) )  ///
             levels(99.9 99 95) ciopts(lwidth(*1) lcolor(*.6)) xla(none) xtitle("") xsc(noline) ///
@@ -1312,9 +1312,9 @@ coefplot      (SE_YD_act_ag_$rp), bylabel(Activity: Agricultural)  ///
              || (SE_YD_act_manuf_$rp), bylabel(Activity: Manufacturing)  ///
              || (SE_YD_act_com_$rp), bylabel(Activity: Commerce)  ///
              || (SE_YD_act_serv_$rp), bylabel(Activity: Services)  ///
-             || (SE_YD_ln_trwage_$rp), bylabel(Total Wage (ln)) ///
+             || (SE_YD_ln_mrwage_main), bylabel(Total Wage (ln)) ///
              || (SE_YD_ln_hrwage_main), bylabel(Hourly Wage (ln)) ///
-             || (SE_YD_ln_whpw_w_$rp), bylabel(Work Hours p.w.) ///
+             || (SE_YD_ln_whpw_w_$rp), bylabel(Work Hours p.w. (ln)) ///
              || (SE_YD_formal), bylabel(Formal) ///
              || , drop( _Iyear_2016 $district _cons $SR_controls) ///
               xline(0) msymbol(d) ///
@@ -1348,11 +1348,11 @@ esttab $SR_outcome_WEMP_YD   ///
       posthead("& & & & & & & & \\  & b (se) & b (se) & b (se) & b (se) & b (se) & b (se) & b (se) & b (se) \\ \midrule \midrule \multicolumn{9}{c}{\textit{\textbf{WAGE EMPLOYMENT}}} \\ \multicolumn{9}{c}{\textit{PANEL A: District and Year Fixed Effects}} \\  \midrule ") ///
       fragment replace label ///
       drop($district _cons $SR_controls _Iyear_2016)   ///
-      mtitles("\multirow{2}{*}{Agriculture}" "\multirow{2}{*}{Manufacturing}" "\multirow{2}{*}{Commerce}" "\multirow{2}{*}{Services}" "\multirow{2}{*}{\shortstack[c]{Total Wage\\ (ln)}}" "\multirow{2}{*}{\shortstack[c]{Hourly Wage\\ (ln)}}" "\multirow{2}{*}{\shortstack[c]{Work Hours\\ p.w.}}" "\multirow{2}{*}{Formal}") ///
+      mtitles("\multirow{2}{*}{Agriculture}" "\multirow{2}{*}{Manufacturing}" "\multirow{2}{*}{Commerce}" "\multirow{2}{*}{Services}" "\multirow{2}{*}{\shortstack[c]{Total Wage\\ (ln)}}" "\multirow{2}{*}{\shortstack[c]{Hourly Wage\\ (ln)}}" "\multirow{2}{*}{\shortstack[c]{Work Hours\\ p.w. (ln)}}" "\multirow{2}{*}{Formal}") ///
       varlabel(inter_lfp_empl_7d "Nbr Ref x Wage Empl" lfp_empl_7d "Wage Empl") ///
       stats(N r2_a, fmt(0 2) labels("\\\\[-0.5cm] N" "Adj. $ R^{2} $ \\\\[-0.6cm]")) ///
       b(%8.3f) se(%8.3f) starlevels(* 0.1 ** 0.05 *** 0.01) ///
-      prefoot("\\\\[-0.5cm] \hline") //
+      prefoot(" \hline") //
 
 esttab $SR_outcome_WEMP_YI  /// 
       using "$out_analysis/SR_REF_HET_reg_MERGE_LFP.tex",  ///
@@ -1363,18 +1363,18 @@ esttab $SR_outcome_WEMP_YI  ///
       r2 b(%8.3f) se(%8.3f) ///
       varlabel(inter_lfp_empl_7d "Nbr Ref x Wage Empl" lfp_empl_7d "Wage Empl") ///
       nomtitles nonumbers starlevels(* 0.1 ** 0.05 *** 0.01) ///
-      prefoot("\\\\[-0.5cm] \hline") //
+      prefoot(" \hline") //
 
 esttab $SR_outcome_TEMP_YD    /// 
       using "$out_analysis/SR_REF_HET_reg_MERGE_LFP.tex",  ///
-      posthead("\midrule \midrule \multicolumn{9}{c}{\textit{\textbf{DAILY LABOR}}} \\ \multicolumn{9}{c}{\textit{PANEL C: District and Year Fixed Effects}} \\ \midrule  ") ///
+      posthead("\midrule \midrule \multicolumn{9}{c}{\textit{\textbf{TEMPORARY}}} \\ \multicolumn{9}{c}{\textit{PANEL C: District and Year Fixed Effects}} \\ \midrule  ") ///
       fragment append label ///
       drop($SR_controls _cons $district _Iyear_2016)   ///
       stats(N r2_a, fmt(0 2) labels("\\\\[-0.5cm] N" "Adj. $ R^{2} $ \\\\[-0.6cm]"))  ///
-      varlabel(inter_lfp_temp_7d "Nbr Ref x Daily Labor" lfp_temp_7d "Daily Labor") ///
+      varlabel(inter_lfp_temp_7d "Nbr Ref x Temporary" lfp_temp_7d "Temporary") ///
       r2 b(%8.3f) se(%8.3f) ///
       nomtitles nonumbers starlevels(* 0.1 ** 0.05 *** 0.01) ///
-      prefoot("\\\\[-0.5cm] \hline") //
+      prefoot(" \hline") //
 
 esttab $SR_outcome_TEMP_YI    /// 
       using "$out_analysis/SR_REF_HET_reg_MERGE_LFP.tex",  ///
@@ -1382,10 +1382,10 @@ esttab $SR_outcome_TEMP_YI    ///
       fragment append label ///
       drop($SR_controls _cons )   ///
       stats(N r2_a, fmt(0 2) labels("\\\\[-0.5cm] N" "Adj. $ R^{2} $ \\\\[-0.6cm]"))  ///
-      varlabel(inter_lfp_temp_7d "Nbr Ref x Daily Labor" lfp_temp_7d "Daily Labor") ///
+      varlabel(inter_lfp_temp_7d "Nbr Ref x Temporary" lfp_temp_7d "Temporary") ///
       r2 b(%8.3f) se(%8.3f) ///
       nomtitles nonumbers starlevels(* 0.1 ** 0.05 *** 0.01) ///
-      prefoot("\\\\[-0.5cm] \hline") //
+      prefoot("\hline") //
 
 esttab $SR_outcome_SE_YD    /// 
       using "$out_analysis/SR_REF_HET_reg_MERGE_LFP.tex",  ///
@@ -1396,7 +1396,7 @@ esttab $SR_outcome_SE_YD    ///
       varlabel(inter_lfp_se_7d "Nbr Ref x SE" lfp_se_7d "SE") ///
       r2 b(%8.3f) se(%8.3f) ///
       nomtitles nonumbers starlevels(* 0.1 ** 0.05 *** 0.01) ///
-      prefoot("\\\\[-0.5cm] \hline") //
+      prefoot("\hline") //
 
 esttab $SR_outcome_SE_YI  /// 
       using "$out_analysis/SR_REF_HET_reg_MERGE_LFP.tex",  ///
@@ -1407,8 +1407,8 @@ esttab $SR_outcome_SE_YI  ///
       r2 b(%8.3f) se(%8.3f) ///
       varlabel(inter_lfp_se_7d "Nbr Ref x SE" lfp_se_7d "SE") ///
       nomtitles nonumbers starlevels(* 0.1 ** 0.05 *** 0.01) ///
-      prefoot("\\\\[-0.5cm] \hline") ///
-      postfoot("\bottomrule  \\\\[-0.6cm]  \end{tabular}  ")
+      prefoot(" \hline") ///
+      postfoot("\bottomrule   \end{tabular}  ")
 
 
 
@@ -1554,12 +1554,12 @@ estout $SR_outcome_AG_YI ///
 **************************************************************************
 
 coefplot      (AG_YD_lfp_empl_$rp), bylabel(Wage Employee)  ///
-             || (AG_YD_lfp_temp_$rp), bylabel(Daily Labor)  ///
+             || (AG_YD_lfp_temp_$rp), bylabel(Temporary)  ///
              || (AG_YD_lfp_employer_$rp), bylabel(Employer)  ///
              || (AG_YD_lfp_se_$rp), bylabel(Self-Employed)  ///
-             || (AG_YD_ln_trwage_$rp), bylabel(Total Wage (ln)) ///
+             || (AG_YD_ln_mrwage_main), bylabel(Total Wage (ln)) ///
              || (AG_YD_ln_hrwage_main), bylabel(Hourly Wage (ln)) ///
-             || (AG_YD_ln_whpw_w_$rp), bylabel(Work Hours p.w.) ///
+             || (AG_YD_ln_whpw_w_$rp), bylabel(Work Hours p.w. (ln)) ///
              || (AG_YD_formal), bylabel(Formal) ///
              || , drop( _Iyear_2016 $district _cons $SR_controls) ///
               xline(0) msymbol(d) ///
@@ -1724,12 +1724,12 @@ estout $SR_outcome_MANUF_YI ///
 ********************************************************************
 
 coefplot      (MANUF_YD_lfp_empl_$rp), bylabel(Wage Employee)  ///
-             || (MANUF_YD_lfp_temp_$rp), bylabel(Daily Labor)  ///
+             || (MANUF_YD_lfp_temp_$rp), bylabel(Temporary)  ///
              || (MANUF_YD_lfp_employer_$rp), bylabel(Employer)  ///
              || (MANUF_YD_lfp_se_$rp), bylabel(Self-Employed)  ///
-             || (MANUF_YD_ln_trwage_$rp), bylabel(Total Wage (ln)) ///
+             || (MANUF_YD_ln_mrwage_main), bylabel(Total Wage (ln)) ///
              || (MANUF_YD_ln_hrwage_main), bylabel(Hourly Wage (ln)) ///
-             || (MANUF_YD_ln_whpw_w_$rp), bylabel(Work Hours p.w.) ///
+             || (MANUF_YD_ln_whpw_w_$rp), bylabel(Work Hours p.w. (ln)) ///
              || (MANUF_YD_formal), bylabel(Formal) ///
              || , drop( _Iyear_2016 $district _cons $SR_controls) ///
               xline(0) msymbol(d) ///
@@ -1890,12 +1890,12 @@ estout $SR_outcome_COM_YI ///
 ***************************************************************
 
 coefplot      (COM_YD_lfp_empl_$rp), bylabel(Wage Employee)  ///
-             || (COM_YD_lfp_temp_$rp), bylabel(Daily Labor)  ///
+             || (COM_YD_lfp_temp_$rp), bylabel(Temporary)  ///
              || (COM_YD_lfp_employer_$rp), bylabel(Employer)  ///
              || (COM_YD_lfp_se_$rp), bylabel(Self-Employed)  ///
-             || (COM_YD_ln_trwage_$rp), bylabel(Total Wage (ln)) ///
+             || (COM_YD_ln_mrwage_main), bylabel(Total Wage (ln)) ///
              || (COM_YD_ln_hrwage_main), bylabel(Hourly Wage (ln)) ///
-             || (COM_YD_ln_whpw_w_$rp), bylabel(Work Hours p.w.) ///
+             || (COM_YD_ln_whpw_w_$rp), bylabel(Work Hours p.w. (ln)) ///
              || (COM_YD_formal), bylabel(Formal) ///
              || , drop( _Iyear_2016 $district _cons $SR_controls) ///
               xline(0) msymbol(d) ///
@@ -2061,12 +2061,12 @@ estout $SR_outcome_SERV_YI ///
 ***************************************************************
 
 coefplot      (SERV_YD_lfp_empl_$rp), bylabel(Wage Employee)  ///
-             || (SERV_YD_lfp_temp_$rp), bylabel(Daily Labor)  ///
+             || (SERV_YD_lfp_temp_$rp), bylabel(Temporary)  ///
              || (SERV_YD_lfp_employer_$rp), bylabel(Employer)  ///
              || (SERV_YD_lfp_se_$rp), bylabel(Self-Employed)  ///
-             || (SERV_YD_ln_trwage_$rp), bylabel(Total Wage (ln)) ///
+             || (SERV_YD_ln_mrwage_main), bylabel(Total Wage (ln)) ///
              || (SERV_YD_ln_hrwage_main), bylabel(Hourly Wage (ln)) ///
-             || (SERV_YD_ln_whpw_w_$rp), bylabel(Work Hours p.w.) ///
+             || (SERV_YD_ln_whpw_w_$rp), bylabel(Work Hours p.w. (ln)) ///
              || (SERV_YD_formal), bylabel(Formal) ///
              || , drop( _Iyear_2016 $district _cons $SR_controls) ///
               xline(0) msymbol(d) ///
@@ -2110,11 +2110,11 @@ esttab $SR_outcome_AG_YD   ///
       posthead("& & & & & & & & \\  & b (se) & b (se) & b (se) & b (se) & b (se) & b (se) & b (se) & b (se) \\ \midrule \midrule \multicolumn{9}{c}{\textit{\textbf{AGRICULTURE}}} \\ \multicolumn{9}{c}{\textit{PANEL A: District and Year Fixed Effects}} \\  \midrule ") ///
       fragment replace label ///
     drop($district _cons $SR_controls _Iyear_2016)   ///
-      mtitles("\multirow{2}{*}{Wage Employee}" "\multirow{2}{*}{Daily Labor}" "\multirow{2}{*}{Employer}" "\multirow{2}{*}{Self-Empl.}" "\multirow{2}{*}{\shortstack[c]{Total Wage\\ (ln)}}" "\multirow{2}{*}{\shortstack[c]{Hourly Wage\\ (ln)}}" "\multirow{2}{*}{\shortstack[c]{Work Hours\\ p.w.}}" "\multirow{2}{*}{Formal}") ///
+      mtitles("\multirow{2}{*}{Wage Employee}" "\multirow{2}{*}{Temporary}" "\multirow{2}{*}{Employer}" "\multirow{2}{*}{Self-Empl.}" "\multirow{2}{*}{\shortstack[c]{Total Wage\\ (ln)}}" "\multirow{2}{*}{\shortstack[c]{Hourly Wage\\ (ln)}}" "\multirow{2}{*}{\shortstack[c]{Work Hours\\ p.w. (ln)}}" "\multirow{2}{*}{Formal}") ///
       varlabel(inter_act_ag_7d "Nbr Ref x Agri" act_ag_7d "Agriculture") ///
       stats(N r2_a, fmt(0 2) labels("\\\\[-0.5cm] N" "Adj. $ R^{2} $ \\\\[-0.6cm]")) ///
       b(%8.3f) se(%8.3f) starlevels(* 0.1 ** 0.05 *** 0.01) ///
-      prefoot("\\\\[-0.5cm] \hline") //
+      prefoot("\hline") //
 
 esttab $SR_outcome_AG_YI  /// 
       using "$out_analysis/SR_REF_HET_reg_MERGE_ACT_p1.tex",  ///
@@ -2125,7 +2125,7 @@ esttab $SR_outcome_AG_YI  ///
       r2 b(%8.3f) se(%8.3f) ///
       varlabel(inter_act_ag_7d "Nbr Ref x Agri" act_ag_7d "Agriculture") ///
       nomtitles nonumbers starlevels(* 0.1 ** 0.05 *** 0.01) ///
-      prefoot("\\\\[-0.5cm] \hline") //
+      prefoot("\hline") //
 
 esttab $SR_outcome_MANUF_YD    /// 
       using "$out_analysis/SR_REF_HET_reg_MERGE_ACT_p1.tex",  ///
@@ -2136,7 +2136,7 @@ esttab $SR_outcome_MANUF_YD    ///
       varlabel(inter_act_manuf_7d "Nbr Ref x Manuf" act_manuf_7d "Manufacturing") ///
       r2 b(%8.3f) se(%8.3f) ///
       nomtitles nonumbers starlevels(* 0.1 ** 0.05 *** 0.01) ///
-      prefoot("\\\\[-0.5cm] \hline") //
+      prefoot("\hline") //
 
 esttab $SR_outcome_MANUF_YI    /// 
       using "$out_analysis/SR_REF_HET_reg_MERGE_ACT_p1.tex",  ///
@@ -2147,7 +2147,7 @@ esttab $SR_outcome_MANUF_YI    ///
       varlabel(inter_act_manuf_7d "Nbr Ref x Manuf" act_manuf_7d "Manufacturing") ///
       r2 b(%8.3f) se(%8.3f) ///
       nomtitles nonumbers starlevels(* 0.1 ** 0.05 *** 0.01) ///
-      prefoot("\\\\[-0.5cm] \hline") //
+      prefoot(" \hline") //
 
 esttab $SR_outcome_COM_YD    /// 
       using "$out_analysis/SR_REF_HET_reg_MERGE_ACT_p1.tex",  ///
@@ -2158,7 +2158,7 @@ esttab $SR_outcome_COM_YD    ///
       varlabel(inter_act_com_7d "Nbr Ref x Commerce" act_com_7d "Commerce") ///
       r2 b(%8.3f) se(%8.3f) ///
       nomtitles nonumbers starlevels(* 0.1 ** 0.05 *** 0.01) ///
-      prefoot("\\\\[-0.5cm] \hline") //
+      prefoot("\hline") //
 
 esttab $SR_outcome_COM_YI  /// 
       using "$out_analysis/SR_REF_HET_reg_MERGE_ACT_p1.tex",  ///
@@ -2169,8 +2169,8 @@ esttab $SR_outcome_COM_YI  ///
       r2 b(%8.3f) se(%8.3f) ///
       varlabel(inter_act_com_7d "Nbr Ref x Commerce" act_com_7d "Commerce") ///
       nomtitles nonumbers starlevels(* 0.1 ** 0.05 *** 0.01) ///
-      prefoot("\\\\[-0.5cm] \hline") ///
-      postfoot("\bottomrule  \\\\[-0.6cm]  \end{tabular}  ")
+      prefoot(" \hline") ///
+      postfoot("\bottomrule  \end{tabular}  ")
 
 
 
@@ -2188,11 +2188,11 @@ esttab $SR_outcome_SERV_YD   ///
       posthead("& & & & & & & & \\  & b (se) & b (se) & b (se) & b (se) & b (se) & b (se) & b (se) & b (se) \\ \midrule \midrule \multicolumn{9}{c}{\textit{\textbf{SERVICES}}} \\ \multicolumn{9}{c}{\textit{PANEL A: District and Year Fixed Effects}} \\  \midrule ") ///
       fragment replace label ///
     drop($district _cons $SR_controls _Iyear_2016)   ///
-      mtitles("\multirow{2}{*}{Wage Employee}" "\multirow{2}{*}{Daily Labor}" "\multirow{2}{*}{Employer}" "\multirow{2}{*}{Self-Empl.}" "\multirow{2}{*}{\shortstack[c]{Total Wage\\ (ln)}}" "\multirow{2}{*}{\shortstack[c]{Hourly Wage\\ (ln)}}" "\multirow{2}{*}{\shortstack[c]{Work Hours\\ p.w.}}" "\multirow{2}{*}{Formal}") ///
+      mtitles("\multirow{2}{*}{Wage Employee}" "\multirow{2}{*}{Temporary}" "\multirow{2}{*}{Employer}" "\multirow{2}{*}{Self-Empl.}" "\multirow{2}{*}{\shortstack[c]{Total Wage\\ (ln)}}" "\multirow{2}{*}{\shortstack[c]{Hourly Wage\\ (ln)}}" "\multirow{2}{*}{\shortstack[c]{Work Hours\\ p.w. (ln)}}" "\multirow{2}{*}{Formal}") ///
       varlabel(inter_act_serv_7d "Nbr Ref x Services" act_serv_7d "Services") ///
       stats(N r2_a, fmt(0 2) labels("\\\\[-0.5cm] N" "Adj. $ R^{2} $ \\\\[-0.6cm]")) ///
       b(%8.3f) se(%8.3f) starlevels(* 0.1 ** 0.05 *** 0.01) ///
-      prefoot("\\\\[-0.5cm] \hline") //
+      prefoot(" \hline") //
 
 esttab $SR_outcome_SERV_YI  /// 
       using "$out_analysis/SR_REF_HET_reg_MERGE_ACT_p2.tex",  ///
@@ -2203,8 +2203,8 @@ esttab $SR_outcome_SERV_YI  ///
       r2 b(%8.3f) se(%8.3f) ///
       varlabel(inter_act_serv_7d "Nbr Ref x Services" act_serv_7d "Services") ///
       nomtitles nonumbers starlevels(* 0.1 ** 0.05 *** 0.01) ///
-      prefoot("\\\\[-0.5cm] \hline") ///
-      postfoot("\bottomrule  \\\\[-0.6cm]  \end{tabular}  ")
+      prefoot(" \hline") ///
+      postfoot("\bottomrule \end{tabular}  ")
 
 
 

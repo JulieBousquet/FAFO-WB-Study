@@ -245,10 +245,10 @@ esttab $WPOLS_YD_p1   ///
       posthead("& & & & & & \\ & b (se) & b (se) & b (se) & b (se) & b (se) & b (se)  \\ \midrule \midrule \multicolumn{7}{c}{\textit{\textbf{District and Year Fixed Effects}}} \\ \multicolumn{7}{c}{\textit{PANEL A: OLS}} \\ \midrule ") ///
       fragment replace label ///
     drop($SR_controls $district _cons _Iyear_2016)   ///
-      mtitles("\multirow{2}{*}{Employed}" "\multirow{2}{*}{Unemployed}" "\multirow{2}{*}{\shortstack[c]{Total Wage\\ (ln)}}" "\multirow{2}{*}{\shortstack[c]{Hourly Wage\\ (ln)}}" "\multirow{2}{*}{\shortstack[c]{Work Hours\\ p.w.}}" "\multirow{2}{*}{Formal}") ///
+      mtitles("\multirow{2}{*}{Employed}" "\multirow{2}{*}{Unemployed}" "\multirow{2}{*}{\shortstack[c]{Total Wage\\ (ln)}}" "\multirow{2}{*}{\shortstack[c]{Hourly Wage\\ (ln)}}" "\multirow{2}{*}{\shortstack[c]{Work Hours\\ p.w. (ln)}}" "\multirow{2}{*}{Formal}") ///
       stats(N r2_a, fmt(0 2) labels("\\\\[-0.5cm] N" "Adj. $ R^{2} $ \\\\[-0.6cm]")) ///
       b(%8.3f) se(%8.3f) starlevels(* 0.1 ** 0.05 *** 0.01) ///
-      prefoot("\\\\[-0.5cm] \hline") //
+      prefoot(" \hline") //
 
 esttab $WPIV_YD_p1  /// 
       using "$out_analysis/SR_WP_reg_MERGE_p1.tex",  ///
@@ -258,7 +258,7 @@ esttab $WPIV_YD_p1  ///
       stats(N r2_a rkf, fmt(0 2 0) labels("\\\\[-0.5cm] N" "Adj. $ R^{2} $" "KP-Stat \\\\[-0.6cm]"))  ///
       r2 b(%8.3f) se(%8.3f) ///
       nomtitles nonumbers starlevels(* 0.1 ** 0.05 *** 0.01) ///
-      prefoot("\\\\[-0.5cm] \hline") //
+      prefoot("\hline") //
 
 esttab $WPOLS_YI_p1    /// 
       using "$out_analysis/SR_WP_reg_MERGE_p1.tex",  ///
@@ -268,7 +268,7 @@ esttab $WPOLS_YI_p1    ///
       stats(N r2_a, fmt(0 2) labels("\\\\[-0.5cm] N" "Adj. $ R^{2} $ \\\\[-0.6cm]"))  ///
       r2 b(%8.3f) se(%8.3f) ///
       nomtitles nonumbers starlevels(* 0.1 ** 0.05 *** 0.01) ///
-      prefoot("\\\\[-0.5cm] \hline") //
+      prefoot(" \hline") //
 
 esttab $WPIV_YI_p1  /// 
       using "$out_analysis/SR_WP_reg_MERGE_p1.tex",  ///
@@ -278,8 +278,8 @@ esttab $WPIV_YI_p1  ///
       stats(N r2_a rkf, fmt(0 2 0) labels("\\\\[-0.5cm] N" "Adj. $ R^{2} $" "KP-Stat \\\\[-0.6cm]"))  ///
       r2 b(%8.3f) se(%8.3f) ///
       nomtitles nonumbers starlevels(* 0.1 ** 0.05 *** 0.01) ///
-      prefoot("\\\\[-0.5cm] \hline") ///
-      postfoot("\bottomrule  \\\\[-0.6cm]  \end{tabular}  ")
+      prefoot(" \hline") ///
+      postfoot("\bottomrule   \end{tabular}  ")
 
 
 
@@ -293,7 +293,7 @@ esttab $WPOLS_YD_p2   ///
       mtitles("\multirow{2}{*}{Employee}" "\multirow{2}{*}{Temporary}" "\multirow{2}{*}{Employer}" "\multirow{2}{*}{SE}" "\multirow{2}{*}{Agriculture}" "\multirow{2}{*}{Manufacturing}" "\multirow{2}{*}{Commerce}" "\multirow{2}{*}{Services}") ///
       stats(N r2_a, fmt(0 2) labels("\\\\[-0.5cm] N" "Adj. $ R^{2} $ \\\\[-0.6cm]")) ///
       b(%8.3f) se(%8.3f) starlevels(* 0.1 ** 0.05 *** 0.01) ///
-      prefoot("\\\\[-0.5cm] \hline") //
+      prefoot(" \hline") //
 
 esttab $WPIV_YD_p2  /// 
       using "$out_analysis/SR_WP_reg_MERGE_p2.tex",  ///
@@ -303,7 +303,7 @@ esttab $WPIV_YD_p2  ///
       stats(N r2_a rkf, fmt(0 2 0) labels("\\\\[-0.5cm] N" "Adj. $ R^{2} $" "KP-Stat \\\\[-0.6cm]"))  ///
       r2 b(%8.3f) se(%8.3f) ///
       nomtitles nonumbers starlevels(* 0.1 ** 0.05 *** 0.01) ///
-      prefoot("\\\\[-0.5cm] \hline") //
+      prefoot(" \hline") //
 
 esttab $WPOLS_YI_p2    /// 
       using "$out_analysis/SR_WP_reg_MERGE_p2.tex",  ///
@@ -313,7 +313,7 @@ esttab $WPOLS_YI_p2    ///
       stats(N r2_a, fmt(0 2) labels("\\\\[-0.5cm] N" "Adj. $ R^{2} $ \\\\[-0.6cm]"))  ///
       r2 b(%8.3f) se(%8.3f) ///
       nomtitles nonumbers starlevels(* 0.1 ** 0.05 *** 0.01) ///
-      prefoot("\\\\[-0.5cm] \hline") //
+      prefoot("\hline") //
 
 esttab $WPIV_YI_p2  /// 
       using "$out_analysis/SR_WP_reg_MERGE_p2.tex",  ///
@@ -323,8 +323,8 @@ esttab $WPIV_YI_p2  ///
       stats(N r2_a rkf, fmt(0 2 0) labels("\\\\[-0.5cm] N" "Adj. $ R^{2} $" "KP-Stat \\\\[-0.6cm]"))  ///
       r2 b(%8.3f) se(%8.3f) ///
       nomtitles nonumbers starlevels(* 0.1 ** 0.05 *** 0.01) ///
-      prefoot("\\\\[-0.5cm] \hline") ///
-      postfoot("\bottomrule  \\\\[-0.6cm]  \end{tabular}  ")
+      prefoot(" \hline") ///
+      postfoot("\bottomrule    \end{tabular}  ")
 
 
 
@@ -339,7 +339,7 @@ esttab $WPIV_YI_p2  ///
 
 
     coefplot (WPOLS_YD_employed_olf_$rp, label(Employed))  ///
-             (WPOLS_YD_unemployed_olf_$rp, label(Unemployed))  ///
+             (WPOLS_YD_unemployed_$rp, label(Unemployed))  ///
              (WPOLS_YD_lfp_empl_$rp, label(Type: Wage Worker))  ///
              (WPOLS_YD_lfp_temp_$rp, label(Type: Temporary))  ///
              (WPOLS_YD_lfp_employer_$rp, label(Type: Employer))  ///
@@ -348,12 +348,12 @@ esttab $WPIV_YI_p2  ///
              (WPOLS_YD_act_manuf_$rp, label(Activity: Manufacturing))  ///
              (WPOLS_YD_act_com_$rp, label(Activity: Commerce))  ///
              (WPOLS_YD_act_serv_$rp, label(Activity: Services))  ///
-             (WPOLS_YD_ln_trwage_$rp, label(Total Wage (ln))) ///
+             (WPOLS_YD_ln_mrwage_main, label(Total Wage (ln))) ///
              (WPOLS_YD_ln_hrwage_main, label(Hourly Wage (ln))) ///
-             (WPOLS_YD_ln_whpw_w_$rp, label(Work Hours p.w.)) ///
+             (WPOLS_YD_ln_whpw_w_$rp, label(Work Hours p.w. (ln))) ///
              (WPOLS_YD_formal, label(Formal)) , bylabel("OLS District Year") ///
              || (WPIV_YD_employed_olf_$rp, label(Employed)) ///
-             (WPIV_YD_unemployed_olf_$rp, label(Unemployed))  ///
+             (WPIV_YD_unemployed_$rp, label(Unemployed))  ///
              (WPIV_YD_lfp_empl_$rp, label(Type: Wage Worker))  ///
              (WPIV_YD_lfp_temp_$rp, label(Type: Temporary))  ///
              (WPIV_YD_lfp_employer_$rp, label(Type: Employer))  ///
@@ -362,12 +362,12 @@ esttab $WPIV_YI_p2  ///
              (WPIV_YD_act_manuf_$rp, label(Activity: Manufacturing))  ///
              (WPIV_YD_act_com_$rp, label(Activity: Commerce))  ///
              (WPIV_YD_act_serv_$rp, label(Activity: Services))  ///
-             (WPIV_YD_ln_trwage_$rp, label(Total Wage (ln))) ///
+             (WPIV_YD_ln_mrwage_main, label(Total Wage (ln))) ///
              (WPIV_YD_ln_hrwage_main, label(Hourly Wage (ln))) ///
-             (WPIV_YD_ln_whpw_w_$rp, label(Work Hours p.w.)) ///
+             (WPIV_YD_ln_whpw_w_$rp, label(Work Hours p.w. (ln))) ///
              (WPIV_YD_formal, label(Formal)) , bylabel("IV District Year") ///
              || (WPOLS_YI_employed_olf_$rp, label(Employed))  ///
-             (WPOLS_YI_unemployed_olf_$rp, label(Unemployed))  ///
+             (WPOLS_YI_unemployed_$rp, label(Unemployed))  ///
              (WPOLS_YI_lfp_empl_$rp, label(Type: Wage Worker))  ///
              (WPOLS_YI_lfp_temp_$rp, label(Type: Temporary))  ///
              (WPOLS_YI_lfp_employer_$rp, label(Type: Employer))  ///
@@ -376,12 +376,12 @@ esttab $WPIV_YI_p2  ///
              (WPOLS_YI_act_manuf_$rp, label(Activity: Manufacturing))  ///
              (WPOLS_YI_act_com_$rp, label(Activity: Commerce))  ///
              (WPOLS_YI_act_serv_$rp, label(Activity: Services))  ///
-             (WPOLS_YI_ln_trwage_$rp, label(Total Wage (ln))) ///
+             (WPOLS_YI_ln_mrwage_main, label(Total Wage (ln))) ///
              (WPOLS_YI_ln_hrwage_main, label(Hourly Wage (ln))) ///
-             (WPOLS_YI_ln_whpw_w_$rp, label(Work Hours p.w.)) ///
+             (WPOLS_YI_ln_whpw_w_$rp, label(Work Hours p.w. (ln))) ///
              (WPOLS_YI_formal, label(Formal)) , bylabel("OLS Indiv Year") ///
              || (WPIV_YI_employed_olf_$rp, label(Employed)) ///
-             (WPIV_YI_unemployed_olf_$rp, label(Unemployed))  ///
+             (WPIV_YI_unemployed_$rp, label(Unemployed))  ///
              (WPIV_YI_lfp_empl_$rp, label(Type: Wage Worker))  ///
              (WPIV_YI_lfp_temp_$rp, label(Type: Temporary))  ///
              (WPIV_YI_lfp_employer_$rp, label(Type: Employer))  ///
@@ -390,9 +390,9 @@ esttab $WPIV_YI_p2  ///
              (WPIV_YI_act_manuf_$rp, label(Activity: Manufacturing))  ///
              (WPIV_YI_act_com_$rp, label(Activity: Commerce))  ///
              (WPIV_YI_act_serv_$rp, label(Activity: Services))  ///
-             (WPIV_YI_ln_trwage_$rp, label(Total Wage (ln))) ///
+             (WPIV_YI_ln_mrwage_main, label(Total Wage (ln))) ///
              (WPIV_YI_ln_hrwage_main, label(Hourly Wage (ln))) ///
-             (WPIV_YI_ln_whpw_w_$rp, label(Work Hours p.w.)) ///
+             (WPIV_YI_ln_whpw_w_$rp, label(Work Hours p.w. (ln))) ///
              (WPIV_YI_formal, label(Formal)) , bylabel("IV Indiv Year") ///
              || , drop(_Iyear_2016 $district _cons $SR_controls) ///
               xline(0) msymbol(d) ///

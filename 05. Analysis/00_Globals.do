@@ -140,7 +140,7 @@ global   district      ///
 
 global SR_treat_var_ref  ln_hh_syrians_bydis 
 *ln_prop_hh_syrians
-global SR_IV_ref         ln_IV_Ref_NETW
+global SR_IV_ref         IV_Ref_NETW
 
 global SR_treat_var_wp   ln_agg_wp_orig
 *global iv_wp      IV_WP_DIST //GOOD ORIG
@@ -153,7 +153,7 @@ global rp 7d
 
 *7days
 global SR_outcome employed_olf_7d ///
-                  unemployed_olf_7d ///
+                  unemployed_7d ///
                   lfp_empl_7d ///
                   lfp_temp_7d ///
                   lfp_employer_7d ///
@@ -162,11 +162,13 @@ global SR_outcome employed_olf_7d ///
                   act_manuf_7d ///
                   act_com_7d ///
                   act_serv_7d ///
-                  ln_trwage_7d ///
+                  ln_mrwage_main ///
                   ln_hrwage_main ///
                   ln_whpw_w_7d ///
                   formal
 
+*BEOFRE USED IS FOR WAGE ln_trwage_7d 
+*lfp_seag_7d IRRELEVANT CAT (50 PPLE)
 
 global SR_models  REFOLS_YD REFIV_YD REFOLS_YI REFIV_YI ///
                   WPOLS_YD WPIV_YD WPOLS_YI WPIV_YI ///
@@ -178,8 +180,8 @@ global SR_models  REFOLS_YD REFIV_YD REFOLS_YI REFIV_YI ///
 foreach model of global SR_models {         
    global   `model'_p1 ///
                  `model'_employed_olf_7d ///
-                 `model'_unemployed_olf_7d ///
-                 `model'_ln_trwage_7d  ///
+                 `model'_unemployed_7d ///
+                 `model'_ln_mrwage_main  ///
                  `model'_ln_hrwage_main  ///
                  `model'_ln_whpw_w_7d  ///
                  `model'_formal  
@@ -216,7 +218,7 @@ global SR_outcome_HET_LFP   act_ag_7d ///
                             act_manuf_7d ///
                             act_com_7d ///
                             act_serv_7d ///
-                            ln_trwage_7d ///
+                            ln_mrwage_main ///
                             ln_hrwage_main ///
                             ln_whpw_w_7d ///
                             formal
@@ -232,7 +234,7 @@ foreach model of global SR_models_HET_LFP {
                                 `model'_act_manuf_7d ///
                                 `model'_act_com_7d ///
                                 `model'_act_serv_7d ///
-                                `model'_ln_trwage_7d ///
+                                `model'_ln_mrwage_main ///
                                 `model'_ln_hrwage_main ///
                                 `model'_ln_whpw_w_7d ///
                                 `model'_formal
@@ -243,7 +245,7 @@ global SR_outcome_HET_ACT   lfp_empl_7d ///
                             lfp_temp_7d ///
                             lfp_employer_7d ///
                             lfp_se_7d ///
-                            ln_trwage_7d ///
+                            ln_mrwage_main ///
                             ln_hrwage_main ///
                             ln_whpw_w_7d ///
                             formal
@@ -258,7 +260,7 @@ foreach model of global SR_models_HET_ACT {
                                 `model'_lfp_temp_7d ///
                                 `model'_lfp_employer_7d ///
                                 `model'_lfp_se_7d ///
-                                `model'_ln_trwage_7d ///
+                                `model'_ln_mrwage_main ///
                                 `model'_ln_hrwage_main ///
                                 `model'_ln_whpw_w_7d ///
                                 `model'_formal
