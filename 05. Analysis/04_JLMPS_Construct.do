@@ -1131,11 +1131,12 @@ No = 0
 gen formal = 1 if ussocinsp == 1 | uscontrp == 1
 replace formal = 0 if uscontrp == 0 | uscontrp == 0 & !mi(formal)
 tab formal
-lab var formal "1 Formal - 0 Informal - Formal if contract (uscontrp=0) OR insurance (ussocinsp=0)"
+lab var formal "1 Formal - 0 Informal - 3m - Formal if contract (uscontrp=0) OR insurance (ussocinsp=0)"
 tab formal usemp1
 lab def formal 1 "Formal" 0 "Informal", modify
 lab val formal formal
 tab formal
+
 
 
 /*
@@ -1351,11 +1352,11 @@ lab var job_regular_3m "From usirreg - Usual job (3m) is regular - 1 Yes - 0 No"
 
 *Incidence of wrk social insurance in prim. job (ref. 3-month)
 tab ussocinsp, m 
-ren ussocinsp incidence_soc_insur_3m
+gen incidence_soc_insur_3m = ussocinsp 
 
 *Incidence of wrk contract in prim. job (ref. 3-month)
 tab uscontrp, m 
-ren uscontrp incidence_wrk_contract_3m
+gen incidence_wrk_contract_3m = uscontrp 
 
 *Formality of prim. job (ref. 3-month)
 tab usformal, m 
@@ -2785,6 +2786,27 @@ tab unemployed_7d, m
 *define as holding a social security or a formal contract 
 tab formal
 tab formal lfp_3m
+
+
+gen formal_3m = 1 if ussocinsp == 1 | uscontrp == 1
+replace formal_3m = 0 if uscontrp == 0 | uscontrp == 0 & !mi(formal)
+tab formal_3m
+lab var formal_3m "1 Formal - 0 Informal - 3m - Formal if contract (uscontrp=0) OR insurance (ussocinsp=0)"
+tab formal_3m usemp1
+lab def formal_3m 1 "Formal" 0 "Informal", modify
+lab val formal_3m formal_3m
+tab formal_3m
+
+
+
+gen formal_7d = 1 if crsocinsp == 1 | crcontrp == 1
+replace formal_7d = 0 if crcontrp == 0 | crcontrp == 0 & !mi(formal)
+tab formal_7d
+lab var formal_7d "1 Formal - 0 Informal - 7d - Formal if contract (uscontrp=0) OR insurance (ussocinsp=0)"
+tab formal_7d usemp1
+lab def formal_7d 1 "Formal" 0 "Informal", modify
+lab val formal_7d formal_7d
+tab formal_7d
 
 
 *Economic activity of crr. job (Sections(1digit), based on ISIC4, ref. 1-week)

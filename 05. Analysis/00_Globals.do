@@ -165,7 +165,7 @@ global SR_outcome employed_olf_7d ///
                   ln_mrwage_main ///
                   ln_hrwage_main ///
                   ln_whpw_w_7d ///
-                  formal
+                  formal_7d
 
 *BEOFRE USED IS FOR WAGE ln_trwage_7d 
 *lfp_seag_7d IRRELEVANT CAT (50 PPLE)
@@ -184,7 +184,7 @@ foreach model of global SR_models {
                  `model'_ln_mrwage_main  ///
                  `model'_ln_hrwage_main  ///
                  `model'_ln_whpw_w_7d  ///
-                 `model'_formal  
+                 `model'_formal_7d 
    
    global   `model'_p2 ///
                  `model'_lfp_empl_7d ///
@@ -196,6 +196,58 @@ foreach model of global SR_models {
                  `model'_act_com_7d ///
                  `model'_act_serv_7d 
  }       
+
+
+*REFERENCE PERIOD
+global rp 7d 
+*3m
+
+*3months
+global SR_outcome_3m    employed_olf_3m ///
+                        unemployed_3m ///
+                        lfp_empl_3m ///
+                        lfp_temp_3m ///
+                        lfp_employer_3m ///
+                        lfp_se_3m ///
+                        act_ag_3m ///
+                        act_manuf_3m ///
+                        act_com_3m ///
+                        act_serv_3m ///
+                        ln_trwage_3m ///
+                        ln_hrwage_main ///
+                        ln_whpw_w_3m ///
+                        formal_3m
+
+*BEOFRE USED IS FOR WAGE ln_trwage_7d 
+*lfp_seag_7d IRRELEVANT CAT (50 PPLE)
+
+global SR_models_3m  REFOLS_YD3 REFIV_YD3 REFOLS_YI3 REFIV_YI3 ///
+                  WPOLS_YD3 WPIV_YD3 WPOLS_YI3 WPIV_YI3 ///
+                  REFGEN_YD3 REFGEN_YI3 ///
+                  REFURB_YD3 REFURB_YI3 ///
+                  REFEDU_YD3 REFEDU_YI3 ///
+                  WEMP_YD3 WEMP_YI3
+
+foreach model_3m of global SR_models_3m {         
+   global   `model_3m'_p1 ///
+                 `model_3m'_employed_olf_3m ///
+                 `model_3m'_unemployed_3m ///
+                 `model_3m'_ln_trwage_3m  ///
+                 `model_3m'_ln_hrwage_main  ///
+                 `model_3m'_ln_whpw_w_3m  ///
+                 `model_3m'_formal_3m  
+   
+   global   `model_3m'_p2 ///
+                 `model_3m'_lfp_empl_3m ///
+                 `model_3m'_lfp_temp_3m ///
+                 `model_3m'_lfp_employer_3m ///
+                 `model_3m'_lfp_se_3m ///
+                 `model_3m'_act_ag_3m ///
+                 `model_3m'_act_manuf_3m ///
+                 `model_3m'_act_com_3m ///
+                 `model_3m'_act_serv_3m 
+ }       
+
 
 
 global SR_controls age age2 gender 
@@ -221,7 +273,7 @@ global SR_outcome_HET_LFP   act_ag_7d ///
                             ln_mrwage_main ///
                             ln_hrwage_main ///
                             ln_whpw_w_7d ///
-                            formal
+                            formal_7d
 
 global SR_models_HET_LFP    WEMP_YD WEMP_YI ///
                             TEMP_YD TEMP_YI ///
@@ -237,7 +289,7 @@ foreach model of global SR_models_HET_LFP {
                                 `model'_ln_mrwage_main ///
                                 `model'_ln_hrwage_main ///
                                 `model'_ln_whpw_w_7d ///
-                                `model'_formal
+                                `model'_formal_7d
 }
 
 
@@ -248,7 +300,7 @@ global SR_outcome_HET_ACT   lfp_empl_7d ///
                             ln_mrwage_main ///
                             ln_hrwage_main ///
                             ln_whpw_w_7d ///
-                            formal
+                            formal_7d
 
 global SR_models_HET_ACT    AG_YD AG_YI ///
                             MANUF_YD MANUF_YI ///
@@ -263,8 +315,107 @@ foreach model of global SR_models_HET_ACT {
                                 `model'_ln_mrwage_main ///
                                 `model'_ln_hrwage_main ///
                                 `model'_ln_whpw_w_7d ///
-                                `model'_formal
+                                `model'_formal_7d
 }
+
+
+
+
+
+                    *************************************
+                    ******** 3 MONTHS ***************
+                    *************************************
+
+
+global SR_outcome_HET_LFP_3m   act_ag_3m ///
+                            act_manuf_3m ///
+                            act_com_3m ///
+                            act_serv_3m ///
+                            ln_trwage_3m ///
+                            ln_hrwage_main ///
+                            ln_whpw_w_3m ///
+                            formal_3m
+
+global SR_models_HET_LFP_3m    WEMP_YD3 WEMP_YI3 ///
+                            TEMP_YD3 TEMP_YI3 ///
+                            SE_YD3 SE_YI3
+
+
+
+foreach model_3m of global SR_models_HET_LFP_3m {     
+    global SR_outcome_`model_3m'   `model_3m'_act_ag_3m ///
+                                `model_3m'_act_manuf_3m ///
+                                `model_3m'_act_com_3m ///
+                                `model_3m'_act_serv_3m ///
+                                `model_3m'_ln_trwage_3m ///
+                                `model_3m'_ln_hrwage_main ///
+                                `model_3m'_ln_whpw_w_3m ///
+                                `model_3m'_formal_3m
+}
+
+
+global SR_outcome_HET_ACT_3m   lfp_empl_3m ///
+                            lfp_temp_3m ///
+                            lfp_employer_3m ///
+                            lfp_se_3m ///
+                            ln_trwage_3m ///
+                            ln_hrwage_main ///
+                            ln_whpw_w_3m ///
+                            formal_3m
+
+global SR_models_HET_ACT_3m    AG_YD3 AG_YI3 ///
+                            MANUF_YD3 MANUF_YI3 ///
+                            COM_YD3 COM_YI3 ///
+                            SERV_YD3 SERV_YI3
+
+foreach model_3m of global SR_models_HET_ACT_3m {     
+    global SR_outcome_`model_3m'   `model_3m'_lfp_empl_3m ///
+                                `model_3m'_lfp_temp_3m ///
+                                `model_3m'_lfp_employer_3m ///
+                                `model_3m'_lfp_se_3m ///
+                                `model_3m'_ln_trwage_3m ///
+                                `model_3m'_ln_hrwage_main ///
+                                `model_3m'_ln_whpw_w_3m ///
+                                `model_3m'_formal_3m
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
